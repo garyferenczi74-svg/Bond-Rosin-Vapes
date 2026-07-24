@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body { margin: 0; background: #1B1D1C; }
+a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
+@keyframes dialedBreathe { 0% { color: rgba(27,29,28,0); } 50% { color: rgba(27,29,28,1); } 100% { color: rgba(27,29,28,0); } }
+@keyframes plateDrift { from { background-position: 0% 0%, 100% 100%, 50% 0%; } to { background-position: 60% 40%, 40% 60%, 30% 80%; } }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
+</style>
+</helmet>
+<div style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;background:#EFEBE2;color:#1B1D1C">
+
+  <nav style="position:fixed;top:0;left:0;right:0;z-index:900">
+    <div ref="{{ navBgRef }}" style="position:absolute;inset:0;background:#1B1D1C;opacity:0;transition:opacity .5s cubic-bezier(0.22,1,0.36,1)"></div>
+    <div ref="{{ navFgRef }}" style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(20px,4vw,56px);color:#1B1D1C;transition:color .5s">
+      <a href="Home.dc.html" onClick="{{ goHome }}" style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:19px;letter-spacing:0.35em;color:inherit">BOND</a>
+      <sc-if value="{{ wideNav }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:38px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.2em;text-transform:uppercase">
+          <span style="border-bottom:1px solid currentColor;padding-bottom:3px">No. 1 Dialed</span>
+          <a href="No2.dc.html" onClick="{{ goNo2 }}" style="color:inherit;transition:color .3s" style-hover="background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 2 Unwind</a>
+          <a href="No3.dc.html" onClick="{{ goNo3 }}" style="color:inherit;transition:color .3s" style-hover="background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 3 Peak</a>
+          <a href="Home.dc.html" onClick="{{ goHome }}" style="color:inherit;transition:color .3s" style-hover="background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent">Home</a>
+        </div>
+      </sc-if>
+      <sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}">
+        <a href="Home.dc.html" onClick="{{ goHome }}" style="font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:inherit">Home</a>
+      </sc-if>
+    </div>
+  </nav>
+
+  <section data-screen-label="No. 1 World Hero" style="position:relative;height:100vh;min-height:600px;overflow:hidden;background:#E1DAD0">
+    <div style="position:absolute;inset:0;background-image:radial-gradient(900px 600px at 30% 20%, rgba(121,200,74,0.16), transparent 70%),radial-gradient(700px 900px at 80% 70%, rgba(27,29,28,0.10), transparent 70%),radial-gradient(1000px 500px at 60% 10%, rgba(239,235,226,0.8), transparent 70%);background-size:180% 180%;background-color:#E1DAD0;animation:plateDrift 26s ease-in-out infinite alternate"></div>
+    <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
+      <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(96px,17vw,210px);line-height:1;color:#1B1D1C">No. 1</div>
+      <div style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .5s both;font-family:'GFS Didot',Didot,serif;font-size:clamp(20px,2.6vw,30px);letter-spacing:0.4em;color:transparent;background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;margin-top:28px;padding-left:0.35em;animation:dialedBreathe 6.5s ease-in-out infinite">DIALED</div>
+      <p style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .7s both;font-size:13.5px;color:#8E887C;margin:18px 0 0">Focus. Clarity. Momentum.</p>
+      <p style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .9s both;font-family:'GFS Didot',Didot,serif;font-size:clamp(18px,2.2vw,24px);color:#1B1D1C;margin:36px 0 0">Bond with your potential.</p>
+    </div>
+    <div style="position:absolute;bottom:36px;left:50%;width:1px;height:56px;background:#1B1D1C;transform-origin:top;animation:scrollLine 3.2s cubic-bezier(0.22,1,0.36,1) 1.6s infinite both"></div>
+  </section>
+
+  <section data-screen-label="The Moment" style="background:#EFEBE2;padding:clamp(80px,10vw,140px) clamp(20px,4vw,56px);text-align:center">
+    <div style="font-family:'GFS Didot',Didot,serif;font-size:clamp(24px,3vw,38px);letter-spacing:0.18em;text-transform:uppercase;color:transparent;background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;animation:dialedBreathe 6.5s ease-in-out infinite">The Moment</div>
+    <p style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(16px,2.2vw,25px);line-height:1.8;color:#1B1D1C;max-width:1100px;margin:32px auto 0"><span style="white-space:nowrap">Morning stone A clear desk Work worth doing</span><br><span style="white-space:nowrap">No. 1 belongs to the hours you keep for momentum, when the day is still yours to shape</span></p>
+  </section>
+
+  <section data-screen-label="Product" style="background:#EFEBE2;padding:0 clamp(20px,4vw,56px) clamp(80px,10vw,140px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;max-width:1080px;margin:0 auto;align-items:center">
+      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(27,29,28,0.25)"><image-slot id="no1-product" shape="rect" style="display:block;width:100%;height:100%" placeholder="No. 1 product still. KNURL-MACRO detail."></image-slot></div>
+      <div>
+        <div style="width:56px;height:1px;background:#4E8A2B"></div>
+        <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8E887C;margin-top:28px">LIVE ROSIN VAPE</div>
+        <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(28px,3.6vw,44px);letter-spacing:0.06em;color:#1B1D1C;margin:16px 0 0">No. 1 <span style="font-size:0.5em;letter-spacing:0.3em;color:transparent;background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;vertical-align:middle;margin-left:12px;animation:dialedBreathe 6.5s ease-in-out infinite">DIALED</span></h2>
+        <p style="font-size:14.5px;line-height:1.75;color:#8E887C;max-width:420px;margin:24px 0 0">Single ribbon of intent. 100 percent solventless live rosin, pressed from fresh frozen plants and nothing else. The green indicator marks the number made for forward motion.</p>
+        <div style="display:flex;flex-direction:column;gap:14px;margin:36px 0 0;font-size:13px;color:#1B1D1C">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #DED7CA;padding-bottom:12px;max-width:420px"><span style="color:#8E887C">Extraction</span><span>Solventless. Heat, pressure, time.</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #DED7CA;padding-bottom:12px;max-width:420px"><span style="color:#8E887C">Source</span><span>Fresh frozen. Small batch.</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #DED7CA;padding-bottom:12px;max-width:420px"><span style="color:#8E887C">Hardware</span><span>510 vape. Matte black.</span></div>
+        </div>
+        <a href="Home.dc.html#find" onClick="{{ goFind }}" style="font-family:'GFS Didot',Didot,serif;display:inline-block;background:transparent;color:#1B1D1C;border:1px solid #1B1D1C;border-radius:2px;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 44px;margin-top:44px;transition:background .4s,color .4s,border-color .4s,box-shadow .4s" style-hover="background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);color:#0D1407;border-color:#7CBF4E;box-shadow:0 8px 40px rgba(78,138,43,0.5), inset 0 1px 0 rgba(255,255,255,0.35);text-shadow:0 1px 0 rgba(255,255,255,0.25)" style-active="background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);color:#0D1407;border-color:#7CBF4E;box-shadow:0 8px 40px rgba(78,138,43,0.5), inset 0 1px 0 rgba(255,255,255,0.35);text-shadow:0 1px 0 rgba(255,255,255,0.25)">Find Your Bond</a>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="The Dialed Edit" style="position:relative;height:64vh;min-height:420px;overflow:hidden">
+    <image-slot id="no1-edit" shape="rect" style="position:absolute;inset:0;display:block" placeholder="The Dialed Edit still life. Green glass, lime, sunglasses, racket in sage daylight."></image-slot>
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(239,235,226,0.88) 0%,rgba(239,235,226,0.6) 38%,rgba(239,235,226,0.08) 70%,rgba(239,235,226,0) 100%);pointer-events:none"></div>
+    <div style="position:absolute;left:clamp(20px,4vw,56px);top:50%;transform:translateY(-50%);pointer-events:none">
+      <div style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#4E8A2B">The Dialed Edit</div>
+      <div style="width:1px;height:28px;background:linear-gradient(180deg,#4E8A2B,transparent);margin:18px 0"></div>
+      <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.2vw,42px);letter-spacing:0.12em;color:#1B1D1C;margin:0">THE DIALED EDIT</h2>
+      <p style="font-size:14.5px;line-height:1.8;color:#1B1D1C;max-width:360px;margin:24px 0 0">Curated for clarity. Designed for forward motion.</p>
+      <p style="font-family:'GFS Didot',Didot,serif;font-style:italic;font-size:clamp(15px,1.7vw,19px);color:#4E8A2B;margin:10px 0 0">Rituals. Tools. Mindset. Everything in its place.</p>
+    </div>
+  </section>
+
+  <section data-screen-label="Purity" style="position:relative;background:#EFEBE2;overflow:hidden">
+    <div style="position:absolute;top:0;right:0;bottom:0;width:34%;min-width:260px">
+      <image-slot id="no1-rosin" shape="rect" style="position:absolute;inset:0;display:block" placeholder="Live rosin macro. Golden texture."></image-slot>
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,#EFEBE2 0%,rgba(239,235,226,0) 45%);pointer-events:none"></div>
+    </div>
+    <div style="position:relative;max-width:1180px;margin:0 auto;padding:clamp(80px,10vw,120px) clamp(20px,4vw,56px);padding-right:clamp(20px,30vw,420px)">
+      <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(28px,3.6vw,46px);letter-spacing:0.1em;line-height:1.4;color:#1B1D1C;margin:0">PURE CONSUMPTION<br>FULL ARRIVAL</h2>
+      <div style="display:flex;gap:clamp(24px,4vw,52px);flex-wrap:wrap;margin-top:clamp(40px,5vw,64px)">
+        <div style="text-align:center;max-width:110px">
+          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M12 21c0-6 2-11 8-14-1 7-3 12-8 14zM12 21c0-6-2-11-8-14 1 7 3 12 8 14z"></path></svg></div>
+          <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Chemical Solvents</div>
+        </div>
+        <div style="text-align:center;max-width:110px">
+          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 1 1-12 0c0-3.5 2.5-6.5 6-11z"></path></svg></div>
+          <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Added Terpenes</div>
+        </div>
+        <div style="text-align:center;max-width:110px">
+          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M10 3h4M11 3v6l-5 10a2 2 0 0 0 1.8 3h8.4a2 2 0 0 0 1.8-3l-5-10V3"></path></svg></div>
+          <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Distillate</div>
+        </div>
+        <div style="text-align:center;max-width:110px">
+          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="#4E8A2B"><circle cx="12" cy="8" r="1"></circle><circle cx="8" cy="12" r="1"></circle><circle cx="16" cy="12" r="1"></circle><circle cx="10" cy="16" r="1"></circle><circle cx="14" cy="16" r="1"></circle></svg></div>
+          <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Fillers</div>
+        </div>
+        <div style="text-align:center;max-width:110px">
+          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M12 5v14M5 12h14"></path></svg></div>
+          <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Additives</div>
+        </div>
+      </div>
+      <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(15px,1.7vw,19px);color:#1B1D1C;margin:clamp(40px,5vw,56px) 0 0">When the product is pure, the experience is real. Bond.</p>
+    </div>
+  </section>
+
+  <section data-screen-label="Find Your Number" style="background:#1B1D1C;padding:clamp(80px,10vw,140px) clamp(20px,4vw,56px);text-align:center">
+    <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(24px,3vw,38px);letter-spacing:0.08em;color:#E1DAD0;margin:0">NOT SURE WHICH NUMBER IS YOURS.</h2>
+    <p style="font-size:14.5px;color:#8E887C;margin:20px 0 40px">Three questions. One number.</p>
+    <a href="Home.dc.html#choose" onClick="{{ goChoose }}" style="font-family:'GFS Didot',Didot,serif;display:inline-block;background:transparent;color:#E1DAD0;border:1px solid #E1DAD0;border-radius:2px;font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;padding:16px 36px">Find Your Number</a>
+  </section>
+
+  <footer style="background:#1B1D1C;border-top:1px solid #3A3C3B;padding:56px clamp(20px,4vw,56px) 40px">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:baseline;justify-content:space-between">
+        <div style="font-family:'GFS Didot',Didot,serif;font-size:17px;letter-spacing:0.35em;color:#E1DAD0">BOND</div>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase">
+          <a href="Home.dc.html" onClick="{{ goHome }}" style="color:#8E887C" style-hover="color:#E1DAD0">Home</a>
+          <a href="No2.dc.html" onClick="{{ goNo2 }}" style="color:#8E887C" style-hover="color:#E1DAD0">No. 2 Unwind</a>
+          <a href="No3.dc.html" onClick="{{ goNo3 }}" style="color:#8E887C" style-hover="color:#E1DAD0">No. 3 Peak</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid #3A3C3B;margin-top:40px;padding-top:24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;font-size:11.5px;color:#8E887C">
+        <span>21+ Cannabis products. Keep out of reach of children.</span>
+        <span>&copy; 2026 Bond. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <div style="position:fixed;inset:0;z-index:1100;background:#0D0F0E;pointer-events:none;animation:fadeOut .7s cubic-bezier(0.22,1,0.36,1) .15s both"></div>
+  <div ref="{{ fadeRef }}" style="position:fixed;inset:0;z-index:1200;background:#0D0F0E;opacity:0;pointer-events:none;transition:opacity .4s cubic-bezier(0.22,1,0.36,1)"></div>
+  <dc-import name="AgeGate" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { narrow: false };
+  navBgRef = React.createRef(); navFgRef = React.createRef(); fadeRef = React.createRef();
+  componentDidMount() {
+    this.setState({ narrow: innerWidth < 760 });
+    this._resize = () => this.setState({ narrow: innerWidth < 760 });
+    addEventListener('resize', this._resize);
+    this._scroll = () => {
+      const on = scrollY > 40;
+      if (this.navBgRef.current) this.navBgRef.current.style.opacity = on ? '0.95' : '0';
+      if (this.navFgRef.current) this.navFgRef.current.style.color = on ? '#E1DAD0' : '#1B1D1C';
+    };
+    this._lastY = -1;
+    const poll = () => {
+      if (scrollY !== this._lastY) { this._lastY = scrollY; this._scroll(); }
+      this._pollRaf = requestAnimationFrame(poll);
+    };
+    poll();
+  }
+  componentWillUnmount() { removeEventListener('resize', this._resize); if (this._pollRaf) cancelAnimationFrame(this._pollRaf); }
+  navTo(url) {
+    return (e) => {
+      if (e) e.preventDefault();
+      const f = this.fadeRef.current;
+      if (f) { f.style.pointerEvents = 'auto'; f.style.opacity = '1'; }
+      setTimeout(() => { location.href = url; }, 420);
+    };
+  }
+  renderVals() {
+    return {
+      wideNav: !this.state.narrow, narrowNav: this.state.narrow,
+      navBgRef: this.navBgRef, navFgRef: this.navFgRef, fadeRef: this.fadeRef,
+      goHome: this.navTo('Home.dc.html'), goNo2: this.navTo('No2.dc.html'), goNo3: this.navTo('No3.dc.html'),
+      goFind: this.navTo('Home.dc.html#find'), goChoose: this.navTo('Home.dc.html#choose')
+    };
+  }
+}
+</script>
+</body>
+</html>

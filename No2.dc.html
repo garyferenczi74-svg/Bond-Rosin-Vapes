@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0C131C"></rect><text x="50" y="57" font-family="Didot,serif" font-size="20" letter-spacing="4" fill="#86ACE3" text-anchor="middle">No.2</text></svg></template>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body { margin: 0; background: #1B1D1C; }
+a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
+@keyframes momentBreathe { 0% { color: #E1DAD0; } 50% { color: #86ACE3; } 100% { color: #E1DAD0; } }
+@keyframes unwindBreathe { 0% { color: rgba(225,218,208,0); } 50% { color: rgba(225,218,208,1); } 100% { color: rgba(225,218,208,0); } }
+@keyframes plateDrift { from { background-position: 0% 0%, 100% 100%, 50% 0%; } to { background-position: 60% 40%, 40% 60%, 30% 80%; } }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
+</style>
+</helmet>
+<div style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;background:#1B1D1C;color:#E1DAD0">
+
+  <nav style="position:fixed;top:0;left:0;right:0;z-index:900">
+    <div ref="{{ navBgRef }}" style="position:absolute;inset:0;background:#1B1D1C;opacity:0;transition:opacity .5s cubic-bezier(0.22,1,0.36,1)"></div>
+    <div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(20px,4vw,56px);color:#E1DAD0">
+      <a href="Home.dc.html" onClick="{{ goHome }}" style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:19px;letter-spacing:0.35em;color:inherit">BOND</a>
+      <sc-if value="{{ wideNav }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:38px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.2em;text-transform:uppercase">
+          <a href="No1.dc.html" onClick="{{ goNo1 }}" style="color:inherit;transition:color .3s" style-hover="background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 1 Dialed</a>
+          <span style="border-bottom:1px solid currentColor;padding-bottom:3px">No. 2 Unwind</span>
+          <a href="No3.dc.html" onClick="{{ goNo3 }}" style="color:inherit;transition:color .3s" style-hover="background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 3 Peak</a>
+          <a href="Home.dc.html" onClick="{{ goHome }}" style="color:inherit;transition:color .3s" style-hover="background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent">Home</a>
+        </div>
+      </sc-if>
+      <sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}">
+        <a href="Home.dc.html" onClick="{{ goHome }}" style="font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:inherit">Home</a>
+      </sc-if>
+    </div>
+  </nav>
+
+  <section data-screen-label="No. 2 World Hero" style="position:relative;height:100vh;min-height:600px;overflow:hidden;background:#0C131C">
+    <div style="position:absolute;inset:0;background-image:radial-gradient(900px 500px at 30% 75%, rgba(134,172,227,0.14), transparent 70%),radial-gradient(700px 800px at 75% 25%, rgba(134,172,227,0.08), transparent 70%),radial-gradient(1100px 600px at 55% 100%, rgba(13,22,34,0.9), transparent 75%);background-size:180% 180%;background-color:#0C131C;animation:plateDrift 30s ease-in-out infinite alternate"></div>
+    <div style="position:absolute;inset:0;opacity:0.5;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIj48ZmlsdGVyIGlkPSJsIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSI0IiBzZWVkPSI3Ii8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIiBmaWx0ZXI9InVybCgjbCkiLz48L3N2Zz4=')"></div>
+    <div style="position:absolute;inset:0;opacity:0.35;mix-blend-mode:soft-light;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MjAiIGhlaWdodD0iNTIwIj48ZmlsdGVyIGlkPSJnIj48ZmVUdXJidWxlbmNlIHR5cGU9InR1cmJ1bGVuY2UiIGJhc2VGcmVxdWVuY3k9IjAuMDEyIDAuMDIiIG51bU9jdGF2ZXM9IjMiIHNlZWQ9IjEzIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI1MjAiIGhlaWdodD0iNTIwIiBmaWx0ZXI9InVybCgjZykiLz48L3N2Zz4=')"></div>
+    <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
+      <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(96px,17vw,210px);line-height:1;color:#E1DAD0">No. 2</div>
+      <div style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .5s both;font-family:'GFS Didot',Didot,serif;font-size:clamp(20px,2.6vw,30px);letter-spacing:0.4em;color:transparent;background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;margin-top:28px;padding-left:0.35em;animation:unwindBreathe 6.5s ease-in-out infinite">UNWIND</div>
+      <p style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .7s both;font-size:13.5px;color:#8E887C;margin:18px 0 0">Release. Stillness. Restoration.</p>
+      <p style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .9s both;font-family:'GFS Didot',Didot,serif;font-size:clamp(18px,2.2vw,24px);color:#E1DAD0;margin:36px 0 0">Bond with the moment.</p>
+    </div>
+    <div style="position:absolute;bottom:36px;left:50%;width:1px;height:56px;background:#E1DAD0;transform-origin:top;animation:scrollLine 3.2s cubic-bezier(0.22,1,0.36,1) 1.6s infinite both"></div>
+  </section>
+
+  <section data-screen-label="The Moment" style="background:#1B1D1C;padding:clamp(80px,10vw,140px) clamp(20px,4vw,56px);text-align:center">
+    <div style="font-family:'GFS Didot',Didot,serif;font-size:clamp(24px,3vw,38px);letter-spacing:0.18em;text-transform:uppercase;color:transparent;background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;animation:unwindBreathe 6.5s ease-in-out infinite">The Moment</div>
+    <p style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(16px,2.2vw,25px);line-height:1.8;color:#E1DAD0;max-width:1100px;margin:32px auto 0"><span style="white-space:nowrap">Midnight water Lights low, phone face down</span><br><span style="white-space:nowrap">No. 2 belongs to the hour you keep for yourself, when the day is finally allowed to end</span></p>
+  </section>
+
+  <section data-screen-label="Product" style="background:#1B1D1C;padding:0 clamp(20px,4vw,56px) clamp(80px,10vw,140px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;max-width:1080px;margin:0 auto;align-items:center">
+      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5)"><image-slot id="no2-product" shape="rect" style="display:block;width:100%;height:100%" placeholder="No. 2 product still. KNURL-MACRO detail."></image-slot></div>
+      <div>
+        <div style="width:56px;height:1px;background:#86ACE3"></div>
+        <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8E887C;margin-top:28px">LIVE ROSIN VAPE</div>
+        <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(28px,3.6vw,44px);letter-spacing:0.06em;color:#E1DAD0;margin:16px 0 0">No. 2 <span style="font-size:0.5em;letter-spacing:0.3em;color:transparent;background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;vertical-align:middle;margin-left:12px;animation:unwindBreathe 6.5s ease-in-out infinite">UNWIND</span></h2>
+        <p style="font-size:14.5px;line-height:1.75;color:#8E887C;max-width:420px;margin:24px 0 0">Stillness, pressed. 100 percent solventless live rosin from fresh frozen plants and nothing else. The blue indicator marks the number made for letting go.</p>
+        <div style="display:flex;flex-direction:column;gap:14px;margin:36px 0 0;font-size:13px;color:#E1DAD0">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #3A3C3B;padding-bottom:12px;max-width:420px"><span style="color:#8E887C">Extraction</span><span>Solventless. Heat, pressure, time.</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #3A3C3B;padding-bottom:12px;max-width:420px"><span style="color:#8E887C">Source</span><span>Fresh frozen. Small batch.</span></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #3A3C3B;padding-bottom:12px;max-width:420px"><span style="color:#8E887C">Hardware</span><span>510 vape. Matte black.</span></div>
+        </div>
+        <a href="Home.dc.html#find" onClick="{{ goFind }}" style="font-family:'GFS Didot',Didot,serif;display:inline-block;background:transparent;color:#E1DAD0;border:1px solid #E1DAD0;border-radius:2px;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 44px;margin-top:44px;transition:background .4s,color .4s,border-color .4s,box-shadow .4s" style-hover="background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);color:#0B1322;border-color:#BCD6F7;box-shadow:0 8px 40px rgba(134,172,227,0.5), inset 0 1px 0 rgba(255,255,255,0.35);text-shadow:0 1px 0 rgba(255,255,255,0.25)" style-active="background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);color:#0B1322;border-color:#BCD6F7;box-shadow:0 8px 40px rgba(134,172,227,0.5), inset 0 1px 0 rgba(255,255,255,0.35);text-shadow:0 1px 0 rgba(255,255,255,0.25)">Find Your Bond</a>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="The Unwind Edit" style="position:relative;height:64vh;min-height:420px;overflow:hidden">
+    <image-slot id="no2-edit" shape="rect" style="position:absolute;inset:0;display:block" placeholder="The Unwind Edit still life. Sunglasses, silver, dark marble."></image-slot>
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,15,14,0.82) 0%,rgba(13,15,14,0.55) 38%,rgba(13,15,14,0.1) 70%,rgba(13,15,14,0) 100%);pointer-events:none"></div>
+    <div style="position:absolute;left:clamp(20px,4vw,56px);top:50%;transform:translateY(-50%);pointer-events:none">
+      <div style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#86ACE3">The Unwind Edit</div>
+      <div style="width:1px;height:28px;background:linear-gradient(180deg,#86ACE3,transparent);margin:18px 0"></div>
+      <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.2vw,42px);letter-spacing:0.12em;color:#E1DAD0;margin:0;text-shadow:0 2px 20px rgba(0,0,0,0.6)">THE UNWIND EDIT</h2>
+      <p style="font-size:14.5px;line-height:1.8;color:#E1DAD0;max-width:360px;margin:24px 0 0;text-shadow:0 1px 12px rgba(0,0,0,0.6)">Elements that reflect the moment.</p>
+      <p style="font-family:'GFS Didot',Didot,serif;font-style:italic;font-size:clamp(15px,1.7vw,19px);color:#86ACE3;margin:10px 0 0;text-shadow:0 1px 12px rgba(0,0,0,0.6)">Cool. Considered. Effortless.</p>
+    </div>
+  </section>
+
+  <section data-screen-label="Purity" style="background:#141615;padding:clamp(80px,10vw,120px) clamp(20px,4vw,56px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(40px,5vw,72px);max-width:1180px;margin:0 auto;align-items:center">
+      <div>
+        <div style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#86ACE3">Purity</div>
+        <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(24px,3vw,38px);letter-spacing:0.1em;line-height:1.5;color:#E1DAD0;margin:20px 0 0"><span style="white-space:nowrap">NOTHING ADDED</span><br><span style="white-space:nowrap">NOTHING IN THE WAY</span></h2>
+        <div style="width:40px;height:1px;background:#86ACE3;margin-top:26px"></div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0">
+          <div style="text-align:center;padding:0 clamp(8px,1.4vw,20px);border-right:1px solid #3A3C3B">
+            <div style="width:52px;height:52px;border:1px solid #86ACE3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#86ACE3" stroke-width="1.2"><path d="M12 21c0-6 2-11 8-14-1 7-3 12-8 14zM12 21c0-6-2-11-8-14 1 7 3 12 8 14z"></path></svg></div>
+            <div style="font-size:11px;letter-spacing:0.06em;color:#E1DAD0;margin-top:16px;line-height:1.7">No chemical<br>solvents</div>
+          </div>
+          <div style="text-align:center;padding:0 clamp(8px,1.4vw,20px);border-right:1px solid #3A3C3B">
+            <div style="width:52px;height:52px;border:1px solid #86ACE3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#86ACE3" stroke-width="1.2"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 1 1-12 0c0-3.5 2.5-6.5 6-11z"></path></svg></div>
+            <div style="font-size:11px;letter-spacing:0.06em;color:#E1DAD0;margin-top:16px;line-height:1.7">No added<br>terpenes</div>
+          </div>
+          <div style="text-align:center;padding:0 clamp(8px,1.4vw,20px);border-right:1px solid #3A3C3B">
+            <div style="width:52px;height:52px;border:1px solid #86ACE3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#86ACE3" stroke-width="1.2"><path d="M10 3h4M11 3v6l-5 10a2 2 0 0 0 1.8 3h8.4a2 2 0 0 0 1.8-3l-5-10V3"></path></svg></div>
+            <div style="font-size:11px;letter-spacing:0.06em;color:#E1DAD0;margin-top:16px;line-height:1.7">No<br>distillate</div>
+          </div>
+          <div style="text-align:center;padding:0 clamp(8px,1.4vw,20px);border-right:1px solid #3A3C3B">
+            <div style="width:52px;height:52px;border:1px solid #86ACE3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="#86ACE3"><circle cx="12" cy="8" r="1"></circle><circle cx="8" cy="12" r="1"></circle><circle cx="16" cy="12" r="1"></circle><circle cx="10" cy="16" r="1"></circle><circle cx="14" cy="16" r="1"></circle></svg></div>
+            <div style="font-size:11px;letter-spacing:0.06em;color:#E1DAD0;margin-top:16px;line-height:1.7">No<br>fillers</div>
+          </div>
+          <div style="text-align:center;padding:0 clamp(8px,1.4vw,20px)">
+            <div style="width:52px;height:52px;border:1px solid #86ACE3;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#86ACE3" stroke-width="1.2"><path d="M12 5v14M5 12h14"></path></svg></div>
+            <div style="font-size:11px;letter-spacing:0.06em;color:#E1DAD0;margin-top:16px;line-height:1.7">No<br>additives</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #3A3C3B;margin-top:clamp(28px,3.5vw,44px);padding-top:clamp(20px,2.5vw,30px)">
+          <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(14px,1.5vw,17px);color:#E1DAD0;margin:0;text-align:center">When the product is pure, the experience is real. Bond.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-screen-label="Find Your Number" style="background:#0C131C;padding:clamp(80px,10vw,140px) clamp(20px,4vw,56px);text-align:center">
+    <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(24px,3vw,38px);letter-spacing:0.08em;color:#E1DAD0;margin:0">NOT SURE WHICH NUMBER IS YOURS</h2>
+    <p style="font-size:14.5px;color:#86ACE3;margin:20px 0 40px">Three questions. One number.</p>
+    <a href="Home.dc.html#choose" onClick="{{ goChoose }}" style="font-family:'GFS Didot',Didot,serif;display:inline-block;background:transparent;color:#E1DAD0;border:1px solid #E1DAD0;border-radius:2px;font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;padding:16px 36px">Find Your Number</a>
+  </section>
+
+  <footer style="background:#1B1D1C;border-top:1px solid #3A3C3B;padding:56px clamp(20px,4vw,56px) 40px">
+    <div style="max-width:1180px;margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:baseline;justify-content:space-between">
+        <div style="font-family:'GFS Didot',Didot,serif;font-size:17px;letter-spacing:0.35em;color:#E1DAD0">BOND</div>
+        <div style="display:flex;gap:28px;flex-wrap:wrap;font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase">
+          <a href="Home.dc.html" onClick="{{ goHome }}" style="color:#8E887C" style-hover="color:#E1DAD0">Home</a>
+          <a href="No1.dc.html" onClick="{{ goNo1 }}" style="color:#8E887C" style-hover="color:#E1DAD0">No. 1 Dialed</a>
+          <a href="No3.dc.html" onClick="{{ goNo3 }}" style="color:#8E887C" style-hover="color:#E1DAD0">No. 3 Peak</a>
+        </div>
+      </div>
+      <div style="border-top:1px solid #3A3C3B;margin-top:40px;padding-top:24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;font-size:11.5px;color:#8E887C">
+        <span>21+ Cannabis products. Keep out of reach of children.</span>
+        <span>&copy; 2026 Bond. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+  <div style="position:fixed;inset:0;z-index:1100;background:#0D0F0E;pointer-events:none;animation:fadeOut .7s cubic-bezier(0.22,1,0.36,1) .15s both"></div>
+  <div ref="{{ fadeRef }}" style="position:fixed;inset:0;z-index:1200;background:#0D0F0E;opacity:0;pointer-events:none;transition:opacity .4s cubic-bezier(0.22,1,0.36,1)"></div>
+  <dc-import name="AgeGate" hint-size="0px,0px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { narrow: false };
+  navBgRef = React.createRef(); fadeRef = React.createRef();
+  componentDidMount() {
+    this.setState({ narrow: innerWidth < 760 });
+    this._resize = () => this.setState({ narrow: innerWidth < 760 });
+    addEventListener('resize', this._resize);
+    this._scroll = () => { if (this.navBgRef.current) this.navBgRef.current.style.opacity = scrollY > 40 ? '0.95' : '0'; };
+    this._lastY = -1;
+    const poll = () => {
+      if (scrollY !== this._lastY) { this._lastY = scrollY; this._scroll(); }
+      this._pollRaf = requestAnimationFrame(poll);
+    };
+    poll();
+  }
+  componentWillUnmount() { removeEventListener('resize', this._resize); if (this._pollRaf) cancelAnimationFrame(this._pollRaf); }
+  navTo(url) {
+    return (e) => {
+      if (e) e.preventDefault();
+      const f = this.fadeRef.current;
+      if (f) { f.style.pointerEvents = 'auto'; f.style.opacity = '1'; }
+      setTimeout(() => { location.href = url; }, 420);
+    };
+  }
+  renderVals() {
+    return {
+      wideNav: !this.state.narrow, narrowNav: this.state.narrow,
+      navBgRef: this.navBgRef, fadeRef: this.fadeRef,
+      goHome: this.navTo('Home.dc.html'), goNo1: this.navTo('No1.dc.html'), goNo3: this.navTo('No3.dc.html'),
+      goFind: this.navTo('Home.dc.html#find'), goChoose: this.navTo('Home.dc.html#choose')
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body { margin: 0; background: #1B1D1C; }
+a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
+@keyframes gateIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gateRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes bondBreathe { 0% { color: rgba(232,225,213,1); } 50% { color: rgba(232,225,213,0); } 100% { color: rgba(232,225,213,1); } }
+</style>
+</helmet>
+<sc-if value="{{ visible }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;align-items:center;justify-content:center;animation:gateIn .6s cubic-bezier(0.22,1,0.36,1) both">
+  <div style="position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 38%, rgba(194,154,69,0.07), transparent 70%),radial-gradient(1200px 700px at 50% 100%, rgba(13,15,14,0.9), transparent 80%)"></div>
+  <div style="position:absolute;inset:0;opacity:0.45;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIj48ZmlsdGVyIGlkPSJsIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSI0IiBzZWVkPSI3Ii8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIiBmaWx0ZXI9InVybCgjbCkiLz48L3N2Zz4=')"></div>
+  <sc-if value="{{ declined }}" hint-placeholder-val="{{ false }}">
+    <div style="position:relative;text-align:center;padding:32px;max-width:520px;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
+      <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(44px,6vw,64px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;animation:bondBreathe 6.5s ease-in-out infinite">BOND</div>
+      <p style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(22px,3vw,30px);color:#E1DAD0;line-height:1.5;margin:48px 0 16px">Not yet</p>
+      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;color:#8E887C;line-height:1.7;margin:0 0 40px">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
+      <div style="width:48px;height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:0 auto"></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
+    <div style="position:relative;text-align:center;padding:32px;max-width:560px;width:100%;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
+      <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(52px,8vw,84px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;animation:bondBreathe 6.5s ease-in-out infinite">BOND</div>
+      <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(15px,1.8vw,18px);letter-spacing:0.22em;color:#E1DAD0;margin:22px 0 0;padding-left:0.22em">WITH YOUR HIGHEST SELF</p>
+      <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:32px auto 0"></div>
+      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C;margin:32px 0 20px">Confirm your age to enter</p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:32px">
+        <select value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:150px;outline:none;cursor:pointer">
+          <option value="" style="color:#1B1D1C">Birth month</option>
+          <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
+            <option value="{{ $index }}" style="color:#1B1D1C">{{ m }}</option>
+          </sc-for>
+        </select>
+        <select value="{{ year }}" onChange="{{ setYear }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:120px;outline:none;cursor:pointer">
+          <option value="" style="color:#1B1D1C">Birth year</option>
+          <sc-for list="{{ years }}" as="y" hint-placeholder-count="0">
+            <option value="{{ y }}" style="color:#1B1D1C">{{ y }}</option>
+          </sc-for>
+        </select>
+      </div>
+      <button onClick="{{ enter }}" style="background:{{ enterBg }};color:{{ enterColor }};border:1px solid {{ enterBorder }};border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 56px;cursor:pointer;transition:background .4s,color .4s,border-color .4s,box-shadow .4s;box-shadow:{{ enterShadow }}">Enter</button>
+      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:11px;color:#8E887C;margin:40px 0 0;letter-spacing:0.04em">21+ Cannabis products. Keep out of reach of children.</p>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:600},&quot;bypass&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { verified: false, declined: false, month: '', year: '', checked: false };
+  componentDidMount() {
+    try {
+      const raw = localStorage.getItem('bond_age_ok');
+      if (raw) {
+        const ts = parseInt(raw, 10);
+        if (Date.now() - ts < 30 * 24 * 3600 * 1000) { this.setState({ verified: true, checked: true }); return; }
+        localStorage.removeItem('bond_age_ok');
+      }
+    } catch (e) {}
+    this.setState({ checked: true });
+  }
+  renderVals() {
+    const bypass = this.props.bypass ?? false;
+    const { verified, declined, month, year, checked } = this.state;
+    const standalone = /AgeGate\.dc\.html/i.test(location.pathname);
+    const visible = standalone ? true : (checked && !verified && !bypass);
+    const ready = month !== '' && year !== '';
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const years = []; const now = new Date().getFullYear();
+    for (let y = now; y >= now - 100; y--) years.push(String(y));
+    return {
+      visible, declined, asking: !declined, months, years, month, year,
+      enterBg: ready ? 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%)' : 'transparent',
+      enterColor: ready ? '#141109' : '#8E887C',
+      enterBorder: ready ? '#E3C270' : '#3A3C3B',
+      enterShadow: ready ? '0 8px 40px rgba(194,154,69,0.4)' : 'none',
+      setMonth: (e) => this.setState({ month: e.target.value }),
+      setYear: (e) => this.setState({ year: e.target.value }),
+      enter: () => {
+        if (!ready) return;
+        const b = new Date(parseInt(year, 10), parseInt(month, 10), 1);
+        const nowD = new Date();
+        let age = nowD.getFullYear() - b.getFullYear();
+        if (nowD.getMonth() < b.getMonth()) age--;
+        if (age >= 21) {
+          try { localStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
+          this.setState({ verified: true });
+        } else this.setState({ declined: true });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
