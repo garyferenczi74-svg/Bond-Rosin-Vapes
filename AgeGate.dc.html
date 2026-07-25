@@ -61,14 +61,18 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 class Component extends DCLogic {
   state = { verified: false, declined: false, month: '', year: '', checked: false };
   componentDidMount() {
-    try {
-      const raw = localStorage.getItem('bond_age_ok');
-      if (raw) {
-        const ts = parseInt(raw, 10);
-        if (Date.now() - ts < 30 * 24 * 3600 * 1000) { this.setState({ verified: true, checked: true }); return; }
-        localStorage.removeItem('bond_age_ok');
-      }
-    } catch (e) {}
+    // Review mode: always show the gate on load. The 30-day remember is
+    // disabled so the gate can be reviewed on every reload. To restore the
+    // remember-me behavior before public launch, re-enable the localStorage
+    // check below.
+    // try {
+    //   const raw = localStorage.getItem('bond_age_ok');
+    //   if (raw) {
+    //     const ts = parseInt(raw, 10);
+    //     if (Date.now() - ts < 30 * 24 * 3600 * 1000) { this.setState({ verified: true, checked: true }); return; }
+    //     localStorage.removeItem('bond_age_ok');
+    //   }
+    // } catch (e) {}
     this.setState({ checked: true });
   }
   renderVals() {
