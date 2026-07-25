@@ -132,7 +132,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   </section>
 
   <sc-if value="{{ motionOk }}" hint-placeholder-val="{{ true }}">
-  <section id="process" data-screen-label="S2 The Press" ref="{{ pressWrapRef }}" style="height:400vh;background:#141615;position:relative">
+  <section id="process" data-screen-label="S2 The Press" ref="{{ pressWrapRef }}" style="height:100vh;min-height:640px;background:#141615;position:relative">
     <div style="position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center">
       <div ref="{{ processHeadRef }}" style="position:absolute;top:72px;left:0;right:0;display:flex;flex-direction:column;align-items:center;z-index:5">
         <div style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#C29A45">The Process</div>
@@ -324,21 +324,32 @@ class Component extends DCLogic {
     };
     poll();
     if (!reduced) requestAnimationFrame(() => this.startVapor());
+    if (!reduced && this.pressWrapRef.current) {
+      this.applyPress(0);
+      this._pressIO = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) this.playPress();
+          else { if (this._pressRaf) cancelAnimationFrame(this._pressRaf); this.applyPress(0); }
+        }
+      }, { threshold: 0.55 });
+      this._pressIO.observe(this.pressWrapRef.current);
+    }
   }
   componentWillUnmount() {
     removeEventListener('resize', this._resize);
     if (this._pollRaf) cancelAnimationFrame(this._pollRaf);
     if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._pressRaf) cancelAnimationFrame(this._pressRaf);
+    if (this._pressIO) this._pressIO.disconnect();
     if (this._fit) removeEventListener('resize', this._fit);
   }
 
   onScroll() {
     const nb = this.navBgRef.current;
     if (nb) nb.style.opacity = scrollY > 40 ? '0.95' : '0';
-    const wrap = this.pressWrapRef.current;
-    if (!wrap || this.state.reduced) return;
-    const total = wrap.offsetHeight - innerHeight;
-    const p = Math.min(Math.max(-wrap.getBoundingClientRect().top / total, 0), 1);
+  }
+
+  applyPress(p) {
     const set = (ref, styles) => { if (ref.current) Object.assign(ref.current.style, styles); };
     if (this.processHeadRef.current) this.processHeadRef.current.style.opacity = String(Math.max(1 - p / 0.1, 0));
     const c = Math.min(p / 0.55, 1);
@@ -358,6 +369,19 @@ class Component extends DCLogic {
     const cl = p > 0.94;
     set(this.closerRef, { opacity: cl ? '1' : '0', transform: cl ? 'translateY(0)' : 'translateY(12px)' });
     set(this.progRef, { transform: `scaleX(${p})` });
+  }
+
+  playPress() {
+    if (this.state.reduced) { this.applyPress(1); return; }
+    if (this._pressRaf) cancelAnimationFrame(this._pressRaf);
+    const dur = 5200;
+    const start = performance.now();
+    const step = (now) => {
+      const t = Math.min((now - start) / dur, 1);
+      this.applyPress(t);
+      if (t < 1) this._pressRaf = requestAnimationFrame(step);
+    };
+    this._pressRaf = requestAnimationFrame(step);
   }
 
   startVapor() {
