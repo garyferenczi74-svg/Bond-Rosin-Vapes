@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -14,6 +14,7 @@
 <script src="./image-slot.js"></script>
 <style>
 body { margin: 0; background: #1B1D1C; }
+html, body { overflow-x: hidden; max-width: 100%; }
 a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
@@ -40,7 +41,18 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
         </div>
       </sc-if>
       <sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}">
-        <a href="Home.dc.html" onClick="{{ goHome }}" style="font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:inherit">Home</a>
+        <button onClick="{{ toggleMenu }}" aria-label="Open menu" style="background:transparent;border:0;display:inline-flex;align-items:center;padding:10px;cursor:pointer;min-width:44px;min-height:44px;justify-content:center;color:inherit">
+          <svg width="26" height="16" viewBox="0 0 26 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="1" y1="1" x2="25" y2="1"></line><line x1="1" y1="8" x2="25" y2="8"></line><line x1="1" y1="15" x2="25" y2="15"></line></svg>
+        </button>
+      </sc-if>
+      <sc-if value="{{ menuOpen }}">
+        <div onClick="{{ closeMenu }}" style="position:fixed;inset:0;z-index:1000;background:#1B1D1C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:env(safe-area-inset-top,0px) 24px env(safe-area-inset-bottom,0px)">
+          <button onClick="{{ closeMenu }}" aria-label="Close menu" style="position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:20px;background:transparent;border:0;display:inline-flex;padding:10px;cursor:pointer;min-width:44px;min-height:44px;justify-content:center;align-items:center"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#E1DAD0" stroke-width="1.5" stroke-linecap="round"><line x1="2" y1="2" x2="20" y2="20"></line><line x1="20" y1="2" x2="2" y2="20"></line></svg></button>
+          <a href="No1.dc.html" onClick="{{ closeMenu }}" style="font-family:'GFS Didot',Didot,serif;font-size:26px;letter-spacing:0.14em;text-transform:uppercase;color:#E1DAD0">No. 1 Dialed</a>
+          <a href="No2.dc.html" onClick="{{ closeMenu }}" style="font-family:'GFS Didot',Didot,serif;font-size:26px;letter-spacing:0.14em;text-transform:uppercase;color:#E1DAD0">No. 2 Unwind</a>
+          <a href="No3.dc.html" onClick="{{ closeMenu }}" style="font-family:'GFS Didot',Didot,serif;font-size:26px;letter-spacing:0.14em;text-transform:uppercase;color:#E1DAD0">No. 3 Peak</a>
+          <a href="Home.dc.html" onClick="{{ closeMenu }}" style="font-family:'GFS Didot',Didot,serif;font-size:26px;letter-spacing:0.14em;text-transform:uppercase;color:#E1DAD0">Home</a>
+        </div>
       </sc-if>
     </div>
   </nav>
@@ -160,7 +172,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { narrow: false };
+  state = { narrow: false, menu: false };
   navBgRef = React.createRef(); fadeRef = React.createRef();
   componentDidMount() {
     this.setState({ narrow: innerWidth < 760 });
@@ -186,6 +198,9 @@ class Component extends DCLogic {
   renderVals() {
     return {
       wideNav: !this.state.narrow, narrowNav: this.state.narrow,
+      menuOpen: this.state.menu,
+      toggleMenu: () => this.setState({ menu: !this.state.menu }),
+      closeMenu: () => this.setState({ menu: false }),
       navBgRef: this.navBgRef, fadeRef: this.fadeRef,
       goHome: this.navTo('Home.dc.html'), goNo1: this.navTo('No1.dc.html'), goNo3: this.navTo('No3.dc.html'),
       goFind: this.navTo('Home.dc.html#find'), goChoose: this.navTo('Home.dc.html#choose')
