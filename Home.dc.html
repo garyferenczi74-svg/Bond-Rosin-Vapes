@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -14,7 +14,10 @@
 <script src="./image-slot.js"></script>
 <style>
 body { margin: 0; background: #1B1D1C; }
+html, body { overflow-x: hidden; max-width: 100%; }
 a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
+/* iOS 100vh fix: upgrade the hero to dynamic viewport height where supported */
+@supports (height: 100dvh) { #top { height: 100dvh !important; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
