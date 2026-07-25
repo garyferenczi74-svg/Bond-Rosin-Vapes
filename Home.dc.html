@@ -373,7 +373,7 @@ class Component extends DCLogic {
   playPress() {
     if (this.state.reduced) { this.applyPress(1); return; }
     if (this._pressRaf) cancelAnimationFrame(this._pressRaf);
-    const dur = 5200;
+    const dur = 8600;
     const start = performance.now();
     const step = (now) => {
       const t = Math.min((now - start) / dur, 1);
