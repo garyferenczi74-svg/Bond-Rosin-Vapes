@@ -218,18 +218,20 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   <section id="circle" data-screen-label="Bond Haus" style="background:#1B1D1C;border-top:1px solid #3A3C3B;padding:clamp(80px,10vw,140px) clamp(20px,4vw,56px)">
     <div style="max-width:760px;margin:0 auto;text-align:center">
       <sc-if value="{{ notJoined }}" hint-placeholder-val="{{ true }}">
-        <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.4vw,42px);letter-spacing:0.08em;color:#E1DAD0;margin:0">ENTER THE BOND HAUS</h2>
+        <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.4vw,42px);letter-spacing:0.08em;color:#E1DAD0;margin:0">ENTER THE BOND CIRCLE</h2>
         <p style="font-size:14.5px;line-height:1.75;color:#8E887C;margin:24px auto 40px;max-width:440px">Get first access to new drops, retailer arrivals, private events, and what is next from Bond.</p>
         <form onSubmit="{{ joinCircle }}" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <input type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="Enter your email" style="background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:14px;padding:15px 18px;width:min(320px,100%);outline:none">
-          <button type="submit" style="background:#E1DAD0;color:#1B1D1C;border:1px solid #E1DAD0;border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;padding:16px 32px;cursor:pointer">Join the Haus</button>
+          <button type="submit" style="background:#E1DAD0;color:#1B1D1C;border:1px solid #E1DAD0;border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;padding:16px 32px;cursor:pointer">Join the Circle</button>
         </form>
         <p style="font-size:11px;color:#8E887C;margin:20px 0 0;letter-spacing:0.04em">By joining, you agree to receive emails from Bond.</p>
+        <a href="Haus.dc.html" style="display:inline-block;font-family:'GFS Didot',Didot,serif;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;text-decoration:none;margin:26px 0 0;border-bottom:1px solid #3A3C3B;padding-bottom:3px;transition:color .3s,border-color .3s" style-hover="color:#E1DAD0;border-color:#C29A45">Already in the Haus? Enter here.</a>
       </sc-if>
       <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}">
         <div style="animation:fadeIn .8s cubic-bezier(0.22,1,0.36,1) both">
-          <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.4vw,42px);letter-spacing:0.08em;color:#E1DAD0;margin:0">WELCOME TO THE HAUS.</h2>
+          <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.4vw,42px);letter-spacing:0.08em;color:#E1DAD0;margin:0">WELCOME TO THE CIRCLE.</h2>
           <p style="font-size:14.5px;color:#8E887C;margin:24px 0 0">Watch your inbox. We keep it quiet, and worth it.</p>
+          <a href="Haus.dc.html" style="display:inline-block;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:#E1DAD0;text-decoration:none;margin:32px 0 0;border-bottom:1px solid #C29A45;padding-bottom:4px;transition:color .3s" style-hover="color:#E3C270">Enter Bond Haus</a>
         </div>
       </sc-if>
     </div>
@@ -243,7 +245,8 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
           <a href="#numbers" style="color:#8E887C" style-hover="color:#E1DAD0">Products</a>
           <a href="#process" style="color:#8E887C" style-hover="color:#E1DAD0">Our Process</a>
           <a href="#find" style="color:#8E887C" style-hover="color:#E1DAD0">Find Your Bond</a>
-          <a href="#circle" style="color:#8E887C" style-hover="color:#E1DAD0">Bond Haus</a>
+          <a href="Haus.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">Bond Haus</a>
+          <a href="Admin.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">Admin</a>
         </div>
       </div>
       <div style="border-top:1px solid #3A3C3B;margin-top:40px;padding-top:24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;font-size:11.5px;color:#8E887C">

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bond Haus</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; overflow-x: hidden; max-width: 100%; }
+  body { min-height: 100vh; background: #0D0F0E; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; }
+  @supports (height: 100dvh) { .screen { min-height: 100dvh; } }
+  a { color: inherit; text-decoration: none; }
+  @keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
+  @keyframes gateRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
+  .field { background: transparent; border: 1px solid #3A3C3B; border-radius: 2px; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; font-size: 15px; padding: 15px 18px; width: 100%; outline: none; transition: border-color .3s; }
+  .field:focus { border-color: #C29A45; }
+  .field::placeholder { color: #6E685E; }
+  .btn { background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); color: #141109; border: 1px solid rgba(227,194,112,0.7); border-radius: 2px; font-family: 'GFS Didot', Didot, serif; font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; padding: 17px; cursor: pointer; box-shadow: 0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+  <div class="screen" style="position:relative;min-height:100vh;display:flex;flex-direction:column">
+    <div style="position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 34%, rgba(194,154,69,0.05), transparent 70%),radial-gradient(1200px 700px at 50% 100%, rgba(13,15,14,0.95), transparent 80%);pointer-events:none"></div>
+
+    <header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:26px clamp(20px,4vw,56px)">
+      <a href="Home.dc.html" style="font-family:'GFS Didot',Didot,serif;font-size:19px;letter-spacing:0.35em;color:#E8E1D5;padding-left:0.35em">BOND</a>
+    </header>
+
+    <main style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+      <div style="text-align:center;max-width:420px;width:100%;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
+        <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(46px,8vw,72px);letter-spacing:0.35em;padding-left:0.35em;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(2px 3px 3px rgba(0,0,0,0.7));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">BOND</div>
+        <div style="width:min(320px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>
+
+        <!-- Step 1: credentials -->
+        <form id="credForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left">
+          <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C;text-align:center;margin:0 0 6px">Sign in to continue</p>
+          <input class="field" type="email" name="email" placeholder="Email" autocomplete="email">
+          <input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">
+          <button type="submit" class="btn" style="margin-top:6px">Enter</button>
+        </form>
+
+        <!-- Step 2: MFA challenge -->
+        <form id="mfaForm" class="hidden" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left">
+          <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C;text-align:center;margin:0 0 6px">Enter your authentication code</p>
+          <input class="field" type="text" inputmode="numeric" maxlength="6" name="code" placeholder="6 digit code" style="text-align:center;letter-spacing:0.5em" autocomplete="one-time-code">
+          <button type="submit" class="btn" style="margin-top:6px">Verify</button>
+        </form>
+
+        <p id="failLine" style="font-family:'GFS Didot',Didot,serif;font-size:14px;font-style:italic;color:#B0A99A;margin:22px 0 0;min-height:20px"></p>
+      </div>
+    </main>
+
+    <footer style="position:relative;text-align:center;padding:28px;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#4E4A43">
+      Design preview. Secured access opens with the Vauxhall app layer.
+    </footer>
+  </div>
+
+  <script>
+    // PREVIEW ONLY. No real authentication, MFA, audit, or rate limiting here.
+    // The secured version (Supabase Auth, mandatory TOTP, append-only audit,
+    // lockout, and true 404 cloaking) is the Next.js build, not this static page.
+    var cred = document.getElementById('credForm');
+    var mfa = document.getElementById('mfaForm');
+    var fail = document.getElementById('failLine');
+
+    cred.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = cred.email.value.trim();
+      var pass = cred.password.value.trim();
+      if (!email || !pass) { fail.textContent = 'That did not open the door.'; return; }
+      fail.textContent = '';
+      cred.classList.add('hidden');
+      mfa.classList.remove('hidden');
+      mfa.code.focus();
+    });
+
+    mfa.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var code = mfa.code.value.trim();
+      if (code.length !== 6) { fail.textContent = 'That did not open the door.'; return; }
+      fail.textContent = '';
+      window.location.href = 'Vauxhall.dc.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vauxhall</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #141615; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; letter-spacing: 0.02em; cursor: pointer; transition: background .2s, color .2s; }
+  .navitem:hover { background: #20221F; color: #E1DAD0; }
+  .navitem.on { background: #24261F; color: #E1DAD0; box-shadow: inset 2px 0 0 #E1DAD0; }
+  .wing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 3px; cursor: pointer; transition: background .2s; }
+  .wing:hover { background: #20221F; }
+  .wing.on { background: #202220; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #2E302D; border-radius: 999px; font-size: 12px; color: #B0A99A; white-space: nowrap; }
+  .badge { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
+  .event { display: grid; grid-template-columns: 88px 150px 1fr; gap: 16px; align-items: start; padding: 15px 18px; border-bottom: 1px solid #202220; transition: background .15s; }
+  .event:hover { background: #191B19; }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  @media (max-width: 900px) {
+    .rail { display: none; }
+    .event { grid-template-columns: 70px 1fr; }
+    .event .etype { grid-column: 2; margin-top: 4px; }
+  }
+</style>
+</head>
+<body>
+<div style="display:flex;min-height:100vh">
+
+  <!-- Left rail -->
+  <aside class="rail" style="width:248px;flex-shrink:0;background:#171917;border-right:1px solid #202220;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:22px 18px 16px;border-bottom:1px solid #202220">
+      <div style="font-family:'GFS Didot',Didot,serif;font-size:22px;letter-spacing:0.34em;padding-left:0.34em;color:#E8E1D5">VAUXHALL</div>
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Command Center</div>
+    </div>
+
+    <div style="padding:16px 12px 6px">
+      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Wings</div>
+      <div class="wing on"><span class="dot" style="background:#E1DAD0"></span><span>Vauxhall</span></div>
+      <div class="wing"><span class="dot" style="background:#7FA87A"></span><span style="color:#8E887C">Product</span></div>
+      <div class="wing"><span class="dot" style="background:#C08457"></span><span style="color:#8E887C">Security</span></div>
+      <div class="wing"><span class="dot" style="background:#6C8FB8"></span><span style="color:#8E887C">Social</span></div>
+    </div>
+
+    <div style="padding:14px 12px;flex:1;overflow-y:auto" class="scroll">
+      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Vauxhall</div>
+      <div class="navitem on">Live Feed</div>
+      <div class="navitem">Agents</div>
+      <div class="navitem">Review <span style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">3</span></div>
+      <div class="navitem">Queue</div>
+      <div class="navitem">Steering</div>
+      <div class="navitem">Evolution</div>
+      <div class="navitem">Knowledge</div>
+    </div>
+
+    <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div>
+        <div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div>
+      </div>
+      <a href="Home.dc.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;border:1px solid #2E302D;border-radius:3px;padding:7px 11px">Sign out</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">
+      <div>
+        <div style="font-family:'GFS Didot',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">Live Feed</div>
+        <div style="font-size:12px;color:#6E685E;margin-top:2px">The room where the Section is visible.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="chip"><span class="dot" style="background:#7FA87A;box-shadow:0 0 8px #7FA87A"></span>Live</span>
+        <span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>
+      </div>
+    </header>
+
+    <!-- Agent status strip -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;padding:16px clamp(16px,3vw,32px);border-bottom:1px solid #202220">
+      <span class="chip"><span class="dot" style="background:#7FA87A"></span>JB <span style="color:#5E5A52">Active</span></span>
+      <span class="chip"><span class="dot" style="background:#7FA87A"></span>Q <span style="color:#5E5A52">Active</span></span>
+      <span class="chip"><span class="dot" style="background:#7FA87A"></span>Moneypenny <span style="color:#5E5A52">Active</span></span>
+      <span class="chip"><span class="dot" style="background:#E3C270"></span>Vesper <span style="color:#5E5A52">Verifying</span></span>
+      <span class="chip"><span class="dot" style="background:#7FA87A"></span>M <span style="color:#5E5A52">Active</span></span>
+      <span class="chip"><span class="dot" style="background:#7FA87A"></span>Felix <span style="color:#5E5A52">Active</span></span>
+      <span class="chip"><span class="dot" style="background:#C08457"></span>Carver <span style="color:#5E5A52">Blocked</span></span>
+    </div>
+
+    <!-- Filters -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px clamp(16px,3vw,32px);border-bottom:1px solid #202220">
+      <span class="badge" style="background:#24261F;color:#E1DAD0;border-color:#33352F">All events</span>
+      <span class="badge">Agent Decision</span>
+      <span class="badge">Advisor</span>
+      <span class="badge">Alert</span>
+      <span class="badge">Self-Tune</span>
+      <span class="badge">Research Task</span>
+      <span class="badge">Report</span>
+      <span style="margin-left:auto;font-size:12px;color:#6E685E;align-self:center">All Data view . Export</span>
+    </div>
+
+    <!-- Feed -->
+    <div class="scroll" style="flex:1;overflow-y:auto">
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:32:08</div>
+        <div><span style="color:#E1DAD0">Felix</span><div class="etype" style="margin-top:6px"><span class="badge" style="border-color:#4A3A2A;color:#C08457">Alert</span></div></div>
+        <div><div style="color:#E1DAD0">Lockout raised on /haus/admin after 5 failed attempts from 74.12.x.x</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Escalated to Security wing . source logged . audit id A-40912</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:29:51</div>
+        <div><span style="color:#E1DAD0">JB</span><div class="etype" style="margin-top:6px"><span class="badge">Agent Decision</span></div></div>
+        <div><div style="color:#E1DAD0">Endorsed Vesper verdict on release candidate rc-118, routed to M for gate</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Recommendation awaiting owner in Review</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:27:14</div>
+        <div><span style="color:#E1DAD0">Vesper</span><div class="etype" style="margin-top:6px"><span class="badge">Report</span></div></div>
+        <div><div style="color:#E1DAD0">Verification pass on rc-118: age gate, claims lint, dash lint all green</div><div style="font-size:12px;color:#6E685E;margin-top:4px">1 warning noted, non-blocking</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:21:03</div>
+        <div><span style="color:#E1DAD0">Q</span><div class="etype" style="margin-top:6px"><span class="badge">Research Task</span></div></div>
+        <div><div style="color:#E1DAD0">Ingested 3 new solventless extraction studies into canon staging</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Pending Moneypenny approval before canon merge</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:18:44</div>
+        <div><span style="color:#E1DAD0">Moneypenny</span><div class="etype" style="margin-top:6px"><span class="badge">Knowledge</span></div></div>
+        <div><div style="color:#E1DAD0">Canon version v41 published: No. 3 Peak batch note revision</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Approved by owner . prior version retained</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:12:37</div>
+        <div><span style="color:#E1DAD0">Carver</span><div class="etype" style="margin-top:6px"><span class="badge" style="border-color:#4A3A2A;color:#C08457">Escalation</span></div></div>
+        <div><div style="color:#E1DAD0">Blocked: awaiting Felix clearance on 4 social drafts before scheduling</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Blocker: originality check queued</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">14:05:19</div>
+        <div><span style="color:#E1DAD0">M</span><div class="etype" style="margin-top:6px"><span class="badge">Self-Tune</span></div></div>
+        <div><div style="color:#E1DAD0">Proposed tuning: raise pre-check strictness on dependency audit to high</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Owner action required to apply . rollback available</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">13:58:02</div>
+        <div><span style="color:#E1DAD0">Felix</span><div class="etype" style="margin-top:6px"><span class="badge">Advisor</span></div></div>
+        <div><div style="color:#E1DAD0">Pre-Check passed on rc-117: headers, CSP, age gate integrity confirmed</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Cleared to M gate . 0 open findings</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">13:44:55</div>
+        <div><span style="color:#E1DAD0">Q</span><div class="etype" style="margin-top:6px"><span class="badge">Insight</span></div></div>
+        <div><div style="color:#E1DAD0">Reorder rate for No. 1 Dialed trending up 12 percent week over week</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Flagged to Product wing for velocity review</div></div>
+      </div>
+
+      <div class="event">
+        <div class="mono" style="color:#6E685E;font-size:12.5px">13:30:11</div>
+        <div><span style="color:#E1DAD0">JB</span><div class="etype" style="margin-top:6px"><span class="badge">Report</span></div></div>
+        <div><div style="color:#E1DAD0">Daily audit posted: 6 decisions, 0 anomalies, tomorrow plan set</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Waiting in Review</div></div>
+      </div>
+
+    </div>
+
+    <footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">
+      Design preview . mock data . the secured Vauxhall runs on the Next.js app layer with MFA, RLS, and append only audit
+    </footer>
+
+  </main>
+</div>
+</body>
+</html>
