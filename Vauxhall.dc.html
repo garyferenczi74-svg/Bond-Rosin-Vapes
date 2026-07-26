@@ -20,22 +20,52 @@
   .wing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 3px; cursor: pointer; transition: background .2s; }
   .wing:hover { background: #20221F; }
   .wing.on { background: #202220; }
-  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #2E302D; border-radius: 999px; font-size: 12px; color: #B0A99A; white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #2E302D; border-radius: 999px; font-size: 12px; color: #B0A99A; white-space: nowrap; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .chip.active { background: #20221F; color: #E1DAD0; border-color: #4E4A43; }
   .badge { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
-  .event { display: grid; grid-template-columns: 88px 150px 1fr; gap: 16px; align-items: start; padding: 15px 18px; border-bottom: 1px solid #202220; transition: background .15s; }
+  .pill { cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .pill.active { background: #24261F; color: #E1DAD0; border-color: #33352F; }
+  .event { display: grid; grid-template-columns: 88px 150px 1fr; gap: 16px; align-items: start; padding: 15px 18px; border-bottom: 1px solid #202220; transition: background .15s; cursor: pointer; }
   .event:hover { background: #191B19; }
+  .event.enter { animation: feedIn .5s cubic-bezier(0.22,1,0.36,1) both; }
+  @keyframes feedIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .detail { background: #17190F00; border-bottom: 1px solid #202220; padding: 4px 18px 18px 122px; font-size: 13px; color: #8E887C; }
+  .detail a { color: #B0A99A; border-bottom: 1px solid #33352F; }
+  .card { background: #191B18; border: 1px solid #202220; border-radius: 5px; padding: 16px 18px; }
+  .lbl { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6E685E; }
+  .act { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 14px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; background: transparent; cursor: pointer; transition: background .2s, color .2s, border-color .2s; font-family: inherit; }
+  .act:hover { background: #20221F; color: #E1DAD0; border-color: #4E4A43; }
+  .act.go:hover { border-color: #2E4A22; color: #7CBF4E; }
+  .act.no:hover { border-color: #4A3A2A; color: #C08457; }
+  .vfield { background: #141615; border: 1px solid #2E302D; border-radius: 3px; color: #E1DAD0; font-family: inherit; font-size: 14px; padding: 12px 14px; width: 100%; outline: none; transition: border-color .2s; }
+  .vfield:focus { border-color: #C29A45; }
+  .vfield::placeholder { color: #6E685E; }
+  .step { display: flex; align-items: center; gap: 0; }
+  .stepdot { width: 9px; height: 9px; border-radius: 50%; background: #2E302D; flex-shrink: 0; }
+  .stepdot.done { background: #7FA87A; }
+  .stepdot.now { background: #E3C270; box-shadow: 0 0 8px rgba(227,194,112,0.6); }
+  .stepbar { height: 1px; flex: 1; background: #2E302D; }
+  .stepbar.done { background: #4E5A48; }
   .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #20221F; border: 1px solid #33352F; color: #E1DAD0; padding: 12px 22px; border-radius: 4px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data th { text-align: left; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #5E5A52; padding: 10px 12px; border-bottom: 1px solid #202220; position: sticky; top: 0; background: #141615; }
+  table.data td { padding: 10px 12px; border-bottom: 1px solid #1C1E1B; color: #B0A99A; vertical-align: top; }
+  table.data tr:hover td { background: #191B19; }
   @media (max-width: 900px) {
     .rail { display: none; }
     .event { grid-template-columns: 70px 1fr; }
     .event .etype { grid-column: 2; margin-top: 4px; }
+    .detail { padding-left: 18px; }
+    .grid2 { grid-template-columns: 1fr !important; }
+    .grid3 { grid-template-columns: 1fr !important; }
   }
 </style>
 </head>
 <body>
 <div style="display:flex;min-height:100vh">
 
-  <!-- Left rail -->
   <aside class="rail" style="width:248px;flex-shrink:0;background:#171917;border-right:1px solid #202220;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
     <div style="padding:22px 18px 16px;border-bottom:1px solid #202220">
       <div style="font-family:'GFS Didot',Didot,serif;font-size:22px;letter-spacing:0.34em;padding-left:0.34em;color:#E8E1D5">VAUXHALL</div>
@@ -44,7 +74,7 @@
 
     <div style="padding:16px 12px 6px">
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Wings</div>
-      <a class="wing on" href="Vauxhall.dc.html"><span class="dot" style="background:#E1DAD0"></span><span>Vauxhall</span></a>
+      <a class="wing on" href="#/vauxhall/live-feed"><span class="dot" style="background:#E1DAD0"></span><span>Vauxhall</span></a>
       <a class="wing" href="Product.dc.html"><span class="dot" style="background:#7CBF4E"></span><span style="color:#8E887C">Product</span></a>
       <a class="wing" href="Security.dc.html"><span class="dot" style="background:#C08457"></span><span style="color:#8E887C">Security</span></a>
       <a class="wing" href="Social.dc.html"><span class="dot" style="background:#6C8FB8"></span><span style="color:#8E887C">Social</span></a>
@@ -52,13 +82,13 @@
 
     <div style="padding:14px 12px;flex:1;overflow-y:auto" class="scroll">
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Vauxhall</div>
-      <div class="navitem on">Live Feed</div>
-      <div class="navitem">Agents</div>
-      <div class="navitem">Review <span style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">3</span></div>
-      <div class="navitem">Queue</div>
-      <div class="navitem">Steering</div>
-      <div class="navitem">Evolution</div>
-      <div class="navitem">Knowledge</div>
+      <a class="navitem" data-view="live-feed" href="#/vauxhall/live-feed">Live Feed</a>
+      <a class="navitem" data-view="agents" href="#/vauxhall/agents">Agents</a>
+      <a class="navitem" data-view="review" href="#/vauxhall/review">Review <span id="reviewBadge" style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">3</span></a>
+      <a class="navitem" data-view="queue" href="#/vauxhall/queue">Queue</a>
+      <a class="navitem" data-view="steering" href="#/vauxhall/steering">Steering</a>
+      <a class="navitem" data-view="evolution" href="#/vauxhall/evolution">Evolution</a>
+      <a class="navitem" data-view="knowledge" href="#/vauxhall/knowledge">Knowledge</a>
     </div>
 
     <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
@@ -66,117 +96,529 @@
         <div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div>
         <div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div>
       </div>
-      <a href="Home.dc.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;border:1px solid #2E302D;border-radius:3px;padding:7px 11px">Sign out</a>
+      <button id="signOut" class="act">Sign out</button>
     </div>
   </aside>
 
-  <!-- Main -->
-  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
-
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">
-      <div>
-        <div style="font-family:'GFS Didot',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">Live Feed</div>
-        <div style="font-size:12px;color:#6E685E;margin-top:2px">The room where the Section is visible.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="chip"><span class="dot" style="background:#7FA87A;box-shadow:0 0 8px #7FA87A"></span>Live</span>
-        <span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>
-      </div>
-    </header>
-
-    <!-- Agent status strip -->
-    <div style="display:flex;gap:10px;flex-wrap:wrap;padding:16px clamp(16px,3vw,32px);border-bottom:1px solid #202220">
-      <span class="chip"><span class="dot" style="background:#7FA87A"></span>JB <span style="color:#5E5A52">Active</span></span>
-      <span class="chip"><span class="dot" style="background:#7FA87A"></span>Q <span style="color:#5E5A52">Active</span></span>
-      <span class="chip"><span class="dot" style="background:#7FA87A"></span>Moneypenny <span style="color:#5E5A52">Active</span></span>
-      <span class="chip"><span class="dot" style="background:#E3C270"></span>Vesper <span style="color:#5E5A52">Verifying</span></span>
-      <span class="chip"><span class="dot" style="background:#7FA87A"></span>M <span style="color:#5E5A52">Active</span></span>
-      <span class="chip"><span class="dot" style="background:#7FA87A"></span>Felix <span style="color:#5E5A52">Active</span></span>
-      <span class="chip"><span class="dot" style="background:#C08457"></span>Carver <span style="color:#5E5A52">Blocked</span></span>
-    </div>
-
-    <!-- Filters -->
-    <div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px clamp(16px,3vw,32px);border-bottom:1px solid #202220">
-      <span class="badge" style="background:#24261F;color:#E1DAD0;border-color:#33352F">All events</span>
-      <span class="badge">Agent Decision</span>
-      <span class="badge">Advisor</span>
-      <span class="badge">Alert</span>
-      <span class="badge">Self-Tune</span>
-      <span class="badge">Research Task</span>
-      <span class="badge">Report</span>
-      <span style="margin-left:auto;font-size:12px;color:#6E685E;align-self:center">All Data view . Export</span>
-    </div>
-
-    <!-- Feed -->
-    <div class="scroll" style="flex:1;overflow-y:auto">
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:32:08</div>
-        <div><span style="color:#E1DAD0">Felix</span><div class="etype" style="margin-top:6px"><span class="badge" style="border-color:#4A3A2A;color:#C08457">Alert</span></div></div>
-        <div><div style="color:#E1DAD0">Lockout raised on /haus/admin after 5 failed attempts from 74.12.x.x</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Escalated to Security wing . source logged . audit id A-40912</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:29:51</div>
-        <div><span style="color:#E1DAD0">JB</span><div class="etype" style="margin-top:6px"><span class="badge">Agent Decision</span></div></div>
-        <div><div style="color:#E1DAD0">Endorsed Vesper verdict on release candidate rc-118, routed to M for gate</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Recommendation awaiting owner in Review</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:27:14</div>
-        <div><span style="color:#E1DAD0">Vesper</span><div class="etype" style="margin-top:6px"><span class="badge">Report</span></div></div>
-        <div><div style="color:#E1DAD0">Verification pass on rc-118: age gate, claims lint, dash lint all green</div><div style="font-size:12px;color:#6E685E;margin-top:4px">1 warning noted, non-blocking</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:21:03</div>
-        <div><span style="color:#E1DAD0">Q</span><div class="etype" style="margin-top:6px"><span class="badge">Research Task</span></div></div>
-        <div><div style="color:#E1DAD0">Ingested 3 new solventless extraction studies into canon staging</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Pending Moneypenny approval before canon merge</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:18:44</div>
-        <div><span style="color:#E1DAD0">Moneypenny</span><div class="etype" style="margin-top:6px"><span class="badge">Knowledge</span></div></div>
-        <div><div style="color:#E1DAD0">Canon version v41 published: No. 3 Peak batch note revision</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Approved by owner . prior version retained</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:12:37</div>
-        <div><span style="color:#E1DAD0">Carver</span><div class="etype" style="margin-top:6px"><span class="badge" style="border-color:#4A3A2A;color:#C08457">Escalation</span></div></div>
-        <div><div style="color:#E1DAD0">Blocked: awaiting Felix clearance on 4 social drafts before scheduling</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Blocker: originality check queued</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">14:05:19</div>
-        <div><span style="color:#E1DAD0">M</span><div class="etype" style="margin-top:6px"><span class="badge">Self-Tune</span></div></div>
-        <div><div style="color:#E1DAD0">Proposed tuning: raise pre-check strictness on dependency audit to high</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Owner action required to apply . rollback available</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">13:58:02</div>
-        <div><span style="color:#E1DAD0">Felix</span><div class="etype" style="margin-top:6px"><span class="badge">Advisor</span></div></div>
-        <div><div style="color:#E1DAD0">Pre-Check passed on rc-117: headers, CSP, age gate integrity confirmed</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Cleared to M gate . 0 open findings</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">13:44:55</div>
-        <div><span style="color:#E1DAD0">Q</span><div class="etype" style="margin-top:6px"><span class="badge">Insight</span></div></div>
-        <div><div style="color:#E1DAD0">Reorder rate for No. 1 Dialed trending up 12 percent week over week</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Flagged to Product wing for velocity review</div></div>
-      </div>
-
-      <div class="event">
-        <div class="mono" style="color:#6E685E;font-size:12.5px">13:30:11</div>
-        <div><span style="color:#E1DAD0">JB</span><div class="etype" style="margin-top:6px"><span class="badge">Report</span></div></div>
-        <div><div style="color:#E1DAD0">Daily audit posted: 6 decisions, 0 anomalies, tomorrow plan set</div><div style="font-size:12px;color:#6E685E;margin-top:4px">Waiting in Review</div></div>
-      </div>
-
-    </div>
-
-    <footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">
-      Design preview . mock data . the secured Vauxhall runs on the Next.js app layer with MFA, RLS, and append only audit
-    </footer>
-
-  </main>
+  <main id="main" style="flex:1;min-width:0;display:flex;flex-direction:column"></main>
 </div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// Vauxhall Command Center wiring. In memory mock data layer with a clean seam
+// for a real backend. Only VauxhallStore internals change when Supabase arrives.
+// No em dashes or en dashes anywhere. Refresh resets data by design.
+
+var AGENTS = ['JB','Q','Moneypenny','Vesper','M','Felix','Carver'];
+
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var VauxhallStore = {
+  session: true,
+  live: false,
+  filter: { agent: null, type: null, allData: false },
+  _eid: 100,
+  events: [],
+  review: [],
+  rcs: [],
+  drafts: [],
+  tuning: [],
+  canon: [],
+
+  seed: function(){
+    this.events = [
+      { id:'e10', time:'14:32:08', agent:'Felix', type:'Alert', summary:'Lockout raised on /haus/admin after 5 failed attempts from 74.12.x.x', sub:'Escalated to Security wing . source logged . audit id A-40912', audit:'A-40912' },
+      { id:'e09', time:'14:29:51', agent:'JB', type:'Agent Decision', summary:'Endorsed Vesper verdict on release candidate rc-118, routed to M for gate', sub:'Recommendation awaiting owner in Review', audit:'A-40908' },
+      { id:'e08', time:'14:27:14', agent:'Vesper', type:'Report', summary:'Verification pass on rc-118: age gate, claims lint, dash lint all green', sub:'1 warning noted, non-blocking', audit:'A-40905' },
+      { id:'e07', time:'14:21:03', agent:'Q', type:'Research Task', summary:'Ingested 3 new solventless extraction studies into canon staging', sub:'Pending Moneypenny approval before canon merge', audit:'A-40902' },
+      { id:'e06', time:'14:18:44', agent:'Moneypenny', type:'Knowledge', summary:'Canon version v41 published: No. 3 Peak batch note revision', sub:'Approved by owner . prior version retained', audit:'A-40898' },
+      { id:'e05', time:'14:12:37', agent:'Carver', type:'Escalation', summary:'Blocked: awaiting Felix clearance on 4 social drafts before scheduling', sub:'Blocker: originality check queued', audit:'A-40891' },
+      { id:'e04', time:'14:05:19', agent:'M', type:'Self-Tune', summary:'Proposed tuning: raise pre-check strictness on dependency audit to high', sub:'Owner action required to apply . rollback available', audit:'A-40884' },
+      { id:'e03', time:'13:58:02', agent:'Felix', type:'Advisor', summary:'Pre-Check passed on rc-117: headers, CSP, age gate integrity confirmed', sub:'Cleared to M gate . 0 open findings', audit:'A-40877' },
+      { id:'e02', time:'13:44:55', agent:'Q', type:'Insight', summary:'Reorder rate for No. 1 Dialed trending up 12 percent week over week', sub:'Flagged to Product wing for velocity review', audit:'A-40869' },
+      { id:'e01', time:'13:30:11', agent:'JB', type:'Report', summary:'Daily audit posted: 6 decisions, 0 anomalies, tomorrow plan set', sub:'Waiting in Review', audit:'A-40852' }
+    ];
+    this.review = [
+      { id:'r1', agent:'M', title:'Raise pre-check strictness on dependency audit to high', evidence:'Self-Tune e04 . rollback available', endorse:'JB endorses: reduces dev-side escapes', state:'open' },
+      { id:'r2', agent:'JB', title:'Endorsement of rc-118 awaiting owner', evidence:'Vesper report e08 . Felix advisor e03', endorse:'JB endorses: all gates green', state:'open' },
+      { id:'r3', agent:'Q', title:'Canon staging ingestion of 3 extraction studies', evidence:'Research Task e07', endorse:'Moneypenny approval required before merge', state:'open' }
+    ];
+    this.rcs = [
+      { id:'rc-117', title:'Release candidate rc-117', stage:2, note:'Cleared to M gate . 0 open findings' },
+      { id:'rc-118', title:'Release candidate rc-118', stage:3, note:'At owner review . 1 non-blocking warning' }
+    ];
+    this.drafts = [
+      { id:'d-207', title:'Nothing added, everything real', kind:'Reel', blocker:'Awaiting Felix originality check' },
+      { id:'d-208', title:'The press, in 15 seconds', kind:'Short', blocker:'Awaiting Felix originality check' },
+      { id:'d-209', title:'With your highest self', kind:'Carousel', blocker:'Awaiting Felix originality check' },
+      { id:'d-210', title:'Find your number', kind:'Reel', blocker:'Awaiting Felix originality check' }
+    ];
+    this.tuning = [
+      { id:'t1', agent:'M', proposal:'Raise pre-check strictness on dependency audit to high', before:'Dependency audit runs at medium, warns on drift', after:'Dependency audit runs at high, blocks on drift', trigger:'2 minor version drifts caught late in the last 30 days', state:'proposed' }
+    ];
+    this.canon = [
+      { id:'brand-tokens', name:'brand-tokens', ver:'v3', body:'Locked palette and type. Matte Black #1B1D1C surfaces, Deep Charcoal #2A2A2A cards, Bone #E1DAD0 type. Gold gradient for the wordmark. GFS Didot for display, Aptos for UI. No em dashes anywhere.', prior:'v2: pre July 22 palette before the token lock.' },
+      { id:'copy-bank', name:'copy-bank', ver:'v5', body:'Approved lines. With your highest self. What you consume matters. Nothing added, everything real. When the product is pure the experience is real.', prior:'v4: earlier hero lines before the Circle and Haus split.' },
+      { id:'framer-build-spec', name:'framer-build-spec', ver:'v1', body:'Video first. Three Signature Moments. Film Day shot list. Source of truth after approved mockups. Where a document conflicts with a mockup, the mockup wins.', prior:'v0: outline before the shot list was added.' },
+      { id:'build-prompt-v1-2', name:'build-prompt-v1-2', ver:'v2', body:'Landing structure, copy, backend, motion workflow. The Next.js layer is reserved for Bond Haus, Vauxhall, and the Circle app.', prior:'v1: before the Next.js reservation note.' },
+      { id:'brand-guidelines-v1-1', name:'brand-guidelines-v1-1', ver:'v1', body:'Retrofitted to the July 22 token lock. Voice, spacing, logo usage, and the Circle versus Haus tier rule stated once so nothing drifts.', prior:'v0: draft before the token retrofit.' },
+      { id:'tokens-sheet', name:'tokens-sheet', ver:'v3', body:'One page token sheet for fast agent briefing. Mirrored into brand-tokens. Colors, type scale, spacing, motion timings.', prior:'v2: before the motion timings row.' }
+    ];
+  },
+
+  listEvents: function(){
+    var f = this.filter, out = this.events.slice();
+    if (f.agent) out = out.filter(function(e){ return e.agent === f.agent; });
+    if (f.type) out = out.filter(function(e){ return e.type === f.type; });
+    return out;
+  },
+  addEvent: function(ev){ this.events.unshift(ev); },
+  nextId: function(){ this._eid++; return 'e' + this._eid; },
+  nextTime: function(){
+    var d = new Date();
+    function p(n){ return (n<10?'0':'') + n; }
+    return p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  },
+  genEvent: function(){
+    var pool = [
+      { agent:'Q', type:'Research Task', summary:'Scanned 2 new terpene preservation papers for canon staging', sub:'Pending Moneypenny approval before canon merge' },
+      { agent:'Vesper', type:'Report', summary:'Verification sweep clean on preview surfaces', sub:'Age gate, claims lint, dash lint all green' },
+      { agent:'Felix', type:'Advisor', summary:'Rule check complete: no new findings on the current build', sub:'0 open findings . scorecard holds' },
+      { agent:'Carver', type:'Insight', summary:'Process reveal hook holding the top of the league table', sub:'Flagged for the next concept round' },
+      { agent:'JB', type:'Agent Decision', summary:'Routed a velocity insight to the Product wing', sub:'Awaiting owner acknowledgement' },
+      { agent:'M', type:'Report', summary:'Pre-Check green on the latest candidate', sub:'Cleared to gate . rollback point set' },
+      { agent:'Moneypenny', type:'Knowledge', summary:'Canon search index refreshed', sub:'6 documents, version history intact' },
+      { agent:'Q', type:'Trend', summary:'Reorder signal steady on No. 2 Unwind', sub:'Within plan, no action needed' }
+    ];
+    var pick = pool[Math.floor(Math.random()*pool.length)];
+    return { id:this.nextId(), time:this.nextTime(), agent:pick.agent, type:pick.type, summary:pick.summary, sub:pick.sub, audit:'A-' + (41000 + Math.floor(Math.random()*900)) };
+  },
+
+  resolveReview: function(id, action, note){
+    var it = this.review.filter(function(r){ return r.id===id; })[0];
+    if (!it || it.state !== 'open') return;
+    it.state = action;
+    var verb = action==='approved' ? 'Owner approved' : action==='rejected' ? 'Owner rejected' : 'Owner sent back';
+    this.addEvent({ id:this.nextId(), time:this.nextTime(), agent:'JB', type:'Agent Decision', summary: verb + ': ' + it.title, sub: note ? ('Note: ' + note) : 'Logged to the decision record', audit:'A-' + (41000 + Math.floor(Math.random()*900)) });
+  },
+  openReviewCount: function(){ return this.review.filter(function(r){ return r.state==='open'; }).length; },
+
+  submitDirective: function(text, target, priority, due){
+    var words = text.trim().split(/\s+/).slice(0,8).join(' ');
+    this.addEvent({ id:this.nextId(), time:this.nextTime(), agent:'JB', type:'Agent Decision', summary:'Directive received: ' + words + '... routed by JB', sub:'Target: ' + (target||'JB decides') + ' . Priority: ' + priority + (due?(' . Due: ' + due):''), audit:'A-' + (41000 + Math.floor(Math.random()*900)) });
+  },
+
+  applyTuning: function(id){
+    var t = this.tuning.filter(function(x){ return x.id===id; })[0];
+    if (!t) return;
+    t.state = 'applied';
+    this.addEvent({ id:this.nextId(), time:this.nextTime(), agent:'M', type:'Evolution', summary:'Tuning applied: ' + t.proposal, sub:'Owner action . rollback available', audit:'A-' + (41000 + Math.floor(Math.random()*900)) });
+  },
+  rejectTuning: function(id, note){
+    var t = this.tuning.filter(function(x){ return x.id===id; })[0];
+    if (!t) return;
+    t.state = 'rejected';
+    this.addEvent({ id:this.nextId(), time:this.nextTime(), agent:'M', type:'Self-Tune', summary:'Tuning rejected: ' + t.proposal, sub: note ? ('Note: ' + note) : 'Owner declined', audit:'A-' + (41000 + Math.floor(Math.random()*900)) });
+  },
+
+  agentSummary: function(name){
+    var evs = this.events.filter(function(e){ return e.agent===name; });
+    var status = 'Active', task = 'Standing by', blocker = '';
+    if (name==='Vesper'){ status='Verifying'; task='Verification pass on rc-118'; }
+    if (name==='Carver'){ status='Blocked'; task='4 social drafts held'; blocker='Awaiting Felix originality check'; }
+    if (name==='M'){ task='Holding rc-118 at the gate'; }
+    if (name==='Felix'){ task='Runtime and pre-check watch'; }
+    if (name==='JB'){ task='Routing recommendations to Review'; }
+    if (name==='Q'){ task='Ingesting extraction studies'; }
+    if (name==='Moneypenny'){ task='Canon version control'; }
+    var recs = name==='M' ? 1 : name==='JB' ? 1 : name==='Q' ? 1 : 0;
+    return { status:status, task:task, blocker:blocker, events:evs.slice(0,10), errors:0, recs:recs };
+  }
+};
+
+// ---------- rendering ----------
+var main = document.getElementById('main');
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+function toast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2500);
+}
+
+function typeBadge(t){
+  var oxide = (t==='Alert'||t==='Escalation'||t==='Error');
+  var style = oxide ? 'border-color:#4A3A2A;color:#C08457' : '';
+  return '<span class="badge" style="'+style+'">'+esc(t)+'</span>';
+}
+
+var TYPE_PILLS = ['Agent Decision','Advisor','Alert','Self-Tune','Research Task','Report'];
+
+function headerBar(title, subtitle, right){
+  return '<header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">'
+    + '<div><div style="font-family:\'GFS Didot\',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">'+esc(title)+'</div>'
+    + '<div style="font-size:12px;color:#6E685E;margin-top:2px">'+esc(subtitle)+'</div></div>'
+    + '<div style="display:flex;align-items:center;gap:10px">'+(right||'')+'</div></header>';
+}
+
+function previewFooter(note){
+  return '<footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">'+esc(note)+'</footer>';
+}
+
+function renderLiveFeed(){
+  var f = VauxhallStore.filter;
+  var liveChip = '<span class="chip" id="liveChip"><span class="dot" style="background:'+(VauxhallStore.live?'#7FA87A':'#5E5A52')+';'+(VauxhallStore.live?'box-shadow:0 0 8px #7FA87A':'')+'"></span>'+(VauxhallStore.live?'Live':'Paused')+'</span>';
+  var pvToggle = '<span class="badge pill'+(VauxhallStore.live?'':' active')+'" id="pvToggle" style="border-color:#3A2E1C;color:#E3C270;cursor:pointer">Design preview</span>';
+  var head = headerBar('Live Feed', 'The room where the Section is visible.', liveChip + pvToggle);
+
+  var chips = '<div style="display:flex;gap:10px;flex-wrap:wrap;padding:16px clamp(16px,3vw,32px);border-bottom:1px solid #202220">';
+  AGENTS.forEach(function(a){
+    var summ = VauxhallStore.agentSummary(a);
+    var d = summ.status==='Blocked' ? '#C08457' : summ.status==='Verifying' ? '#E3C270' : '#7FA87A';
+    var active = f.agent===a ? ' active' : '';
+    chips += '<span class="chip'+active+'" data-agent="'+a+'"><span class="dot" style="background:'+d+'"></span>'+a+' <span style="color:#5E5A52">'+summ.status+'</span></span>';
+  });
+  chips += '</div>';
+
+  var pills = '<div style="display:flex;gap:8px;flex-wrap:wrap;padding:14px clamp(16px,3vw,32px);border-bottom:1px solid #202220">';
+  pills += '<span class="badge pill'+(f.type?'':' active')+'" data-type="">All events</span>';
+  TYPE_PILLS.forEach(function(t){ pills += '<span class="badge pill'+(f.type===t?' active':'')+'" data-type="'+esc(t)+'">'+esc(t)+'</span>'; });
+  pills += '<span style="margin-left:auto;font-size:12px;color:#6E685E;align-self:center"><span class="pill" id="allData" style="cursor:pointer;'+(f.allData?'color:#E1DAD0':'')+'">All Data view</span> . <span class="pill" id="exportCsv" style="cursor:pointer">Export</span></span>';
+  pills += '</div>';
+
+  var body;
+  var list = VauxhallStore.listEvents();
+  if (f.allData){
+    body = '<div class="scroll" style="flex:1;overflow:auto"><table class="data"><thead><tr><th>Time</th><th>Agent</th><th>Type</th><th>Summary</th><th>Subline</th></tr></thead><tbody>';
+    list.forEach(function(e){ body += '<tr><td class="mono">'+esc(e.time)+'</td><td style="color:#E1DAD0">'+esc(e.agent)+'</td><td>'+esc(e.type)+'</td><td style="color:#E1DAD0">'+esc(e.summary)+'</td><td>'+esc(e.sub)+'</td></tr>'; });
+    body += '</tbody></table></div>';
+  } else {
+    body = '<div class="scroll" id="feed" style="flex:1;overflow-y:auto">';
+    list.forEach(function(e){ body += feedRow(e); });
+    if (!list.length) body += '<div style="padding:40px;text-align:center;color:#6E685E">No events match this filter.</div>';
+    body += '</div>';
+  }
+
+  main.innerHTML = head + chips + pills + body + previewFooter('Design preview . mock data . the secured Vauxhall runs on the Next.js app layer with MFA, RLS, and append only audit');
+}
+
+function feedRow(e){
+  return '<div class="event" data-eid="'+e.id+'">'
+    + '<div class="mono" style="color:#6E685E;font-size:12.5px">'+esc(e.time)+'</div>'
+    + '<div><span style="color:#E1DAD0">'+esc(e.agent)+'</span><div class="etype" style="margin-top:6px">'+typeBadge(e.type)+'</div></div>'
+    + '<div><div style="color:#E1DAD0">'+esc(e.summary)+'</div><div style="font-size:12px;color:#6E685E;margin-top:4px">'+esc(e.sub)+'</div></div>'
+    + '</div>';
+}
+
+function expandRow(rowEl, e){
+  var existing = rowEl.nextElementSibling;
+  if (existing && existing.classList.contains('detail')){ existing.remove(); return; }
+  closeDetails();
+  var link = e.type==='Alert' ? '<a href="#/security" style="margin-left:14px">View in Security wing</a>' : '';
+  var html = '<div class="detail"><div style="line-height:1.7">'+esc(e.sub)+'</div>'
+    + '<div style="margin-top:8px">Source artifact: <a href="#/vauxhall/live-feed">artifact/'+esc(e.id)+'</a> . Audit '
+    + '<span class="mono">'+esc(e.audit||'n/a')+'</span> <button class="act" data-copy="'+esc(e.audit||'')+'" style="padding:4px 9px;margin-left:6px">Copy</button>'+link+'</div></div>';
+  rowEl.insertAdjacentHTML('afterend', html);
+}
+function closeDetails(){ var ds = document.querySelectorAll('.detail'); ds.forEach(function(d){ d.remove(); }); }
+
+function renderAgents(){
+  var head = headerBar('Agents', 'The roster board. Status, task, and open recommendations per agent.', '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>');
+  var grid = '<div class="scroll grid3" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px);display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-content:start">';
+  AGENTS.forEach(function(a){
+    var s = VauxhallStore.agentSummary(a);
+    var d = s.status==='Blocked' ? '#C08457' : s.status==='Verifying' ? '#E3C270' : '#7FA87A';
+    var evs = s.events.map(function(e){ return '<div style="display:flex;gap:10px;font-size:12px;color:#8E887C;padding:4px 0"><span class="mono" style="color:#5E5A52;min-width:56px">'+esc(e.time)+'</span><span>'+esc(e.type)+'</span></div>'; }).join('');
+    grid += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between">'
+      + '<span style="font-family:\'GFS Didot\',Didot,serif;font-size:19px;color:#E1DAD0">'+a+'</span>'
+      + '<span class="chip"><span class="dot" style="background:'+d+'"></span>'+s.status+'</span></div>'
+      + '<div style="font-size:13px;color:#B0A99A;margin-top:12px">'+esc(s.task)+'</div>'
+      + (s.blocker ? '<div style="font-size:12px;color:#C08457;margin-top:6px">Blocker: '+esc(s.blocker)+'</div>' : '')
+      + '<div style="display:flex;gap:18px;margin-top:12px;font-size:11.5px;color:#6E685E"><span>Errors 24h: '+s.errors+'</span><span>Open recs: '+s.recs+'</span></div>'
+      + '<div style="border-top:1px solid #202220;margin-top:12px;padding-top:8px"><div class="lbl" style="margin-bottom:4px">Last events</div>'+(evs||'<div style="font-size:12px;color:#5E5A52">None recorded</div>')+'</div></div>';
+  });
+  grid += '</div>';
+  main.innerHTML = head + grid + previewFooter('Design preview . mock data . blocked states surface their blocker');
+}
+
+function renderReview(){
+  var head = headerBar('Review', 'The decision inbox. Approve, reject, or send back with a note.', '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>');
+  var open = VauxhallStore.review.filter(function(r){ return r.state==='open'; });
+  var body = '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px);display:flex;flex-direction:column;gap:14px;align-content:start">';
+  if (!open.length){ body += '<div class="card" style="text-align:center;color:#6E685E">The queue is clear. Nothing awaits you.</div>'; }
+  open.forEach(function(r){
+    body += '<div class="card" data-rid="'+r.id+'"><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px">'
+      + '<span style="color:#E1DAD0;font-size:15px">'+esc(r.title)+'</span><span class="badge">'+esc(r.agent)+'</span></div>'
+      + '<div style="font-size:12.5px;color:#8E887C;margin-top:8px">Evidence: '+esc(r.evidence)+'</div>'
+      + '<div style="font-size:12.5px;color:#7FA87A;margin-top:4px">'+esc(r.endorse)+'</div>'
+      + '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="act go" data-act="approved" data-rid="'+r.id+'">Approve</button>'
+      + '<button class="act no" data-act="rejected" data-rid="'+r.id+'">Reject</button>'
+      + '<button class="act" data-act="sent back" data-rid="'+r.id+'">Send back with note</button></div></div>';
+  });
+  body += '</div>';
+  main.innerHTML = head + body + previewFooter('Design preview . mock data . daily audit digests land here in the portal build');
+}
+
+function renderQueue(){
+  var head = headerBar('Queue', 'Release candidates and social drafts moving through their gates.', '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>');
+  var gates = ['Vesper','Felix','M','Owner'];
+  var rcCol = '<div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Release candidates</div>';
+  VauxhallStore.rcs.forEach(function(rc){
+    var step = '<div class="step" style="margin-top:12px">';
+    gates.forEach(function(g,i){
+      var cls = i < rc.stage ? 'done' : i===rc.stage ? 'now' : '';
+      step += '<div class="stepdot '+cls+'"></div>' + (i<gates.length-1 ? '<div class="stepbar '+(i<rc.stage?'done':'')+'"></div>' : '');
+    });
+    step += '</div><div class="step" style="justify-content:space-between;margin-top:6px;font-size:10.5px;color:#6E685E">'+gates.map(function(g){return '<span>'+g+'</span>';}).join('')+'</div>';
+    rcCol += '<div class="qitem" data-q="'+rc.id+'" style="padding:15px 16px;border-bottom:1px solid #202220;cursor:pointer"><div style="display:flex;justify-content:space-between"><span style="color:#E1DAD0">'+esc(rc.title)+'</span><span class="mono" style="color:#6E685E">'+esc(rc.id)+'</span></div>'+step+'</div>';
+  });
+  rcCol += '</div>';
+  var dCol = '<div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Social drafts</div>';
+  VauxhallStore.drafts.forEach(function(d){
+    dCol += '<div class="qitem" data-q="'+d.id+'" style="padding:15px 16px;border-bottom:1px solid #202220;cursor:pointer"><div style="display:flex;justify-content:space-between"><span style="color:#E1DAD0">'+esc(d.title)+'</span><span class="badge" style="border-color:#4A3A2A;color:#C08457">Blocked</span></div><div style="font-size:12px;color:#6E685E;margin-top:5px">'+esc(d.kind)+' . '+esc(d.blocker)+'</div></div>';
+  });
+  dCol += '</div>';
+  var body = '<div class="scroll grid2" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px);display:grid;grid-template-columns:1fr 1fr;gap:14px;align-content:start">'+rcCol+dCol+'</div>';
+  main.innerHTML = head + body + previewFooter('Design preview . mock data . items move through their gates in the portal build');
+}
+
+function renderSteering(){
+  var head = headerBar('Steering', 'Write directives into the inbox. What you type is what JB decomposes.', '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>');
+  var agentOpts = '<option value="">JB decides</option>' + AGENTS.map(function(a){ return '<option value="'+a+'">'+a+'</option>'; }).join('');
+  var body = '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">'
+    + '<div class="card" style="max-width:640px">'
+    + '<div class="lbl">Directive</div><textarea id="dirText" class="vfield" rows="4" placeholder="Write the directive. JB decomposes it into tasks." style="margin-top:8px;resize:vertical"></textarea>'
+    + '<div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px">'
+    + '<div><div class="lbl">Target agent</div><select id="dirTarget" class="vfield" style="margin-top:8px">'+agentOpts+'</select></div>'
+    + '<div><div class="lbl">Priority</div><select id="dirPriority" class="vfield" style="margin-top:8px"><option>Normal</option><option>High</option><option>Low</option></select></div>'
+    + '<div><div class="lbl">Due date</div><input id="dirDue" type="date" class="vfield" style="margin-top:8px"></div>'
+    + '</div>'
+    + '<button id="dirSubmit" class="act go" style="margin-top:16px;padding:12px 28px">File directive</button>'
+    + '</div></div>';
+  main.innerHTML = head + body + previewFooter('Design preview . mock data . directives file to the inbox JB reads');
+}
+
+function renderEvolution(){
+  var head = headerBar('Evolution', 'The self-tune ledger. Applying a tuning is an owner action.', '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>');
+  var body = '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px);display:flex;flex-direction:column;gap:14px;align-content:start">';
+  VauxhallStore.tuning.forEach(function(t){
+    var stateChip = t.state==='applied' ? '<span class="badge" style="border-color:#2E4A22;color:#7CBF4E">Applied</span>' : t.state==='rejected' ? '<span class="badge" style="border-color:#4A3A2A;color:#C08457">Rejected</span>' : '<span class="badge">Proposed</span>';
+    body += '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px"><span style="color:#E1DAD0;font-size:15px">'+esc(t.proposal)+'</span><span>'+esc(t.agent)+' . '+stateChip+'</span></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px"><div><div class="lbl">Before</div><div style="font-size:13px;color:#8E887C;margin-top:5px">'+esc(t.before)+'</div></div><div><div class="lbl">After</div><div style="font-size:13px;color:#B0A99A;margin-top:5px">'+esc(t.after)+'</div></div></div>'
+      + '<div style="font-size:12.5px;color:#6E685E;margin-top:10px">Trigger: '+esc(t.trigger)+'</div>';
+    if (t.state==='proposed'){
+      body += '<div style="display:flex;gap:10px;margin-top:14px"><button class="act go" data-apply="'+t.id+'">Apply</button><button class="act no" data-reject="'+t.id+'">Reject</button></div>';
+    } else if (t.state==='applied'){
+      body += '<div style="display:flex;gap:10px;margin-top:14px;align-items:center"><button class="act no" data-reject="'+t.id+'">Roll back</button><span style="font-size:12px;color:#6E685E">Applied . rollback available</span></div>';
+    }
+    body += '</div>';
+  });
+  body += '</div>';
+  main.innerHTML = head + body + previewFooter('Design preview . mock data . agents may propose tuning, applying it is yours');
+}
+
+var knowledgeSel = 'brand-tokens';
+var knowledgeQuery = '';
+function renderKnowledge(){
+  var head = headerBar('Knowledge', 'The canon browser. Edits route through the Moneypenny approval flow.', '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>');
+  var docs = VauxhallStore.canon.filter(function(c){ return c.name.indexOf(knowledgeQuery.toLowerCase())!==-1; });
+  var listHtml = docs.map(function(c){
+    var on = c.id===knowledgeSel ? 'background:#24261F;color:#E1DAD0' : 'color:#8E887C';
+    return '<div class="kdoc" data-doc="'+c.id+'" style="padding:10px 12px;border-radius:3px;cursor:pointer;font-size:13px;'+on+'">'+esc(c.name)+'</div>';
+  }).join('');
+  var sel = VauxhallStore.canon.filter(function(c){ return c.id===knowledgeSel; })[0] || VauxhallStore.canon[0];
+  var reader = '<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:20px;color:#E1DAD0">'+esc(sel.name)+'</div>'
+    + '<select id="kver" class="vfield" style="width:auto;padding:8px 12px"><option>'+esc(sel.ver)+' current</option><option>prior</option></select></div>'
+    + '<div id="kbody" style="font-size:13.5px;line-height:1.9;color:#B0A99A;margin-top:16px">'+esc(sel.body)+'</div>';
+  var body = '<div class="scroll" style="flex:1;overflow:hidden;display:grid;grid-template-columns:260px 1fr">'
+    + '<div style="border-right:1px solid #202220;padding:16px 12px;overflow-y:auto"><input id="ksearch" class="vfield" placeholder="Search canon . press /" value="'+esc(knowledgeQuery)+'" style="margin-bottom:12px">'+listHtml+'</div>'
+    + '<div style="padding:24px clamp(16px,3vw,32px);overflow-y:auto">'+reader+'</div></div>';
+  main.innerHTML = head + body + previewFooter('Design preview . mock data . no silent canon changes, even from the portal');
+}
+
+// ---------- sign out and sign in mock ----------
+function renderSignIn(){
+  main.innerHTML = '<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">'
+    + '<div style="max-width:380px;width:100%;text-align:center">'
+    + '<div style="font-family:\'GFS Didot\',Didot,serif;font-weight:400;font-size:56px;letter-spacing:0.35em;padding-left:0.35em;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent">BOND</div>'
+    + '<div style="width:min(300px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:26px auto 0"></div>'
+    + '<form id="siCred" style="margin:30px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left">'
+    + '<p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C;text-align:center;margin:0 0 6px">Sign in to continue</p>'
+    + '<input class="vfield" type="email" name="email" placeholder="Email" autocomplete="email">'
+    + '<input class="vfield" type="password" name="password" placeholder="Password" autocomplete="current-password">'
+    + '<button type="submit" class="act go" style="margin-top:6px;padding:15px">Enter</button></form>'
+    + '<form id="siMfa" style="display:none;margin:30px 0 0;flex-direction:column;gap:14px;text-align:left">'
+    + '<p style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C;text-align:center;margin:0 0 6px">Enter your authentication code</p>'
+    + '<input class="vfield" type="text" inputmode="numeric" maxlength="6" name="code" placeholder="6 digit code" style="text-align:center;letter-spacing:0.5em">'
+    + '<button type="submit" class="act go" style="margin-top:6px;padding:15px">Verify</button></form>'
+    + '<p id="siFail" style="font-family:\'GFS Didot\',Didot,serif;font-size:14px;font-style:italic;color:#B0A99A;margin:20px 0 0;min-height:20px"></p>'
+    + '<p style="font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#4E4A43;margin:34px 0 0">Design preview . demo credential owner@bond.test</p>'
+    + '</div></div>';
+  var cred = document.getElementById('siCred'), mfa = document.getElementById('siMfa'), fail = document.getElementById('siFail');
+  cred.addEventListener('submit', function(ev){ ev.preventDefault();
+    var email = cred.email.value.trim().toLowerCase();
+    if (email === 'owner@bond.test' && cred.password.value){ fail.textContent=''; cred.style.display='none'; mfa.style.display='flex'; mfa.code.focus(); }
+    else { fail.textContent = 'That did not open the door.'; }
+  });
+  mfa.addEventListener('submit', function(ev){ ev.preventDefault();
+    if (mfa.code.value.trim().length === 6){ VauxhallStore.session = true; location.hash = '#/vauxhall/live-feed'; route(); toast('Welcome back.'); }
+    else { fail.textContent = 'That did not open the door.'; }
+  });
+}
+
+// ---------- router ----------
+function setRailActive(view){
+  document.querySelectorAll('.navitem').forEach(function(n){ n.classList.toggle('on', n.getAttribute('data-view')===view); });
+  var badge = document.getElementById('reviewBadge');
+  var c = VauxhallStore.openReviewCount();
+  if (badge){ badge.textContent = c; badge.style.display = c ? '' : 'none'; }
+}
+
+function route(){
+  if (!VauxhallStore.session){ renderSignIn(); return; }
+  var h = location.hash || '#/vauxhall/live-feed';
+  var parts = h.replace(/^#\//,'').split('/');
+  var wing = parts[0] || 'vauxhall';
+  var view = parts[1] || 'live-feed';
+  if (wing !== 'vauxhall'){
+    // other wings are their own pages; if reached by hash, send there
+    var map = { product:'Product.dc.html', security:'Security.dc.html', social:'Social.dc.html' };
+    if (map[wing]){ window.location.href = map[wing]; return; }
+    wing = 'vauxhall'; view = 'live-feed';
+  }
+  setRailActive(view);
+  switch(view){
+    case 'agents': renderAgents(); break;
+    case 'review': renderReview(); break;
+    case 'queue': renderQueue(); break;
+    case 'steering': renderSteering(); break;
+    case 'evolution': renderEvolution(); break;
+    case 'knowledge': renderKnowledge(); break;
+    default: renderLiveFeed();
+  }
+}
+
+// ---------- live ticker ----------
+var tickTimer = null;
+function scheduleTick(){
+  if (tickTimer) clearTimeout(tickTimer);
+  if (!VauxhallStore.live) return;
+  var delay = 25000 + Math.random()*20000;
+  tickTimer = setTimeout(function(){
+    VauxhallStore.addEvent(VauxhallStore.genEvent());
+    var onFeed = (location.hash||'').indexOf('/vauxhall/live-feed')!==-1 || location.hash==='' || location.hash==='#/vauxhall/live-feed';
+    if (onFeed && !VauxhallStore.filter.allData){
+      var feed = document.getElementById('feed');
+      if (feed){
+        var list = VauxhallStore.listEvents();
+        var top = list[0];
+        if (top){ var wrap = document.createElement('div'); wrap.innerHTML = feedRow(top); var node = wrap.firstChild; node.classList.add('enter'); feed.insertBefore(node, feed.firstChild); }
+      }
+    }
+    scheduleTick();
+  }, delay);
+}
+function setLive(on){
+  VauxhallStore.live = on;
+  if (on) scheduleTick(); else if (tickTimer) clearTimeout(tickTimer);
+}
+
+// ---------- events ----------
+document.addEventListener('click', function(ev){
+  var t = ev.target;
+  var closest = function(sel){ return t.closest(sel); };
+
+  var copyBtn = t.closest('[data-copy]');
+  if (copyBtn){ var v = copyBtn.getAttribute('data-copy'); if (navigator.clipboard) navigator.clipboard.writeText(v); toast('Audit id '+v+' copied.'); return; }
+
+  // agent chip
+  var chip = t.closest('[data-agent]');
+  if (chip){ var a = chip.getAttribute('data-agent'); VauxhallStore.filter.agent = (VauxhallStore.filter.agent===a)?null:a; renderLiveFeed(); return; }
+
+  // type pill
+  var pill = t.closest('[data-type]');
+  if (pill){ var ty = pill.getAttribute('data-type'); VauxhallStore.filter.type = ty || null; renderLiveFeed(); return; }
+
+  if (t.id==='allData'){ VauxhallStore.filter.allData = !VauxhallStore.filter.allData; renderLiveFeed(); return; }
+  if (t.id==='exportCsv'){ exportCsv(); return; }
+  if (t.id==='pvToggle' || t.id==='liveChip'){ setLive(!VauxhallStore.live); renderLiveFeed(); return; }
+
+  // review actions
+  var ra = t.closest('[data-act]');
+  if (ra){
+    var rid = ra.getAttribute('data-rid'); var act = ra.getAttribute('data-act'); var note = '';
+    if (act==='sent back'){ note = prompt('Add a note to send back with:') || ''; }
+    VauxhallStore.resolveReview(rid, act, note);
+    setRailActive('review'); renderReview();
+    toast(act==='approved'?'Approved.':act==='rejected'?'Rejected.':'Sent back.');
+    return;
+  }
+
+  // evolution
+  var ap = t.closest('[data-apply]'); if (ap){ VauxhallStore.applyTuning(ap.getAttribute('data-apply')); renderEvolution(); toast('Tuning applied.'); return; }
+  var rj = t.closest('[data-reject]'); if (rj){ var n = prompt('Reason (optional):')||''; VauxhallStore.rejectTuning(rj.getAttribute('data-reject'), n); renderEvolution(); toast('Recorded.'); return; }
+
+  // knowledge doc select
+  var kd = t.closest('[data-doc]'); if (kd){ knowledgeSel = kd.getAttribute('data-doc'); renderKnowledge(); return; }
+
+  // steering submit
+  if (t.id==='dirSubmit'){
+    var text = document.getElementById('dirText').value.trim();
+    if (!text){ toast('Write a directive first.'); return; }
+    VauxhallStore.submitDirective(text, document.getElementById('dirTarget').value, document.getElementById('dirPriority').value, document.getElementById('dirDue').value);
+    renderSteering(); toast('Directive filed.'); return;
+  }
+
+  // sign out
+  if (t.id==='signOut'){ VauxhallStore.session=false; setLive(false); renderSignIn(); return; }
+
+  // feed row expand
+  var row = t.closest('.event');
+  if (row){ var e = VauxhallStore.events.filter(function(x){ return x.id===row.getAttribute('data-eid'); })[0]; if (e) expandRow(row, e); return; }
+
+  // queue item detail
+  var qi = t.closest('[data-q]');
+  if (qi){
+    var id = qi.getAttribute('data-q');
+    var item = VauxhallStore.rcs.concat(VauxhallStore.drafts).filter(function(x){ return x.id===id; })[0];
+    if (item){ var exists = qi.querySelector('.qdetail'); if (exists){ exists.remove(); return; }
+      var det = document.createElement('div'); det.className='qdetail'; det.style.cssText='margin-top:10px;font-size:12.5px;color:#8E887C;border-top:1px solid #202220;padding-top:10px';
+      det.textContent = item.note ? item.note : (item.kind + ' . ' + item.blocker);
+      qi.appendChild(det); }
+    return;
+  }
+});
+
+document.addEventListener('input', function(ev){
+  if (ev.target && ev.target.id==='ksearch'){ knowledgeQuery = ev.target.value; renderKnowledge(); var s=document.getElementById('ksearch'); if(s){ s.focus(); s.setSelectionRange(s.value.length,s.value.length); } }
+});
+document.addEventListener('change', function(ev){
+  if (ev.target && ev.target.id==='kver'){ var sel = VauxhallStore.canon.filter(function(c){return c.id===knowledgeSel;})[0]; var body=document.getElementById('kbody'); if (body) body.textContent = ev.target.selectedIndex===0 ? sel.body : sel.prior; }
+});
+
+document.addEventListener('keydown', function(ev){
+  if (ev.key==='Escape'){ closeDetails(); }
+  if (ev.key==='/' && (location.hash||'').indexOf('knowledge')!==-1){ var s=document.getElementById('ksearch'); if (s && document.activeElement!==s){ ev.preventDefault(); s.focus(); } }
+});
+
+function exportCsv(){
+  var list = VauxhallStore.listEvents();
+  var rows = [['time','agent','type','summary','subline']].concat(list.map(function(e){ return [e.time,e.agent,e.type,e.summary,e.sub]; }));
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var d = new Date(); function p(n){return (n<10?'0':'')+n;}
+  var name = 'vauxhall-events-' + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) + '.csv';
+  var blob = new Blob([csv], { type:'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('Exported ' + list.length + ' events.');
+}
+
+window.addEventListener('hashchange', route);
+VauxhallStore.seed();
+if (!location.hash) location.hash = '#/vauxhall/live-feed';
+route();
+</script>
 </body>
 </html>
