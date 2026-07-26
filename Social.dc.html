@@ -14,18 +14,55 @@
   a { color: inherit; text-decoration: none; }
   .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
   .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; cursor: pointer; transition: background .2s, color .2s; }
+  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; letter-spacing: 0.02em; cursor: pointer; transition: background .2s, color .2s; }
   .navitem:hover { background: #1E2124; color: #E1DAD0; }
   .navitem.on { background: #1E2226; color: #E1DAD0; box-shadow: inset 2px 0 0 #6C8FB8; }
   .wing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 3px; cursor: pointer; transition: background .2s; color: #8E887C; }
   .wing:hover { background: #1E2124; }
   .wing.on { background: #1E2124; color: #E1DAD0; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #2E302D; border-radius: 999px; font-size: 12px; color: #B0A99A; white-space: nowrap; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .chip.active { background: #1E2226; color: #E1DAD0; border-color: #34506A; }
+  .badge { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
+  .pill { cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .pill.active { background: #1E2226; color: #E1DAD0; border-color: #34506A; }
   .card { background: #191B18; border: 1px solid #202220; border-radius: 5px; padding: 16px 18px; }
   .lbl { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6E685E; }
-  .badge { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
   .live { display:inline-flex; align-items:center; gap:7px; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #86ACE3; }
+  .act { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 14px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; background: transparent; cursor: pointer; transition: background .2s, color .2s, border-color .2s; font-family: inherit; }
+  .act:hover { background: #1E2124; color: #E1DAD0; border-color: #4E4A43; }
+  .act.go:hover { border-color: #2E4A22; color: #7CBF4E; }
+  .act.no:hover { border-color: #4A3A2A; color: #C08457; }
+  .act.blue:hover { border-color: #34506A; color: #86ACE3; }
+  .act[disabled] { opacity: 0.4; cursor: not-allowed; }
+  .vfield { background: #141615; border: 1px solid #2E302D; border-radius: 3px; color: #E1DAD0; font-family: inherit; font-size: 14px; padding: 12px 14px; width: 100%; outline: none; transition: border-color .2s; }
+  .vfield:focus { border-color: #6C8FB8; }
+  .vfield::placeholder { color: #6E685E; }
+  .tab { padding: 8px 14px; border-radius: 3px 3px 0 0; font-size: 12px; color: #8E887C; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab.on { color: #E1DAD0; border-bottom-color: #6C8FB8; }
+  .step { display: flex; align-items: center; gap: 0; }
+  .stepdot { width: 9px; height: 9px; border-radius: 50%; background: #2E302D; flex-shrink: 0; }
+  .stepdot.done { background: #7FA87A; }
+  .stepdot.now { background: #86ACE3; box-shadow: 0 0 8px rgba(134,172,227,0.6); }
+  .stepbar { height: 1px; flex: 1; background: #2E302D; }
+  .stepbar.done { background: #34506A; }
   .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
-  @media (max-width: 900px) { .rail { display: none; } .strips { grid-template-columns: 1fr !important; } .chain { grid-template-columns: 1fr !important; } .chain .arrow { display:none; } }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1E2226; border: 1px solid #34506A; color: #E1DAD0; padding: 12px 22px; border-radius: 4px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data th { text-align: left; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #5E5A52; padding: 10px 12px; border-bottom: 1px solid #202220; cursor: pointer; }
+  table.data td { padding: 10px 12px; border-bottom: 1px solid #1C1E1B; color: #B0A99A; vertical-align: top; }
+  table.data tr:hover td { background: #191B19; }
+  .bar { height: 6px; background: #1E2124; border-radius: 3px; overflow: hidden; }
+  .bar > span { display:block; height: 100%; background: #4F719F; border-radius: 3px; }
+  @media (max-width: 900px) {
+    .rail { display: none; }
+    .strips { grid-template-columns: 1fr !important; }
+    .chain { grid-template-columns: 1fr !important; }
+    .chain .arrow { display: none; }
+    .grid2 { grid-template-columns: 1fr !important; }
+    .grid3 { grid-template-columns: 1fr !important; }
+    .split { grid-template-columns: 1fr !important; }
+  }
 </style>
 </head>
 <body>
@@ -45,16 +82,16 @@
     </div>
     <div style="padding:14px 12px;flex:1;overflow-y:auto" class="scroll">
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Social</div>
-      <div class="navitem on">Overview</div>
-      <div class="navitem">Research</div>
-      <div class="navitem">Auto-Script</div>
-      <div class="navitem">Scriptwriter</div>
-      <div class="navitem">Create</div>
-      <div class="navitem">Content</div>
-      <div class="navitem">Editor <span style="float:right;background:#1C2E3A;color:#86ACE3;border-radius:999px;font-size:10px;padding:1px 7px">4</span></div>
-      <div class="navitem">Scheduler</div>
-      <div class="navitem">Analyzer</div>
-      <div class="navitem">Post Tracking</div>
+      <a class="navitem" data-view="overview" href="#/social/overview">Overview</a>
+      <a class="navitem" data-view="research" href="#/social/research">Research</a>
+      <a class="navitem" data-view="auto-script" href="#/social/auto-script">Auto-Script</a>
+      <a class="navitem" data-view="scriptwriter" href="#/social/scriptwriter">Scriptwriter</a>
+      <a class="navitem" data-view="create" href="#/social/create">Create</a>
+      <a class="navitem" data-view="content" href="#/social/content">Content</a>
+      <a class="navitem" data-view="editor" href="#/social/editor">Editor <span id="editorBadge" style="float:right;background:#1C2E3A;color:#86ACE3;border-radius:999px;font-size:10px;padding:1px 7px">0</span></a>
+      <a class="navitem" data-view="scheduler" href="#/social/scheduler">Scheduler</a>
+      <a class="navitem" data-view="analyzer" href="#/social/analyzer">Analyzer</a>
+      <a class="navitem" data-view="tracking" href="#/social/tracking">Post Tracking</a>
     </div>
     <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
       <div><div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div><div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div></div>
@@ -62,71 +99,879 @@
     </div>
   </aside>
 
-  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">
-      <div>
-        <div style="font-family:'GFS Didot',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">Overview</div>
-        <div style="font-size:12px;color:#6E685E;margin-top:2px">Carver drafts, Felix clears, Gary approves, then it schedules. Never before.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="badge" style="border-color:#1C3A4A;color:#86ACE3"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3;margin-right:6px"></span>Desk live</span>
-        <span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>
-      </div>
-    </header>
-
-    <div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">
-
-      <div class="strips" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="card"><div class="live"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3"></span>Scriptwriter live</div><div style="color:#E1DAD0;margin-top:10px">Drafting 10 hook variations for the current concept</div><div style="font-size:12px;color:#6E685E;margin-top:6px">Concept: solventless, nothing added . house voice</div></div>
-        <div class="card"><div class="live"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3"></span>Editor live</div><div style="color:#E1DAD0;margin-top:10px">Last approved: Morning Routine . 3 edits flagged</div><div style="font-size:12px;color:#6E685E;margin-top:6px">4 drafts awaiting Felix clearance</div></div>
-        <div class="card"><div class="live"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3"></span>Scheduler live</div><div style="color:#E1DAD0;margin-top:10px">12 posts queued for the next 7 days</div><div style="font-size:12px;color:#6E685E;margin-top:6px">Optimal window 6:30 PM weekdays</div></div>
-        <div class="card"><div class="live"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3"></span>Analyzer</div><div style="color:#E1DAD0;margin-top:10px">Processing 30 day engagement across 6 platforms</div><div style="font-size:12px;color:#6E685E;margin-top:6px">Hook league tables refreshing</div></div>
-      </div>
-
-      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;margin:26px 0 10px">The chain</div>
-      <div class="chain" style="display:grid;grid-template-columns:1fr 24px 1fr 24px 1fr 24px 1fr;gap:0;align-items:stretch">
-        <div class="card" style="text-align:center"><div class="lbl">Carver drafts</div><div style="font-family:'GFS Didot',Didot,serif;font-size:26px;margin-top:8px">6</div><div style="font-size:11.5px;color:#6E685E;margin-top:4px">in draft</div></div>
-        <div class="arrow" style="display:flex;align-items:center;justify-content:center;color:#4E4A43">to</div>
-        <div class="card" style="text-align:center"><div class="lbl">Felix clears</div><div style="font-family:'GFS Didot',Didot,serif;font-size:26px;margin-top:8px;color:#C08457">4</div><div style="font-size:11.5px;color:#6E685E;margin-top:4px">in review</div></div>
-        <div class="arrow" style="display:flex;align-items:center;justify-content:center;color:#4E4A43">to</div>
-        <div class="card" style="text-align:center"><div class="lbl">Gary approves</div><div style="font-family:'GFS Didot',Didot,serif;font-size:26px;margin-top:8px;color:#E3C270">2</div><div style="font-size:11.5px;color:#6E685E;margin-top:4px">awaiting you</div></div>
-        <div class="arrow" style="display:flex;align-items:center;justify-content:center;color:#4E4A43">to</div>
-        <div class="card" style="text-align:center;border-color:#1C3A4A"><div class="lbl">Scheduler</div><div style="font-family:'GFS Didot',Didot,serif;font-size:26px;margin-top:8px;color:#86ACE3">12</div><div style="font-size:11.5px;color:#6E685E;margin-top:4px">queued</div></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:16px">
-        <div class="card" style="padding:0">
-          <div style="padding:15px 16px;border-bottom:1px solid #202220"><span style="font-size:12.5px;color:#E1DAD0">Editor queue</span></div>
-          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">
-            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="color:#E1DAD0">Nothing added, everything real</div><div style="font-size:12px;color:#6E685E;margin-top:3px">Reel . awaiting Felix clearance</div></div><span class="badge" style="border-color:#4A3A2A;color:#C08457">Clearing</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="color:#E1DAD0">The press, in 15 seconds</div><div style="font-size:12px;color:#6E685E;margin-top:3px">Short . cleared . awaiting Gary</div></div><span class="badge" style="border-color:#3A2E1C;color:#E3C270">Approve</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="color:#E1DAD0">With your highest self</div><div style="font-size:12px;color:#6E685E;margin-top:3px">Carousel . manual draft . audit attached</div></div><span class="badge" style="border-color:#4A3A2A;color:#C08457">Clearing</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center"><div><div style="color:#E1DAD0">Find your number</div><div style="font-size:12px;color:#6E685E;margin-top:3px">Reel . cleared . awaiting Gary</div></div><span class="badge" style="border-color:#3A2E1C;color:#E3C270">Approve</span></div>
-          </div>
-        </div>
-
-        <div class="card" style="padding:0">
-          <div style="padding:15px 16px;border-bottom:1px solid #202220"><span style="font-size:12.5px;color:#E1DAD0">Hook types . 30 day</span></div>
-          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:13px">
-            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Process reveal</span><span class="mono" style="color:#8E887C">6.1 percent</span></div><div style="height:5px;background:#1E2124;border-radius:3px;margin-top:6px"><div style="width:88%;height:100%;background:#4F719F;border-radius:3px"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Zero claim</span><span class="mono" style="color:#8E887C">5.4 percent</span></div><div style="height:5px;background:#1E2124;border-radius:3px;margin-top:6px"><div style="width:78%;height:100%;background:#4F719F;border-radius:3px"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Ritual moment</span><span class="mono" style="color:#8E887C">4.8 percent</span></div><div style="height:5px;background:#1E2124;border-radius:3px;margin-top:6px"><div style="width:69%;height:100%;background:#4F719F;border-radius:3px"></div></div></div>
-            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Founder voice</span><span class="mono" style="color:#8E887C">3.9 percent</span></div><div style="height:5px;background:#1E2124;border-radius:3px;margin-top:6px"><div style="width:56%;height:100%;background:#4F719F;border-radius:3px"></div></div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:16px;border-color:#3A2A22;display:flex;gap:12px;align-items:flex-start">
-        <span class="dot" style="background:#D4664C;margin-top:6px"></span>
-        <div><div style="color:#E1DAD0">Hard rule</div><div style="font-size:13px;color:#8E887C;margin-top:4px;line-height:1.6">An unapproved post cannot be scheduled by any account, including owner, without raising a P1 finding in the Security wing. Approved posts only reach the Scheduler.</div></div>
-      </div>
-
-    </div>
-
-    <footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">
-      Design preview . mock data . scheduling, clearance enforcement, and the compounding loop into canon run in the secured build
-    </footer>
-  </main>
+  <main id="main" style="flex:1;min-width:0;display:flex;flex-direction:column"></main>
 </div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// Vauxhall Social Desk. In memory mock data layer with a clean seam for a real
+// backend. Carver drafts, Felix clears, the owner approves, then it schedules.
+// The draft state machine is enforced in the store. No em dashes or en dashes
+// anywhere, in code, comments, or mock data. Refresh resets the desk by design.
+
+var PLATFORMS = ['Instagram','TikTok','YouTube','X','Facebook','Threads'];
+var TERRITORIES = ['Cannabis Lifestyle','Fragrance and Watches','Quiet Luxury','Wellness Ritual','NY Dispensary Culture'];
+var HOOK_TYPES = ['Process reveal','Zero claim','Ritual moment','Founder voice','Sensory precision','Quiet flex'];
+var FORMATS = ['Talking head','Macro product','Process','Carousel','Text-led'];
+var ASSETS = ['VAPOR-HERO','PRESS-SEQUENCE','PEN-TURN Dialed','PEN-TURN Unwind','PEN-TURN Peak','KNURL-MACRO','EMBOSS-LIGHT','WORLD-PLATE 1','WORLD-PLATE 2','WORLD-PLATE 3','ROSIN-MACRO'];
+var WARNINGS = [
+  'Cannabis may cause impairment and may be habit forming.',
+  'Cannabis can impair concentration, coordination, and judgment. Do not operate a vehicle or machinery under the influence of cannabis.',
+  'There may be health risks associated with consumption of this product.',
+  'Cannabis is not recommended for use by persons who are pregnant or nursing.'
+];
+var STATES = ['draft','in_clearance','cleared','owner_approved','scheduled','published','archived','rejected'];
+var STATE_LABEL = { draft:'Draft', in_clearance:'In clearance', cleared:'Cleared', owner_approved:'Owner approved', scheduled:'Scheduled', published:'Published', archived:'Archived', rejected:'Rejected' };
+var STATE_COLOR = { draft:'#8E887C', in_clearance:'#C08457', cleared:'#E3C270', owner_approved:'#7CBF4E', scheduled:'#86ACE3', published:'#B7C6D8', archived:'#5E5A52', rejected:'#D4664C' };
+var ACTIVE_STATES = ['draft','in_clearance','cleared','owner_approved'];
+var PIPELINE = ['draft','in_clearance','cleared','owner_approved','scheduled','published'];
+var FORBIDDEN_VOCAB = ['lit','dope','fire','vibes','insane','crazy','blazed','banger','epic','af'];
+var CLAIMS = ['cure','heal','treat','therapeutic','medical','remedy','prevents','prevent'];
+var HOOK_POOL = [
+  'Nothing added. Everything real.',
+  'The press takes fifteen seconds. The standard took years.',
+  'Cold cure, slow turn, no shortcuts.',
+  'You can taste the plant, because that is all it is.',
+  'Solventless is not a claim. It is a method.',
+  'Find your number. Then hold it.',
+  'The knurl is not decoration. It is a promise.',
+  'From plant to Bond, and nothing in between.',
+  'Quiet on the outside. Pure on the inside.',
+  'One plant. One press. One standard.',
+  'What you consume matters, so we made it honest.',
+  'Rosin the way it should be, unhurried and clean.',
+  'The world on a plate, pressed by hand.',
+  'Bone and gold, and nothing to hide.'
+];
+var DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+var SLOT_TIMES = ['12:00 PM','3:00 PM','6:30 PM','9:00 PM'];
+
+// Long-dash detector built from char codes so no literal long dash appears in this file.
+var DASH_RE = new RegExp('[' + String.fromCharCode(0x2014) + String.fromCharCode(0x2013) + ']');
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nowMs(){ return new Date().getTime(); }
+function clock(){ var d = new Date(); function p(n){ return (n<10?'0':'')+n; } return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()); }
+function fmtAge(ms){ var s = Math.floor((nowMs()-ms)/1000); if (s<60) return s+'s in state'; var m=Math.floor(s/60); if (m<60) return m+'m in state'; var h=Math.floor(m/60); if (h<24) return h+'h in state'; return Math.floor(h/24)+'d in state'; }
+
+var SocialStore = {
+  ledger: [], drafts: [], feed: [], findings: [], optimalWindows: [], blackout: {},
+  platformRates: {}, heat: [], _did: 300, _lid: 100,
+
+  seed: function(){
+    // ledger, 20 entries, 4 per territory
+    this.ledger = [];
+    var self = this;
+    TERRITORIES.forEach(function(terr, ti){
+      for (var k=0;k<4;k++){
+        var i = ti*4+k;
+        self.ledger.push({
+          id:'L'+(i+1),
+          source: terr.split(' ')[0].toLowerCase()+'/post-'+(k+1),
+          platform: PLATFORMS[i%6],
+          date: '2026-07-'+(10+(i%18)),
+          territory: terr,
+          format: FORMATS[i%5],
+          hookType: HOOK_TYPES[i%6],
+          views: 40000 + i*8200,
+          rate: (3.1 + ((i*7)%22)/10).toFixed(1),
+          engRel: (1.4 + (k*0.6)).toFixed(1)+'x account median',
+          score: 5 - k,
+          provenance: 'Platform-native discovery . official analytics only',
+          status: 'tracked'
+        });
+      }
+    });
+
+    // drafts across the state machine
+    this.drafts = [];
+    var mk = function(o){ return self.addSeedDraft(o); };
+    // draft state (Carver drafting), 6
+    mk({ title:'Morning ritual, unhurried', hookType:'Ritual moment', territory:'Wellness Ritual', state:'draft', ageM:12 });
+    mk({ title:'The turn, in close', hookType:'Sensory precision', territory:'Cannabis Lifestyle', state:'draft', ageM:34 });
+    mk({ title:'Bone and gold', hookType:'Quiet flex', territory:'Quiet Luxury', state:'draft', ageM:70 });
+    mk({ title:'One plant, one press', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'draft', ageM:110 });
+    mk({ title:'Dialed in at dusk', hookType:'Ritual moment', territory:'Wellness Ritual', state:'draft', ageM:150 });
+    mk({ title:'Quiet luxury, loud purity', hookType:'Quiet flex', territory:'Fragrance and Watches', state:'draft', ageM:220 });
+    // in_clearance, 4 (Morning Routine carries 3 flagged edits)
+    mk({ title:'Morning Routine', hookType:'Ritual moment', territory:'Wellness Ritual', state:'in_clearance', ageM:26,
+      flaggedEdits:['Tighten the open. The first line runs long.','Second beat repeats the word pure. Vary it.','Warning card sits under three seconds. Hold it to four.'] });
+    mk({ title:'Nothing added, everything real', hookType:'Zero claim', territory:'Cannabis Lifestyle', state:'in_clearance', ageM:44 });
+    mk({ title:'The press, in 15 seconds', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'in_clearance', ageM:52 });
+    mk({ title:'With your highest self', hookType:'Founder voice', territory:'Quiet Luxury', state:'in_clearance', source:'manual', ageM:60 });
+    // cleared (awaiting owner), 2
+    mk({ title:'Find your number', hookType:'Founder voice', territory:'NY Dispensary Culture', state:'cleared', ageM:38 });
+    mk({ title:'Cold cure, no shortcuts', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'cleared', ageM:66 });
+    // owner_approved (ready for scheduler), 2
+    mk({ title:'The knurl, up close', hookType:'Sensory precision', territory:'Fragrance and Watches', state:'owner_approved', ageM:90 });
+    mk({ title:'Rosin the right way', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'owner_approved', ageM:120 });
+    // scheduled, 12 across 6 lanes and Mon to Fri
+    var schedTitles = ['World on a plate','Unwind at six','From plant to Bond','Peak, unhurried','The standard, kept','Hand pressed','Pure on the inside','Slow and clean','Your highest self','The honest hit','No solvents, ever','Taste the plant'];
+    for (var s=0;s<12;s++){
+      mk({ title: schedTitles[s], hookType: HOOK_TYPES[s%6], territory: TERRITORIES[s%5], state:'scheduled', ageM: 200+s*15,
+        slot:{ platform: PLATFORMS[s%6], day: DAYS[s%5], time: (s%2? '6:30 PM':'9:00 PM') } });
+    }
+    // published, 8 for analyzer and tracking
+    var pubTitles = ['Nothing to hide','The first press','A cleaner high','What purity feels like','Method, not marketing','The quiet room','One number, held','Real from the root'];
+    for (var p=0;p<8;p++){
+      var rate = (4.0 + ((p*13)%30)/10);
+      mk({ title: pubTitles[p], hookType: HOOK_TYPES[p%6], territory: TERRITORIES[p%5], state:'published', ageM: 400+p*40,
+        platform: PLATFORMS[p%6], publishedAt: '2026-07-'+(2+p*2)+' 6:30 PM',
+        metrics:{ h48: 12000+p*2600, d30: 61000+p*8400, rate: rate } });
+    }
+    // archived and rejected, 1 each for Content filters
+    mk({ title:'Old cut, retired', hookType:'Quiet flex', territory:'Quiet Luxury', state:'archived', ageM:900 });
+    mk({ title:'Off voice, sent back', hookType:'Founder voice', territory:'Cannabis Lifestyle', state:'rejected', ageM:300, rejectReason:'Claims language in the second line. Returned to Carver.' });
+
+    this.optimalWindows = ['Mon 6:30 PM','Tue 6:30 PM','Wed 6:30 PM','Thu 6:30 PM','Fri 6:30 PM'];
+    this.platformRates = { Instagram:5.4, TikTok:6.2, YouTube:4.1, X:3.3, Facebook:2.8, Threads:4.7 };
+    this.heat = [2.1,1.9,2.4,3.0,3.6,4.2,4.9,5.8,6.4,5.9,4.8,3.9]; // hour buckets across the day
+    this.feed = [
+      { id:'f3', time:clock(), type:'FEED', text:'Carver filed a hook set for The turn, in close' },
+      { id:'f2', time:clock(), type:'FEED', text:'Felix cleared Find your number to the owner queue' },
+      { id:'f1', time:clock(), type:'KNOWLEDGE', text:'Moneypenny: process reveal hook filed to canon' }
+    ];
+    this.findings = [];
+  },
+
+  addSeedDraft: function(o){
+    var st = o.state || 'draft';
+    var d = {
+      id: 'd-' + (++this._did),
+      title: o.title,
+      hook: (o.hook !== undefined) ? o.hook : HOOK_POOL[this._did % HOOK_POOL.length],
+      hookOptions: o.hookOptions || [],
+      hookType: o.hookType || HOOK_TYPES[0],
+      format: o.format || 'Process',
+      territory: o.territory || TERRITORIES[0],
+      platform: o.platform || 'Instagram',
+      variants: o.variants || {},
+      shots: o.shots || [ASSETS[this._did % ASSETS.length]],
+      warning: (o.warning !== undefined) ? o.warning : WARNINGS[this._did % WARNINGS.length],
+      provenance: (o.provenance !== undefined) ? o.provenance : (o.source==='manual' ? '' : 'Ledger L'+(1+(this._did%20))+' . platform-native discovery'),
+      state: st,
+      source: o.source || 'scriptwriter',
+      audit: o.source==='manual' ? this.runAudit({ hook:o.hook||'', caption:'', provenance:'' }) : null,
+      flaggedEdits: o.flaggedEdits || [],
+      custody: { carver: clock(), felix: '', owner: '' },
+      stateSince: nowMs() - (o.ageM||10)*60000,
+      slot: o.slot || null,
+      metrics: o.metrics || null,
+      publishedAt: o.publishedAt || '',
+      rejectReason: o.rejectReason || '',
+      folded: false, retiredReport: false
+    };
+    // backfill custody stamps for advanced states
+    if (['cleared','owner_approved','scheduled','published'].indexOf(st)!==-1) d.custody.felix = clock();
+    if (['owner_approved','scheduled','published'].indexOf(st)!==-1) d.custody.owner = clock();
+    this.drafts.push(d);
+    return d;
+  },
+
+  get: function(id){ return this.drafts.filter(function(d){ return d.id===id; })[0]; },
+  byState: function(st){ return this.drafts.filter(function(d){ return d.state===st; }); },
+  activeDrafts: function(){ return this.drafts.filter(function(d){ return ACTIVE_STATES.indexOf(d.state)!==-1; }); },
+
+  // ---- lint and audit ----
+  lint: function(d){
+    var text = (d.hook||'') + ' ' + Object.keys(d.variants||{}).map(function(k){ return d.variants[k]; }).join(' ');
+    var low = text.toLowerCase();
+    var vocab = FORBIDDEN_VOCAB.filter(function(w){ return new RegExp('\\b'+w+'\\b').test(low); });
+    var claims = CLAIMS.filter(function(w){ return new RegExp('\\b'+w+'\\b').test(low); });
+    return [
+      { label:'Forbidden vocabulary', hit: vocab.length>0, detail: vocab.length? vocab.join(', ') : 'none' },
+      { label:'Exclamation points', hit: text.indexOf('!')!==-1, detail: text.indexOf('!')!==-1? 'present' : 'none' },
+      { label:'Em or en dashes', hit: DASH_RE.test(text), detail: DASH_RE.test(text)? 'present' : 'none' },
+      { label:'Claims language', hit: claims.length>0, detail: claims.length? claims.join(', ') : 'none' },
+      { label:'Warning assigned', hit: !d.warning, detail: d.warning? 'assigned' : 'missing' },
+      { label:'Provenance present', hit: !d.provenance, detail: d.provenance? 'present' : 'missing' }
+    ];
+  },
+  lintClean: function(d){ return this.lint(d).every(function(x){ return !x.hit; }); },
+  runAudit: function(o){
+    var text = ((o.hook||'')+' '+(o.caption||'')).toLowerCase();
+    var vocab = FORBIDDEN_VOCAB.filter(function(w){ return new RegExp('\\b'+w+'\\b').test(text); });
+    var claims = CLAIMS.filter(function(w){ return new RegExp('\\b'+w+'\\b').test(text); });
+    return {
+      voice: text.length < 6 ? 'Thin. Give the audit something to read.' : 'Reads in the house register.',
+      vocabulary: vocab.length? ('Flagged: '+vocab.join(', ')) : 'Clean.',
+      claims: claims.length? ('Hard block: '+claims.join(', ')) : 'Clean.',
+      dashes: DASH_RE.test((o.hook||'')+(o.caption||'')) ? 'Dash present. Remove it.' : 'Clean.',
+      originality: o.provenance ? 'Provenance supplied.' : 'No provenance. Manual origin noted for the record.',
+      claimsBlock: claims.length>0
+    };
+  },
+
+  // ---- rotation ----
+  wouldViolateRotation: function(d, w){
+    var others = this.activeDrafts().filter(function(x){ return x.id!==d.id; });
+    if (!others.length) return false;
+    return others.every(function(x){ return x.warning===w; });
+  },
+  assignWarning: function(d, w){
+    if (this.wouldViolateRotation(d, w)){ return false; }
+    d.warning = w; return true;
+  },
+
+  // ---- transitions ----
+  moveState: function(d, to){ d.state = to; d.stateSince = nowMs(); },
+  submitToClearance: function(id){
+    var d = this.get(id); if (!d || d.state!=='draft') return false;
+    if (!this.lintClean(d)) return false;
+    this.moveState(d, 'in_clearance');
+    this.emit('FEED', 'Carver submitted ' + d.title + ' to Felix for clearance');
+    return true;
+  },
+  clearDraft: function(id){
+    var d = this.get(id); if (!d || d.state!=='in_clearance') return false;
+    d.custody.felix = clock(); this.moveState(d, 'cleared');
+    this.emit('FEED', 'Felix cleared ' + d.title + ' to the owner queue');
+    return true;
+  },
+  rejectDraft: function(id, reason){
+    var d = this.get(id); if (!d || d.state!=='in_clearance') return false;
+    d.rejectReason = reason||'No reason recorded'; this.moveState(d, 'rejected');
+    this.emit('FEED', 'Felix rejected ' + d.title + ': ' + d.rejectReason);
+    return true;
+  },
+  approveDraft: function(id){
+    var d = this.get(id); if (!d || d.state!=='cleared') return false;
+    d.custody.owner = clock(); this.moveState(d, 'owner_approved');
+    this.emit('FEED', 'Owner approved: ' + d.title);
+    return true;
+  },
+  sendBack: function(id, note){
+    var d = this.get(id); if (!d || d.state!=='cleared') return false;
+    d.backNote = note||''; d.custody.felix=''; d.custody.owner=''; this.moveState(d, 'draft');
+    this.emit('FEED', 'Owner sent ' + d.title + ' back to Carver' + (note?(': '+note):''));
+    return true;
+  },
+  schedule: function(id, platform, slot, opts){
+    var d = this.get(id);
+    if (!d) return false;
+    if (d.state !== 'owner_approved'){
+      var msg = 'P1: unapproved draft reached Scheduler, blocked';
+      this.raiseFinding('P1', msg + ' (' + (d.title||id) + ', state ' + d.state + ')');
+      this.emit('ALERT', msg);
+      return false;
+    }
+    if (slot && this.blackout[slot.day]){ return false; }
+    d.platform = platform || d.platform; d.slot = slot || d.slot; this.moveState(d, 'scheduled');
+    this.emit('FEED', 'Scheduled ' + d.title + ' . ' + d.platform + ' . ' + (d.slot? d.slot.day+' '+d.slot.time : 'slot set'));
+    return true;
+  },
+  publish: function(id){
+    var d = this.get(id); if (!d || d.state!=='scheduled') return false;
+    this.moveState(d, 'published');
+    d.publishedAt = (d.slot? d.slot.day+' '+d.slot.time : clock());
+    d.metrics = { h48: 9000+Math.floor(Math.random()*6000), d30: 48000+Math.floor(Math.random()*30000), rate: (4.0+Math.random()*2.5) };
+    this.emit('FEED', 'Published ' + d.title);
+    return true;
+  },
+  archive: function(id){ var d=this.get(id); if (!d) return false; this.moveState(d,'archived'); this.emit('FEED','Archived '+d.title); return true; },
+  duplicate: function(id){
+    var d=this.get(id); if (!d) return false;
+    var copy = this.addSeedDraft({ title: d.title+' (copy)', hook:d.hook, hookType:d.hookType, territory:d.territory, format:d.format, platform:d.platform, provenance:d.provenance, state:'draft', ageM:0 });
+    copy.variants = Object.assign({}, d.variants); copy.shots = d.shots.slice();
+    this.emit('FEED','Duplicated '+d.title+' as a fresh draft, provenance carried');
+    return copy;
+  },
+
+  // ---- creation ----
+  createFromScript: function(entry, hooks){
+    var d = this.addSeedDraft({
+      title: 'Untitled from ' + entry.id,
+      hook: hooks[0] || '',
+      hookOptions: hooks.slice(),
+      hookType: entry.hookType, format: entry.format, territory: entry.territory,
+      provenance: 'Ledger ' + entry.id + ' . ' + entry.provenance,
+      warning: '', state:'draft', source:'scriptwriter', ageM:0
+    });
+    d.custody.carver = clock();
+    this.emit('FEED', 'Carver opened a script shell from ledger ' + entry.id);
+    return d;
+  },
+  createManual: function(o){
+    var d = this.addSeedDraft({ title:o.title||'Manual draft', hook:o.caption||'', hookType:o.hookType||'Founder voice', territory:o.territory||'Cannabis Lifestyle', platform:o.platform, provenance:o.provenance||'', warning:o.warning||'', state:'draft', source:'manual', ageM:0 });
+    d.variants[o.platform] = o.caption||'';
+    d.audit = this.runAudit({ hook:o.caption, caption:o.caption, provenance:o.provenance });
+    this.emit('FEED', 'Manual draft saved and audited: ' + d.title);
+    return d;
+  },
+
+  // ---- analyzer ----
+  hookAverages: function(){
+    var out = {}; var pub = this.byState('published');
+    HOOK_TYPES.forEach(function(t){
+      var set = pub.filter(function(d){ return d.hookType===t && d.metrics; });
+      out[t] = set.length ? set.reduce(function(a,d){ return a+d.metrics.rate; },0)/set.length : 0;
+    });
+    return out;
+  },
+  territoryAverages: function(){
+    var out = {}; var pub = this.byState('published');
+    TERRITORIES.forEach(function(t){
+      var set = pub.filter(function(d){ return d.territory===t && d.metrics; });
+      out[t] = set.length ? set.reduce(function(a,d){ return a+d.metrics.rate; },0)/set.length : 0;
+    });
+    return out;
+  },
+  recompute: function(){
+    var self = this;
+    PLATFORMS.forEach(function(p){ self.platformRates[p] = +(2.5 + Math.random()*4).toFixed(1); });
+    this.heat = this.heat.map(function(){ return +(1.5 + Math.random()*5).toFixed(1); });
+    // re-derive optimal windows from the strongest heat bucket, keep weekday cadence
+    var peak = 0, pi = 0; this.heat.forEach(function(v,i){ if (v>peak){ peak=v; pi=i; } });
+    var hour = 6 + pi; var ampm = hour>=12? 'PM':'AM'; var h12 = ((hour+11)%12)+1;
+    var t = h12 + ':30 ' + ampm;
+    this.optimalWindows = ['Mon','Tue','Wed','Thu','Fri'].map(function(d){ return d+' '+t; });
+    this.emit('FEED', 'Analyzer recomputed. Optimal window is now ' + t + ' weekdays');
+  },
+
+  // ---- knowledge and findings ----
+  foldToCanon: function(id){ var d=this.get(id); if (!d) return false; d.folded=true; this.emit('KNOWLEDGE','Moneypenny: proven hook filed to canon (' + d.hookType + ')'); return true; },
+  retireReport: function(id){ var d=this.get(id); if (!d) return false; d.retiredReport=true; this.emit('FEED','Retired '+d.title+' from reporting'); return true; },
+  raiseFinding: function(level, text){ this.findings.unshift({ id:'F'+(this.findings.length+1), level:level, text:text, time:clock() }); },
+  emit: function(type, text){ this.feed.unshift({ id:'f'+(++this._lid), time:clock(), type:type, text:text }); },
+
+  kpis: function(){
+    var pub = this.byState('published');
+    var avg = pub.length ? pub.reduce(function(a,d){ return a+(d.metrics? d.metrics.rate:0); },0)/pub.length : 0;
+    return {
+      inClearance: this.byState('in_clearance').length,
+      awaitingOwner: this.byState('cleared').length,
+      scheduled7: this.byState('scheduled').length,
+      published30: pub.length,
+      avgEng: avg.toFixed(1)
+    };
+  }
+};
+
+// ================= rendering =================
+var main = document.getElementById('main');
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2600); }
+
+// module UI state
+var ledgerSort = { key:'score', dir:-1 };
+var ledgerFilter = { territory:null };
+var ledgerSel = null;
+var autoState = { entryId:null, hooks:[] };
+var activeDraftId = null;
+var scwTab = 'Instagram';
+var createState = { platform:'Instagram', caption:'', warning:'', provenance:'', draftId:null };
+var contentFilter = { state:null, territory:null, platform:null, q:'' };
+var schedPick = { draftId:'', platform:'Instagram', day:'Mon', time:'6:30 PM' };
+
+function headerBar(title, subtitle, right){
+  return '<header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">'
+    + '<div><div style="font-family:\'GFS Didot\',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">'+esc(title)+'</div>'
+    + '<div style="font-size:12px;color:#6E685E;margin-top:2px">'+esc(subtitle)+'</div></div>'
+    + '<div style="display:flex;align-items:center;gap:10px">'+(right||'')+'</div></header>';
+}
+function previewFooter(note){ return '<footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">'+esc(note)+'</footer>'; }
+function pv(){ return '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>'; }
+function scroller(inner){ return '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">'+inner+'</div>'; }
+function stateChip(st){ return '<span class="badge" style="border-color:'+STATE_COLOR[st]+'55;color:'+STATE_COLOR[st]+'">'+esc(STATE_LABEL[st])+'</span>'; }
+function chainStrip(d){
+  function seg(name, stamp){ var done = !!stamp; return '<div style="flex:1;text-align:center"><div class="stepdot '+(done?'done':'')+'" style="margin:0 auto 6px"></div><div style="font-size:11px;color:'+(done?'#B0A99A':'#5E5A52')+'">'+name+'</div><div class="mono" style="font-size:10.5px;color:#5E5A52">'+(stamp||'pending')+'</div></div>'; }
+  return '<div style="display:flex;align-items:flex-start;gap:8px;margin-top:12px">'+seg('Carver',d.custody.carver)+seg('Felix',d.custody.felix)+seg('Owner',d.custody.owner)+'</div>';
+}
+
+function setRailActive(view){
+  document.querySelectorAll('.navitem').forEach(function(n){ n.classList.toggle('on', n.getAttribute('data-view')===view); });
+  var b = document.getElementById('editorBadge'); if (b){ var c = SocialStore.byState('in_clearance').length + SocialStore.byState('cleared').length; b.textContent = c; b.style.display = c? '' : 'none'; }
+}
+
+// ---------- 1. Overview ----------
+function renderOverview(){
+  var k = SocialStore.kpis();
+  var head = headerBar('Overview', 'Carver drafts, Felix clears, the owner approves, then it schedules. Never before.',
+    '<span class="badge" style="border-color:#1C3A4A;color:#86ACE3"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3;margin-right:6px"></span>Desk live</span>'+pv());
+  var strips = '<div class="strips" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+    + stripCard('scriptwriter','Scriptwriter live','Drafting 10 hook variations for the current concept','House voice . solventless, nothing added')
+    + stripCard('editor','Editor live','Last approved: Morning Routine, 3 edits flagged', k.inClearance+' drafts awaiting Felix clearance')
+    + stripCard('scheduler','Scheduler live', k.scheduled7+' posts queued for the next 7 days','Optimal window '+ (SocialStore.optimalWindows[0]||'6:30 PM weekdays'))
+    + stripCard('analyzer','Analyzer','Processing 30 day engagement across 6 platforms','Hook league tables refreshing')
+    + '</div>';
+  var kpis = '<div class="grid3" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px">'
+    + kpiCard('Drafts in clearance', k.inClearance) + kpiCard('Awaiting owner', k.awaitingOwner)
+    + kpiCard('Scheduled next 7d', k.scheduled7) + kpiCard('Published last 30d', k.published30)
+    + kpiCard('Avg engagement', k.avgEng+'%') + '</div>';
+  var pipe = '<div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;margin:26px 0 10px">The pipeline</div><div class="chain" style="display:grid;grid-template-columns:1fr 20px 1fr 20px 1fr 20px 1fr 20px 1fr 20px 1fr;align-items:stretch">';
+  PIPELINE.forEach(function(st, i){
+    pipe += '<div class="card pipeStage" data-stage="'+st+'" style="text-align:center;cursor:pointer;border-color:'+STATE_COLOR[st]+'33"><div class="lbl">'+esc(STATE_LABEL[st])+'</div><div style="font-family:\'GFS Didot\',Didot,serif;font-size:26px;margin-top:8px;color:'+STATE_COLOR[st]+'">'+SocialStore.byState(st).length+'</div></div>';
+    if (i<PIPELINE.length-1) pipe += '<div class="arrow" style="display:flex;align-items:center;justify-content:center;color:#4E4A43">to</div>';
+  });
+  pipe += '</div>';
+  var feed = '<div class="card" style="margin-top:16px;padding:0"><div style="padding:14px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Live feed</div>'
+    + SocialStore.feed.slice(0,6).map(function(f){ var c = f.type==='ALERT'? '#D4664C' : f.type==='KNOWLEDGE'? '#7CBF4E' : '#6C8FB8'; return '<div style="display:flex;gap:12px;padding:10px 16px;border-bottom:1px solid #1C1E1B;font-size:12.5px"><span class="mono" style="color:#5E5A52;min-width:64px">'+esc(f.time)+'</span><span class="dot" style="background:'+c+';margin-top:6px"></span><span style="color:#B0A99A">'+esc(f.text)+'</span></div>'; }).join('') + '</div>';
+  main.innerHTML = head + scroller(strips + kpis + pipe + feed) + previewFooter('Design preview . mock data . every strip, card, and stage is a live link into its room');
+}
+function stripCard(view, live, line, sub){ return '<a class="card stripLink" href="#/social/'+view+'" style="display:block"><div class="live"><span class="dot" style="background:#86ACE3;box-shadow:0 0 8px #86ACE3"></span>'+esc(live)+'</div><div style="color:#E1DAD0;margin-top:10px">'+esc(line)+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+esc(sub)+'</div></a>'; }
+function kpiCard(label, val){ return '<div class="card" style="text-align:center"><div class="lbl">'+esc(label)+'</div><div style="font-family:\'GFS Didot\',Didot,serif;font-size:28px;margin-top:8px;color:#E1DAD0">'+esc(val)+'</div></div>'; }
+
+// ---------- 2. Research ----------
+function renderResearch(){
+  var head = headerBar('Research', 'The Scout tracks the viral ledger. Platform-native discovery and official analytics only.', pv());
+  var chips = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">';
+  TERRITORIES.forEach(function(t){
+    var n = SocialStore.ledger.filter(function(e){ return e.territory===t; }).length;
+    chips += '<span class="chip'+(ledgerFilter.territory===t?' active':'')+'" data-terr="'+esc(t)+'">'+esc(t)+' <span style="color:#5E5A52">'+n+'</span></span>';
+  });
+  chips += '<span class="chip'+(!ledgerFilter.territory?' active':'')+'" data-terr="">All territories</span></div>';
+  var rows = SocialStore.ledger.slice();
+  if (ledgerFilter.territory) rows = rows.filter(function(e){ return e.territory===ledgerFilter.territory; });
+  rows.sort(function(a,b){ var k=ledgerSort.key; var av=a[k], bv=b[k]; if (k==='score'||k==='rate'){ av=+av; bv=+bv; } if (av<bv) return -ledgerSort.dir; if (av>bv) return ledgerSort.dir; return 0; });
+  var table = '<div class="card" style="padding:0;overflow:auto"><table class="data"><thead><tr>'
+    + th('source','Source') + th('platform','Platform') + th('date','Date','sortDate') + th('territory','Territory') + th('format','Format') + th('hookType','Hook') + th('rate','Eng %','sortRate') + th('engRel','Relative') + th('score','Fit','sortScore') + th('status','Status') + '</tr></thead><tbody>';
+  rows.forEach(function(e){
+    table += '<tr class="ledRow" data-lid="'+e.id+'" style="cursor:pointer"><td style="color:#B0A99A">'+esc(e.source)+'</td><td>'+esc(e.platform)+'</td><td class="mono">'+esc(e.date)+'</td><td>'+esc(e.territory)+'</td><td>'+esc(e.format)+'</td><td>'+esc(e.hookType)+'</td><td class="mono">'+esc(e.rate)+'</td><td>'+esc(e.engRel)+'</td><td class="mono" style="color:#E3C270">'+e.score+'/5</td><td>'+ledgerStatus(e.status)+'</td></tr>';
+  });
+  table += '</tbody></table></div>';
+  var detail = '';
+  if (ledgerSel){
+    var e = SocialStore.ledger.filter(function(x){ return x.id===ledgerSel; })[0];
+    if (e) detail = '<div class="card" style="margin-top:16px;border-color:#34506A55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(e.id)+' . '+esc(e.hookType)+'</div>'+ledgerStatus(e.status)+'</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;font-size:12.5px">'
+      + kv('Source', e.source)+kv('Platform', e.platform)+kv('Date', e.date)+kv('Territory', e.territory)+kv('Format', e.format)+kv('Engagement', e.rate+'% . '+e.engRel)+kv('Remix fit', e.score+' of 5')+kv('Views', e.views.toLocaleString())+kv('Provenance', e.provenance)+'</div>'
+      + '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="act blue" data-toauto="'+e.id+'">Send to Auto-Script</button><button class="act no" data-retire="'+e.id+'">Retire</button></div></div>';
+  }
+  var addForm = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">Add ledger entry</div>'
+    + '<div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">'
+    + '<input id="leSource" class="vfield" placeholder="Source link or handle">'
+    + selField('lePlatform', PLATFORMS) + selField('leTerr', TERRITORIES) + selField('leFormat', FORMATS) + selField('leHook', HOOK_TYPES)
+    + '<input id="leRate" class="vfield" placeholder="Engagement percent">'
+    + '</div>'
+    + '<input id="leProv" class="vfield" placeholder="Provenance, required" style="margin-top:12px">'
+    + '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:#B0A99A">'
+    + '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="leSent"> Positive sentiment confirmed</label>'
+    + '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="leRec"> Within 90 day recency</label></div>'
+    + '<button id="leAdd" class="act go" style="margin-top:14px;padding:12px 26px">Add to ledger</button>'
+    + '<div style="font-size:11px;color:#5E5A52;margin-top:12px;letter-spacing:0.04em">Felix rule: platform-native discovery and official analytics only. No scraped or purchased data.</div></div>';
+  main.innerHTML = head + scroller(chips + table + detail + addForm) + previewFooter('Design preview . mock data . 20 seeded entries across 5 territories');
+}
+function th(key, label, sortId){ var arrow = ledgerSort.key===key ? (ledgerSort.dir>0?' up':' down') : ''; return '<th data-sort="'+key+'">'+esc(label)+(ledgerSort.key===key?(ledgerSort.dir>0?' ▲':' ▼'):'')+'</th>'; }
+function ledgerStatus(s){ var m={ tracked:'#8E887C','selected for remix':'#86ACE3', remixed:'#7CBF4E', retired:'#5E5A52' }; return '<span class="badge" style="border-color:'+(m[s]||'#33352F')+'55;color:'+(m[s]||'#B0A99A')+'">'+esc(s)+'</span>'; }
+function kv(k,v){ return '<div><div class="lbl">'+esc(k)+'</div><div style="color:#B0A99A;margin-top:4px">'+esc(v)+'</div></div>'; }
+function selField(id, opts){ return '<select id="'+id+'" class="vfield">'+opts.map(function(o){ return '<option>'+esc(o)+'</option>'; }).join('')+'</select>'; }
+
+// ---------- 3. Auto-Script ----------
+function renderAutoScript(){
+  var head = headerBar('Auto-Script', 'The variation engine. Ten hooks in the house voice, scored against the brand test.', pv());
+  var entries = SocialStore.ledger.filter(function(e){ return e.status!=='retired'; });
+  var entry = autoState.entryId ? SocialStore.ledger.filter(function(e){ return e.id===autoState.entryId; })[0] : null;
+  var picker = '<div class="card"><div class="lbl">Source entry</div><select id="autoPick" class="vfield" style="margin-top:8px">'
+    + '<option value="">Choose a ledger entry</option>'
+    + entries.map(function(e){ return '<option value="'+e.id+'"'+(entry&&entry.id===e.id?' selected':'')+'>'+esc(e.id+' . '+e.hookType+' . '+e.territory)+'</option>'; }).join('')
+    + '</select>';
+  if (entry) picker += '<div style="font-size:12.5px;color:#8E887C;margin-top:12px;line-height:1.7">'+esc(entry.hookType)+' from '+esc(entry.territory)+' . '+esc(entry.format)+'<br>Provenance: '+esc(entry.provenance)+'</div>';
+  picker += '<button id="autoGen" class="act blue" style="margin-top:14px;padding:12px 24px"'+(entry?'':' disabled')+'>Generate hooks</button>';
+  if (autoState.hooks.length) picker += '<button id="autoRegen" class="act" style="margin-top:14px;margin-left:8px;padding:12px 24px">Regenerate unselected</button>';
+  picker += '</div>';
+  var right = '';
+  if (autoState.hooks.length){
+    right = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+    autoState.hooks.forEach(function(h, i){
+      right += '<div class="card" style="border-color:'+(h.selected?'#34506A':'#202220')+'"><div style="color:#E1DAD0;line-height:1.5">'+esc(h.text)+'</div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span class="badge" style="border-color:'+h.fitColor+'55;color:'+h.fitColor+'">'+esc(h.fit)+'</span>'
+        + '<button class="act'+(h.selected?' blue':'')+'" data-hooksel="'+i+'">'+(h.selected?'Selected':'Select')+'</button></div></div>';
+    });
+    right += '</div>';
+    var nsel = autoState.hooks.filter(function(h){ return h.selected; }).length;
+    right += '<button id="autoSend" class="act go" style="margin-top:16px;padding:13px 28px"'+(nsel?'':' disabled')+'>Send '+nsel+' to Scriptwriter</button>';
+  } else {
+    right = '<div class="card" style="color:#6E685E;text-align:center;padding:40px">Pick an entry and generate hooks to begin.</div>';
+  }
+  main.innerHTML = head + scroller('<div class="split" style="display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start">'+picker+'<div>'+right+'</div></div>') + previewFooter('Design preview . mock data . hooks carry the ledger provenance forward automatically');
+}
+function scoreHook(text){
+  var low = text.toLowerCase(); var s = 3;
+  if (text.length <= 62) s += 1;
+  if (/(cold|press|turn|clean|pure|quiet|slow|real|bone|gold|plant|honest)/.test(low)) s += 1;
+  if (FORBIDDEN_VOCAB.some(function(w){ return new RegExp('\\b'+w+'\\b').test(low); })) s -= 2;
+  if (CLAIMS.some(function(w){ return new RegExp('\\b'+w+'\\b').test(low); })) s -= 2;
+  if (s>=5) return { fit:'Strong fit', fitColor:'#7CBF4E' };
+  if (s>=4) return { fit:'Fits', fitColor:'#86ACE3' };
+  return { fit:'Soft', fitColor:'#C08457' };
+}
+function makeHooks(startIdx){
+  var out = [];
+  for (var i=0;i<10;i++){ var text = HOOK_POOL[(startIdx+i)%HOOK_POOL.length]; var sc = scoreHook(text); out.push({ text:text, fit:sc.fit, fitColor:sc.fitColor, selected:false }); }
+  return out;
+}
+
+// ---------- 4. Scriptwriter ----------
+function currentDraft(){
+  var d = activeDraftId ? SocialStore.get(activeDraftId) : null;
+  if (!d){ d = SocialStore.addSeedDraft({ title:'New script', hook:'', state:'draft', warning:'', provenance:'', ageM:0, source:'scriptwriter' }); d.custody.carver=clock(); activeDraftId = d.id; }
+  return d;
+}
+function renderScriptwriter(){
+  var d = currentDraft();
+  if (PLATFORMS.indexOf(scwTab)===-1) scwTab = 'Instagram';
+  var head = headerBar('Scriptwriter', 'The full script editor. Save with warnings, submit only when the lint rail is clean.', pv());
+  var hookOpts = (d.hookOptions&&d.hookOptions.length) ? '<select id="scwHookPick" class="vfield" style="margin-top:8px">'+d.hookOptions.map(function(h){ return '<option'+(h===d.hook?' selected':'')+'>'+esc(h)+'</option>'; }).join('')+'</select>' : '';
+  var shots = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">'+d.shots.map(function(a){ return '<span class="chip" data-shotdel="'+esc(a)+'">'+esc(a)+' <span style="color:#C08457">x</span></span>'; }).join('')+'</div>'
+    + '<select id="scwShotAdd" class="vfield" style="margin-top:10px"><option value="">Add a Film Day asset</option>'+ASSETS.filter(function(a){ return d.shots.indexOf(a)===-1; }).map(function(a){ return '<option>'+esc(a)+'</option>'; }).join('')+'</select>';
+  var tabs = '<div style="display:flex;gap:4px;border-bottom:1px solid #202220;margin-top:8px;flex-wrap:wrap">'+PLATFORMS.map(function(p){ return '<span class="tab'+(scwTab===p?' on':'')+'" data-scwtab="'+p+'">'+esc(p)+'</span>'; }).join('')+'</div>'
+    + '<textarea id="scwCaption" data-cap="'+scwTab+'" class="vfield" rows="4" placeholder="Caption for '+scwTab+'" style="margin-top:10px;resize:vertical">'+esc(d.variants[scwTab]||'')+'</textarea>';
+  var warnSel = '<select id="scwWarn" class="vfield" style="margin-top:8px"><option value="">Choose a rotating warning</option>'+WARNINGS.map(function(w,i){ return '<option value="'+i+'"'+(d.warning===w?' selected':'')+'>Warning '+(i+1)+' . '+esc(w.slice(0,42))+'...</option>'; }).join('')+'</select>';
+  var left = '<div class="card">'
+    + '<div class="lbl">Working title</div><input id="scwTitle" data-field="title" class="vfield" value="'+esc(d.title)+'" style="margin-top:8px">'
+    + '<div class="lbl" style="margin-top:16px">Selected hook</div>'+hookOpts+'<input id="scwHook" data-field="hook" class="vfield" value="'+esc(d.hook)+'" style="margin-top:8px">'
+    + '<div class="lbl" style="margin-top:16px">Shot list</div>'+shots
+    + '<div class="lbl" style="margin-top:16px">Caption per platform</div>'+tabs
+    + '<div class="lbl" style="margin-top:16px">Rotating warning</div>'+warnSel
+    + '<div class="lbl" style="margin-top:16px">Provenance</div><div class="vfield" style="margin-top:8px;color:#8E887C;background:#131513">'+esc(d.provenance||'No provenance inherited')+'</div>'
+    + '<div style="display:flex;gap:10px;margin-top:18px"><button id="scwSave" class="act">Save</button><button id="scwSubmit" class="act go">Submit to clearance</button></div>'
+    + '</div>';
+  var right = '<div class="card" id="lintRail" style="position:sticky;top:20px">'+lintRailHtml(d)+'</div>';
+  main.innerHTML = head + scroller('<div class="split" style="display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start">'+left+right+'</div>') + previewFooter('Design preview . mock data . submit is blocked while any lint hit remains');
+}
+function lintRailHtml(d){
+  var lint = SocialStore.lint(d); var clean = lint.every(function(x){ return !x.hit; });
+  return '<div class="lbl">Live lint rail</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:9px">'
+    + lint.map(function(x){ var c = x.hit? '#D4664C' : '#7CBF4E'; return '<div style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:'+(x.hit?'#E1DAD0':'#8E887C')+'">'+esc(x.label)+'</span><span style="color:'+c+'">'+(x.hit?esc(x.detail):'clean')+'</span></div>'; }).join('')
+    + '</div><div style="margin-top:14px;padding-top:12px;border-top:1px solid #202220;font-size:12px;color:'+(clean?'#7CBF4E':'#C08457')+'">'+(clean?'Rail clean. Submit is open.':'Rail has hits. Submit is blocked.')+'</div>';
+}
+function refreshLint(){ var d = SocialStore.get(activeDraftId); var el = document.getElementById('lintRail'); if (d && el) el.innerHTML = lintRailHtml(d); }
+
+// ---------- 5. Create ----------
+function renderCreate(){
+  var head = headerBar('Create', 'Manual mode. Human hands, same standards. The agent audit runs on save.', pv());
+  var d = createState.draftId ? SocialStore.get(createState.draftId) : null;
+  var form = '<div class="card">'
+    + '<div class="lbl">Platform</div><select id="cxPlatform" class="vfield" style="margin-top:8px">'+PLATFORMS.map(function(p){ return '<option'+(createState.platform===p?' selected':'')+'>'+esc(p)+'</option>'; }).join('')+'</select>'
+    + '<div class="lbl" style="margin-top:16px">Caption</div><textarea id="cxCaption" class="vfield" rows="4" placeholder="Write the post" style="margin-top:8px;resize:vertical">'+esc(createState.caption)+'</textarea>'
+    + '<div class="lbl" style="margin-top:16px">Media</div><div class="vfield" style="margin-top:8px;color:#6E685E;text-align:center;padding:22px;border-style:dashed">Media placeholder . drop a Film Day asset here</div>'
+    + '<div class="lbl" style="margin-top:16px">Rotating warning</div><select id="cxWarn" class="vfield" style="margin-top:8px"><option value="">Choose a warning</option>'+WARNINGS.map(function(w,i){ return '<option value="'+i+'"'+(createState.warning===w?' selected':'')+'>Warning '+(i+1)+' . '+esc(w.slice(0,42))+'...</option>'; }).join('')+'</select>'
+    + '<div class="lbl" style="margin-top:16px">Provenance, optional</div><input id="cxProv" class="vfield" value="'+esc(createState.provenance)+'" placeholder="Leave blank to record a manual origin" style="margin-top:8px">'
+    + '<div style="display:flex;gap:10px;margin-top:18px"><button id="cxSave" class="act">Save and run audit</button>'
+    + (d && d.audit ? '<button id="cxSubmit" class="act go">Submit to clearance</button>' : '')
+    + '</div></div>';
+  var audit = '';
+  if (d && d.audit){
+    var a = d.audit;
+    audit = '<div class="card"><div class="lbl">Agent audit</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;font-size:12.5px">'
+      + auditRow('Voice', a.voice, false) + auditRow('Vocabulary', a.vocabulary, a.vocabulary.indexOf('Flagged')===0)
+      + auditRow('Claims', a.claims, a.claimsBlock) + auditRow('Dashes', a.dashes, a.dashes.indexOf('Dash')===0)
+      + auditRow('Originality', a.originality, false) + '</div>'
+      + (a.claimsBlock ? '<div style="margin-top:14px;padding:10px 12px;border:1px solid #4A2A22;border-radius:3px;color:#D4664C;font-size:12.5px">Claims language hard-blocks this draft. Remove it before clearance.</div>' : '<div style="margin-top:14px;font-size:12px;color:#7CBF4E">Audit attached. This draft may enter clearance.</div>')
+      + '</div>';
+  } else {
+    audit = '<div class="card" style="color:#6E685E;text-align:center;padding:40px">The audit findings attach here after you save.</div>';
+  }
+  main.innerHTML = head + scroller('<div class="split" style="display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start">'+form+audit+'</div>') + previewFooter('Design preview . mock data . claims language is the only hard block on a manual draft');
+}
+function auditRow(k, v, bad){ var c = bad? '#D4664C':'#8E887C'; return '<div style="display:flex;justify-content:space-between;gap:12px"><span style="color:#B0A99A">'+esc(k)+'</span><span style="color:'+c+';text-align:right">'+esc(v)+'</span></div>'; }
+
+// ---------- 6. Content ----------
+function renderContent(){
+  var head = headerBar('Content', 'The library. Every item in every state.', pv());
+  var chips = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    + '<span class="pill badge'+(!contentFilter.state?' active':'')+'" data-cstate="">All states</span>'
+    + STATES.map(function(s){ return '<span class="pill badge'+(contentFilter.state===s?' active':'')+'" data-cstate="'+s+'">'+esc(STATE_LABEL[s])+' '+SocialStore.byState(s).length+'</span>'; }).join('')+'</div>';
+  var filters = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">'
+    + '<select id="cfTerr" class="vfield" style="width:auto"><option value="">All territories</option>'+TERRITORIES.map(function(t){ return '<option'+(contentFilter.territory===t?' selected':'')+'>'+esc(t)+'</option>'; }).join('')+'</select>'
+    + '<select id="cfPlat" class="vfield" style="width:auto"><option value="">All platforms</option>'+PLATFORMS.map(function(p){ return '<option'+(contentFilter.platform===p?' selected':'')+'>'+esc(p)+'</option>'; }).join('')+'</select>'
+    + '<input id="cfSearch" class="vfield" style="width:auto;flex:1;min-width:160px" placeholder="Search titles" value="'+esc(contentFilter.q)+'"></div>';
+  var items = SocialStore.drafts.filter(function(d){
+    if (contentFilter.state && d.state!==contentFilter.state) return false;
+    if (contentFilter.territory && d.territory!==contentFilter.territory) return false;
+    if (contentFilter.platform && d.platform!==contentFilter.platform) return false;
+    if (contentFilter.q && d.title.toLowerCase().indexOf(contentFilter.q.toLowerCase())===-1) return false;
+    return true;
+  });
+  var grid = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">';
+  if (!items.length) grid += '<div class="card" style="grid-column:1/-1;text-align:center;color:#6E685E">Nothing matches this filter.</div>';
+  items.forEach(function(d){
+    grid += '<div class="card contentCard" data-cid="'+d.id+'" style="cursor:pointer"><div style="display:flex;justify-content:space-between;gap:8px">'+stateChip(d.state)+'<span style="font-size:11px;color:#5E5A52">'+esc(fmtAge(d.stateSince))+'</span></div>'
+      + '<div style="color:#E1DAD0;margin-top:10px">'+esc(d.title)+'</div><div style="font-size:12px;color:#6E685E;margin-top:5px">'+esc(d.platform)+' . '+esc(d.hookType)+'</div>'
+      + '<div style="font-size:11px;color:#5E5A52;margin-top:6px">Warning: '+(d.warning?esc(d.warning.slice(0,26))+'...':'none')+'</div></div>';
+  });
+  grid += '</div>';
+  var detail = '';
+  if (ledgerSel && ledgerSel.indexOf('d-')===0){
+    var d = SocialStore.get(ledgerSel);
+    if (d) detail = contentDetail(d);
+  }
+  main.innerHTML = head + scroller(chips + filters + grid + detail) + previewFooter('Design preview . mock data . '+SocialStore.drafts.length+' items across the state machine');
+}
+function contentDetail(d){
+  var variants = Object.keys(d.variants).length ? Object.keys(d.variants).map(function(p){ return '<div style="font-size:12.5px;margin-top:6px"><span style="color:#86ACE3">'+esc(p)+'</span> <span style="color:#8E887C">'+esc(d.variants[p]||'empty')+'</span></div>'; }).join('') : '<div style="font-size:12.5px;color:#6E685E">No platform variants yet</div>';
+  var aud = d.audit ? ('<div style="font-size:12.5px;color:#8E887C;margin-top:6px">Voice: '+esc(d.audit.voice)+'<br>Claims: '+esc(d.audit.claims)+'</div>') : '<div style="font-size:12.5px;color:#6E685E">No audit on this draft</div>';
+  return '<div class="card" style="margin-top:16px;border-color:#34506A55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(d.title)+'</div>'+stateChip(d.state)+'</div>'
+    + '<div class="lbl" style="margin-top:14px">Hook</div><div style="color:#B0A99A;margin-top:4px">'+esc(d.hook||'none')+'</div>'
+    + '<div class="lbl" style="margin-top:14px">Variants</div>'+variants
+    + '<div class="lbl" style="margin-top:14px">Audit</div>'+aud
+    + '<div class="lbl" style="margin-top:14px">Chain of custody</div>'+chainStrip(d)
+    + '<div style="display:flex;gap:10px;margin-top:16px"><button class="act no" data-archive="'+d.id+'">Archive</button><button class="act" data-dupe="'+d.id+'">Duplicate</button></div></div>';
+}
+
+// ---------- 7. Editor ----------
+function renderEditor(){
+  var head = headerBar('Editor', 'Two queues. Felix clears, then the owner approves.', pv());
+  var felix = SocialStore.byState('in_clearance');
+  var owner = SocialStore.byState('cleared');
+  var body = '<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">';
+  body += '<div><div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;margin-bottom:10px">Felix clearance queue</div>';
+  if (!felix.length) body += '<div class="card" style="color:#6E685E;text-align:center">Clearance queue is empty.</div>';
+  felix.forEach(function(d){
+    var lint = SocialStore.lint(d); var clean = lint.every(function(x){ return !x.hit; });
+    var margins = d.flaggedEdits.length ? '<div style="margin-top:12px;border-left:2px solid #34506A;padding-left:12px">'+d.flaggedEdits.map(function(m){ return '<div style="font-size:12px;color:#8E887C;padding:3px 0">'+esc(m)+'</div>'; }).join('')+'</div>' : '';
+    body += '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px"><span style="color:#E1DAD0">'+esc(d.title)+'</span><span class="badge">'+esc(d.source)+'</span></div>'
+      + '<div style="font-size:12.5px;color:#8E887C;margin-top:8px">'+esc(d.hook||'no hook')+'</div>'
+      + '<div style="font-size:12px;color:'+(clean?'#7CBF4E':'#C08457')+';margin-top:8px">Lint: '+(clean?'clean':'has hits')+' . '+(d.audit?'audit attached':'no audit')+'</div>'
+      + '<div style="font-size:12px;color:#6E685E;margin-top:4px">Provenance: '+esc(d.provenance||'none')+'</div>'+margins
+      + chainStrip(d)
+      + '<div style="display:flex;gap:10px;margin-top:14px"><button class="act go" data-clear="'+d.id+'">Clear</button><button class="act no" data-reject="'+d.id+'">Reject with reason</button></div></div>';
+  });
+  body += '</div><div><div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;margin-bottom:10px">Owner queue</div>';
+  if (!owner.length) body += '<div class="card" style="color:#6E685E;text-align:center">Nothing awaits your approval.</div>';
+  owner.forEach(function(d){
+    body += '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px"><span style="color:#E1DAD0">'+esc(d.title)+'</span>'+stateChip(d.state)+'</div>'
+      + '<div style="font-size:12.5px;color:#8E887C;margin-top:8px">'+esc(d.hook||'no hook')+'</div>'
+      + '<div style="font-size:12px;color:#6E685E;margin-top:6px">Warning: '+esc(d.warning?d.warning.slice(0,50)+'...':'none')+'</div>'+chainStrip(d)
+      + '<div style="display:flex;gap:10px;margin-top:14px"><button class="act go" data-approve="'+d.id+'">Approve</button><button class="act" data-sendback="'+d.id+'">Send back with note</button></div></div>';
+  });
+  body += '</div></div>';
+  main.innerHTML = head + scroller(body) + previewFooter('Design preview . mock data . the chain of custody stamps as each hand passes');
+}
+
+// ---------- 8. Scheduler ----------
+function renderScheduler(){
+  var head = headerBar('Scheduler', 'Approved posts only. Any other state is refused and raises a P1.', pv());
+  var approved = SocialStore.byState('owner_approved');
+  var sched = SocialStore.byState('scheduled');
+  var picker = '<div class="card"><div class="lbl">Schedule an approved post</div>'
+    + '<select id="scPick" class="vfield" style="margin-top:8px"><option value="">Owner approved drafts only</option>'+approved.map(function(d){ return '<option value="'+d.id+'"'+(schedPick.draftId===d.id?' selected':'')+'>'+esc(d.title)+'</option>'; }).join('')+'</select>'
+    + '<div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">'
+    + '<select id="scPlat" class="vfield">'+PLATFORMS.map(function(p){ return '<option'+(schedPick.platform===p?' selected':'')+'>'+esc(p)+'</option>'; }).join('')+'</select>'
+    + '<select id="scDay" class="vfield">'+DAYS.map(function(dy){ return '<option'+(schedPick.day===dy?' selected':'')+'>'+esc(dy)+'</option>'; }).join('')+'</select>'
+    + '<select id="scTime" class="vfield">'+SLOT_TIMES.map(function(t){ return '<option'+(schedPick.time===t?' selected':'')+'>'+esc(t)+'</option>'; }).join('')+'</select></div>'
+    + '<button id="scDo" class="act go" style="margin-top:12px;padding:11px 24px"'+(approved.length?'':' disabled')+'>Schedule</button>'
+    + '<div class="lbl" style="margin-top:16px">Optimal windows</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'+SocialStore.optimalWindows.map(function(w){ return '<span class="chip winChip" data-win="'+esc(w)+'">'+esc(w)+'</span>'; }).join('')+'</div>'
+    + '<div class="lbl" style="margin-top:16px">Blackout days</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">'+DAYS.map(function(dy){ return '<span class="chip'+(SocialStore.blackout[dy]?' active':'')+'" data-black="'+dy+'" style="'+(SocialStore.blackout[dy]?'border-color:#4A3A2A;color:#C08457':'')+'">'+esc(dy)+'</span>'; }).join('')+'</div>'
+    + '<div style="margin-top:16px;padding-top:14px;border-top:1px solid #202220"><div class="lbl">Protection test</div><div style="font-size:12px;color:#8E887C;margin:8px 0">Attempt to schedule a draft that is not owner approved.</div><button id="scTest" class="act no">Run protection test</button></div>'
+    + (SocialStore.findings.length ? '<div style="margin-top:12px;padding:10px 12px;border:1px solid #4A2A22;border-radius:3px;color:#D4664C;font-size:12px">'+esc(SocialStore.findings[0].text)+'</div>' : '')
+    + '</div>';
+  // week grid across 6 lanes
+  var grid = '<div class="card" style="padding:0;overflow:auto"><div style="padding:14px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Week view . '+sched.length+' scheduled</div>'
+    + '<table class="data" style="min-width:640px"><thead><tr><th>Platform</th>'+DAYS.map(function(dy){ return '<th style="'+(SocialStore.blackout[dy]?'color:#C08457':'')+'">'+esc(dy)+'</th>'; }).join('')+'</tr></thead><tbody>';
+  PLATFORMS.forEach(function(p){
+    grid += '<tr><td style="color:#E1DAD0">'+esc(p)+'</td>';
+    DAYS.forEach(function(dy){
+      var cell = sched.filter(function(d){ return d.platform===p && d.slot && d.slot.day===dy; });
+      grid += '<td>'+(cell.length? cell.map(function(d){ return '<div style="font-size:11px;color:#86ACE3">'+esc(d.slot.time)+'</div><div style="font-size:11px;color:#8E887C">'+esc(d.title.slice(0,18))+'</div>'; }).join('') : (SocialStore.blackout[dy]? '<span style="color:#4A3A2A">blackout</span>':''))+'</td>';
+    });
+    grid += '</tr>';
+  });
+  grid += '</tbody></table></div>';
+  main.innerHTML = head + scroller('<div class="split" style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start">'+picker+grid+'</div>') + previewFooter('Design preview . mock data . the P1 protection is enforced in the store, not just the UI');
+}
+
+// ---------- 9. Analyzer ----------
+function renderAnalyzer(){
+  var head = headerBar('Analyzer', 'The measurement room. Recompute reconnects the loop to the Scheduler.', '<button id="anRecompute" class="act blue">Recompute</button>'+pv());
+  var maxRate = Math.max.apply(null, PLATFORMS.map(function(p){ return SocialStore.platformRates[p]||0; }));
+  var plat = '<div class="card"><div class="lbl">30 day engagement by platform</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">'
+    + PLATFORMS.map(function(p){ var r = SocialStore.platformRates[p]||0; return '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(p)+'</span><span class="mono" style="color:#8E887C">'+r.toFixed(1)+'%</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(r/maxRate*100)+'%"></span></div></div>'; }).join('')+'</div></div>';
+  var ha = SocialStore.hookAverages(); var hks = HOOK_TYPES.filter(function(t){ return ha[t]>0; }).sort(function(a,b){ return ha[b]-ha[a]; });
+  var league = '<div class="card"><div class="lbl">Hook type league . published posts</div><table class="data" style="margin-top:10px"><thead><tr><th>Hook type</th><th>Avg eng</th><th>Note</th></tr></thead><tbody>'
+    + hks.map(function(t, i){ var note = i===0?'best':(i===hks.length-1?'worst':''); var c = i===0?'#7CBF4E':(i===hks.length-1?'#C08457':'#8E887C'); return '<tr><td style="color:#E1DAD0">'+esc(t)+'</td><td class="mono">'+ha[t].toFixed(1)+'%</td><td style="color:'+c+'">'+note+'</td></tr>'; }).join('')+'</tbody></table></div>';
+  var ta = SocialStore.territoryAverages(); var tmax = Math.max.apply(null, TERRITORIES.map(function(t){ return ta[t]||0; })) || 1;
+  var terr = '<div class="card"><div class="lbl">Territory performance</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:12px">'
+    + TERRITORIES.map(function(t){ var r=ta[t]||0; return '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(t)+'</span><span class="mono" style="color:#8E887C">'+r.toFixed(1)+'%</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(r/tmax*100)+'%"></span></div></div>'; }).join('')+'</div></div>';
+  var hmax = Math.max.apply(null, SocialStore.heat);
+  var heat = '<div class="card"><div class="lbl">Optimal window calculator . engagement by hour</div><div style="display:flex;gap:4px;align-items:flex-end;height:90px;margin-top:14px">'
+    + SocialStore.heat.map(function(v, i){ var hour=6+i; var peak = v===hmax; return '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center"><div style="width:100%;height:'+Math.round(v/hmax*70)+'px;background:'+(peak?'#86ACE3':'#34506A')+';border-radius:2px"></div><div style="font-size:9px;color:'+(peak?'#86ACE3':'#5E5A52')+';margin-top:4px">'+(hour>12?hour-12:hour)+(hour>=12?'p':'a')+'</div></div>'; }).join('')+'</div>'
+    + '<div style="font-size:12px;color:#8E887C;margin-top:12px">Derived window: '+esc(SocialStore.optimalWindows[0]||'weekday evening')+'. This feeds the Scheduler chips directly.</div></div>';
+  main.innerHTML = head + scroller('<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">'+plat+league+terr+heat+'</div>') + previewFooter('Design preview . mock data . Recompute re-rolls the series and updates the Scheduler window');
+}
+
+// ---------- 10. Post Tracking ----------
+function renderTracking(){
+  var head = headerBar('Post Tracking', 'Per post accountability. This is where wins compound.', pv());
+  var pub = SocialStore.byState('published').filter(function(d){ return !d.retiredReport; });
+  var ha = SocialStore.hookAverages();
+  var table = '<div class="card" style="padding:0;overflow:auto"><table class="data"><thead><tr><th>Title</th><th>Platform</th><th>Published</th><th>Warning</th><th>48h</th><th>30d</th><th>Vs hook avg</th></tr></thead><tbody>';
+  if (!pub.length) table += '<tr><td colspan="7" style="text-align:center;color:#6E685E">No published posts in reporting.</td></tr>';
+  pub.forEach(function(d){
+    var diff = d.metrics.rate - (ha[d.hookType]||d.metrics.rate); var dc = diff>=0? '#7CBF4E':'#C08457';
+    table += '<tr class="trackRow" data-tid="'+d.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(d.title)+(d.folded?' <span class="badge" style="border-color:#2E4A22;color:#7CBF4E">canon</span>':'')+'</td><td>'+esc(d.platform)+'</td><td class="mono">'+esc(d.publishedAt)+'</td><td title="'+esc(d.warning)+'">'+esc((d.warning||'').slice(0,20))+'...</td><td class="mono">'+d.metrics.h48.toLocaleString()+'</td><td class="mono">'+d.metrics.d30.toLocaleString()+'</td><td class="mono" style="color:'+dc+'">'+(diff>=0?'+':'')+diff.toFixed(1)+'%</td></tr>';
+  });
+  table += '</tbody></table></div>';
+  var detail = '';
+  if (ledgerSel && ledgerSel.indexOf('d-')===0){
+    var d = SocialStore.get(ledgerSel);
+    if (d && d.state==='published') detail = '<div class="card" style="margin-top:16px;border-color:#34506A55"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(d.title)+'</div>'
+      + '<div class="lbl" style="margin-top:12px">Chain of custody</div>'+chainStrip(d)
+      + '<div class="lbl" style="margin-top:14px">Provenance</div><div style="color:#B0A99A;margin-top:4px;font-size:12.5px">'+esc(d.provenance||'none')+'</div>'
+      + '<div class="lbl" style="margin-top:14px">Metric history</div><div style="font-size:12.5px;color:#8E887C;margin-top:4px">48h '+d.metrics.h48.toLocaleString()+' . 30d '+d.metrics.d30.toLocaleString()+' . rate '+d.metrics.rate.toFixed(1)+'%</div>'
+      + '<div style="display:flex;gap:10px;margin-top:16px"><button class="act go" data-fold="'+d.id+'"'+(d.folded?' disabled':'')+'>'+(d.folded?'Filed to canon':'Fold into canon')+'</button><button class="act no" data-retirerep="'+d.id+'">Retire from reporting</button></div></div>';
+  }
+  main.innerHTML = head + scroller(table + detail) + previewFooter('Design preview . mock data . folding a win files its hook pattern to canon');
+}
+
+// ================= router =================
+function route(){
+  var h = location.hash || '#/social/overview';
+  var parts = h.replace(/^#\//,'').split('/');
+  var wing = parts[0] || 'social';
+  var view = parts[1] || 'overview';
+  if (wing !== 'social'){
+    var map = { vauxhall:'Vauxhall.dc.html', product:'Product.dc.html', security:'Security.dc.html' };
+    if (map[wing]){ window.location.href = map[wing]; return; }
+    view = 'overview';
+  }
+  setRailActive(view);
+  switch(view){
+    case 'research': renderResearch(); break;
+    case 'auto-script': renderAutoScript(); break;
+    case 'scriptwriter': renderScriptwriter(); break;
+    case 'create': renderCreate(); break;
+    case 'content': renderContent(); break;
+    case 'editor': renderEditor(); break;
+    case 'scheduler': renderScheduler(); break;
+    case 'analyzer': renderAnalyzer(); break;
+    case 'tracking': renderTracking(); break;
+    default: renderOverview();
+  }
+}
+function go(view){ location.hash = '#/social/'+view; }
+
+// ================= events =================
+document.addEventListener('click', function(ev){
+  var t = ev.target;
+
+  // overview pipeline stage
+  var stage = t.closest('[data-stage]'); if (stage){ contentFilter = { state: stage.getAttribute('data-stage'), territory:null, platform:null, q:'' }; go('content'); return; }
+
+  // research territory chip
+  var terr = t.closest('[data-terr]'); if (terr){ var v = terr.getAttribute('data-terr'); ledgerFilter.territory = v || null; renderResearch(); return; }
+  // research sort
+  var sortTh = t.closest('[data-sort]'); if (sortTh){ var k = sortTh.getAttribute('data-sort'); if (ledgerSort.key===k) ledgerSort.dir *= -1; else { ledgerSort.key=k; ledgerSort.dir = (k==='date'?1:-1); } renderResearch(); return; }
+  // research row
+  var lr = t.closest('.ledRow'); if (lr){ ledgerSel = lr.getAttribute('data-lid'); renderResearch(); return; }
+  var toAuto = t.closest('[data-toauto]'); if (toAuto){ var id = toAuto.getAttribute('data-toauto'); var e = SocialStore.ledger.filter(function(x){ return x.id===id; })[0]; if (e){ e.status='selected for remix'; autoState = { entryId:id, hooks:[] }; SocialStore.emit('FEED','Sent ledger '+id+' to Auto-Script'); go('auto-script'); } return; }
+  var ret = t.closest('[data-retire]'); if (ret){ var e2 = SocialStore.ledger.filter(function(x){ return x.id===ret.getAttribute('data-retire'); })[0]; if (e2){ e2.status='retired'; toast('Entry retired.'); ledgerSel=null; renderResearch(); } return; }
+  if (t.id==='leAdd'){ addLedgerEntry(); return; }
+
+  // auto-script
+  if (t.id==='autoGen'){ if (autoState.entryId){ autoState.hooks = makeHooks(0); renderAutoScript(); } return; }
+  if (t.id==='autoRegen'){ var next = makeHooks(Math.floor(Math.random()*HOOK_POOL.length)); autoState.hooks = autoState.hooks.map(function(h, i){ return h.selected ? h : next[i]; }); renderAutoScript(); return; }
+  var hs = t.closest('[data-hooksel]'); if (hs){ var idx = +hs.getAttribute('data-hooksel'); autoState.hooks[idx].selected = !autoState.hooks[idx].selected; renderAutoScript(); return; }
+  if (t.id==='autoSend'){
+    var entry = SocialStore.ledger.filter(function(x){ return x.id===autoState.entryId; })[0];
+    var picked = autoState.hooks.filter(function(h){ return h.selected; }).map(function(h){ return h.text; });
+    if (entry && picked.length){ entry.status='remixed'; var d = SocialStore.createFromScript(entry, picked); activeDraftId = d.id; scwTab='Instagram'; autoState={ entryId:null, hooks:[] }; toast('Script shell created.'); go('scriptwriter'); }
+    return;
+  }
+
+  // scriptwriter
+  var shotDel = t.closest('[data-shotdel]'); if (shotDel){ var d0 = SocialStore.get(activeDraftId); var a = shotDel.getAttribute('data-shotdel'); d0.shots = d0.shots.filter(function(x){ return x!==a; }); renderScriptwriter(); return; }
+  var scwtab = t.closest('[data-scwtab]'); if (scwtab){ scwTab = scwtab.getAttribute('data-scwtab'); renderScriptwriter(); return; }
+  if (t.id==='scwSave'){ toast('Saved. Lint warnings are allowed on save.'); return; }
+  if (t.id==='scwSubmit'){
+    var d1 = SocialStore.get(activeDraftId);
+    if (SocialStore.submitToClearance(d1.id)){ activeDraftId=null; toast('Submitted to Felix for clearance.'); go('editor'); }
+    else toast('Blocked. Clear every lint hit before submitting.');
+    return;
+  }
+
+  // create
+  if (t.id==='cxSave'){
+    createState.platform = valOf('cxPlatform'); createState.caption = valOf('cxCaption');
+    var wi = valOf('cxWarn'); createState.warning = wi===''? '' : WARNINGS[+wi]; createState.provenance = valOf('cxProv');
+    var d2 = SocialStore.createManual({ title: createState.caption.slice(0,32)||'Manual draft', caption:createState.caption, platform:createState.platform, warning:createState.warning, provenance:createState.provenance, hookType:'Founder voice' });
+    createState.draftId = d2.id; toast('Saved and audited.'); renderCreate(); return;
+  }
+  if (t.id==='cxSubmit'){
+    var d3 = SocialStore.get(createState.draftId);
+    if (d3.audit && d3.audit.claimsBlock){ toast('Claims language hard-blocks this draft.'); return; }
+    if (!SocialStore.lintClean(d3)){ toast('Resolve lint hits before clearance.'); return; }
+    SocialStore.submitToClearance(d3.id); createState = { platform:'Instagram', caption:'', warning:'', provenance:'', draftId:null }; toast('Submitted to clearance.'); go('editor'); return;
+  }
+
+  // content
+  var cs = t.closest('[data-cstate]'); if (cs){ contentFilter.state = cs.getAttribute('data-cstate') || null; renderContent(); return; }
+  var cc = t.closest('.contentCard'); if (cc){ ledgerSel = cc.getAttribute('data-cid'); renderContent(); return; }
+  var arch = t.closest('[data-archive]'); if (arch){ SocialStore.archive(arch.getAttribute('data-archive')); toast('Archived.'); renderContent(); return; }
+  var dupe = t.closest('[data-dupe]'); if (dupe){ SocialStore.duplicate(dupe.getAttribute('data-dupe')); toast('Duplicated with provenance.'); renderContent(); return; }
+
+  // editor
+  var cl = t.closest('[data-clear]'); if (cl){ SocialStore.clearDraft(cl.getAttribute('data-clear')); toast('Cleared to owner queue.'); renderEditor(); setRailActive('editor'); return; }
+  var rj = t.closest('[data-reject]'); if (rj){ var reason = prompt('Reason for rejection:'); if (reason!==null){ SocialStore.rejectDraft(rj.getAttribute('data-reject'), reason||'No reason recorded'); toast('Rejected. Returned to Content.'); renderEditor(); } return; }
+  var ap = t.closest('[data-approve]'); if (ap){ SocialStore.approveDraft(ap.getAttribute('data-approve')); toast('Approved. Ready for the Scheduler.'); renderEditor(); setRailActive('editor'); return; }
+  var sb = t.closest('[data-sendback]'); if (sb){ var note = prompt('Note to send back with:'); if (note!==null){ SocialStore.sendBack(sb.getAttribute('data-sendback'), note); toast('Sent back to Carver.'); renderEditor(); } return; }
+
+  // scheduler
+  var win = t.closest('[data-win]'); if (win){ var parts2 = win.getAttribute('data-win').split(' '); schedPick.day = parts2[0]; schedPick.time = parts2.slice(1).join(' '); renderScheduler(); return; }
+  var black = t.closest('[data-black]'); if (black){ var dy = black.getAttribute('data-black'); SocialStore.blackout[dy] = !SocialStore.blackout[dy]; renderScheduler(); return; }
+  if (t.id==='scDo'){
+    var pick = valOf('scPick'); if (!pick){ toast('Choose an approved draft.'); return; }
+    var okS = SocialStore.schedule(pick, valOf('scPlat'), { day: valOf('scDay'), time: valOf('scTime') });
+    if (okS){ schedPick.draftId=''; toast('Scheduled.'); } else { toast(SocialStore.blackout[valOf('scDay')]? 'That day is blacked out.' : 'Refused. Only owner approved drafts schedule.'); }
+    renderScheduler(); return;
+  }
+  if (t.id==='scTest'){
+    var victim = SocialStore.byState('draft')[0] || SocialStore.byState('in_clearance')[0];
+    if (!victim){ toast('No unapproved draft to test with.'); return; }
+    var res = SocialStore.schedule(victim.id, 'Instagram', { day:'Mon', time:'6:30 PM' }, { test:true });
+    toast(res? 'Test unexpectedly passed.' : 'Blocked. P1 raised and ALERT emitted.');
+    renderScheduler(); return;
+  }
+
+  // analyzer
+  if (t.id==='anRecompute'){ SocialStore.recompute(); toast('Recomputed. Scheduler window updated.'); renderAnalyzer(); return; }
+
+  // tracking
+  var tr = t.closest('.trackRow'); if (tr){ ledgerSel = tr.getAttribute('data-tid'); renderTracking(); return; }
+  var fold = t.closest('[data-fold]'); if (fold){ SocialStore.foldToCanon(fold.getAttribute('data-fold')); toast('Filed to canon. Moneypenny notified.'); renderTracking(); return; }
+  var rr = t.closest('[data-retirerep]'); if (rr){ SocialStore.retireReport(rr.getAttribute('data-retirerep')); ledgerSel=null; toast('Retired from reporting.'); renderTracking(); return; }
+});
+
+// live typing into scriptwriter and create without full re-render
+document.addEventListener('input', function(ev){
+  var t = ev.target;
+  var d = SocialStore.get(activeDraftId);
+  if (t.getAttribute && t.getAttribute('data-field') && d){ d[t.getAttribute('data-field')] = t.value; refreshLint(); return; }
+  if (t.getAttribute && t.getAttribute('data-cap') && d){ d.variants[t.getAttribute('data-cap')] = t.value; refreshLint(); return; }
+  if (t.id==='cxCaption'){ createState.caption = t.value; return; }
+  if (t.id==='cfSearch'){ contentFilter.q = t.value; var g = document.querySelector('.grid3'); renderContent(); var s=document.getElementById('cfSearch'); if (s){ s.focus(); s.setSelectionRange(s.value.length,s.value.length); } return; }
+});
+document.addEventListener('change', function(ev){
+  var t = ev.target;
+  if (t.id==='autoPick'){ autoState = { entryId: t.value||null, hooks:[] }; renderAutoScript(); return; }
+  var d = SocialStore.get(activeDraftId);
+  if (t.id==='scwHookPick' && d){ d.hook = t.value; renderScriptwriter(); return; }
+  if (t.id==='scwShotAdd' && d){ if (t.value && d.shots.indexOf(t.value)===-1) d.shots.push(t.value); renderScriptwriter(); return; }
+  if (t.id==='scwWarn' && d){ if (t.value===''){ d.warning=''; refreshLint(); return; } var w = WARNINGS[+t.value]; if (SocialStore.assignWarning(d, w)) { refreshLint(); } else { toast('Rotation guard: that warning would repeat across every active draft. Pick another.'); renderScriptwriter(); } return; }
+  if (t.id==='cfTerr'){ contentFilter.territory = t.value||null; renderContent(); return; }
+  if (t.id==='cfPlat'){ contentFilter.platform = t.value||null; renderContent(); return; }
+  if (t.id==='scPick'){ schedPick.draftId = t.value; return; }
+  if (t.id==='scPlat'){ schedPick.platform = t.value; return; }
+  if (t.id==='scDay'){ schedPick.day = t.value; return; }
+  if (t.id==='scTime'){ schedPick.time = t.value; return; }
+});
+
+function valOf(id){ var el = document.getElementById(id); return el? el.value : ''; }
+function addLedgerEntry(){
+  var source = valOf('leSource'), prov = valOf('leProv');
+  var sent = document.getElementById('leSent'), rec = document.getElementById('leRec');
+  if (!source){ toast('Add a source.'); return; }
+  if (!prov){ toast('Provenance is required.'); return; }
+  if (!sent.checked || !rec.checked){ toast('Confirm positive sentiment and 90 day recency.'); return; }
+  SocialStore.ledger.unshift({ id:'L'+(SocialStore.ledger.length+1), source:source, platform:valOf('lePlatform'), date:'2026-07-24', territory:valOf('leTerr'), format:valOf('leFormat'), hookType:valOf('leHook'), views:38000, rate:(valOf('leRate')||'3.0'), engRel:'new entry', score:3, provenance:prov, status:'tracked' });
+  toast('Added to the ledger.'); renderResearch();
+}
+
+window.addEventListener('hashchange', route);
+SocialStore.seed();
+if (!location.hash) location.hash = '#/social/overview';
+route();
+</script>
 </body>
 </html>
