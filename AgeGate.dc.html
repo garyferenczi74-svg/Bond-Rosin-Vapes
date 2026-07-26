@@ -34,9 +34,9 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
   <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
     <div style="position:relative;text-align:center;padding:32px;max-width:560px;width:100%;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(52px,8vw,84px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;transform-origin:center;animation:bondBreathe 6.5s ease-in-out infinite,breatheScale 3.6s ease-in-out infinite">BOND</div>
-      <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(15px,1.8vw,18px);letter-spacing:0.22em;color:#E1DAD0;margin:22px 0 0;padding-left:0.22em">WITH YOUR HIGHEST SELF</p>
-      <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:32px auto 0"></div>
-      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C;margin:32px 0 20px">Confirm your age to enter</p>
+      <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(18px,2.6vw,28px);letter-spacing:0.03em;color:#E1DAD0;margin:24px 0 0">Intentional elevation is for adults.</p>
+      <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>
+      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:13px;line-height:1.7;color:#B0A99A;max-width:440px;margin:26px auto 26px">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
       <div style="display:flex;gap:12px;justify-content:center;margin-bottom:32px">
         <select value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:150px;outline:none;cursor:pointer">
           <option value="" style="color:#1B1D1C">Birth month</option>
@@ -52,7 +52,7 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
         </select>
       </div>
       <button onClick="{{ enter }}" style="background:{{ enterBg }};color:{{ enterColor }};border:1px solid {{ enterBorder }};border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 56px;cursor:pointer;transition:background .4s,color .4s,border-color .4s,box-shadow .4s;box-shadow:{{ enterShadow }}">Enter</button>
-      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:11px;color:#8E887C;margin:40px 0 0;letter-spacing:0.04em">21+ Cannabis products. Keep out of reach of children.</p>
+      <div style="font-family:Helvetica,Arial,sans-serif;font-weight:700;font-size:12px;line-height:1.5;color:#111;background:#FDE100;border-radius:2px;padding:12px 16px;margin:38px auto 0;max-width:520px;text-align:left">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</div>
     </div>
   </sc-if>
 </div>

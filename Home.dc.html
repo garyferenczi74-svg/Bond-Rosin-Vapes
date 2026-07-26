@@ -225,7 +225,12 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
           <input type="email" value="{{ email }}" onChange="{{ setEmail }}" placeholder="Enter your email" style="background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:14px;padding:15px 18px;width:min(320px,100%);outline:none">
           <button type="submit" style="background:#E1DAD0;color:#1B1D1C;border:1px solid #E1DAD0;border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:11.5px;letter-spacing:0.16em;text-transform:uppercase;padding:16px 32px;cursor:pointer">Join the Circle</button>
         </form>
-        <p style="font-size:11px;color:#8E887C;margin:20px 0 0;letter-spacing:0.04em">By joining, you agree to receive emails from Bond.</p>
+        <label style="display:inline-flex;align-items:center;gap:9px;font-size:12px;color:#B0A99A;margin:18px 0 0;cursor:pointer">
+          <input type="checkbox" checked="{{ age21 }}" onChange="{{ toggleAge21 }}" style="width:15px;height:15px;accent-color:#C29A45;cursor:pointer">
+          <span>I confirm I am 21 years of age or older.</span>
+        </label>
+        <sc-if value="{{ ageErr }}" hint-placeholder-val="{{ false }}"><p style="font-size:11.5px;color:#D4664C;margin:8px 0 0">Please confirm you are 21 or older to join.</p></sc-if>
+        <p style="font-size:11px;color:#8E887C;margin:14px 0 0;letter-spacing:0.04em">By joining, you agree to receive emails from Bond.</p>
         <a href="Haus.dc.html" style="display:inline-block;font-family:'GFS Didot',Didot,serif;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;text-decoration:none;margin:26px 0 0;border-bottom:1px solid #3A3C3B;padding-bottom:3px;transition:color .3s,border-color .3s" style-hover="color:#E1DAD0;border-color:#C29A45">Already in the Haus? Enter here.</a>
       </sc-if>
       <sc-if value="{{ joined }}" hint-placeholder-val="{{ false }}">
@@ -238,6 +243,24 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     </div>
   </section>
 
+  <div style="background:#FDE100;color:#111;font-family:Helvetica,Arial,sans-serif;font-weight:700;padding:16px clamp(20px,4vw,56px)">
+    <div style="max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:8px;font-size:12px;line-height:1.5">
+      <span>For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</span>
+      <span id="bondRotWarn">Cannabis may cause impairment and may be habit forming.</span>
+      <span>Licensed by the New York State Office of Cannabis Management. [OCM LICENSE NUMBER]</span>
+    </div>
+  </div>
+  <script>
+  (function(){
+    var w=["Cannabis may cause impairment and may be habit forming.","Cannabis can impair concentration, coordination, and judgment. Do not operate a vehicle or machinery under the influence of cannabis.","There may be health risks associated with consumption of this product.","Cannabis is not recommended for use by persons who are pregnant or nursing."];
+    try {
+      var idx=sessionStorage.getItem('bond_warn_idx');
+      if(idx===null){ var c=(parseInt(localStorage.getItem('bond_warn_ctr')||'-1',10)+1)%w.length; localStorage.setItem('bond_warn_ctr',String(c)); idx=String(c); sessionStorage.setItem('bond_warn_idx',idx); }
+      var el=document.getElementById('bondRotWarn'); if(el) el.textContent=w[parseInt(idx,10)];
+    } catch(e){}
+  })();
+  </script>
+
   <footer style="background:#1B1D1C;border-top:1px solid #3A3C3B;padding:56px clamp(20px,4vw,56px) 40px">
     <div style="max-width:1180px;margin:0 auto">
       <div style="display:flex;flex-wrap:wrap;gap:32px;align-items:baseline;justify-content:space-between">
@@ -247,6 +270,9 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
           <a href="#process" style="color:#8E887C" style-hover="color:#E1DAD0">Our Process</a>
           <a href="#find" style="color:#8E887C" style-hover="color:#E1DAD0">Find Your Bond</a>
           <a href="Haus.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">Bond Haus</a>
+          <a href="FAQ.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">FAQ</a>
+          <a href="Terms.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">Terms</a>
+          <a href="Privacy.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">Privacy</a>
           <a href="Admin.dc.html" style="color:#8E887C" style-hover="color:#E1DAD0">Admin</a>
         </div>
       </div>
@@ -298,7 +324,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;locatorLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;CMS&quot;},&quot;gateBypass&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
-  state = { narrow: false, reduced: false, modal: false, menu: false, step: 1, exp: null, mom: null, set: null, email: '', joined: false };
+  state = { narrow: false, reduced: false, modal: false, menu: false, step: 1, exp: null, mom: null, set: null, email: '', joined: false, age21: false, ageErr: false };
   canvasRef = React.createRef(); navBgRef = React.createRef(); pressWrapRef = React.createRef();
   heroBondRef = React.createRef(); navBondRef = React.createRef(); processHeadRef = React.createRef();
   plateTopRef = React.createRef(); plateBottomRef = React.createRef(); amberRef = React.createRef();
@@ -488,13 +514,17 @@ class Component extends DCLogic {
       goRec: rec ? this.navTo(rec.recUrl) : null,
       email: s.email, joined: s.joined, notJoined: !s.joined,
       setEmail: (e) => this.setState({ email: e.target.value }),
+      age21: s.age21,
+      ageErr: s.ageErr,
+      toggleAge21: () => this.setState({ age21: !s.age21, ageErr: false }),
       joinCircle: (e) => {
         e.preventDefault();
         const em = s.email.trim().toLowerCase();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) return;
+        if (!s.age21) { this.setState({ ageErr: true }); return; }
         try {
           const list = JSON.parse(localStorage.getItem('bond_circle') || '[]');
-          if (!list.some(x => x.email === em)) { list.push({ email: em, source: 'homepage', ts: Date.now() }); localStorage.setItem('bond_circle', JSON.stringify(list)); }
+          if (!list.some(x => x.email === em)) { list.push({ email: em, source: 'homepage', age21: true, ts: Date.now() }); localStorage.setItem('bond_circle', JSON.stringify(list)); }
         } catch (err) {}
         this.setState({ joined: true });
       }
