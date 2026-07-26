@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vauxhall . Product</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #141615; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; cursor: pointer; transition: background .2s, color .2s; }
+  .navitem:hover { background: #20221F; color: #E1DAD0; }
+  .navitem.on { background: #212420; color: #E1DAD0; box-shadow: inset 2px 0 0 #7CBF4E; }
+  .wing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 3px; cursor: pointer; transition: background .2s; color: #8E887C; }
+  .wing:hover { background: #20221F; }
+  .wing.on { background: #202220; color: #E1DAD0; }
+  .card { background: #191B18; border: 1px solid #202220; border-radius: 5px; padding: 16px 18px; }
+  .kpi { font-family: 'GFS Didot', Didot, serif; font-size: 30px; line-height: 1; color: #E1DAD0; }
+  .lbl { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6E685E; }
+  .badge { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
+  .row { display: grid; grid-template-columns: 1.2fr 1fr 1fr 0.9fr; gap: 14px; align-items: center; padding: 13px 16px; border-bottom: 1px solid #202220; }
+  .row:hover { background: #191B19; }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  .up { color: #7CBF4E; }
+  @media (max-width: 900px) { .rail { display: none; } .kpigrid { grid-template-columns: repeat(2,1fr) !important; } .row { grid-template-columns: 1fr 1fr; } .row .hidesm { display:none; } }
+</style>
+</head>
+<body>
+<div style="display:flex;min-height:100vh">
+
+  <aside class="rail" style="width:248px;flex-shrink:0;background:#171917;border-right:1px solid #202220;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:22px 18px 16px;border-bottom:1px solid #202220">
+      <div style="font-family:'GFS Didot',Didot,serif;font-size:22px;letter-spacing:0.34em;padding-left:0.34em;color:#E8E1D5">VAUXHALL</div>
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Product . Mini ERP</div>
+    </div>
+    <div style="padding:16px 12px 6px">
+      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Wings</div>
+      <a class="wing" href="Vauxhall.dc.html"><span class="dot" style="background:#E1DAD0"></span><span>Vauxhall</span></a>
+      <a class="wing on" href="Product.dc.html"><span class="dot" style="background:#7CBF4E"></span><span>Product</span></a>
+      <a class="wing" href="Security.dc.html"><span class="dot" style="background:#C08457"></span><span>Security</span></a>
+      <a class="wing" href="Social.dc.html"><span class="dot" style="background:#6C8FB8"></span><span>Social</span></a>
+    </div>
+    <div style="padding:14px 12px;flex:1;overflow-y:auto" class="scroll">
+      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Product</div>
+      <div class="navitem on">Dashboard</div>
+      <div class="navitem">Orders</div>
+      <div class="navitem">Inventory</div>
+      <div class="navitem">Stock in Process</div>
+      <div class="navitem">Accounts</div>
+      <div class="navitem">SKU Portfolio</div>
+      <div class="navitem">Sales Overview</div>
+      <div class="navitem">Board Metrics</div>
+      <div class="navitem">Unit Economics</div>
+      <div class="navitem">Alerts and Risks <span style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">4</span></div>
+    </div>
+    <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div><div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div></div>
+      <a href="Home.dc.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;border:1px solid #2E302D;border-radius:3px;padding:7px 11px">Sign out</a>
+    </div>
+  </aside>
+
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">
+      <div>
+        <div style="font-family:'GFS Didot',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">Dashboard</div>
+        <div style="font-size:12px;color:#6E685E;margin-top:2px">Bond commercial spine. Wholesale first, through licensed dispensaries.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge" style="border-color:#2E4A22;color:#7CBF4E"><span class="dot" style="background:#7CBF4E;box-shadow:0 0 8px #7CBF4E;margin-right:6px"></span>On plan</span>
+        <span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>
+      </div>
+    </header>
+
+    <div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">
+
+      <div class="kpigrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div class="card"><div class="lbl">Open orders</div><div class="kpi" style="margin-top:10px">7</div><div style="font-size:12px;color:#6E685E;margin-top:6px">2 in fulfillment . 1 late</div></div>
+        <div class="card"><div class="lbl">Units on hand</div><div class="kpi" style="margin-top:10px">3,140</div><div style="font-size:12px;color:#6E685E;margin-top:6px">across 3 SKUs, 6 lots</div></div>
+        <div class="card"><div class="lbl">Units in process</div><div class="kpi" style="margin-top:10px">1,600</div><div style="font-size:12px;color:#6E685E;margin-top:6px">2 runs . next ready Fri</div></div>
+        <div class="card"><div class="lbl">Shipments this week</div><div class="kpi" style="margin-top:10px">4</div><div style="font-size:12px;color:#6E685E;margin-top:6px">920 units out</div></div>
+        <div class="card"><div class="lbl">Sales month to date</div><div class="kpi" style="margin-top:10px">$84.2k</div><div style="font-size:12px;margin-top:6px"><span class="up">76 percent</span> of $110k plan</div></div>
+        <div class="card"><div class="lbl">Reorder rate</div><div class="kpi" style="margin-top:10px">41 percent</div><div style="font-size:12px;margin-top:6px"><span class="up">up 6 pts</span> vs last month</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:16px">
+
+        <div class="card" style="padding:0">
+          <div style="padding:15px 16px;border-bottom:1px solid #202220;display:flex;justify-content:space-between;align-items:center"><span style="font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0">Open orders</span><span style="font-size:11.5px;color:#6E685E">Calendar . List</span></div>
+          <div style="padding:6px 16px 0;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:#5E5A52;display:grid;grid-template-columns:1.2fr 1fr 1fr 0.9fr;gap:14px;padding-bottom:8px">
+            <span>Account</span><span>Lines</span><span>Promised</span><span>Stage</span>
+          </div>
+          <div class="row"><span>Verdant, Albany</span><span class="hidesm">No. 1 x240, No. 3 x120</span><span class="mono hidesm">Jul 26</span><span><span class="badge" style="border-color:#4A3A2A;color:#C08457">Late</span></span></div>
+          <div class="row"><span>Highline, Brooklyn</span><span class="hidesm">No. 2 x360</span><span class="mono hidesm">Jul 29</span><span><span class="badge">Fulfillment</span></span></div>
+          <div class="row"><span>Northstar, Buffalo</span><span class="hidesm">No. 1 x180</span><span class="mono hidesm">Aug 02</span><span><span class="badge">Confirmed</span></span></div>
+          <div class="row"><span>Solace, Ithaca</span><span class="hidesm">No. 3 x96</span><span class="mono hidesm">Aug 05</span><span><span class="badge">Confirmed</span></span></div>
+          <div class="row" style="border-bottom:none"><span>Meridian, Rochester</span><span class="hidesm">No. 2 x240, No. 1 x120</span><span class="mono hidesm">Aug 09</span><span><span class="badge">Draft</span></span></div>
+        </div>
+
+        <div class="card" style="padding:0">
+          <div style="padding:15px 16px;border-bottom:1px solid #202220"><span style="font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0">Top accounts by velocity</span></div>
+          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Highline, Brooklyn</span><span class="mono" style="color:#8E887C">380 u/mo</span></div><div style="height:5px;background:#20221F;border-radius:3px;margin-top:6px"><div style="width:92%;height:100%;background:#4E8A2B;border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Verdant, Albany</span><span class="mono" style="color:#8E887C">310 u/mo</span></div><div style="height:5px;background:#20221F;border-radius:3px;margin-top:6px"><div style="width:76%;height:100%;background:#4E8A2B;border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Meridian, Rochester</span><span class="mono" style="color:#8E887C">260 u/mo</span></div><div style="height:5px;background:#20221F;border-radius:3px;margin-top:6px"><div style="width:63%;height:100%;background:#4E8A2B;border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Northstar, Buffalo</span><span class="mono" style="color:#8E887C">190 u/mo</span></div><div style="height:5px;background:#20221F;border-radius:3px;margin-top:6px"><div style="width:46%;height:100%;background:#4E8A2B;border-radius:3px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Solace, Ithaca</span><span class="mono" style="color:#8E887C">120 u/mo</span></div><div style="height:5px;background:#20221F;border-radius:3px;margin-top:6px"><div style="width:29%;height:100%;background:#4E8A2B;border-radius:3px"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px">
+        <div class="card"><div class="lbl">No. 1 Dialed</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">1,280</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved 240 . Available 1,040 . 2 lots</div></div>
+        <div class="card"><div class="lbl">No. 2 Unwind</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">1,060</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved 360 . Available 700 . 2 lots</div></div>
+        <div class="card"><div class="lbl">No. 3 Peak . Reserve</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">800</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved 216 . Available 584 . 2 lots</div></div>
+      </div>
+
+    </div>
+
+    <footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">
+      Design preview . mock data . adding a SKU here propagates to inventory, orders, and reporting in the secured build
+    </footer>
+  </main>
+</div>
+</body>
+</html>
