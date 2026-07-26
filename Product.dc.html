@@ -29,6 +29,8 @@
   .kpi { font-family: 'GFS Didot', Didot, serif; font-size: 30px; line-height: 1; color: #E1DAD0; }
   .lbl { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6E685E; }
   .up { color: #7CBF4E; } .down { color: #C08457; }
+  .stamp { font-size: 10.5px; letter-spacing: 0.06em; color: #5E5A52; }
+  .stamp.stale { color: #C08457; }
   .act { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 14px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; background: transparent; cursor: pointer; transition: background .2s, color .2s, border-color .2s; font-family: inherit; }
   .act:hover { background: #20221F; color: #E1DAD0; border-color: #4E4A43; }
   .act.go:hover { border-color: #2E4A22; color: #7CBF4E; }
@@ -44,10 +46,10 @@
   .stepbar { height: 1px; flex: 1; background: #2E302D; }
   .stepbar.done { background: #34502A; }
   .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1E2418; border: 1px solid #3F5A2C; color: #E1DAD0; padding: 12px 22px; border-radius: 4px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1E2418; border: 1px solid #3F5A2C; color: #E1DAD0; padding: 12px 22px; border-radius: 4px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  table.data th { text-align: left; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #5E5A52; padding: 10px 12px; border-bottom: 1px solid #202220; cursor: pointer; }
+  table.data th { text-align: left; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #5E5A52; padding: 10px 12px; border-bottom: 1px solid #202220; }
   table.data td { padding: 10px 12px; border-bottom: 1px solid #1C1E1B; color: #B0A99A; vertical-align: top; }
   table.data tr:hover td { background: #191B19; }
   .bar { height: 6px; background: #20221F; border-radius: 3px; overflow: hidden; }
@@ -67,7 +69,7 @@
   <aside class="rail" style="width:248px;flex-shrink:0;background:#171917;border-right:1px solid #202220;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
     <div style="padding:22px 18px 16px;border-bottom:1px solid #202220">
       <div style="font-family:'GFS Didot',Didot,serif;font-size:22px;letter-spacing:0.34em;padding-left:0.34em;color:#E8E1D5">VAUXHALL</div>
-      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Product . Mini ERP</div>
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Product . Metrc connected</div>
     </div>
     <div style="padding:16px 12px 6px">
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Wings</div>
@@ -80,14 +82,13 @@
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Product</div>
       <a class="navitem" data-view="dashboard" href="#/product/dashboard">Dashboard</a>
       <a class="navitem" data-view="orders" href="#/product/orders">Orders</a>
-      <a class="navitem" data-view="inventory" href="#/product/inventory">Inventory</a>
-      <a class="navitem" data-view="process" href="#/product/process">Stock in Process</a>
+      <a class="navitem" data-view="stock" href="#/product/stock">Stock</a>
+      <a class="navitem" data-view="production" href="#/product/production">Stock in Process</a>
       <a class="navitem" data-view="accounts" href="#/product/accounts">Accounts</a>
-      <a class="navitem" data-view="portfolio" href="#/product/portfolio">SKU Portfolio</a>
-      <a class="navitem" data-view="sales" href="#/product/sales">Sales Overview</a>
-      <a class="navitem" data-view="board" href="#/product/board">Board Metrics</a>
-      <a class="navitem" data-view="economics" href="#/product/economics">Unit Economics</a>
+      <a class="navitem" data-view="sales" href="#/product/sales">Sales</a>
+      <a class="navitem" data-view="skus" href="#/product/skus">SKU Portfolio</a>
       <a class="navitem" data-view="alerts" href="#/product/alerts">Alerts and Risks <span id="alertBadge" style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">0</span></a>
+      <a class="navitem" data-view="trace" href="#/product/trace">Trace <span id="traceChip" style="float:right;background:#20221F;color:#7CBF4E;border-radius:999px;font-size:10px;padding:1px 7px">sync</span></a>
     </div>
     <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
       <div><div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div><div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div></div>
@@ -101,100 +102,194 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// Vauxhall Product mini ERP. In memory mock data layer with a clean seam for a
-// real backend. The commercial spine: wholesale through licensed NY dispensaries.
-// Orders move through a fulfillment state machine that reserves and ships real
-// inventory and rolls into sales, board, and alerts. No em dashes or en dashes
-// anywhere. Refresh resets the ledger by design.
+// Vauxhall Product wing, Metrc connected. In memory mock data with a clean seam.
+// All track and trace goes through TraceProvider; MetrcMockAdapter simulates
+// Metrc Connect for New York seed to sale. The MetrcConnectAdapter swaps in for
+// production behind the same interface; the store and screens never change.
+// Metrc is source of truth for regulatory reality (quantities, UIDs, test status);
+// the ERP is source of truth for commercial reality (price, terms, promises).
+// No em dashes or en dashes anywhere. Refresh resets the ledger by design.
 
 var TODAY = '2026-07-26';
-var STAGES = ['draft','confirmed','fulfillment','shipped','delivered','invoiced','paid'];
-var STAGE_LABEL = { draft:'Draft', confirmed:'Confirmed', fulfillment:'Fulfillment', shipped:'Shipped', delivered:'Delivered', invoiced:'Invoiced', paid:'Paid', cancelled:'Cancelled' };
-var STAGE_COLOR = { draft:'#8E887C', confirmed:'#E3C270', fulfillment:'#86ACE3', shipped:'#7CBF4E', delivered:'#7CBF4E', invoiced:'#B0A99A', paid:'#7FA87A', cancelled:'#C08457' };
+var STAGES = ['draft','confirmed','fulfillment','shipped','delivered','paid'];
+var STAGE_LABEL = { draft:'Draft', confirmed:'Confirmed', fulfillment:'In Fulfillment', shipped:'Shipped', delivered:'Delivered', paid:'Paid', cancelled:'Cancelled' };
+var STAGE_COLOR = { draft:'#8E887C', confirmed:'#E3C270', fulfillment:'#86ACE3', shipped:'#7CBF4E', delivered:'#7CBF4E', paid:'#7FA87A', cancelled:'#C08457' };
 var RESERVING = ['confirmed','fulfillment'];
-var RUN_STAGES = ['pressing','curing','filling','testing','packaging','ready'];
+var RUN_STAGES = ['fresh frozen','washed','pressed','filled','packaged','ready'];
+var TEST_COLOR = { TestPassed:'#7CBF4E', RetestPassed:'#7CBF4E', TestingRequired:'#E3C270', TestFailed:'#D4664C' };
+var PASSING = ['TestPassed','RetestPassed'];
 var LOW_STOCK = 300;
+var DISCREPANCY_TOL = 0.02;
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function money(n){ n = Math.round(n); return '$' + n.toLocaleString(); }
 function moneyK(n){ return '$' + (n/1000).toFixed(1) + 'k'; }
-function dlt(a, b){ return a < b; } // date string less than, ISO sortable
+function dlt(a, b){ return a < b; }
+function clock(){ var d = new Date(); function p(n){ return (n<10?'0':'')+n; } return p(d.getHours())+':'+p(d.getMinutes()); }
+function daysUntil(dateStr){ return Math.round((new Date(dateStr).getTime() - new Date(TODAY).getTime())/86400000); }
 
+// ============ TraceProvider seam ============
+// The production MetrcConnectAdapter would implement this same interface against
+// the real Metrc NY API with a vendor key plus a per licensee user key, license
+// scoped calls, 15 minute scheduled pulls, and explicit confirmed writes only.
+function MetrcMockAdapter(){
+  this.name = 'Metrc Connect (mock)';
+  this.packages = {};   // uid -> { uid, item, metrcQty, testStatus, packageDate, facility }
+  this.facilities = {}; // license -> { license, name, city, status, licenseExpiry }
+  this.transfers = [];  // { manifest, destination, packages, status }
+  this.items = [];
+  this.tags = { packageRemaining: 380, packageThreshold: 500, retailRemaining: 8600, retailThreshold: 2000, unitCost: 0.10 };
+  this.sync = { asOf:'11:05', packages:'11:05', transfers:'11:04', labResults:'09:40', tags:'11:02', next:'11:20', stale:true };
+  this._mfx = 40;
+}
+MetrcMockAdapter.prototype.seedPackage = function(p){ this.packages[p.uid] = p; };
+MetrcMockAdapter.prototype.seedFacility = function(f){ this.facilities[f.license] = f; };
+MetrcMockAdapter.prototype.seedTransfer = function(t){ this.transfers.push(t); };
+MetrcMockAdapter.prototype.getPackages = function(){ var self=this; return Object.keys(this.packages).map(function(k){ return self.packages[k]; }); };
+MetrcMockAdapter.prototype.getPackage = function(uid){ return this.packages[uid] || null; };
+MetrcMockAdapter.prototype.getLabResults = function(uid){ var p = this.packages[uid]; return p ? { uid:uid, status:p.testStatus, panel:'Potency, pesticides, residual solvents, microbials' } : null; };
+MetrcMockAdapter.prototype.getTransfers = function(){ return this.transfers.slice(); };
+MetrcMockAdapter.prototype.getFacilities = function(){ var self=this; return Object.keys(this.facilities).map(function(k){ return self.facilities[k]; }); };
+MetrcMockAdapter.prototype.getFacility = function(license){ return this.facilities[license] || null; };
+MetrcMockAdapter.prototype.getItems = function(){ return this.items.slice(); };
+MetrcMockAdapter.prototype.getTagInventory = function(){ return this.tags; };
+MetrcMockAdapter.prototype.getSyncStatus = function(){ return this.sync; };
+MetrcMockAdapter.prototype.refresh = function(){ var t = clock(); this.sync = { asOf:t, packages:t, transfers:t, labResults:t, tags:t, next:this._plus15(t), stale:false }; return this.sync; };
+MetrcMockAdapter.prototype._plus15 = function(t){ var p=t.split(':'); var m=(+p[0])*60+(+p[1])+15; var h=Math.floor(m/60)%24, mm=m%60; return (h<10?'0':'')+h+':'+(mm<10?'0':'')+mm; };
+MetrcMockAdapter.prototype.createTransferDraft = function(order, destinationLicense){
+  var manifest = '00000' + (++this._mfx) + '-NY';
+  this.transfers.unshift({ manifest:manifest, destination:destinationLicense, packages: order.lines.length, status:'draft', created:clock() });
+  return { manifest:manifest };
+};
+MetrcMockAdapter.prototype.flipLabResult = function(uid){ var p = this.packages[uid]; if (p && p.testStatus==='TestingRequired'){ p.testStatus = 'TestPassed'; return true; } return false; };
+
+var Trace = new MetrcMockAdapter();
+
+// ============ ProductStore ============
 var ProductStore = {
   skus: [], lots: [], accounts: [], orders: [], runs: [], salesHistory: [], plan: 110000,
-  _oid: 6000, _lid: 400, _aid: 20, _rid: 400, _sid: 500,
+  feed: [], findings: [],
+  _oid: 6000, _lid: 400, _aid: 20, _rid: 400, _sid: 500, _uid: 10,
 
   seed: function(){
+    var self = this;
     this.skus = [
-      { id:'no1', name:'No. 1 Dialed', tier:'Everyday', price:24, cogs:9.4, status:'active' },
-      { id:'no2', name:'No. 2 Unwind', tier:'Evening', price:24, cogs:9.8, status:'active' },
-      { id:'no3', name:'No. 3 Peak', tier:'Reserve', price:32, cogs:12.6, status:'active' }
+      { id:'no1', name:'No. 1 Dialed', tier:'Everyday', price:24, cogs:9.4, status:'active', metrcItem:'Bond No. 1 Dialed 0.5g AIO', tokens:['Solventless','Everyday','Sativa lean'], triad:['Bright','Clear','Social'], lifecycle:'Active' },
+      { id:'no2', name:'No. 2 Unwind', tier:'Evening', price:24, cogs:9.8, status:'active', metrcItem:'Bond No. 2 Unwind 0.5g AIO', tokens:['Solventless','Evening','Indica lean'], triad:['Calm','Round','Quiet'], lifecycle:'Active' },
+      { id:'no3', name:'No. 3 Peak', tier:'Reserve', price:32, cogs:12.6, status:'active', metrcItem:'Bond No. 3 Peak Reserve 0.5g AIO', tokens:['Solventless','Reserve','Single source'], triad:['Deep','Full','Rare'], lifecycle:'Reserve' }
     ];
-    this.lots = [
-      { id:'LOT-3101', skuId:'no1', qty:700, mfg:'2026-06-14', coa:'passed', coaExpiry:'2027-06-14', location:'Vault A' },
-      { id:'LOT-3102', skuId:'no1', qty:580, mfg:'2026-07-02', coa:'passed', coaExpiry:'2027-07-02', location:'Vault A' },
-      { id:'LOT-3110', skuId:'no2', qty:600, mfg:'2026-06-20', coa:'passed', coaExpiry:'2027-06-20', location:'Vault A' },
-      { id:'LOT-3111', skuId:'no2', qty:460, mfg:'2026-07-05', coa:'passed', coaExpiry:'2027-07-05', location:'Vault B' },
-      { id:'LOT-3120', skuId:'no3', qty:500, mfg:'2026-06-28', coa:'passed', coaExpiry:'2027-06-28', location:'Vault B' },
-      { id:'LOT-3121', skuId:'no3', qty:300, mfg:'2026-07-18', coa:'pending', coaExpiry:'2027-07-18', location:'Quarantine' }
+    Trace.items = this.skus.map(function(s){ return { name:s.metrcItem, sku:s.id }; });
+
+    // lots with Metrc packages; L3 carries a seeded discrepancy, L6 is TestingRequired
+    this.seedLot('no1', 700, 'TestPassed', '2026-06-14', 'Vault A', 700);
+    this.seedLot('no1', 580, 'TestPassed', '2026-07-02', 'Vault A', 580);
+    this.seedLot('no2', 600, 'TestPassed', '2026-06-20', 'Vault A', 640);   // discrepancy: Metrc 640 vs ERP 600
+    this.seedLot('no2', 460, 'TestPassed', '2026-07-05', 'Vault B', 460);
+    this.seedLot('no3', 500, 'TestPassed', '2026-06-28', 'Vault B', 500);
+    this.seedLot('no3', 300, 'TestingRequired', '2026-07-18', 'Quarantine', 300); // test gate demo
+
+    // facilities and accounts (Metrc facility status + license expiry)
+    var fac = [
+      { id:'ac1', name:'Verdant', city:'Albany', license:'OCM-RETAIL-0192', expiry:'2027-03-01', mfac:'active', terms:'Net 30', credit:20000, balance:6240, velocity:310, status:'active' },
+      { id:'ac2', name:'Highline', city:'Brooklyn', license:'OCM-RETAIL-0074', expiry:'2027-01-15', mfac:'active', terms:'Net 30', credit:30000, balance:8640, velocity:380, status:'active' },
+      { id:'ac3', name:'Northstar', city:'Buffalo', license:'OCM-RETAIL-0231', expiry:'2026-12-20', mfac:'active', terms:'Net 15', credit:15000, balance:4320, velocity:190, status:'active' },
+      { id:'ac4', name:'Solace', city:'Ithaca', license:'OCM-RETAIL-0308', expiry:'2027-05-01', mfac:'active', terms:'COD', credit:8000, balance:0, velocity:120, status:'active' },
+      { id:'ac5', name:'Meridian', city:'Rochester', license:'OCM-RETAIL-0141', expiry:'2026-09-08', mfac:'active', terms:'Net 30', credit:18000, balance:9200, velocity:260, status:'active' },
+      { id:'ac6', name:'Halcyon', city:'Kingston', license:'OCM-RETAIL-0355', expiry:'2027-06-01', mfac:'inactive', terms:'COD', credit:6000, balance:0, velocity:0, status:'prospect' }
     ];
-    this.accounts = [
-      { id:'ac1', name:'Verdant', city:'Albany', license:'OCM-RETAIL-0192', terms:'Net 30', credit:20000, balance:6240, status:'active', velocity:310 },
-      { id:'ac2', name:'Highline', city:'Brooklyn', license:'OCM-RETAIL-0074', terms:'Net 30', credit:30000, balance:8640, status:'active', velocity:380 },
-      { id:'ac3', name:'Northstar', city:'Buffalo', license:'OCM-RETAIL-0231', terms:'Net 15', credit:15000, balance:4320, status:'active', velocity:190 },
-      { id:'ac4', name:'Solace', city:'Ithaca', license:'OCM-RETAIL-0308', terms:'COD', credit:8000, balance:0, status:'active', velocity:120 },
-      { id:'ac5', name:'Meridian', city:'Rochester', license:'OCM-RETAIL-0141', terms:'Net 30', credit:18000, balance:19200, status:'hold', velocity:260 },
-      { id:'ac6', name:'Lantern', city:'Syracuse', license:'OCM-RETAIL-0266', terms:'Net 15', credit:12000, balance:3600, status:'active', velocity:150 },
-      { id:'ac7', name:'Halcyon', city:'Kingston', license:'OCM-RETAIL-0355', terms:'COD', credit:6000, balance:0, status:'prospect', velocity:0 }
-    ];
+    this.accounts = fac.map(function(a){ return { id:a.id, name:a.name, city:a.city, license:a.license, licenseExpiry:a.expiry, terms:a.terms, credit:a.credit, balance:a.balance, velocity:a.velocity, status:a.status }; });
+    fac.forEach(function(a){ Trace.seedFacility({ license:a.license, name:a.name, city:a.city, status:a.mfac, licenseExpiry:a.expiry }); });
+
+    // orders; open ones carry lot allocations
     this.orders = [];
-    this.addOrder('ac1', [{skuId:'no1',qty:240},{skuId:'no3',qty:120}], '2026-07-24', 'fulfillment');
-    this.addOrder('ac2', [{skuId:'no2',qty:360}], '2026-07-29', 'fulfillment');
-    this.addOrder('ac3', [{skuId:'no1',qty:180}], '2026-08-02', 'confirmed');
-    this.addOrder('ac4', [{skuId:'no3',qty:96}], '2026-08-05', 'confirmed');
-    this.addOrder('ac5', [{skuId:'no2',qty:240},{skuId:'no1',qty:120}], '2026-08-09', 'draft');
-    this.addOrder('ac6', [{skuId:'no1',qty:300}], '2026-08-12', 'confirmed');
-    this.addOrder('ac7', [{skuId:'no3',qty:144}], '2026-08-14', 'draft');
-    // shipped and settled history for sales and board
-    this.addOrder('ac2', [{skuId:'no1',qty:300}], '2026-07-22', 'delivered', '2026-07-22');
-    this.addOrder('ac1', [{skuId:'no2',qty:260}], '2026-07-24', 'invoiced', '2026-07-24');
-    this.addOrder('ac5', [{skuId:'no3',qty:180}], '2026-06-28', 'paid', '2026-06-28');
-    this.addOrder('ac3', [{skuId:'no1',qty:220}], '2026-07-11', 'paid', '2026-07-11');
+    this.seedOrder('ac1', [{skuId:'no1',qty:240},{skuId:'no3',qty:120}], '2026-07-24', 'fulfillment', '0000012-NY');
+    this.seedOrder('ac2', [{skuId:'no2',qty:360}], '2026-07-29', 'fulfillment', '0000013-NY');
+    this.seedOrder('ac3', [{skuId:'no1',qty:180}], '2026-08-02', 'confirmed', '');
+    this.seedOrder('ac4', [{skuId:'no3',qty:96}], '2026-08-05', 'confirmed', '');
+    this.seedOrder('ac5', [{skuId:'no2',qty:240},{skuId:'no1',qty:120}], '2026-08-09', 'draft', '');
+    // settled history for sales and board
+    this.pushOrder('ac2', [{skuId:'no1',qty:300}], '2026-07-22', 'delivered', '0000009-NY', '2026-07-22');
+    this.pushOrder('ac1', [{skuId:'no2',qty:260}], '2026-07-24', 'delivered', '0000010-NY', '2026-07-24');
+    this.pushOrder('ac5', [{skuId:'no3',qty:180}], '2026-06-28', 'paid', '0000006-NY', '2026-06-28');
+    this.pushOrder('ac3', [{skuId:'no1',qty:220}], '2026-07-11', 'paid', '0000007-NY', '2026-07-11');
 
     this.runs = [
-      { id:'RUN-401', skuId:'no1', qty:900, stage:'curing', ready:'2026-07-31', started:'2026-07-16' },
-      { id:'RUN-402', skuId:'no2', qty:700, stage:'filling', ready:'2026-08-05', started:'2026-07-19' }
+      { id:'RUN-401', skuId:'no1', qty:900, stage:'pressed', ready:'2026-07-31', started:'2026-07-16', yield:'62 percent' },
+      { id:'RUN-402', skuId:'no2', qty:700, stage:'filled', ready:'2026-08-05', started:'2026-07-19', yield:'59 percent' }
     ];
-    this.salesHistory = [
-      { month:'Mar', revenue:58200 }, { month:'Apr', revenue:66400 }, { month:'May', revenue:71900 }, { month:'Jun', revenue:79600 }
-    ];
+    this.salesHistory = [ { month:'Mar', revenue:58200 }, { month:'Apr', revenue:66400 }, { month:'May', revenue:71900 }, { month:'Jun', revenue:79600 } ];
+
+    Trace.seedTransfer({ manifest:'0000012-NY', destination:'OCM-RETAIL-0192', packages:2, status:'accepted', created:'07-22' });
+    Trace.seedTransfer({ manifest:'0000013-NY', destination:'OCM-RETAIL-0074', packages:1, status:'in transit', created:'07-24' });
+
+    // detect seeded discrepancies and auto raise investigations
+    this.scanDiscrepancies();
   },
 
-  // ---- creation ----
-  addOrder: function(accountId, lines, promised, stage, shippedAt){
-    var o = { id:'SO-'+(++this._oid), accountId:accountId, lines:lines, promised:promised, stage:stage||'draft', createdAt:TODAY, shippedAt:shippedAt||'', total:this.orderTotal(lines) };
+  seedLot: function(skuId, qty, testStatus, packageDate, location, metrcQty){
+    var uid = this.mkUid();
+    this.lots.push({ id:'LOT-'+(++this._lid), uid:uid, skuId:skuId, qty:qty, reserved:0, packageDate:packageDate, location:location, coa:'COA-'+uid.slice(-4) });
+    Trace.seedPackage({ uid:uid, item:this.sku(skuId).metrcItem, metrcQty:(metrcQty==null?qty:metrcQty), testStatus:testStatus, packageDate:packageDate, facility:'OCM-PROC-0001' });
+    return uid;
+  },
+  mkUid: function(){ return '1A4FF0100000022' + String(1000000 + (++this._uid)); },
+
+  pushOrder: function(accountId, lines, promised, stage, manifest, shippedAt){
+    var o = { id:'SO-'+(++this._oid), accountId:accountId, lines:lines.map(function(l){ return { skuId:l.skuId, qty:l.qty, allocations:[] }; }), promised:promised, stage:stage, createdAt:TODAY, shippedAt:shippedAt||'', manifest:manifest||'', total:this.orderTotal(lines) };
     this.orders.push(o); return o;
   },
-  orderTotal: function(lines){ var self=this; return lines.reduce(function(a,l){ var s = self.sku(l.skuId); return a + (s? s.price:0)*l.qty; },0); },
+  seedOrder: function(accountId, lines, promised, stage, manifest){
+    var o = this.pushOrder(accountId, lines, promised, stage, manifest, '');
+    if (RESERVING.indexOf(stage)!==-1){ this.allocate(o); }
+    return o;
+  },
+  orderTotal: function(lines){ var self=this; return lines.reduce(function(a,l){ var s=self.sku(l.skuId); return a + (s?s.price:0)*l.qty; },0); },
   orderUnits: function(o){ return o.lines.reduce(function(a,l){ return a+l.qty; },0); },
-  addAccount: function(name, city, license, terms, credit){ var a = { id:'ac'+(++this._aid), name:name, city:city, license:license||'OCM-RETAIL-PENDING', terms:terms||'COD', credit:+credit||6000, balance:0, status:'prospect', velocity:0 }; this.accounts.push(a); return a; },
-  addSku: function(name, tier, price, cogs){ var id = 'sku'+(++this._sid); this.skus.push({ id:id, name:name, tier:tier||'Everyday', price:+price||24, cogs:+cogs||10, status:'active' }); return id; },
-  addLot: function(skuId, qty, coa){ var l = { id:'LOT-'+(++this._lid), skuId:skuId, qty:+qty, mfg:TODAY, coa:coa||'passed', coaExpiry:'2027-07-26', location:'Vault A' }; this.lots.push(l); return l; },
-  addRun: function(skuId, qty, ready){ var r = { id:'RUN-'+(++this._rid), skuId:skuId, qty:+qty, stage:'pressing', ready:ready||'2026-08-20', started:TODAY }; this.runs.push(r); return r; },
+
+  // allocation reserves from passing lots, FIFO; returns { ok, short:[names] }
+  allocate: function(o){
+    var self = this, short = [];
+    o.lines.forEach(function(l){
+      if (l.allocations.length) return;
+      var need = l.qty;
+      var lots = self.lots.filter(function(x){ return x.skuId===l.skuId && self.isPassing(x) && self.availLot(x)>0; }).sort(function(a,b){ return a.packageDate<b.packageDate?-1:1; });
+      for (var i=0;i<lots.length && need>0;i++){ var take = Math.min(self.availLot(lots[i]), need); lots[i].reserved += take; l.allocations.push({ uid:lots[i].uid, qty:take }); need -= take; }
+      if (need>0) short.push(self.sku(l.skuId).name);
+    });
+    return { ok: short.length===0, short: short };
+  },
+  releaseAllocations: function(o){ var self=this; o.lines.forEach(function(l){ l.allocations.forEach(function(a){ var lot=self.lotByUid(a.uid); if (lot) lot.reserved = Math.max(0, lot.reserved - a.qty); }); l.allocations = []; }); },
 
   // ---- lookups and derived ----
   sku: function(id){ return this.skus.filter(function(s){ return s.id===id; })[0]; },
   account: function(id){ return this.accounts.filter(function(a){ return a.id===id; })[0]; },
   order: function(id){ return this.orders.filter(function(o){ return o.id===id; })[0]; },
+  lotByUid: function(uid){ return this.lots.filter(function(l){ return l.uid===uid; })[0]; },
+  status: function(lot){ var p = Trace.getPackage(lot.uid); return p ? p.testStatus : 'Unknown'; },
+  isPassing: function(lot){ return PASSING.indexOf(this.status(lot))!==-1; },
+  availLot: function(lot){ return lot.qty - lot.reserved; },
   onHand: function(skuId){ return this.lots.filter(function(l){ return l.skuId===skuId; }).reduce(function(a,l){ return a+l.qty; },0); },
-  onHandPassed: function(skuId){ return this.lots.filter(function(l){ return l.skuId===skuId && l.coa==='passed'; }).reduce(function(a,l){ return a+l.qty; },0); },
-  reserved: function(skuId){
-    var n = 0; this.orders.forEach(function(o){ if (RESERVING.indexOf(o.stage)!==-1) o.lines.forEach(function(l){ if (l.skuId===skuId) n += l.qty; }); }); return n;
-  },
+  reserved: function(skuId){ return this.lots.filter(function(l){ return l.skuId===skuId; }).reduce(function(a,l){ return a+l.reserved; },0); },
   available: function(skuId){ return this.onHand(skuId) - this.reserved(skuId); },
+  allocatable: function(skuId){ var self=this; return this.lots.filter(function(l){ return l.skuId===skuId && self.isPassing(l); }).reduce(function(a,l){ return a+self.availLot(l); },0); },
   unitsInProcess: function(){ return this.runs.reduce(function(a,r){ return a+r.qty; },0); },
   isLate: function(o){ return RESERVING.indexOf(o.stage)!==-1 && dlt(o.promised, TODAY); },
   openOrders: function(){ return this.orders.filter(function(o){ return ['draft','confirmed','fulfillment','shipped'].indexOf(o.stage)!==-1; }); },
+
+  // ---- gates ----
+  accountGate: function(accountId){
+    var a = this.account(accountId); if (!a) return { ok:false, reason:'Account not found' };
+    if (dlt(a.licenseExpiry, TODAY)) return { ok:false, reason:'License expired ('+a.licenseExpiry+')' };
+    var f = Trace.getFacility(a.license);
+    if (!f || f.status!=='active') return { ok:false, reason:'Metrc facility not active for '+a.license };
+    return { ok:true, reason:'' };
+  },
+  reserveLot: function(uid, qty){
+    var lot = this.lotByUid(uid); if (!lot) return { ok:false, reason:'Lot not found' };
+    if (!this.isPassing(lot)) return { ok:false, reason:'Metrc status '+this.status(lot) };
+    if (qty > this.availLot(lot)) return { ok:false, reason:'Exceeds available ('+this.availLot(lot)+')' };
+    lot.reserved += qty; return { ok:true, reason:'' };
+  },
 
   // ---- order state machine ----
   nextStage: function(stage){ var i = STAGES.indexOf(stage); return i>=0 && i<STAGES.length-1 ? STAGES[i+1] : null; },
@@ -203,40 +298,82 @@ var ProductStore = {
     var to = this.nextStage(o.stage); if (!to) return { ok:false, msg:'Already settled' };
     var self = this;
     if (to==='confirmed'){
-      var short = o.lines.filter(function(l){ return self.available(l.skuId) < l.qty; });
-      if (short.length){ return { ok:false, msg:'Insufficient available stock for ' + short.map(function(l){ return self.sku(l.skuId).name; }).join(', ') }; }
+      var gate = this.accountGate(o.accountId); if (!gate.ok) return { ok:false, msg:'Gate refused: '+gate.reason };
+      var alloc = this.allocate(o);
+      if (!alloc.ok){ this.releaseAllocations(o); return { ok:false, msg:'Test gate or stock: no passable lots for '+alloc.short.join(', ') }; }
     }
     if (to==='shipped'){
-      var acc = this.account(o.accountId);
-      var badCoa = o.lines.filter(function(l){ return self.onHandPassed(l.skuId) < l.qty; });
-      if (badCoa.length){ return { ok:false, msg:'Blocked. Not enough passed-COA stock for ' + badCoa.map(function(l){ return self.sku(l.skuId).name; }).join(', ') }; }
-      // decrement lots FIFO from passed lots
-      o.lines.forEach(function(l){ self.consume(l.skuId, l.qty); });
-      o.shippedAt = TODAY;
-      if (acc) acc.balance += o.total;
+      if (!o.manifest) return { ok:false, msg:'Record a Metrc transfer manifest before shipping' };
+      o.lines.forEach(function(l){ l.allocations.forEach(function(a){ var lot=self.lotByUid(a.uid); if (lot){ lot.qty-=a.qty; lot.reserved-=a.qty; var p=Trace.getPackage(a.uid); if (p) p.metrcQty=Math.max(0,p.metrcQty-a.qty); } }); });
+      this.lots = this.lots.filter(function(l){ return l.qty>0; });
+      o.shippedAt = TODAY; var acc = this.account(o.accountId); if (acc) acc.balance += o.total;
     }
     if (to==='paid'){ var acc2 = this.account(o.accountId); if (acc2) acc2.balance = Math.max(0, acc2.balance - o.total); }
     o.stage = to;
     return { ok:true, msg:'Advanced to ' + STAGE_LABEL[to] };
   },
-  cancelOrder: function(id){ var o = this.order(id); if (!o) return false; if (['shipped','delivered','invoiced','paid'].indexOf(o.stage)!==-1) return false; o.stage='cancelled'; return true; },
-  consume: function(skuId, qty){
-    var lots = this.lots.filter(function(l){ return l.skuId===skuId && l.coa==='passed'; }).sort(function(a,b){ return a.mfg<b.mfg?-1:1; });
-    var need = qty;
-    for (var i=0;i<lots.length && need>0;i++){ var take = Math.min(lots[i].qty, need); lots[i].qty -= take; need -= take; }
-    this.lots = this.lots.filter(function(l){ return l.qty>0; });
+  cancelOrder: function(id){ var o = this.order(id); if (!o) return false; if (['shipped','delivered','paid'].indexOf(o.stage)!==-1) return false; this.releaseAllocations(o); o.stage='cancelled'; return true; },
+  drawManifest: function(id){ var o = this.order(id); if (!o) return null; var a = this.account(o.accountId); var res = Trace.createTransferDraft(o, a.license); o.manifest = res.manifest; return res.manifest; },
+
+  // ---- creation ----
+  createOrder: function(accountId, lines, promised){
+    var gate = this.accountGate(accountId); if (!gate.ok) return { ok:false, msg:'Blocked: '+gate.reason };
+    var o = this.pushOrder(accountId, lines, promised, 'draft', '', ''); return { ok:true, order:o };
+  },
+  addAccount: function(name, city, license, terms, credit){
+    var a = { id:'ac'+(++this._aid), name:name, city:city, license:license||'OCM-RETAIL-PENDING', licenseExpiry:'2027-12-31', terms:terms||'COD', credit:+credit||6000, balance:0, velocity:0, status:'prospect' };
+    this.accounts.push(a);
+    Trace.seedFacility({ license:a.license, name:name, city:city, status:'pending', licenseExpiry:a.licenseExpiry });
+    return a;
+  },
+  addSku: function(name, tier, price, cogs){
+    var id = 'sku'+(++this._sid); var item = 'Bond '+name+' 0.5g AIO';
+    this.skus.push({ id:id, name:name, tier:tier||'Everyday', price:+price||24, cogs:+cogs||10, status:'active', metrcItem:item, tokens:['Solventless',tier||'Everyday'], triad:['New','Clean','Real'], lifecycle:'Trial' });
+    Trace.items.push({ name:item, sku:id }); return id;
+  },
+  addRun: function(skuId, qty, ready){ var r = { id:'RUN-'+(++this._rid), skuId:skuId, qty:+qty, stage:'fresh frozen', ready:ready||'2026-08-20', started:TODAY, yield:'estimated' }; this.runs.push(r); return r; },
+  advanceRun: function(id){ var r = this.runs.filter(function(x){ return x.id===id; })[0]; if (!r) return false; var i = RUN_STAGES.indexOf(r.stage); if (i<RUN_STAGES.length-1){ r.stage = RUN_STAGES[i+1]; return true; } return false; },
+  completeRun: function(id){
+    var r = this.runs.filter(function(x){ return x.id===id; })[0]; if (!r || r.stage!=='ready') return null;
+    var uid = this.seedLot(r.skuId, r.qty, 'TestingRequired', TODAY, 'Vault A', r.qty);
+    this.runs = this.runs.filter(function(x){ return x.id!==id; });
+    this.emit('FEED', 'Run '+r.id+' packaged into '+uid+' . Metrc status TestingRequired');
+    return uid;
   },
 
-  // ---- runs ----
-  advanceRun: function(id){ var r = this.runs.filter(function(x){ return x.id===id; })[0]; if (!r) return false; var i = RUN_STAGES.indexOf(r.stage); if (i<RUN_STAGES.length-1){ r.stage = RUN_STAGES[i+1]; return true; } return false; },
-  receiveRun: function(id){ var r = this.runs.filter(function(x){ return x.id===id; })[0]; if (!r || r.stage!=='ready') return false; this.addLot(r.skuId, r.qty, 'passed'); this.runs = this.runs.filter(function(x){ return x.id!==id; }); return true; },
+  // ---- discrepancy and findings ----
+  discrepancies: function(){
+    var self = this, out = [];
+    this.lots.forEach(function(l){ var p = Trace.getPackage(l.uid); if (!p) return; var v = p.metrcQty===0 && l.qty===0 ? 0 : Math.abs(p.metrcQty - l.qty) / Math.max(1, p.metrcQty); out.push({ uid:l.uid, sku:self.sku(l.skuId).name, erp:l.qty, metrc:p.metrcQty, variance:v, beyond: v>DISCREPANCY_TOL }); });
+    return out;
+  },
+  scanDiscrepancies: function(){
+    var self = this;
+    this.discrepancies().filter(function(d){ return d.beyond; }).forEach(function(d){
+      if (self.findings.filter(function(f){ return f.uid===d.uid && f.state==='open'; }).length) return;
+      self.openInvestigation(d.uid);
+    });
+  },
+  openInvestigation: function(uid){
+    var d = this.discrepancies().filter(function(x){ return x.uid===uid; })[0]; if (!d) return false;
+    if (this.findings.filter(function(f){ return f.uid===uid && f.state==='open'; }).length) return false;
+    this.findings.unshift({ id:'FND-'+(this.findings.length+1), owner:'Felix', kind:'Metrc discrepancy', uid:uid, text:d.sku+' '+d.uid+' ERP '+d.erp+' vs Metrc '+d.metrc+' ('+Math.round(d.variance*100)+' percent)', state:'open', time:clock() });
+    this.emit('ALERT', 'P1: inventory discrepancy beyond tolerance on '+d.sku+' '+uid+', Felix investigation opened');
+    return true;
+  },
+  resolveInvestigation: function(uid){
+    var f = this.findings.filter(function(x){ return x.uid===uid && x.state==='open'; })[0]; if (!f) return false;
+    var lot = this.lotByUid(uid); var p = Trace.getPackage(uid); if (lot && p) lot.qty = p.metrcQty; // reconcile ERP to Metrc paper
+    f.state='resolved'; this.emit('FEED', 'Discrepancy on '+uid+' reconciled to Metrc, finding closed'); return true;
+  },
+  emit: function(type, text){ this.feed.unshift({ id:'ev'+(this.feed.length+1), time:clock(), type:type, text:text }); },
 
   // ---- reporting ----
   revenueMTD: function(){ return this.orders.filter(function(o){ return o.shippedAt && o.shippedAt.indexOf('2026-07')===0; }).reduce(function(a,o){ return a+o.total; },0); },
-  shipmentsThisWeek: function(){ return this.orders.filter(function(o){ return o.shippedAt && dlt('2026-07-19', o.shippedAt) || o.shippedAt==='2026-07-19'; }); },
-  revenueBySku: function(){ var out = {}; var self=this; this.skus.forEach(function(s){ out[s.id]=0; }); this.orders.forEach(function(o){ if (o.shippedAt) o.lines.forEach(function(l){ var s=self.sku(l.skuId); if (s) out[l.skuId]=(out[l.skuId]||0)+s.price*l.qty; }); }); return out; },
-  revenueByAccount: function(){ var out = {}; var self=this; this.orders.forEach(function(o){ if (o.shippedAt) out[o.accountId]=(out[o.accountId]||0)+o.total; }); return out; },
-  grossMargin: function(){ var self=this; var rev=0, cost=0; this.orders.forEach(function(o){ if (o.shippedAt) o.lines.forEach(function(l){ var s=self.sku(l.skuId); if (s){ rev+=s.price*l.qty; cost+=s.cogs*l.qty; } }); }); return rev? (rev-cost)/rev : 0; },
+  shipmentsThisWeek: function(){ return this.orders.filter(function(o){ return o.shippedAt && (dlt('2026-07-19', o.shippedAt) || o.shippedAt==='2026-07-19'); }); },
+  revenueBySku: function(){ var out={}, self=this; this.skus.forEach(function(s){ out[s.id]=0; }); this.orders.forEach(function(o){ if (o.shippedAt) o.lines.forEach(function(l){ var s=self.sku(l.skuId); if (s) out[l.skuId]=(out[l.skuId]||0)+s.price*l.qty; }); }); return out; },
+  revenueByAccount: function(){ var out={}, self=this; this.orders.forEach(function(o){ if (o.shippedAt) out[o.accountId]=(out[o.accountId]||0)+o.total; }); return out; },
+  grossMargin: function(){ var self=this, rev=0, cost=0; this.orders.forEach(function(o){ if (o.shippedAt) o.lines.forEach(function(l){ var s=self.sku(l.skuId); if (s){ rev+=s.price*l.qty; cost+=s.cogs*l.qty; } }); }); return rev? (rev-cost)/rev : 0; },
   arOutstanding: function(){ return this.accounts.reduce(function(a,x){ return a+x.balance; },0); },
   reorderRate: function(){ return 0.41; },
 
@@ -244,10 +381,13 @@ var ProductStore = {
   alerts: function(){
     var self = this, out = [];
     this.orders.forEach(function(o){ if (self.isLate(o)){ var a=self.account(o.accountId); out.push({ level:'high', kind:'Late order', text:o.id+' for '+a.name+', '+a.city+' promised '+o.promised, view:'orders' }); } });
-    this.skus.forEach(function(s){ if (s.status==='active' && self.available(s.id) < LOW_STOCK){ out.push({ level:'high', kind:'Low stock', text:s.name+' available '+self.available(s.id)+' below '+LOW_STOCK, view:'inventory' }); } });
-    this.accounts.forEach(function(a){ if (a.balance > a.credit){ out.push({ level:'high', kind:'Credit hold', text:a.name+', '+a.city+' balance '+money(a.balance)+' over '+money(a.credit)+' limit', view:'accounts' }); } });
-    this.lots.forEach(function(l){ if (l.coa==='pending'){ out.push({ level:'medium', kind:'COA pending', text:l.id+' ('+self.sku(l.skuId).name+') '+l.qty+' units in quarantine', view:'inventory' }); } if (l.coa==='expired'){ out.push({ level:'high', kind:'COA expired', text:l.id+' expired, quarantine '+l.qty+' units', view:'inventory' }); } });
-    this.runs.forEach(function(r){ if (dlt(r.ready, TODAY) && r.stage!=='ready'){ out.push({ level:'medium', kind:'Run behind', text:r.id+' ('+self.sku(r.skuId).name+') due '+r.ready+', still '+r.stage, view:'process' }); } });
+    this.skus.forEach(function(s){ if (s.status==='active' && self.available(s.id) < LOW_STOCK){ out.push({ level:'high', kind:'Low stock', text:s.name+' available '+self.available(s.id)+' below velocity cover', view:'stock' }); } });
+    this.lots.forEach(function(l){ if (dlt(l.packageDate, '2026-05-01')){ out.push({ level:'medium', kind:'Aging lot', text:l.uid+' packaged '+l.packageDate, view:'stock' }); } });
+    this.runs.forEach(function(r){ if (dlt(r.ready, TODAY) && r.stage!=='ready'){ out.push({ level:'medium', kind:'Late run', text:r.id+' ('+self.sku(r.skuId).name+') due '+r.ready+', still '+r.stage, view:'production' }); } });
+    this.accounts.forEach(function(a){ var d=daysUntil(a.licenseExpiry); if (d>=0 && d<=60){ out.push({ level:'high', kind:'License expiry', text:a.name+', '+a.city+' license expires in '+d+' days', view:'accounts' }); } });
+    this.accounts.forEach(function(a){ if (a.balance > a.credit){ out.push({ level:'high', kind:'Receivable', text:a.name+' balance '+money(a.balance)+' over '+money(a.credit), view:'accounts' }); } });
+    var tags = Trace.getTagInventory(); if (tags.packageRemaining < tags.packageThreshold){ out.push({ level:'high', kind:'Low Metrc tags', text:'Package UIDs '+tags.packageRemaining+' below threshold '+tags.packageThreshold, view:'trace' }); }
+    this.findings.filter(function(f){ return f.state==='open'; }).forEach(function(f){ out.push({ level:'high', kind:'Discrepancy', text:f.text, view:'trace' }); });
     return out;
   },
 
@@ -273,14 +413,10 @@ var ProductStore = {
 var main = document.getElementById('main');
 var toastEl = document.getElementById('toast');
 var toastTimer = null;
-function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2600); }
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3000); }
 
-// UI state
-var ordFilter = null, ordSel = null;
-var invSel = null;
-var acctSel = null;
+var ordFilter = null, ordSel = null, acctSel = null, salesTab = 'sku', boardView = false;
 var newOrder = { accountId:'', lines:[], promised:'2026-08-15' };
-var salesTab = 'sku';
 
 function headerBar(title, subtitle, right){
   return '<header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">'
@@ -290,306 +426,288 @@ function headerBar(title, subtitle, right){
 }
 function previewFooter(note){ return '<footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">'+esc(note)+'</footer>'; }
 function pv(){ return '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>'; }
-function onPlan(){ var n = ProductStore.kpis().late; return n? '<span class="badge" style="border-color:#4A3A2A;color:#C08457"><span class="dot" style="background:#C08457;margin-right:6px"></span>'+n+' late</span>' : '<span class="badge" style="border-color:#2E4A22;color:#7CBF4E"><span class="dot" style="background:#7CBF4E;box-shadow:0 0 8px #7CBF4E;margin-right:6px"></span>On plan</span>'; }
 function scroller(inner){ return '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">'+inner+'</div>'; }
 function kpiCard(label, val, sub){ return '<div class="card"><div class="lbl">'+esc(label)+'</div><div class="kpi" style="margin-top:10px">'+esc(val)+'</div>'+(sub?'<div style="font-size:12px;color:#6E685E;margin-top:6px">'+sub+'</div>':'')+'</div>'; }
 function stageChip(st){ return '<span class="badge" style="border-color:'+STAGE_COLOR[st]+'55;color:'+STAGE_COLOR[st]+'">'+esc(STAGE_LABEL[st])+'</span>'; }
 function lateFlag(){ return '<span class="badge" style="border-color:#4A3A2A;color:#D4664C">Late</span>'; }
+function testBadge(status){ return '<span class="badge" style="border-color:'+(TEST_COLOR[status]||'#33352F')+'55;color:'+(TEST_COLOR[status]||'#B0A99A')+'">'+esc(status)+'</span>'; }
+function metrcStamp(){ var s = Trace.getSyncStatus(); return '<span class="stamp'+(s.stale?' stale':'')+'">Metrc as of '+esc(s.asOf)+(s.stale?' . stale':'')+'</span>'; }
+function kv(k,v){ return '<div><div class="lbl">'+esc(k)+'</div><div style="color:#B0A99A;margin-top:4px">'+esc(v)+'</div></div>'; }
+function lineText(o){ return o.lines.map(function(l){ var s = ProductStore.sku(l.skuId); return (s?s.name.replace('No. ','No.'):l.skuId)+' x'+l.qty; }).join(', '); }
 function setRailActive(view){
   document.querySelectorAll('.navitem').forEach(function(n){ n.classList.toggle('on', n.getAttribute('data-view')===view); });
   var b = document.getElementById('alertBadge'); if (b){ var c = ProductStore.alerts().length; b.textContent = c; b.style.display = c? '' : 'none'; }
+  var tc = document.getElementById('traceChip'); if (tc){ var s = Trace.getSyncStatus(); tc.textContent = s.stale? 'stale' : 'sync'; tc.style.color = s.stale? '#C08457' : '#7CBF4E'; tc.style.background = s.stale? '#2A2216' : '#20221F'; }
 }
 
 // ---------- 1. Dashboard ----------
 function renderDashboard(){
-  var k = ProductStore.kpis();
-  var head = headerBar('Dashboard', 'Bond commercial spine. Wholesale first, through licensed dispensaries.', onPlan()+pv());
+  var k = ProductStore.kpis(); var s = Trace.getSyncStatus();
+  var syncChip = '<a class="badge" href="#/product/trace" style="border-color:'+(s.stale?'#4A3A2A;color:#C08457':'#2E4A22;color:#7CBF4E')+'"><span class="dot" style="background:'+(s.stale?'#C08457':'#7CBF4E')+';margin-right:6px"></span>Trace '+(s.stale?'stale':'green')+'</a>';
+  var head = headerBar('Dashboard', 'Bond commercial spine. Wholesale through licensed dispensaries, Metrc reported.', syncChip+pv());
   var kpis = '<div class="kpigrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">'
-    + '<a class="card kpiLink" href="#/product/orders"><div class="lbl">Open orders</div><div class="kpi" style="margin-top:10px">'+k.openOrders+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+k.inFulfillment+' in fulfillment . '+k.late+' late</div></a>'
-    + '<a class="card kpiLink" href="#/product/inventory"><div class="lbl">Units on hand</div><div class="kpi" style="margin-top:10px">'+k.onHand.toLocaleString()+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">across '+ProductStore.skus.length+' SKUs, '+k.lots+' lots</div></a>'
-    + '<a class="card kpiLink" href="#/product/process"><div class="lbl">Units in process</div><div class="kpi" style="margin-top:10px">'+k.inProcess.toLocaleString()+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+k.runs+' runs</div></a>'
-    + '<a class="card kpiLink" href="#/product/orders"><div class="lbl">Shipments this week</div><div class="kpi" style="margin-top:10px">'+k.shipWeek+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+k.shipUnits.toLocaleString()+' units out</div></a>'
-    + '<a class="card kpiLink" href="#/product/sales"><div class="lbl">Sales month to date</div><div class="kpi" style="margin-top:10px">'+moneyK(k.revMTD)+'</div><div style="font-size:12px;margin-top:6px"><span class="up">'+Math.round(k.revMTD/ProductStore.plan*100)+' percent</span> of '+moneyK(ProductStore.plan)+' plan</div></a>'
-    + '<a class="card kpiLink" href="#/product/board"><div class="lbl">Reorder rate</div><div class="kpi" style="margin-top:10px">'+Math.round(k.reorder*100)+' percent</div><div style="font-size:12px;margin-top:6px"><span class="up">up 6 pts</span> vs last month</div></a>'
+    + '<a class="card" href="#/product/orders"><div class="lbl">Open orders</div><div class="kpi" style="margin-top:10px">'+k.openOrders+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+k.inFulfillment+' in fulfillment . '+k.late+' late</div></a>'
+    + '<a class="card" href="#/product/stock"><div style="display:flex;justify-content:space-between"><span class="lbl">Units on hand</span>'+metrcStamp()+'</div><div class="kpi" style="margin-top:10px">'+k.onHand.toLocaleString()+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">across '+ProductStore.skus.length+' SKUs, '+k.lots+' lots</div></a>'
+    + '<a class="card" href="#/product/production"><div class="lbl">Units in process</div><div class="kpi" style="margin-top:10px">'+k.inProcess.toLocaleString()+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+k.runs+' runs</div></a>'
+    + '<a class="card" href="#/product/orders"><div class="lbl">Shipments this week</div><div class="kpi" style="margin-top:10px">'+k.shipWeek+'</div><div style="font-size:12px;color:#6E685E;margin-top:6px">'+k.shipUnits.toLocaleString()+' units out</div></a>'
+    + '<a class="card" href="#/product/sales"><div class="lbl">Sales month to date</div><div class="kpi" style="margin-top:10px">'+moneyK(k.revMTD)+'</div><div style="font-size:12px;margin-top:6px"><span class="up">'+Math.round(k.revMTD/ProductStore.plan*100)+' percent</span> of '+moneyK(ProductStore.plan)+' plan</div></a>'
+    + '<a class="card" href="#/product/sales"><div class="lbl">Reorder rate</div><div class="kpi" style="margin-top:10px">'+Math.round(k.reorder*100)+' percent</div><div style="font-size:12px;margin-top:6px"><span class="up">up 6 pts</span> vs last month</div></a>'
     + '</div>';
   var open = ProductStore.openOrders().slice(0,6);
-  var orders = '<div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Open orders</div><table class="data"><thead><tr><th>Account</th><th>Lines</th><th>Promised</th><th>Stage</th></tr></thead><tbody>'
-    + open.map(function(o){ var a = ProductStore.account(o.accountId); return '<tr class="ordRow" data-oid="'+o.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(a.name)+', '+esc(a.city)+'</td><td>'+esc(lineText(o))+'</td><td class="mono">'+esc(o.promised)+'</td><td>'+(ProductStore.isLate(o)?lateFlag():stageChip(o.stage))+'</td></tr>'; }).join('')
-    + '</tbody></table></div>';
+  var orders = '<div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Open orders by stage</div><table class="data"><thead><tr><th>Account</th><th>Lines</th><th>Promised</th><th>Stage</th></tr></thead><tbody>'
+    + open.map(function(o){ var a = ProductStore.account(o.accountId); return '<tr class="ordRow" data-oid="'+o.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(a.name)+', '+esc(a.city)+'</td><td>'+esc(lineText(o))+'</td><td class="mono">'+esc(o.promised)+'</td><td>'+(ProductStore.isLate(o)?lateFlag():stageChip(o.stage))+'</td></tr>'; }).join('') + '</tbody></table></div>';
   var accts = ProductStore.accounts.filter(function(a){ return a.velocity>0; }).sort(function(a,b){ return b.velocity-a.velocity; });
   var vmax = accts[0]? accts[0].velocity : 1;
   var velocity = '<div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Top accounts by velocity</div><div style="padding:14px 16px;display:flex;flex-direction:column;gap:14px">'
-    + accts.slice(0,5).map(function(a){ return '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(a.name)+', '+esc(a.city)+'</span><span class="mono" style="color:#8E887C">'+a.velocity+' u/mo</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(a.velocity/vmax*100)+'%"></span></div></div>'; }).join('')
-    + '</div></div>';
+    + accts.slice(0,5).map(function(a){ return '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(a.name)+', '+esc(a.city)+'</span><span class="mono" style="color:#8E887C">'+a.velocity+' u/mo</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(a.velocity/vmax*100)+'%"></span></div></div>'; }).join('') + '</div></div>';
   var skuCards = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px">'
-    + ProductStore.skus.map(function(s){ return '<div class="card"><div class="lbl">'+esc(s.name)+(s.tier==='Reserve'?' . Reserve':'')+'</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">'+ProductStore.onHand(s.id).toLocaleString()+'</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved '+ProductStore.reserved(s.id)+' . Available '+ProductStore.available(s.id)+' . '+ProductStore.lots.filter(function(l){return l.skuId===s.id;}).length+' lots</div></div>'; }).join('')
-    + '</div>';
-  main.innerHTML = head + scroller(kpis + '<div class="split" style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:16px">'+orders+velocity+'</div>' + skuCards) + previewFooter('Design preview . mock data . every KPI and row is a live link into its ledger');
+    + ProductStore.skus.map(function(sk){ return '<div class="card"><div class="lbl">'+esc(sk.name)+(sk.tier==='Reserve'?' . Reserve':'')+'</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">'+ProductStore.onHand(sk.id).toLocaleString()+'</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved '+ProductStore.reserved(sk.id)+' . Available '+ProductStore.available(sk.id)+'</div></div>'; }).join('') + '</div>';
+  main.innerHTML = head + scroller(kpis + '<div class="split" style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:16px">'+orders+velocity+'</div>' + skuCards) + previewFooter('Design preview . mock data . Metrc derived figures carry a staleness stamp');
 }
-function lineText(o){ return o.lines.map(function(l){ var s = ProductStore.sku(l.skuId); return (s?s.name.replace('No. ','No.'):l.skuId)+' x'+l.qty; }).join(', '); }
 
 // ---------- 2. Orders ----------
 function renderOrders(){
-  var head = headerBar('Orders', 'The wholesale book. Advancing an order reserves and ships real stock.', pv());
+  var head = headerBar('Orders', 'The wholesale book. Test gate, facility gate, and manifest gate enforced.', pv());
   var chips = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"><span class="pill badge'+(!ordFilter?' active':'')+'" data-ostage="">All</span>'
     + STAGES.map(function(s){ return '<span class="pill badge'+(ordFilter===s?' active':'')+'" data-ostage="'+s+'">'+esc(STAGE_LABEL[s])+' '+ProductStore.orders.filter(function(o){return o.stage===s;}).length+'</span>'; }).join('')+'</div>';
   var rows = ProductStore.orders.filter(function(o){ return !ordFilter || o.stage===ordFilter; });
-  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Order</th><th>Account</th><th>Lines</th><th>Units</th><th>Value</th><th>Promised</th><th>Stage</th></tr></thead><tbody>'
-    + rows.map(function(o){ var a=ProductStore.account(o.accountId); return '<tr class="ordRow" data-oid="'+o.id+'" style="cursor:pointer"><td class="mono" style="color:#B0A99A">'+esc(o.id)+'</td><td style="color:#E1DAD0">'+esc(a.name)+', '+esc(a.city)+'</td><td>'+esc(lineText(o))+'</td><td class="mono">'+ProductStore.orderUnits(o)+'</td><td class="mono">'+money(o.total)+'</td><td class="mono">'+esc(o.promised)+'</td><td>'+(ProductStore.isLate(o)?lateFlag():stageChip(o.stage))+'</td></tr>'; }).join('')
-    + '</tbody></table></div>';
-  var detail = '';
-  if (ordSel){ var o = ProductStore.order(ordSel); if (o) detail = orderDetail(o); }
-  var form = newOrderForm();
-  main.innerHTML = head + scroller(chips + table + detail + form) + previewFooter('Design preview . mock data . the fulfillment machine enforces stock and credit at each gate');
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Order</th><th>Account</th><th>Lines</th><th>Value</th><th>Promised</th><th>Manifest</th><th>Stage</th></tr></thead><tbody>'
+    + rows.map(function(o){ var a=ProductStore.account(o.accountId); return '<tr class="ordRow" data-oid="'+o.id+'" style="cursor:pointer"><td class="mono">'+esc(o.id)+'</td><td style="color:#E1DAD0">'+esc(a.name)+', '+esc(a.city)+'</td><td>'+esc(lineText(o))+'</td><td class="mono">'+money(o.total)+'</td><td class="mono">'+esc(o.promised)+'</td><td class="mono" style="color:'+(o.manifest?'#7CBF4E':'#5E5A52')+'">'+esc(o.manifest||'none')+'</td><td>'+(ProductStore.isLate(o)?lateFlag():stageChip(o.stage))+'</td></tr>'; }).join('') + '</tbody></table></div>';
+  var detail = ''; if (ordSel){ var o = ProductStore.order(ordSel); if (o) detail = orderDetail(o); }
+  main.innerHTML = head + scroller(chips + table + detail + newOrderForm()) + previewFooter('Design preview . mock data . allocation only offers passed-COA lots; shipping needs a manifest');
 }
 function orderDetail(o){
-  var a = ProductStore.account(o.accountId);
-  var next = ProductStore.nextStage(o.stage);
-  var steps = '<div class="step" style="margin-top:8px">'+STAGES.map(function(st,i){ var idx=STAGES.indexOf(o.stage); var cls = i<idx?'done':i===idx?'now':''; return '<div class="stepdot '+cls+'"></div>'+(i<STAGES.length-1?'<div class="stepbar '+(i<idx?'done':'')+'"></div>':''); }).join('')+'</div>'
+  var a = ProductStore.account(o.accountId); var next = ProductStore.nextStage(o.stage);
+  var steps = '<div class="step" style="margin-top:8px">'+STAGES.map(function(st,i){ var idx=STAGES.indexOf(o.stage); var cls=i<idx?'done':i===idx?'now':''; return '<div class="stepdot '+cls+'"></div>'+(i<STAGES.length-1?'<div class="stepbar '+(i<idx?'done':'')+'"></div>':''); }).join('')+'</div>'
     + '<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#5E5A52">'+STAGES.map(function(st){ return '<span>'+STAGE_LABEL[st]+'</span>'; }).join('')+'</div>';
-  return '<div class="card" style="margin-top:16px;border-color:#3F5A2C55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(o.id)+' . '+esc(a.name)+', '+esc(a.city)+'</div>'+(ProductStore.isLate(o)?lateFlag():stageChip(o.stage))+'</div>'
-    + steps
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;font-size:12.5px">'
-    + kv('Lines', lineText(o))+kv('Units', ProductStore.orderUnits(o))+kv('Value', money(o.total))+kv('Promised', o.promised)+kv('Terms', a.terms)+kv('Account balance', money(a.balance)+' of '+money(a.credit))+'</div>'
-    + '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">'
-    + (next? '<button class="act go" data-adv="'+o.id+'">Advance to '+STAGE_LABEL[next]+'</button>' : '<span style="font-size:12px;color:#7FA87A;align-self:center">Settled</span>')
-    + (['shipped','delivered','invoiced','paid','cancelled'].indexOf(o.stage)===-1? '<button class="act no" data-cancel="'+o.id+'">Cancel</button>' : '')
-    + '</div></div>';
+  var lines = o.lines.map(function(l){ var s=ProductStore.sku(l.skuId); var alloc = l.allocations.length? l.allocations.map(function(x){ return x.uid.slice(-6)+' x'+x.qty; }).join(', ') : 'unallocated';
+    return '<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid #1C1E1B"><span>'+esc(s.name)+' x'+l.qty+'</span><span style="color:#8E887C" class="mono">'+esc(alloc)+'</span></div>'; }).join('');
+  var manifestBlock = '<div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="lbl">Metrc manifest</span><span class="mono" style="color:'+(o.manifest?'#7CBF4E':'#5E5A52')+'">'+esc(o.manifest||'none')+'</span>'
+    + (o.manifest? '' : '<button class="act" data-manifest="'+o.id+'">Create Metrc transfer draft</button>')+'</div>';
+  return '<div class="card" style="margin-top:16px;border-color:#3F5A2C55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(o.id)+' . '+esc(a.name)+', '+esc(a.city)+'</div>'+(ProductStore.isLate(o)?lateFlag():stageChip(o.stage))+'</div>'+steps
+    + '<div class="lbl" style="margin-top:16px">Lines and lot allocation</div><div style="margin-top:6px">'+lines+'</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;font-size:12.5px">'+kv('Value',money(o.total))+kv('Promised',o.promised)+kv('Terms',a.terms)+'</div>'
+    + manifestBlock
+    + '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">'+(next? '<button class="act go" data-adv="'+o.id+'">Advance to '+STAGE_LABEL[next]+'</button>' : '<span style="font-size:12px;color:#7FA87A;align-self:center">Settled</span>')
+    + (['shipped','delivered','paid','cancelled'].indexOf(o.stage)===-1? '<button class="act no" data-cancel="'+o.id+'">Cancel</button>' : '')+'</div>'
+    + '<div style="font-size:11px;color:#5E5A52;margin-top:12px">Documents: manifest PDF, COA bundle, invoice (stubs in preview)</div></div>';
 }
-function kv(k,v){ return '<div><div class="lbl">'+esc(k)+'</div><div style="color:#B0A99A;margin-top:4px">'+esc(v)+'</div></div>'; }
 function newOrderForm(){
-  var acctOpts = '<option value="">Choose account</option>'+ProductStore.accounts.map(function(a){ return '<option value="'+a.id+'"'+(newOrder.accountId===a.id?' selected':'')+'>'+esc(a.name+', '+a.city)+'</option>'; }).join('');
-  var lines = newOrder.lines.length ? newOrder.lines.map(function(l,i){ var s=ProductStore.sku(l.skuId); return '<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0"><span>'+esc(s.name)+' x'+l.qty+'</span><span class="mono" style="color:#8E887C">'+money(s.price*l.qty)+'</span></div>'; }).join('') : '<div style="font-size:12px;color:#6E685E">No lines yet</div>';
+  var acctOpts = '<option value="">Choose account</option>'+ProductStore.accounts.map(function(a){ var g=ProductStore.accountGate(a.id); return '<option value="'+a.id+'"'+(newOrder.accountId===a.id?' selected':'')+'>'+esc(a.name+', '+a.city)+(g.ok?'':' (blocked)')+'</option>'; }).join('');
+  var lines = newOrder.lines.length ? newOrder.lines.map(function(l){ var s=ProductStore.sku(l.skuId); return '<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0"><span>'+esc(s.name)+' x'+l.qty+'</span><span class="mono" style="color:#8E887C">'+money(s.price*l.qty)+'</span></div>'; }).join('') : '<div style="font-size:12px;color:#6E685E">No lines yet</div>';
   var skuOpts = ProductStore.skus.filter(function(s){ return s.status==='active'; }).map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+'</option>'; }).join('');
   return '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">New order</div>'
     + '<select id="noAcct" class="vfield">'+acctOpts+'</select>'
     + '<div style="display:grid;grid-template-columns:1fr 120px auto;gap:10px;margin-top:12px"><select id="noSku" class="vfield">'+skuOpts+'</select><input id="noQty" class="vfield" type="number" placeholder="Qty" min="1"><button id="noAddLine" class="act">Add line</button></div>'
     + '<div style="margin-top:12px;border-top:1px solid #202220;padding-top:10px">'+lines+'</div>'
     + '<div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:12px;align-items:center"><input id="noPromised" class="vfield" type="date" value="'+esc(newOrder.promised)+'"><button id="noCreate" class="act go" style="padding:11px 24px">Create order</button></div>'
-    + '</div>';
+    + '<div style="font-size:11px;color:#5E5A52;margin-top:10px">Blocked accounts have an expired license or an inactive Metrc facility.</div></div>';
 }
 
-// ---------- 3. Inventory ----------
-function renderInventory(){
-  var head = headerBar('Inventory', 'Lots on hand by SKU. Reserved and available are computed from the order book.', pv());
+// ---------- 3. Stock ----------
+function renderStock(){
+  var head = headerBar('Stock', 'On hand by SKU and lot. Metrc is the source of truth for quantity and test status.', '<button id="stockRefresh" class="act go">Refresh Metrc</button>'+metrcStamp()+pv());
   var summary = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">'
-    + ProductStore.skus.map(function(s){ var av = ProductStore.available(s.id); var low = av<LOW_STOCK; return '<div class="card"><div style="display:flex;justify-content:space-between"><span class="lbl">'+esc(s.name)+'</span>'+(low?'<span class="badge" style="border-color:#4A3A2A;color:#C08457">Low</span>':'')+'</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">'+ProductStore.onHand(s.id).toLocaleString()+'</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved '+ProductStore.reserved(s.id)+' . Available '+av+'</div></div>'; }).join('')
-    + '</div>';
-  var table = '<div class="card" style="padding:0;margin-top:16px"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Lots</div><table class="data"><thead><tr><th>Lot</th><th>SKU</th><th>Units</th><th>Mfg</th><th>COA</th><th>COA expiry</th><th>Location</th></tr></thead><tbody>'
-    + ProductStore.lots.map(function(l){ var s=ProductStore.sku(l.skuId); var cc = l.coa==='passed'?'#7CBF4E':l.coa==='pending'?'#E3C270':'#D4664C'; return '<tr><td class="mono">'+esc(l.id)+'</td><td style="color:#E1DAD0">'+esc(s.name)+'</td><td class="mono">'+l.qty+'</td><td class="mono">'+esc(l.mfg)+'</td><td><span style="color:'+cc+'">'+esc(l.coa)+'</span></td><td class="mono">'+esc(l.coaExpiry)+'</td><td>'+esc(l.location)+'</td></tr>'; }).join('')
-    + '</tbody></table></div>';
-  var form = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">Receive lot</div><div style="display:grid;grid-template-columns:1fr 140px 160px auto;gap:10px">'
-    + '<select id="rlSku" class="vfield">'+ProductStore.skus.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+'</option>'; }).join('')+'</select>'
-    + '<input id="rlQty" class="vfield" type="number" placeholder="Units" min="1">'
-    + '<select id="rlCoa" class="vfield"><option value="passed">COA passed</option><option value="pending">COA pending</option></select>'
-    + '<button id="rlAdd" class="act go" style="padding:11px 22px">Receive</button></div></div>';
-  main.innerHTML = head + scroller(summary + table + form) + previewFooter('Design preview . mock data . only passed-COA lots are shippable; pending lots sit in quarantine');
+    + ProductStore.skus.map(function(s){ var av=ProductStore.available(s.id); var low=av<LOW_STOCK; return '<div class="card"><div style="display:flex;justify-content:space-between"><span class="lbl">'+esc(s.name)+'</span>'+(low?'<span class="badge" style="border-color:#4A3A2A;color:#C08457">Low</span>':'')+'</div><div style="display:flex;align-items:baseline;gap:8px;margin-top:8px"><span class="kpi" style="font-size:24px">'+ProductStore.onHand(s.id).toLocaleString()+'</span><span style="font-size:11.5px;color:#6E685E">on hand</span></div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Reserved '+ProductStore.reserved(s.id)+' . Available '+av+' . Passable '+ProductStore.allocatable(s.id)+'</div></div>'; }).join('') + '</div>';
+  var table = '<div class="card" style="padding:0;margin-top:16px"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Lots</div><table class="data"><thead><tr><th>Metrc UID</th><th>SKU</th><th>Test status</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Package date</th><th>Location</th><th>COA</th><th></th></tr></thead><tbody>'
+    + ProductStore.lots.map(function(l){ var s=ProductStore.sku(l.skuId); var st=ProductStore.status(l); var av=ProductStore.availLot(l); var canRes = ProductStore.isPassing(l) && av>0;
+      return '<tr><td class="mono" style="color:#B0A99A">'+esc(l.uid.slice(-10))+'</td><td style="color:#E1DAD0">'+esc(s.name)+'</td><td>'+testBadge(st)+'</td><td class="mono">'+l.qty+'</td><td class="mono">'+l.reserved+'</td><td class="mono">'+av+'</td><td class="mono">'+esc(l.packageDate)+'</td><td>'+esc(l.location)+'</td><td class="mono" style="color:#5E5A52">'+esc(l.coa)+'</td>'
+      + '<td><button class="act" data-reslot="'+l.uid+'"'+(canRes?'':' disabled title="'+esc(st)+'"')+'>Allocate 50</button></td></tr>'; }).join('') + '</tbody></table></div>';
+  main.innerHTML = head + scroller(summary + table) + previewFooter('Design preview . mock data . the Allocate control is disabled until Metrc status is TestPassed');
 }
 
-// ---------- 4. Stock in Process ----------
-function renderProcess(){
-  var head = headerBar('Stock in Process', 'Production runs from press to ready. Receiving a run creates a lot.', pv());
+// ---------- 4. Stock in Process (Production) ----------
+function renderProduction(){
+  var head = headerBar('Stock in Process', 'Press and fill runs. Completing a run mints a Metrc package, TestingRequired.', pv());
   var body = ProductStore.runs.length ? ProductStore.runs.map(function(r){
-    var s = ProductStore.sku(r.skuId); var idx = RUN_STAGES.indexOf(r.stage);
-    var steps = '<div class="step" style="margin-top:10px">'+RUN_STAGES.map(function(st,i){ var cls = i<idx?'done':i===idx?'now':''; return '<div class="stepdot '+cls+'"></div>'+(i<RUN_STAGES.length-1?'<div class="stepbar '+(i<idx?'done':'')+'"></div>':''); }).join('')+'</div>'
-      + '<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#5E5A52">'+RUN_STAGES.map(function(st){ return '<span>'+st+'</span>'; }).join('')+'</div>';
+    var s=ProductStore.sku(r.skuId); var idx=RUN_STAGES.indexOf(r.stage);
+    var steps='<div class="step" style="margin-top:10px">'+RUN_STAGES.map(function(st,i){ var cls=i<idx?'done':i===idx?'now':''; return '<div class="stepdot '+cls+'"></div>'+(i<RUN_STAGES.length-1?'<div class="stepbar '+(i<idx?'done':'')+'"></div>':''); }).join('')+'</div>'
+      +'<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#5E5A52">'+RUN_STAGES.map(function(st){ return '<span>'+st+'</span>'; }).join('')+'</div>';
     var late = dlt(r.ready, TODAY) && r.stage!=='ready';
-    return '<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span style="color:#E1DAD0;font-size:15px">'+esc(r.id)+' . '+esc(s.name)+' . '+r.qty+' units</span>'+(late?'<span class="badge" style="border-color:#4A3A2A;color:#C08457">Behind</span>':'<span class="badge">Ready '+esc(r.ready)+'</span>')+'</div>'+steps
-      + '<div style="display:flex;gap:10px;margin-top:14px">'+(r.stage==='ready'? '<button class="act go" data-recv="'+r.id+'">Receive to inventory</button>' : '<button class="act" data-advrun="'+r.id+'">Advance stage</button>')+'</div></div>';
+    return '<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span style="color:#E1DAD0;font-size:15px">'+esc(r.id)+' . '+esc(s.name)+' . '+r.qty+' units</span>'+(late?'<span class="badge" style="border-color:#4A3A2A;color:#C08457">Behind</span>':'<span class="badge">Ready '+esc(r.ready)+'</span>')+'</div>'
+      +'<div style="font-size:12px;color:#6E685E;margin-top:6px">Expected yield '+esc(r.yield)+' . expected completion '+esc(r.ready)+'</div>'+steps
+      +'<div style="display:flex;gap:10px;margin-top:14px">'+(r.stage==='ready'? '<button class="act go" data-complete="'+r.id+'">Complete and mint package</button>' : '<button class="act" data-advrun="'+r.id+'">Advance stage</button>')+'</div></div>';
   }).join('') : '<div class="card" style="color:#6E685E;text-align:center">No runs in process.</div>';
-  var form = '<div class="card" style="margin-top:4px"><div class="lbl" style="margin-bottom:12px">Start a run</div><div style="display:grid;grid-template-columns:1fr 140px 160px auto;gap:10px">'
+  var form = '<div class="card"><div class="lbl" style="margin-bottom:12px">Start a run</div><div style="display:grid;grid-template-columns:1fr 140px 160px auto;gap:10px">'
     + '<select id="nrSku" class="vfield">'+ProductStore.skus.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+'</option>'; }).join('')+'</select>'
     + '<input id="nrQty" class="vfield" type="number" placeholder="Units" min="1"><input id="nrReady" class="vfield" type="date" value="2026-08-20"><button id="nrAdd" class="act go" style="padding:11px 22px">Start</button></div></div>';
-  main.innerHTML = head + scroller(body + form) + previewFooter('Design preview . mock data . a received run posts a passed-COA lot to inventory');
+  main.innerHTML = head + scroller(body + form) + previewFooter('Design preview . mock data . a minted package flips to TestPassed by a simulated lab result, proving the gate');
 }
 
 // ---------- 5. Accounts ----------
 function renderAccounts(){
-  var head = headerBar('Accounts', 'Licensed NY dispensaries. Wholesale only, no direct to consumer.', pv());
-  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Account</th><th>City</th><th>License</th><th>Terms</th><th>Balance</th><th>Credit</th><th>Velocity</th><th>Status</th></tr></thead><tbody>'
-    + ProductStore.accounts.map(function(a){ var over = a.balance>a.credit; var sc = a.status==='active'?'#7CBF4E':a.status==='hold'?'#D4664C':'#8E887C'; return '<tr class="acctRow" data-aid="'+a.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(a.name)+'</td><td>'+esc(a.city)+'</td><td class="mono">'+esc(a.license)+'</td><td>'+esc(a.terms)+'</td><td class="mono" style="color:'+(over?'#D4664C':'#B0A99A')+'">'+money(a.balance)+'</td><td class="mono">'+money(a.credit)+'</td><td class="mono">'+a.velocity+' u/mo</td><td><span class="badge" style="border-color:'+sc+'55;color:'+sc+'">'+esc(a.status)+'</span></td></tr>'; }).join('')
-    + '</tbody></table></div>';
+  var head = headerBar('Accounts', 'Licensed NY dispensaries with Metrc facility status. Wholesale only.', pv());
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Account</th><th>City</th><th>License</th><th>Expiry</th><th>Metrc facility</th><th>Terms</th><th>Balance</th><th>Velocity</th></tr></thead><tbody>'
+    + ProductStore.accounts.map(function(a){ var f=Trace.getFacility(a.license); var d=daysUntil(a.licenseExpiry); var fc=(f&&f.status==='active')?'#7CBF4E':f&&f.status==='pending'?'#E3C270':'#D4664C'; var ec=(d<=60)?'#C08457':'#8E887C';
+      return '<tr class="acctRow" data-aid="'+a.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(a.name)+'</td><td>'+esc(a.city)+'</td><td class="mono">'+esc(a.license)+'</td><td class="mono" style="color:'+ec+'">'+esc(a.licenseExpiry)+(d<=60&&d>=0?' ('+d+'d)':'')+'</td><td><span class="badge" style="border-color:'+fc+'55;color:'+fc+'">'+esc(f?f.status:'unknown')+'</span></td><td>'+esc(a.terms)+'</td><td class="mono">'+money(a.balance)+'</td><td class="mono">'+a.velocity+' u/mo</td></tr>'; }).join('') + '</tbody></table></div>';
   var detail = '';
-  if (acctSel){ var a = ProductStore.account(acctSel); if (a){ var orders = ProductStore.orders.filter(function(o){ return o.accountId===a.id; });
-    detail = '<div class="card" style="margin-top:16px;border-color:#3F5A2C55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(a.name)+', '+esc(a.city)+'</div><span class="badge">'+esc(a.license)+'</span></div>'
-      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;font-size:12.5px">'+kv('Terms',a.terms)+kv('Balance',money(a.balance))+kv('Credit limit',money(a.credit))+kv('Velocity',a.velocity+' u/mo')+'</div>'
-      + '<div class="lbl" style="margin-top:14px">Order history</div>'+(orders.length? '<table class="data" style="margin-top:6px"><tbody>'+orders.map(function(o){ return '<tr><td class="mono">'+esc(o.id)+'</td><td>'+esc(lineText(o))+'</td><td class="mono">'+money(o.total)+'</td><td>'+stageChip(o.stage)+'</td></tr>'; }).join('')+'</tbody></table>' : '<div style="font-size:12px;color:#6E685E;margin-top:4px">No orders yet</div>')
-      + '<div style="display:flex;gap:10px;margin-top:14px">'+(a.status==='hold'? '<button class="act go" data-release="'+a.id+'">Release credit hold</button>' : '<button class="act no" data-hold="'+a.id+'">Place credit hold</button>')+(a.status==='prospect'? '<button class="act" data-activate="'+a.id+'">Activate account</button>' : '')+'</div></div>'; } }
-  var form = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">New account</div><div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
-    + '<input id="naName" class="vfield" placeholder="Dispensary name"><input id="naCity" class="vfield" placeholder="City"><input id="naLicense" class="vfield" placeholder="OCM license">'
+  if (acctSel){ var a=ProductStore.account(acctSel); if (a){ var g=ProductStore.accountGate(a.id); var orders=ProductStore.orders.filter(function(o){ return o.accountId===a.id; });
+    detail = '<div class="card" style="margin-top:16px;border-color:#3F5A2C55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(a.name)+', '+esc(a.city)+'</div><span class="badge" style="border-color:'+(g.ok?'#2E4A22;color:#7CBF4E':'#4A3A2A;color:#C08457')+'">'+(g.ok?'Order ready':'Blocked')+'</span></div>'
+      + (g.ok?'':'<div style="font-size:12px;color:#C08457;margin-top:8px">Gate: '+esc(g.reason)+'</div>')
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;font-size:12.5px">'+kv('License',a.license)+kv('Expiry',a.licenseExpiry)+kv('Terms',a.terms)+kv('Velocity',a.velocity+' u/mo')+'</div>'
+      + '<div class="lbl" style="margin-top:14px">Order history</div>'+(orders.length?'<table class="data" style="margin-top:6px"><tbody>'+orders.map(function(o){ return '<tr><td class="mono">'+esc(o.id)+'</td><td>'+esc(lineText(o))+'</td><td class="mono">'+money(o.total)+'</td><td>'+stageChip(o.stage)+'</td></tr>'; }).join('')+'</tbody></table>':'<div style="font-size:12px;color:#6E685E;margin-top:4px">No orders yet</div>')
+      + '</div>'; } }
+  var form = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">New account intake</div><div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'
+    + '<input id="naName" class="vfield" placeholder="Dispensary name"><input id="naCity" class="vfield" placeholder="City"><input id="naLicense" class="vfield" placeholder="OCM license (required)">'
     + '<select id="naTerms" class="vfield"><option>COD</option><option>Net 15</option><option>Net 30</option></select><input id="naCredit" class="vfield" type="number" placeholder="Credit limit"></div>'
-    + '<button id="naAdd" class="act go" style="margin-top:12px;padding:11px 24px">Add account</button></div>';
-  main.innerHTML = head + scroller(table + detail + form) + previewFooter('Design preview . mock data . a credit hold blocks confirming new orders in the secured build');
+    + '<button id="naAdd" class="act go" style="margin-top:12px;padding:11px 24px">Verify and add</button>'
+    + '<div style="font-size:11px;color:#5E5A52;margin-top:10px">Intake requires a license number and returns the Metrc verification result.</div></div>';
+  main.innerHTML = head + scroller(table + detail + form) + previewFooter('Design preview . mock data . a license expiring inside 60 days carries a warning and appears in Alerts');
 }
 
-// ---------- 6. SKU Portfolio ----------
-function renderPortfolio(){
-  var head = headerBar('SKU Portfolio', 'The three numbers, plus anything new. Adding a SKU propagates everywhere.', pv());
-  var cards = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">'
-    + ProductStore.skus.map(function(s){ var margin = (s.price-s.cogs)/s.price; return '<div class="card"><div style="display:flex;justify-content:space-between"><span style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(s.name)+'</span><span class="badge" style="border-color:'+(s.status==='active'?'#2E4A22;color:#7CBF4E':'#33352F')+'">'+esc(s.status)+'</span></div>'
-      + '<div style="font-size:12px;color:#6E685E;margin-top:4px">'+esc(s.tier)+'</div>'
-      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;font-size:12.5px">'+kv('Wholesale',money(s.price))+kv('Unit cost',money(s.cogs))+kv('Gross margin',Math.round(margin*100)+' percent')+kv('On hand',ProductStore.onHand(s.id).toLocaleString())+'</div>'
-      + '<div style="display:flex;gap:10px;margin-top:14px"><button class="act" data-skutoggle="'+s.id+'">'+(s.status==='active'?'Pause':'Activate')+'</button></div></div>'; }).join('')
-    + '</div>';
-  var form = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">New SKU</div><div style="display:grid;grid-template-columns:1.4fr 1fr 120px 120px auto;gap:10px">'
-    + '<input id="nsName" class="vfield" placeholder="SKU name"><input id="nsTier" class="vfield" placeholder="Tier"><input id="nsPrice" class="vfield" type="number" placeholder="Price"><input id="nsCogs" class="vfield" type="number" placeholder="Cost"><button id="nsAdd" class="act go" style="padding:11px 22px">Add</button></div>'
-    + '<div style="font-size:11px;color:#5E5A52;margin-top:12px">A new SKU appears in Inventory, Orders, Unit Economics, and reporting immediately.</div></div>';
-  main.innerHTML = head + scroller(cards + form) + previewFooter('Design preview . mock data . pausing a SKU removes it from new order lines');
-}
-
-// ---------- 7. Sales Overview ----------
+// ---------- 6. Sales (board metrics and unit economics) ----------
 function renderSales(){
-  var head = headerBar('Sales Overview', 'Revenue by month, SKU, and account. Month to date versus plan.', pv());
+  var right = '<span class="chip'+(boardView?' active':'')+'" id="boardToggle">Board view</span>'+pv();
+  var head = headerBar('Sales', 'Revenue by SKU, account, and region. Sell in versus reorder is the health metric.', right);
   var mtd = ProductStore.revenueMTD();
-  var months = ProductStore.salesHistory.concat([{ month:'Jul', revenue:mtd }]);
-  var mmax = Math.max.apply(null, months.map(function(m){ return m.revenue; }));
-  var monthly = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Revenue by month</span><span style="font-size:12px;color:#8E887C">Jul '+moneyK(mtd)+' of '+moneyK(ProductStore.plan)+' plan</span></div>'
-    + '<div style="display:flex;gap:12px;align-items:flex-end;height:150px;margin-top:16px">'+months.map(function(m){ return '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center"><div style="font-size:11px;color:#8E887C;margin-bottom:4px" class="mono">'+moneyK(m.revenue)+'</div><div style="width:60%;height:'+Math.round(m.revenue/mmax*110)+'px;background:'+(m.month==='Jul'?'#7CBF4E':'#4E8A2B')+';border-radius:3px"></div><div style="font-size:11px;color:#6E685E;margin-top:6px">'+m.month+'</div></div>'; }).join('')+'</div></div>';
-  var bysku = ProductStore.revenueBySku(); var smax = Math.max.apply(null, ProductStore.skus.map(function(s){ return bysku[s.id]||0; })) || 1;
-  var byacct = ProductStore.revenueByAccount();
-  var tabs = '<div style="display:flex;gap:4px;border-bottom:1px solid #202220;margin:16px 0"><span class="chip'+(salesTab==='sku'?' active':'')+'" data-salestab="sku">By SKU</span><span class="chip'+(salesTab==='account'?' active':'')+'" data-salestab="account">By account</span></div>';
-  var breakdown;
-  if (salesTab==='sku'){
-    breakdown = '<div class="card">'+ProductStore.skus.map(function(s){ var r=bysku[s.id]||0; return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(s.name)+'</span><span class="mono" style="color:#8E887C">'+money(r)+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(r/smax*100)+'%"></span></div></div>'; }).join('')+'</div>';
-  } else {
-    var arr = ProductStore.accounts.map(function(a){ return { a:a, r:byacct[a.id]||0 }; }).filter(function(x){ return x.r>0; }).sort(function(x,y){ return y.r-x.r; }); var amax = arr[0]? arr[0].r:1;
-    breakdown = '<div class="card">'+(arr.length? arr.map(function(x){ return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(x.a.name)+', '+esc(x.a.city)+'</span><span class="mono" style="color:#8E887C">'+money(x.r)+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(x.r/amax*100)+'%"></span></div></div>'; }).join('') : '<div style="color:#6E685E">No shipped revenue yet</div>')+'</div>';
+  if (boardView){
+    var gm = ProductStore.grossMargin(); var runrate = ProductStore.salesHistory[ProductStore.salesHistory.length-1].revenue*12;
+    var board = '<div class="card"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:20px;color:#E1DAD0;margin-bottom:4px">Board summary</div><div style="font-size:12px;color:#6E685E;margin-bottom:16px">One page, as of '+TODAY+'</div>'
+      + '<div class="kpigrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">'
+      + kpiCard('Run rate', moneyK(runrate), 'annualized') + kpiCard('Gross margin', Math.round(gm*100)+' percent', 'blended') + kpiCard('Plan attainment', Math.round(mtd/ProductStore.plan*100)+' percent', moneyK(mtd)+' of '+moneyK(ProductStore.plan))
+      + kpiCard('Reorder rate', Math.round(ProductStore.reorderRate()*100)+' percent', 'headline health') + kpiCard('AR outstanding', moneyK(ProductStore.arOutstanding()), '') + kpiCard('Active accounts', ProductStore.accounts.filter(function(a){return a.status==='active';}).length, ProductStore.accounts.filter(function(a){return a.status==='prospect';}).length+' prospects')
+      + '</div></div>';
+    main.innerHTML = head + scroller(board) + previewFooter('Design preview . mock data . toggle off Board view to see the working screens');
+    return;
   }
-  main.innerHTML = head + scroller(monthly + tabs + breakdown) + previewFooter('Design preview . mock data . revenue counts an order once it ships');
+  var months = ProductStore.salesHistory.concat([{ month:'Jul', revenue:mtd }]); var mmax = Math.max.apply(null, months.map(function(m){ return m.revenue; }));
+  var monthly = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Revenue by month</span><span style="font-size:12px;color:#8E887C">Sell in '+moneyK(mtd)+' . reorder '+Math.round(ProductStore.reorderRate()*100)+' percent</span></div>'
+    + '<div style="display:flex;gap:12px;align-items:flex-end;height:140px;margin-top:16px">'+months.map(function(m){ return '<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center"><div style="font-size:11px;color:#8E887C;margin-bottom:4px" class="mono">'+moneyK(m.revenue)+'</div><div style="width:60%;height:'+Math.round(m.revenue/mmax*100)+'px;background:'+(m.month==='Jul'?'#7CBF4E':'#4E8A2B')+';border-radius:3px"></div><div style="font-size:11px;color:#6E685E;margin-top:6px">'+m.month+'</div></div>'; }).join('')+'</div></div>';
+  var bysku = ProductStore.revenueBySku(); var smax = Math.max.apply(null, ProductStore.skus.map(function(s){ return bysku[s.id]||0; }))||1;
+  var byacct = ProductStore.revenueByAccount();
+  var tabs = '<div style="display:flex;gap:8px;margin:16px 0"><span class="chip'+(salesTab==='sku'?' active':'')+'" data-salestab="sku">By SKU</span><span class="chip'+(salesTab==='account'?' active':'')+'" data-salestab="account">By account</span><span class="chip'+(salesTab==='econ'?' active':'')+'" data-salestab="econ">Unit economics</span></div>';
+  var body;
+  if (salesTab==='sku'){ body = '<div class="card">'+ProductStore.skus.map(function(s){ var r=bysku[s.id]||0; return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(s.name)+(s.tier==='Reserve'?' (Reserve edition)':'')+'</span><span class="mono" style="color:#8E887C">'+money(r)+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(r/smax*100)+'%"></span></div></div>'; }).join('')+'</div>'; }
+  else if (salesTab==='account'){ var arr=ProductStore.accounts.map(function(a){ return { a:a, r:byacct[a.id]||0 }; }).filter(function(x){ return x.r>0; }).sort(function(x,y){ return y.r-x.r; }); var amax=arr[0]?arr[0].r:1; body='<div class="card">'+(arr.length?arr.map(function(x){ return '<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+esc(x.a.name)+', '+esc(x.a.city)+'</span><span class="mono" style="color:#8E887C">'+money(x.r)+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(x.r/amax*100)+'%"></span></div></div>'; }).join(''):'<div style="color:#6E685E">No shipped revenue yet</div>')+'</div>'; }
+  else { body = '<div class="card"><div class="lbl" style="margin-bottom:10px">Per unit gross margin . owner editable</div><table class="data"><thead><tr><th>SKU</th><th>Wholesale</th><th>Unit cost</th><th>Gross margin</th><th>Margin %</th></tr></thead><tbody>'
+    + ProductStore.skus.map(function(s){ var gm=s.price-s.cogs; return '<tr><td style="color:#E1DAD0">'+esc(s.name)+'</td><td><input class="vfield ueEdit" data-uefield="price" data-uesku="'+s.id+'" type="number" value="'+s.price+'" style="width:90px;padding:6px 8px"></td><td><input class="vfield ueEdit" data-uefield="cogs" data-uesku="'+s.id+'" type="number" value="'+s.cogs+'" style="width:90px;padding:6px 8px"></td><td class="mono" style="color:#7CBF4E">'+money(gm)+'</td><td class="mono">'+Math.round(gm/s.price*100)+' percent</td></tr>'; }).join('')+'</tbody></table></div>'; }
+  main.innerHTML = head + scroller(monthly + tabs + body) + previewFooter('Design preview . mock data . revenue counts an order once it ships');
 }
 
-// ---------- 8. Board Metrics ----------
-function renderBoard(){
-  var head = headerBar('Board Metrics', 'The numbers a board asks for. Computed from the same ledger.', pv());
-  var k = ProductStore.kpis(); var gm = ProductStore.grossMargin(); var ar = ProductStore.arOutstanding();
-  var runrate = ProductStore.salesHistory[ProductStore.salesHistory.length-1].revenue * 12;
-  var attain = k.revMTD/ProductStore.plan;
-  var cards = '<div class="kpigrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">'
-    + kpiCard('Revenue run rate', moneyK(runrate), 'annualized on last full month')
-    + kpiCard('Gross margin', Math.round(gm*100)+' percent', 'blended across shipped orders')
-    + kpiCard('Plan attainment', Math.round(attain*100)+' percent', moneyK(k.revMTD)+' of '+moneyK(ProductStore.plan))
-    + kpiCard('AR outstanding', moneyK(ar), 'across '+ProductStore.accounts.filter(function(a){return a.balance>0;}).length+' accounts')
-    + kpiCard('Reorder rate', Math.round(k.reorder*100)+' percent', 'up 6 pts vs last month')
-    + kpiCard('Active accounts', ProductStore.accounts.filter(function(a){return a.status==='active';}).length, ProductStore.accounts.filter(function(a){return a.status==='prospect';}).length+' prospects')
-    + '</div>';
-  var funnel = '<div class="card" style="margin-top:16px"><div class="lbl">Order book by stage</div><div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">'
-    + STAGES.map(function(st){ var n = ProductStore.orders.filter(function(o){return o.stage===st;}).length; var val = ProductStore.orders.filter(function(o){return o.stage===st;}).reduce(function(a,o){return a+o.total;},0); var w = ProductStore.orders.length? n/ProductStore.orders.length*100:0; return '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+STAGE_LABEL[st]+' ('+n+')</span><span class="mono" style="color:#8E887C">'+money(val)+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.round(w)+'%;background:'+STAGE_COLOR[st]+'"></span></div></div>'; }).join('')
-    + '</div></div>';
-  main.innerHTML = head + scroller(cards + funnel) + previewFooter('Design preview . mock data . board pack exports from this view in the secured build');
+// ---------- 7. SKU Portfolio ----------
+function renderSkus(){
+  var head = headerBar('SKU Portfolio', 'The catalog as data, mapped to Metrc items. Adding a No. 4 propagates everywhere.', pv());
+  var cards = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">'
+    + ProductStore.skus.map(function(s){ var lots=ProductStore.lots.filter(function(l){return l.skuId===s.id;});
+      return '<div class="card"><div style="display:flex;justify-content:space-between"><span style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(s.name)+'</span><span class="badge" style="border-color:'+(s.status==='active'?'#2E4A22;color:#7CBF4E':'#33352F')+'">'+esc(s.lifecycle)+'</span></div>'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+s.tokens.map(function(t){ return '<span class="badge">'+esc(t)+'</span>'; }).join('')+'</div>'
+      + '<div style="font-size:12px;color:#8E887C;margin-top:10px">Triad: '+s.triad.join(' . ')+'</div>'
+      + '<div style="font-size:11.5px;color:#6E685E;margin-top:8px">Metrc item: '+esc(s.metrcItem)+'</div>'
+      + '<div class="lbl" style="margin-top:12px">Batch history</div>'+(lots.length? lots.map(function(l){ return '<div style="font-size:11.5px;color:#8E887C;margin-top:4px" class="mono">'+esc(l.uid.slice(-8))+' . '+l.qty+' u . '+esc(l.packageDate)+' . '+esc(ProductStore.status(l))+'</div>'; }).join(''):'<div style="font-size:11.5px;color:#6E685E;margin-top:4px">No lots</div>')
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;font-size:12.5px">'+kv('Wholesale',money(s.price))+kv('Margin',Math.round((s.price-s.cogs)/s.price*100)+' percent')+'</div>'
+      + '<div style="display:flex;gap:10px;margin-top:12px"><button class="act" data-skutoggle="'+s.id+'">'+(s.status==='active'?'Pause':'Activate')+'</button></div></div>'; }).join('') + '</div>';
+  var form = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">New SKU</div><div style="display:grid;grid-template-columns:1.4fr 1fr 120px 120px auto;gap:10px">'
+    + '<input id="nsName" class="vfield" placeholder="Name, e.g. No. 4 Flow"><input id="nsTier" class="vfield" placeholder="Tier"><input id="nsPrice" class="vfield" type="number" placeholder="Price"><input id="nsCogs" class="vfield" type="number" placeholder="Cost"><button id="nsAdd" class="act go" style="padding:11px 22px">Add</button></div>'
+    + '<div style="font-size:11px;color:#5E5A52;margin-top:12px">A new SKU registers a Metrc item and appears in Stock, Orders, Sales, and the dashboard at once.</div></div>';
+  main.innerHTML = head + scroller(cards + form) + previewFooter('Design preview . mock data . lifecycle: Active, Reserve, Trial, Retired');
 }
 
-// ---------- 9. Unit Economics ----------
-function renderEconomics(){
-  var head = headerBar('Unit Economics', 'Per unit margin by SKU. Edit price or cost and the ledger recomputes.', pv());
-  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>SKU</th><th>Wholesale</th><th>Unit cost</th><th>Gross margin</th><th>Margin %</th><th>On hand value</th></tr></thead><tbody>'
-    + ProductStore.skus.map(function(s){ var gm=s.price-s.cogs; var pct=gm/s.price; var val=ProductStore.onHand(s.id)*s.cogs; return '<tr><td style="color:#E1DAD0">'+esc(s.name)+'</td>'
-      + '<td><input class="vfield ueEdit" data-uefield="price" data-uesku="'+s.id+'" style="width:90px;padding:6px 8px" type="number" value="'+s.price+'"></td>'
-      + '<td><input class="vfield ueEdit" data-uefield="cogs" data-uesku="'+s.id+'" style="width:90px;padding:6px 8px" type="number" value="'+s.cogs+'"></td>'
-      + '<td class="mono" style="color:#7CBF4E">'+money(gm)+'</td><td class="mono">'+Math.round(pct*100)+' percent</td><td class="mono">'+money(val)+'</td></tr>'; }).join('')
-    + '</tbody></table></div>';
-  var blended = (function(){ var rev=0,cost=0; ProductStore.skus.forEach(function(s){ var u=ProductStore.onHand(s.id); rev+=u*s.price; cost+=u*s.cogs; }); return { rev:rev, cost:cost, gm: rev?(rev-cost)/rev:0 }; })();
-  var summary = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px">'
-    + kpiCard('On hand at cost', moneyK(blended.cost), 'inventory carrying value')
-    + kpiCard('On hand at wholesale', moneyK(blended.rev), 'if fully sold through')
-    + kpiCard('Blended margin', Math.round(blended.gm*100)+' percent', 'weighted by units on hand')
-    + '</div>';
-  main.innerHTML = head + scroller(table + summary) + previewFooter('Design preview . mock data . edits here flow into Sales, Board, and Portfolio');
-}
-
-// ---------- 10. Alerts and Risks ----------
+// ---------- 8. Alerts and Risks ----------
 function renderAlerts(){
-  var head = headerBar('Alerts and Risks', 'Computed live from stock, orders, credit, COA, and runs.', pv());
-  var al = ProductStore.alerts();
-  var body = al.length ? al.map(function(a){ var c = a.level==='high'?'#D4664C':'#E3C270'; return '<a class="card alertRow" href="#/product/'+a.view+'" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;border-color:'+c+'33"><span class="dot" style="background:'+c+';margin-top:6px"></span><div><div style="display:flex;gap:10px;align-items:center"><span class="badge" style="border-color:'+c+'55;color:'+c+'">'+esc(a.kind)+'</span><span style="font-size:11px;color:#5E5A52">'+esc(a.level)+'</span></div><div style="color:#E1DAD0;margin-top:8px">'+esc(a.text)+'</div><div style="font-size:11px;color:#6E685E;margin-top:4px">Open the '+esc(a.view)+' ledger</div></div></a>'; }).join('') : '<div class="card" style="text-align:center;color:#7CBF4E;padding:40px">Nothing at risk. The book is clean.</div>';
+  var head = headerBar('Alerts and Risks', 'Ranked and live. Each alert mirrors to the Vauxhall Live Feed.', pv());
+  var al = ProductStore.alerts().sort(function(a,b){ return (a.level==='high'?0:1)-(b.level==='high'?0:1); });
+  var body = al.length ? al.map(function(a){ var c=a.level==='high'?'#D4664C':'#E3C270'; return '<a class="card" href="#/product/'+a.view+'" style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;border-color:'+c+'33"><span class="dot" style="background:'+c+';margin-top:6px"></span><div><div style="display:flex;gap:10px;align-items:center"><span class="badge" style="border-color:'+c+'55;color:'+c+'">'+esc(a.kind)+'</span><span style="font-size:11px;color:#5E5A52">'+esc(a.level)+'</span></div><div style="color:#E1DAD0;margin-top:8px">'+esc(a.text)+'</div><div style="font-size:11px;color:#6E685E;margin-top:4px">Open the '+esc(a.view)+' screen</div></div></a>'; }).join('') : '<div class="card" style="text-align:center;color:#7CBF4E;padding:40px">Nothing at risk. The book is clean.</div>';
   main.innerHTML = head + scroller(body) + previewFooter('Design preview . mock data . resolving the underlying record clears the alert automatically');
 }
+
+// ---------- 9. Trace (the Metrc room) ----------
+function renderTrace(){
+  var s = Trace.getSyncStatus(); var tags = Trace.getTagInventory();
+  var head = headerBar('Trace', 'The Metrc room. Sync, tags, discrepancies, and the raw package mirror.', '<button id="traceRefresh" class="act go">Refresh Metrc</button>'+pv());
+  var sync = '<div class="card"><div style="display:flex;justify-content:space-between"><span class="lbl">Sync status</span>'+metrcStamp()+'</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;font-size:12.5px">'
+    + syncCell('Packages', s.packages, s.stale) + syncCell('Transfers', s.transfers, s.stale) + syncCell('Lab results', s.labResults, true) + syncCell('Tag inventory', s.tags, s.stale) + '</div>'
+    + '<div style="font-size:12px;color:#6E685E;margin-top:12px">Next scheduled pull '+esc(s.next)+' . cadence 15 minutes . writes are explicit and confirmed</div></div>';
+  var tagLow = tags.packageRemaining < tags.packageThreshold;
+  var tagCard = '<div class="card"><div class="lbl">Tag inventory</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">'
+    + '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Package UIDs</span><span class="mono" style="color:'+(tagLow?'#D4664C':'#8E887C')+'">'+tags.packageRemaining+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.min(100,Math.round(tags.packageRemaining/1000*100))+'%;background:'+(tagLow?'#8A4A32':'#4E8A2B')+'"></span></div><div style="font-size:11px;color:#5E5A52;margin-top:4px">threshold '+tags.packageThreshold+' . '+money(tags.unitCost)+' each</div></div>'
+    + '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>Retail QR identifiers</span><span class="mono" style="color:#8E887C">'+tags.retailRemaining.toLocaleString()+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+Math.min(100,Math.round(tags.retailRemaining/10000*100))+'%"></span></div><div style="font-size:11px;color:#5E5A52;margin-top:4px">threshold '+tags.retailThreshold.toLocaleString()+'</div></div>'
+    + '</div>'+(tagLow?'<div style="font-size:12px;color:#C08457;margin-top:12px">Low tag inventory. Running out of tags stops production.</div>':'')+'</div>';
+  var disc = ProductStore.discrepancies();
+  var consoleTable = '<div class="card" style="padding:0;margin-top:16px"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Discrepancy console . ERP versus Metrc</div><table class="data"><thead><tr><th>Metrc UID</th><th>SKU</th><th>ERP qty</th><th>Metrc qty</th><th>Variance</th><th>State</th><th></th></tr></thead><tbody>'
+    + disc.map(function(d){ var f=ProductStore.findings.filter(function(x){ return x.uid===d.uid; })[0]; var st=f?f.state:'clear'; var vc=d.beyond?'#D4664C':'#8E887C';
+      return '<tr'+(d.beyond?' style="background:#1E1614"':'')+'><td class="mono">'+esc(d.uid.slice(-10))+'</td><td style="color:#E1DAD0">'+esc(d.sku)+'</td><td class="mono">'+d.erp+'</td><td class="mono">'+d.metrc+'</td><td class="mono" style="color:'+vc+'">'+Math.round(d.variance*100)+' percent</td><td>'+(d.beyond?(st==='open'?'<span class="badge" style="border-color:#4A3A2A;color:#D4664C">Investigation open</span>':st==='resolved'?'<span class="badge" style="border-color:#2E4A22;color:#7CBF4E">Resolved</span>':'<span class="badge" style="border-color:#4A3A2A;color:#C08457">Beyond tolerance</span>'):'<span class="badge">Within 2 percent</span>')+'</td>'
+      + '<td>'+(d.beyond && st!=='resolved'? (st==='open'? '<button class="act go" data-resolve="'+d.uid+'">Resolve</button>' : '<button class="act no" data-investigate="'+d.uid+'">Open investigation</button>') : '')+'</td></tr>'; }).join('') + '</tbody></table></div>';
+  var pkgs = Trace.getPackages();
+  var mirror = '<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px"><div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Metrc packages (read only)</div><table class="data"><thead><tr><th>UID</th><th>Item</th><th>Qty</th><th>Status</th></tr></thead><tbody>'
+    + pkgs.map(function(p){ return '<tr><td class="mono">'+esc(p.uid.slice(-10))+'</td><td>'+esc(p.item)+'</td><td class="mono">'+p.metrcQty+'</td><td>'+testBadge(p.testStatus)+'</td></tr>'; }).join('')+'</tbody></table></div>'
+    + '<div class="card" style="padding:0"><div style="padding:15px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Metrc transfers (read only)</div><table class="data"><thead><tr><th>Manifest</th><th>Destination</th><th>Packages</th><th>Status</th></tr></thead><tbody>'
+    + Trace.getTransfers().map(function(t){ return '<tr><td class="mono">'+esc(t.manifest)+'</td><td class="mono">'+esc(t.destination)+'</td><td class="mono">'+t.packages+'</td><td>'+esc(t.status)+'</td></tr>'; }).join('')+'</tbody></table></div></div>';
+  main.innerHTML = head + scroller(sync + '<div style="height:16px"></div>' + tagCard + consoleTable + mirror) + previewFooter('Design preview . mock data . a seeded discrepancy and a seeded stale sync make both failure states visible');
+}
+function syncCell(name, time, stale){ return '<div><div class="lbl">'+esc(name)+'</div><div class="mono" style="color:'+(stale?'#C08457':'#B0A99A')+';margin-top:4px">'+esc(time)+(stale?' . stale':'')+'</div></div>'; }
 
 // ================= router =================
 function route(){
   var h = location.hash || '#/product/dashboard';
   var parts = h.replace(/^#\//,'').split('/');
-  var wing = parts[0] || 'product';
-  var view = parts[1] || 'dashboard';
-  if (wing !== 'product'){
-    var map = { vauxhall:'Vauxhall.dc.html', security:'Security.dc.html', social:'Social.dc.html' };
-    if (map[wing]){ window.location.href = map[wing]; return; }
-    view = 'dashboard';
-  }
+  var wing = parts[0] || 'product'; var view = parts[1] || 'dashboard';
+  if (wing !== 'product'){ var map = { vauxhall:'Vauxhall.dc.html', security:'Security.dc.html', social:'Social.dc.html' }; if (map[wing]){ window.location.href = map[wing]; return; } view = 'dashboard'; }
   setRailActive(view);
   switch(view){
     case 'orders': renderOrders(); break;
-    case 'inventory': renderInventory(); break;
-    case 'process': renderProcess(); break;
+    case 'stock': renderStock(); break;
+    case 'production': renderProduction(); break;
     case 'accounts': renderAccounts(); break;
-    case 'portfolio': renderPortfolio(); break;
     case 'sales': renderSales(); break;
-    case 'board': renderBoard(); break;
-    case 'economics': renderEconomics(); break;
+    case 'skus': renderSkus(); break;
     case 'alerts': renderAlerts(); break;
+    case 'trace': renderTrace(); break;
     default: renderDashboard();
   }
 }
 function go(view){ location.hash = '#/product/'+view; }
-function rerender(){ route(); }
 
 // ================= events =================
 document.addEventListener('click', function(ev){
   var t = ev.target;
 
-  // order rows and actions
   var or = t.closest('.ordRow'); if (or){ ordSel = or.getAttribute('data-oid'); if ((location.hash||'').indexOf('/orders')===-1) go('orders'); else renderOrders(); return; }
   var os = t.closest('[data-ostage]'); if (os){ ordFilter = os.getAttribute('data-ostage')||null; renderOrders(); return; }
   var adv = t.closest('[data-adv]'); if (adv){ var res = ProductStore.advanceOrder(adv.getAttribute('data-adv')); toast(res.msg); if (res.ok) renderOrders(); return; }
-  var can = t.closest('[data-cancel]'); if (can){ if (ProductStore.cancelOrder(can.getAttribute('data-cancel'))){ toast('Order cancelled. Reservation released.'); renderOrders(); } else toast('Cannot cancel a shipped order.'); return; }
+  var can = t.closest('[data-cancel]'); if (can){ if (ProductStore.cancelOrder(can.getAttribute('data-cancel'))){ toast('Order cancelled. Reservations released.'); renderOrders(); } else toast('Cannot cancel a shipped order.'); return; }
+  var mf = t.closest('[data-manifest]'); if (mf){ var m = ProductStore.drawManifest(mf.getAttribute('data-manifest')); toast('Metrc transfer draft '+m+' created.'); renderOrders(); return; }
   if (t.id==='noAddLine'){ addOrderLine(); return; }
   if (t.id==='noCreate'){ createNewOrder(); return; }
 
-  // inventory
-  if (t.id==='rlAdd'){ var sk=valOf('rlSku'), q=+valOf('rlQty'); if (!q){ toast('Enter a quantity.'); return; } ProductStore.addLot(sk, q, valOf('rlCoa')); toast('Lot received.'); renderInventory(); return; }
+  var rl = t.closest('[data-reslot]'); if (rl){ var r = ProductStore.reserveLot(rl.getAttribute('data-reslot'), 50); toast(r.ok? 'Allocated 50 units.' : 'Blocked: '+r.reason); if (r.ok) renderStock(); return; }
+  if (t.id==='stockRefresh' || t.id==='traceRefresh'){ Trace.refresh(); toast('Metrc pulled. Sync green.'); route(); return; }
 
-  // process
-  var ar = t.closest('[data-advrun]'); if (ar){ ProductStore.advanceRun(ar.getAttribute('data-advrun')); toast('Run advanced.'); renderProcess(); return; }
-  var rc = t.closest('[data-recv]'); if (rc){ if (ProductStore.receiveRun(rc.getAttribute('data-recv'))){ toast('Received. New lot posted to inventory.'); renderProcess(); } return; }
-  if (t.id==='nrAdd'){ var nq=+valOf('nrQty'); if (!nq){ toast('Enter a quantity.'); return; } ProductStore.addRun(valOf('nrSku'), nq, valOf('nrReady')); toast('Run started.'); renderProcess(); return; }
+  var arun = t.closest('[data-advrun]'); if (arun){ ProductStore.advanceRun(arun.getAttribute('data-advrun')); toast('Run advanced.'); renderProduction(); return; }
+  var comp = t.closest('[data-complete]'); if (comp){ var uid = ProductStore.completeRun(comp.getAttribute('data-complete')); if (uid){ toast('Package '+uid.slice(-8)+' minted, TestingRequired. Lab result pending.'); renderProduction(); scheduleLabFlip(uid); } return; }
+  if (t.id==='nrAdd'){ var nq=+valOf('nrQty'); if (!nq){ toast('Enter a quantity.'); return; } ProductStore.addRun(valOf('nrSku'), nq, valOf('nrReady')); toast('Run started.'); renderProduction(); return; }
 
-  // accounts
   var acr = t.closest('.acctRow'); if (acr){ acctSel = acr.getAttribute('data-aid'); renderAccounts(); return; }
-  var hold = t.closest('[data-hold]'); if (hold){ var a1=ProductStore.account(hold.getAttribute('data-hold')); a1.status='hold'; toast('Credit hold placed.'); renderAccounts(); return; }
-  var rel = t.closest('[data-release]'); if (rel){ var a2=ProductStore.account(rel.getAttribute('data-release')); a2.status='active'; toast('Hold released.'); renderAccounts(); return; }
-  var act = t.closest('[data-activate]'); if (act){ var a3=ProductStore.account(act.getAttribute('data-activate')); a3.status='active'; toast('Account activated.'); renderAccounts(); return; }
-  if (t.id==='naAdd'){ var nm=valOf('naName'); if (!nm){ toast('Name the account.'); return; } ProductStore.addAccount(nm, valOf('naCity'), valOf('naLicense'), valOf('naTerms'), valOf('naCredit')); toast('Account added.'); renderAccounts(); return; }
+  if (t.id==='naAdd'){ var nm=valOf('naName'), lic=valOf('naLicense'); if (!nm){ toast('Name the account.'); return; } if (!lic){ toast('A license number is required.'); return; } var a=ProductStore.addAccount(nm, valOf('naCity'), lic, valOf('naTerms'), valOf('naCredit')); acctSel=a.id; toast('Added. Metrc facility status: pending verification.'); renderAccounts(); return; }
 
-  // portfolio
-  var stog = t.closest('[data-skutoggle]'); if (stog){ var s=ProductStore.sku(stog.getAttribute('data-skutoggle')); s.status = s.status==='active'?'paused':'active'; toast(s.name+' '+(s.status==='active'?'activated':'paused')+'.'); renderPortfolio(); return; }
-  if (t.id==='nsAdd'){ var nn=valOf('nsName'); if (!nn){ toast('Name the SKU.'); return; } ProductStore.addSku(nn, valOf('nsTier'), valOf('nsPrice'), valOf('nsCogs')); toast('SKU added and propagated.'); renderPortfolio(); return; }
-
-  // sales tabs
+  if (t.id==='boardToggle'){ boardView = !boardView; renderSales(); return; }
   var stb = t.closest('[data-salestab]'); if (stb){ salesTab = stb.getAttribute('data-salestab'); renderSales(); return; }
+
+  var stog = t.closest('[data-skutoggle]'); if (stog){ var sk=ProductStore.sku(stog.getAttribute('data-skutoggle')); sk.status = sk.status==='active'?'paused':'active'; sk.lifecycle = sk.status==='active'?(sk.tier==='Reserve'?'Reserve':'Active'):'Retired'; toast(sk.name+' '+(sk.status==='active'?'activated':'paused')+'.'); renderSkus(); return; }
+  if (t.id==='nsAdd'){ var nn=valOf('nsName'); if (!nn){ toast('Name the SKU.'); return; } ProductStore.addSku(nn, valOf('nsTier'), valOf('nsPrice'), valOf('nsCogs')); toast('SKU added, Metrc item registered, propagated.'); renderSkus(); return; }
+
+  var inv = t.closest('[data-investigate]'); if (inv){ ProductStore.openInvestigation(inv.getAttribute('data-investigate')); toast('Investigation opened. Felix finding filed, Live Feed alerted.'); renderTrace(); return; }
+  var rsv = t.closest('[data-resolve]'); if (rsv){ ProductStore.resolveInvestigation(rsv.getAttribute('data-resolve')); toast('Reconciled to Metrc. Finding closed.'); renderTrace(); return; }
 });
 
-document.addEventListener('input', function(ev){
-  var t = ev.target;
-  if (t.id==='noPromised'){ newOrder.promised = t.value; return; }
-});
+document.addEventListener('input', function(ev){ if (ev.target.id==='noPromised'){ newOrder.promised = ev.target.value; } });
 document.addEventListener('change', function(ev){
   var t = ev.target;
   if (t.id==='noAcct'){ newOrder.accountId = t.value; return; }
-  if (t.classList && t.classList.contains('ueEdit')){ var s=ProductStore.sku(t.getAttribute('data-uesku')); var f=t.getAttribute('data-uefield'); var v=parseFloat(t.value); if (!isNaN(v)){ s[f]=v; renderEconomics(); toast('Recomputed.'); } return; }
+  if (t.classList && t.classList.contains('ueEdit')){ var s=ProductStore.sku(t.getAttribute('data-uesku')); var f=t.getAttribute('data-uefield'); var v=parseFloat(t.value); if (!isNaN(v)){ s[f]=v; renderSales(); toast('Recomputed.'); } return; }
 });
 
 function valOf(id){ var el = document.getElementById(id); return el? el.value : ''; }
-function addOrderLine(){
-  var sk = valOf('noSku'), q = +valOf('noQty');
-  if (!q){ toast('Enter a quantity.'); return; }
-  newOrder.lines.push({ skuId: sk, qty: q }); renderOrders();
-}
+function addOrderLine(){ var sk=valOf('noSku'), q=+valOf('noQty'); if (!q){ toast('Enter a quantity.'); return; } newOrder.lines.push({ skuId:sk, qty:q }); renderOrders(); }
 function createNewOrder(){
   if (!newOrder.accountId){ toast('Choose an account.'); return; }
   if (!newOrder.lines.length){ toast('Add at least one line.'); return; }
-  var o = ProductStore.addOrder(newOrder.accountId, newOrder.lines.slice(), newOrder.promised, 'draft');
-  newOrder = { accountId:'', lines:[], promised:'2026-08-15' };
-  ordSel = o.id; toast('Order '+o.id+' created as a draft.'); renderOrders();
+  var res = ProductStore.createOrder(newOrder.accountId, newOrder.lines.slice(), newOrder.promised);
+  if (!res.ok){ toast(res.msg); return; }
+  ordSel = res.order.id; newOrder = { accountId:'', lines:[], promised:'2026-08-15' }; toast('Order '+res.order.id+' created as a draft.'); renderOrders();
 }
+// simulated lab result event: TestingRequired flips to TestPassed after a delay
+function scheduleLabFlip(uid){ setTimeout(function(){ if (Trace.flipLabResult(uid)){ ProductStore.emit('FEED', 'Lab result received for '+uid.slice(-8)+', Metrc status TestPassed'); toast('Lab result in: '+uid.slice(-8)+' is now TestPassed.'); var v=(location.hash||''); if (v.indexOf('/stock')!==-1||v.indexOf('/production')!==-1||v.indexOf('/trace')!==-1) route(); } }, 6000); }
 
 window.addEventListener('hashchange', route);
 ProductStore.seed();
