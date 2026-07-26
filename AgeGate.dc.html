@@ -102,6 +102,7 @@ class Component extends DCLogic {
         if (age >= 21) {
           try { localStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
           this.setState({ verified: true });
+          try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
         } else this.setState({ declined: true });
       }
     };

@@ -25,6 +25,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes sweep { from { transform: translateX(-140%) skewX(-18deg); } to { transform: translateX(240%) skewX(-18deg); } }
 @keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
+#top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
 </style>
 </helmet>
 <div style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;background:#1B1D1C;color:#E1DAD0">
@@ -62,7 +63,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     </div>
   </nav>
 
-  <section id="top" data-screen-label="S1 Arrival" style="position:relative;height:100vh;min-height:640px;background:#0D0F0E;overflow:hidden">
+  <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;height:100vh;min-height:640px;background:#0D0F0E;overflow:hidden">
     <canvas ref="{{ canvasRef }}" style="position:absolute;inset:0;width:100%;height:100%;animation:fadeIn 2.4s cubic-bezier(0.22,1,0.36,1) 0.7s both"></canvas>
     <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,15,14,0.4) 0%,rgba(13,15,14,0.15) 40%,rgba(13,15,14,0.55) 100%);pointer-events:none"></div>
     <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
@@ -336,6 +337,11 @@ class Component extends DCLogic {
       }, { threshold: 0.55 });
       this._pressIO.observe(this.pressWrapRef.current);
     }
+    // Hold the hero cascade until the age gate is dismissed, so it plays into
+    // view rather than behind the gate overlay. If the gate is bypassed, release now.
+    const releaseHero = () => { const t = document.getElementById('top'); if (t) t.classList.remove('hero-hold'); };
+    if (this.props.gateBypass) releaseHero();
+    else addEventListener('bond-entered', releaseHero, { once: true });
   }
   componentWillUnmount() {
     removeEventListener('resize', this._resize);
