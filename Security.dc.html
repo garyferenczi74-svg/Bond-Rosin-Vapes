@@ -14,22 +14,47 @@
   a { color: inherit; text-decoration: none; }
   .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
   .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; cursor: pointer; transition: background .2s, color .2s; }
+  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; letter-spacing: 0.02em; cursor: pointer; transition: background .2s, color .2s; }
   .navitem:hover { background: #221F1E; color: #E1DAD0; }
   .navitem.on { background: #241F1D; color: #E1DAD0; box-shadow: inset 2px 0 0 #C08457; }
   .wing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 3px; cursor: pointer; transition: background .2s; color: #8E887C; }
   .wing:hover { background: #221F1E; }
   .wing.on { background: #221F1E; color: #E1DAD0; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #2E302D; border-radius: 999px; font-size: 12px; color: #B0A99A; white-space: nowrap; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .chip.active { background: #241F1D; color: #E1DAD0; border-color: #5A3F2C; }
+  .badge { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
+  .pill { cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .pill.active { background: #241F1D; color: #E1DAD0; border-color: #5A3F2C; }
   .card { background: #191B18; border: 1px solid #202220; border-radius: 5px; padding: 16px 18px; }
-  .kpi { font-family: 'GFS Didot', Didot, serif; font-size: 34px; line-height: 1; }
+  .kpi { font-family: 'GFS Didot', Didot, serif; font-size: 34px; line-height: 1; color: #E1DAD0; }
   .lbl { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6E685E; }
-  .badge { font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
-  .sev { font-size: 10.5px; letter-spacing: 0.08em; font-weight: 500; padding: 3px 8px; border-radius: 3px; }
-  .finding { padding: 15px 16px; border-bottom: 1px solid #202220; transition: background .15s; }
-  .finding:hover { background: #191B19; }
-  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
   .good { color: #7CBF4E; }
-  @media (max-width: 900px) { .rail { display: none; } .score { grid-template-columns: repeat(2,1fr) !important; } }
+  .sev { font-size: 10.5px; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 3px; white-space: nowrap; }
+  .act { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 14px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; background: transparent; cursor: pointer; transition: background .2s, color .2s, border-color .2s; font-family: inherit; }
+  .act:hover { background: #221F1E; color: #E1DAD0; border-color: #4E4A43; }
+  .act.go:hover { border-color: #2E4A22; color: #7CBF4E; }
+  .act.no:hover { border-color: #5A3A2A; color: #C08457; }
+  .act[disabled] { opacity: 0.4; cursor: not-allowed; }
+  .vfield { background: #141615; border: 1px solid #2E302D; border-radius: 3px; color: #E1DAD0; font-family: inherit; font-size: 14px; padding: 11px 13px; width: 100%; outline: none; transition: border-color .2s; }
+  .vfield:focus { border-color: #C08457; }
+  .vfield::placeholder { color: #6E685E; }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #241F1D; border: 1px solid #5A3F2C; color: #E1DAD0; padding: 12px 22px; border-radius: 4px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data th { text-align: left; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #5E5A52; padding: 10px 12px; border-bottom: 1px solid #202220; }
+  table.data td { padding: 10px 12px; border-bottom: 1px solid #1C1E1B; color: #B0A99A; vertical-align: top; }
+  table.data tr:hover td { background: #191B19; }
+  .spark { display: flex; align-items: flex-end; gap: 2px; height: 26px; }
+  .spark > i { flex: 1; background: #34502A; border-radius: 1px; min-height: 2px; }
+  .spark > i.bad { background: #8A4A32; }
+  @media (max-width: 900px) {
+    .rail { display: none; }
+    .score { grid-template-columns: repeat(2,1fr) !important; }
+    .mgrid { grid-template-columns: 1fr !important; }
+    .grid2 { grid-template-columns: 1fr !important; }
+    .split { grid-template-columns: 1fr !important; }
+  }
 </style>
 </head>
 <body>
@@ -38,7 +63,7 @@
   <aside class="rail" style="width:248px;flex-shrink:0;background:#181816;border-right:1px solid #202220;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
     <div style="padding:22px 18px 16px;border-bottom:1px solid #202220">
       <div style="font-family:'GFS Didot',Didot,serif;font-size:22px;letter-spacing:0.34em;padding-left:0.34em;color:#E8E1D5">VAUXHALL</div>
-      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Security and Compliance</div>
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Security . Always watching</div>
     </div>
     <div style="padding:16px 12px 6px">
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Wings</div>
@@ -49,17 +74,18 @@
     </div>
     <div style="padding:14px 12px;flex:1;overflow-y:auto" class="scroll">
       <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Security</div>
-      <div class="navitem on">Findings</div>
-      <div class="navitem">Incidents</div>
-      <div class="navitem">Rules</div>
-      <div class="navitem">Waivers</div>
-      <div class="navitem">Pre-Check</div>
-      <div class="navitem">Scanner Bridge</div>
-      <div class="navitem">Audit Log</div>
-      <div class="navitem">DSAR</div>
-      <div class="navitem">Vendors</div>
-      <div class="navitem">Dashboards</div>
-      <div class="navitem">SOC 2 Exporter</div>
+      <a class="navitem" data-view="monitors" href="#/security/monitors">Monitors</a>
+      <a class="navitem" data-view="findings" href="#/security/findings">Findings <span id="findBadge" style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">0</span></a>
+      <a class="navitem" data-view="incidents" href="#/security/incidents">Incidents</a>
+      <a class="navitem" data-view="rules" href="#/security/rules">Rules</a>
+      <a class="navitem" data-view="waivers" href="#/security/waivers">Waivers</a>
+      <a class="navitem" data-view="audit" href="#/security/audit">Audit</a>
+      <a class="navitem" data-view="dsar" href="#/security/dsar">DSAR</a>
+      <a class="navitem" data-view="vendors" href="#/security/vendors">Vendors</a>
+      <a class="navitem" data-view="precheck" href="#/security/precheck">Pre-Check</a>
+      <a class="navitem" data-view="scanner" href="#/security/scanner">Scanner</a>
+      <a class="navitem" data-view="dashboards" href="#/security/dashboards">Dashboards</a>
+      <a class="navitem" data-view="soc2" href="#/security/soc2">SOC 2</a>
     </div>
     <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
       <div><div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div><div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div></div>
@@ -67,97 +93,497 @@
     </div>
   </aside>
 
-  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
-    <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">
-      <div>
-        <div style="font-family:'GFS Didot',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">Findings</div>
-        <div style="font-size:12px;color:#6E685E;margin-top:2px">Cite. Remediate. Document. Runtime plus Claude Code enforcement.</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="badge">Export</span>
-        <span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>
-      </div>
-    </header>
-
-    <div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">
-
-      <div class="score" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
-        <div class="card"><div class="lbl">P0 findings . 30d</div><div class="kpi good" style="margin-top:10px">0</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Target zero</div></div>
-        <div class="card"><div class="lbl">P1 findings . 30d</div><div class="kpi good" style="margin-top:10px">0</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Target zero</div></div>
-        <div class="card"><div class="lbl">Open findings</div><div class="kpi" style="margin-top:10px;color:#E3C270">2</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">1 P2 . 1 P3</div></div>
-        <div class="card" style="border-color:#3A2A22"><div class="lbl">Dev-side escapes . 30d</div><div class="kpi" style="margin-top:10px;color:#D4664C">1</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Honesty metric . root cause filed</div></div>
-      </div>
-
-      <div class="card" style="padding:0;margin-top:16px">
-        <div style="padding:15px 16px;border-bottom:1px solid #202220;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0">Findings</span>
-          <span style="font-size:11.5px;color:#6E685E">Severity . Source . Surface . Citation . Owner . Due . Closure</span>
-        </div>
-
-        <div class="finding">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <span class="sev" style="background:#3A2A22;color:#D4664C;border:1px solid #5A3A2A">P2</span>
-            <span style="color:#E1DAD0">Age gate remember window not honored on Safari private mode</span>
-            <span class="badge" style="margin-left:auto">Runtime monitor</span>
-          </div>
-          <div style="font-size:12.5px;color:#8E887C;margin-top:8px;display:flex;gap:18px;flex-wrap:wrap">
-            <span>Surface: /haus age gate</span><span>Cite: NY OCM 21+ verification</span><span>Owner: Vesper</span><span>Due: Jul 28</span><span class="mono">A-40871</span>
-          </div>
-        </div>
-
-        <div class="finding">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <span class="sev" style="background:#2E2A1C;color:#E3C270;border:1px solid #4A3A1C">P3</span>
-            <span style="color:#E1DAD0">Dependency lucide-react pinned range allows minor drift</span>
-            <span class="badge" style="margin-left:auto">Dependency audit</span>
-          </div>
-          <div style="font-size:12.5px;color:#8E887C;margin-top:8px;display:flex;gap:18px;flex-wrap:wrap">
-            <span>Surface: bondvapes build</span><span>Cite: SHA-pin policy</span><span>Owner: M</span><span>Due: Aug 04</span><span class="mono">A-40860</span>
-          </div>
-        </div>
-
-        <div class="finding" style="opacity:0.72">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <span class="sev" style="background:#20241E;color:#7CBF4E;border:1px solid #2E4A22">Closed</span>
-            <span style="color:#B0A99A">Claims lint: unverified potency phrase in draft social caption</span>
-            <span class="badge" style="margin-left:auto">Felix review</span>
-          </div>
-          <div style="font-size:12.5px;color:#6E685E;margin-top:8px;display:flex;gap:18px;flex-wrap:wrap">
-            <span>Surface: social draft d-207</span><span>Cite: claims-language rule</span><span>Owner: Carver</span><span>Closed Jul 24</span><span class="mono">A-40799</span>
-          </div>
-        </div>
-
-        <div class="finding" style="opacity:0.72;border-bottom:none">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-            <span class="sev" style="background:#20241E;color:#7CBF4E;border:1px solid #2E4A22">Closed</span>
-            <span style="color:#B0A99A">Missing CSP frame-ancestors on preview build</span>
-            <span class="badge" style="margin-left:auto">Code scan</span>
-          </div>
-          <div style="font-size:12.5px;color:#6E685E;margin-top:8px;display:flex;gap:18px;flex-wrap:wrap">
-            <span>Surface: headers</span><span>Cite: web security headers rule</span><span>Owner: M</span><span>Closed Jul 23</span><span class="mono">A-40781</span>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px">
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center"><span class="lbl">Pre-Check</span><span class="badge" style="border-color:#2E4A22;color:#7CBF4E">Green</span></div>
-          <div style="font-size:13px;color:#B0A99A;margin-top:12px;line-height:1.9">Rules passed . Scans clean . Age gate tests green . Claims lint clean</div>
-          <div style="font-size:12px;color:#6E685E;margin-top:8px">rc-118 cleared to M gate</div>
-        </div>
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;align-items:center"><span class="lbl">Waivers</span><span class="badge">1 active</span></div>
-          <div style="font-size:13px;color:#B0A99A;margin-top:12px;line-height:1.6">Placeholder imagery on preview surfaces</div>
-          <div style="font-size:12px;color:#6E685E;margin-top:8px">Expires Aug 15 . compensating control: noindex . owner approved</div>
-        </div>
-      </div>
-
-    </div>
-
-    <footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">
-      Design preview . mock data . the enforced ruleset, append only audit log, and SOC 2 export run in the secured build
-    </footer>
-  </main>
+  <main id="main" style="flex:1;min-width:0;display:flex;flex-direction:column"></main>
 </div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// Vauxhall Security wing. Felix on autonomous 24/7 monitoring. In memory mock
+// data with a clean seam. Monitors run on cadences, open findings and incidents
+// on their own authority, and escalate by severity. Cite. Remediate. Document.
+// The audit log is an append only hash chain. No em dashes or en dashes anywhere.
+// Refresh resets the watch floor by design.
+
+var TODAY = '2026-07-26';
+var SEV = { P0:'#D4664C', P1:'#C08457', P2:'#E3C270', P3:'#8E887C' };
+var SEV_BG = { P0:'#3A2220', P1:'#3A2A1C', P2:'#2E2A1C', P3:'#222420' };
+var MON_COLOR = { green:'#7CBF4E', degraded:'#E3C270', failing:'#D4664C' };
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function clock(){ var d = new Date(); function p(n){ return (n<10?'0':'')+n; } return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()); }
+function hhmm(){ return clock().slice(0,5); }
+function daysUntil(dateStr){ return Math.round((new Date(dateStr).getTime() - new Date(TODAY).getTime())/86400000); }
+function h32(str){ var h = 5381; for (var i=0;i<str.length;i++){ h = ((h<<5)+h+str.charCodeAt(i))>>>0; } return ('00000000'+h.toString(16)).slice(-8); }
+function spark(seed, bad){ var out=[]; for (var i=0;i<24;i++){ var v = 30 + ((seed*7+i*13)%60); out.push(v); } if (bad) out[22]= 96; return out; }
+
+var SecurityStore = {
+  monitors: [], findings: [], incidents: [], rules: [], waivers: [], audit: [], dsar: [], vendors: [], precheck: {}, scanner: [], feed: [],
+  live: false, banner: null, _fid: 0, _iid: 0, _aid: 100, firedLint: false, firedLockout: false,
+
+  seed: function(){
+    var self = this;
+    this.monitors = [
+      m('site-liveness','Site liveness','2 min','RULE-OPS-01','Public site answers from two regions',{ fail:'P1' }),
+      m('age-gate','Age gate integrity','15 min','RULE-CMP-01','Gate renders before content, blocks deep links, captures consent',{ fail:'P0' }),
+      m('warning-band','Compliance band presence','hourly','RULE-CMP-02','Warning text verbatim, rotating slot, license line on every template',{ fail:'P1' }),
+      m('robots','Robots and indexing state','hourly','RULE-CMP-03','Indexing flag matches the launch decision',{ fail:'P1' }),
+      m('headers','Security headers and CSP','hourly','RULE-SEC-01','Response headers match the ruleset',{ fail:'P1' }),
+      m('tls','TLS and domain','daily','RULE-SEC-02','Certificate validity, DNS integrity, renewal horizon',{ fail:'P1' }),
+      m('deps','Dependency and secret scan','on commit + nightly','RULE-PLT-02','CVE sweep and secret patterns',{ fail:'P0' }),
+      m('auth-watch','Auth watch','streaming','RULE-SEC-03','Lockouts, failure bursts, impossible travel on /haus/admin',{ fail:'P1' }),
+      m('rls','RLS probe','hourly','RULE-PLT-01','Anonymous client attempts protected reads',{ fail:'P0' }),
+      m('form-abuse','Form abuse','streaming','RULE-OPS-02','Signup velocity and disposable domain patterns',{ fail:'P2', auto:'throttle the form' }),
+      m('metrc','Metrc sync health','15 min','RULE-PLT-03','Sync freshness, error rates, open discrepancies',{ fail:'P1' }, 'degraded'),
+      m('content-lint','Content lint sweep','on deploy + nightly','RULE-CMP-04','Dashes, exclamation points, forbidden vocabulary, claims language',{ fail:'P2' }),
+      m('audit-chain','Audit log integrity','hourly','RULE-PLT-04','Append only hash chain verifies',{ fail:'P0' }),
+      m('agent-conduct','Agent conduct','streaming','RULE-AGT-01','No production, canon, ruleset, or publish touch without a gate',{ fail:'P1' })
+    ];
+    function m(id, name, cadence, ruleId, rule, sevmap, state){ return { id:id, name:name, cadence:cadence, ruleId:ruleId, rule:rule, sevmap:sevmap, state:state||'green', last:hhmm(), next:'', spark:spark(id.length,false), history:[{ t:hhmm(), r:'pass' }] }; }
+
+    this.findings = [
+      f('P2','Content lint sweep','Terms template','RULE-CMP-04','Felix','2026-07-28','open','Nightly sweep flagged a straight quote inconsistency, non-blocking'),
+      f('P3','Vendor review','Vendors register','RULE-VND-01','Gary','2026-08-05','open','Vercel DPA renewal inside the 60 day horizon'),
+      f('P2','Code scan','CSP frame-ancestors','RULE-SEC-01','M','2026-07-24','closed','Covered by waiver WVR-2 while the legacy preview host is retired')
+    ];
+    function f(sev, source, surface, rule, owner, due, state, evidence){ self._fid++; return { id:'FND-'+self._fid, sev:sev, source:source, surface:surface, rule:rule, owner:owner, due:due, state:state, evidence:evidence||'', closure:'', opened:TODAY }; }
+
+    this.incidents = [];
+    this.rules = [
+      r('RULE-SEC-01','Web security','Security headers and CSP','9 NYCRR house policy plus OWASP secure headers',['Security headers and CSP'],false),
+      r('RULE-SEC-02','Web security','TLS and domain integrity','TLS 1.2 minimum, valid chain, renewal horizon 30 days',['TLS and domain'],false),
+      r('RULE-SEC-03','Web security','Admin auth protection','Lockout after 5, impossible travel detection on /haus/admin',['Auth watch'],false),
+      r('RULE-CMP-01','Compliance','Age gate before content','NY OCM 21 plus verification, gate renders before any cannabis content',['Age gate integrity'],false),
+      r('RULE-CMP-02','Compliance','Warning band verbatim','Required warning text matches verbatim on every template',['Compliance band presence'],false),
+      r('RULE-CMP-03','Compliance','Indexing state','Robots flag matches the launch decision',['Robots and indexing state'],false),
+      r('RULE-CMP-04','Compliance','Content lint','No dashes, exclamation points, forbidden vocabulary, or claims language',['Content lint sweep'],false),
+      r('RULE-PLT-01','Platform','Row level isolation','Anonymous clients cannot read protected tables',['RLS probe'],false),
+      r('RULE-PLT-02','Platform','Secrets and dependencies','No secrets in repo, no critical CVEs shipped',['Dependency and secret scan'],false),
+      r('RULE-PLT-03','Platform','Metrc sync freshness','Sync is fresh within two cycles at ship time',['Metrc sync health'],false),
+      r('RULE-PLT-04','Platform','Audit chain integrity','Append only log verifies end to end',['Audit log integrity'],false),
+      r('RULE-AGT-01','Agent conduct','No production touch','Agents never write production without the human gate',['Agent conduct'],true),
+      r('RULE-AGT-02','Agent conduct','No silent canon edits','Canon changes route through Moneypenny approval',['Agent conduct'],true),
+      r('RULE-AGT-03','Agent conduct','No publish without gates','Nothing publishes without Felix clearance and owner approval',['Agent conduct'],true),
+      r('RULE-AGT-04','Agent conduct','No ruleset modification','Agents cannot edit the enforcement ruleset',['Agent conduct'],true)
+    ];
+    function r(id, group, name, cite, monitors, agentLocked){ return { id:id, group:group, name:name, cite:cite, monitors:monitors, agentLocked:agentLocked, history: id==='RULE-CMP-04'?2:0 }; }
+
+    this.waivers = [
+      { id:'WVR-1', rule:'RULE-CMP-03', scope:'Preview surfaces carry noindex during build', control:'noindex meta plus password gate', expiry:'2026-08-15', approver:'Gary', findingId:null },
+      { id:'WVR-2', rule:'RULE-SEC-01', scope:'Relaxed CSP on the legacy preview host', control:'Host firewalled, no user data', expiry:'2026-07-25', approver:'Gary', findingId:null }
+    ];
+    // the CSP waiver covers the seeded closed finding FND-3
+    this.waivers.filter(function(w){ return w.id==='WVR-2'; }).forEach(function(w){ w.findingId='FND-3'; });
+    // an expired waiver reopens its linked finding automatically
+    this.waivers.forEach(function(w){ if (self.isExpired(w) && w.findingId){ var fnd=self.findings.filter(function(x){ return x.id===w.findingId; })[0]; if (fnd){ fnd.state='open'; fnd.closure=''; fnd.evidence='Reopened: waiver '+w.id+' expired '+w.expiry+', compensating control lapsed'; } } });
+
+    // audit hash chain
+    this.audit = [];
+    this.appendAudit('system','Watch floor initialized');
+    this.appendAudit('Felix','Monitor catalog loaded, 14 probes armed');
+    this.appendAudit('Felix','Finding FND-1 opened by Content lint sweep');
+    this.appendAudit('Felix','Waiver WVR-2 expired, finding FND-3 reopened');
+    this.appendAudit('Vesper','Weekly monitor audit complete, all probes test their cited rule');
+
+    this.dsar = [
+      { id:'DSAR-1', type:'Deletion', identity:'verified', opened:'2026-07-02', due:'2026-08-16', state:'completed', record:'All Bond Circle records erased, confirmation sent' },
+      { id:'DSAR-2', type:'Access', identity:'verified', opened:'2026-07-14', due:'2026-08-28', state:'open', record:'Compiling the record of held data' }
+    ];
+    this.vendors = [
+      { id:'V1', name:'Supabase', scope:'Database and auth', dpa:'signed', renewal:'2027-01-01' },
+      { id:'V2', name:'Vercel', scope:'Hosting and edge', dpa:'signed', renewal:'2026-09-10' },
+      { id:'V3', name:'SendGrid', scope:'Transactional email', dpa:'pending', renewal:'2027-03-01' },
+      { id:'V4', name:'Metrc', scope:'Seed to sale compliance', dpa:'signed', renewal:'2027-06-01' }
+    ];
+    this.precheck = {
+      'rc-117': { rc:'rc-117', status:'unrun', checks:[], fixed:true },
+      'rc-118': { rc:'rc-118', status:'unrun', checks:[], fixed:false }
+    };
+    this.scanner = [
+      { source:'Dependency scan (npm audit)', last:'02:14', critical:0, high:0, moderate:1, note:'lucide-react minor drift, filed FND' },
+      { source:'Secret scan (gitleaks)', last:'02:14', critical:0, high:0, moderate:0, note:'No secrets in tree' },
+      { source:'Static analysis (semgrep)', last:'02:15', critical:0, high:0, moderate:0, note:'No new patterns' }
+    ];
+  },
+
+  // ---- audit chain ----
+  appendAudit: function(actor, action){
+    var prev = this.audit.length ? this.audit[this.audit.length-1].hash : '00000000';
+    var seq = this.audit.length + 1;
+    var ts = TODAY + ' ' + clock();
+    var hash = h32(seq + '|' + ts + '|' + actor + '|' + action + '|' + prev);
+    this.audit.push({ seq:seq, ts:ts, actor:actor, action:action, prev:prev, hash:hash, tampered:false });
+  },
+  verifyChain: function(){
+    for (var i=0;i<this.audit.length;i++){
+      var e = this.audit[i];
+      var prev = i===0 ? '00000000' : this.audit[i-1].hash;
+      var expect = h32(e.seq + '|' + e.ts + '|' + e.actor + '|' + e.action + '|' + prev);
+      if (expect !== e.hash || e.prev !== prev) return i;
+    }
+    return -1;
+  },
+  tamperAudit: function(){ if (this.audit.length<3) return; var e = this.audit[2]; e.action = e.action + ' [altered]'; e.tampered = true; var broken = this.verifyChain(); if (broken>=0){ this.raiseFinding('P0','Audit log integrity','Audit chain','RULE-PLT-04','Felix','Hash chain broken at entry '+(broken+1)+', tamper detected'); this.banner = { level:'P0', text:'P0: audit chain verification failed, tamper detected at entry '+(broken+1) }; this.emit('ALERT','P0: audit log hash chain broken, integrity compromised'); } },
+  resetAudit: function(){ this.audit.forEach(function(e){ if (e.tampered){ e.action = e.action.replace(' [altered]',''); e.tampered=false; } }); this.banner=null; },
+
+  // ---- findings ----
+  raiseFinding: function(sev, source, surface, rule, owner, evidence){
+    this._fid++; var id='FND-'+this._fid;
+    this.findings.unshift({ id:id, sev:sev, source:source, surface:surface, rule:rule, owner:owner, due:TODAY, state:'open', evidence:evidence||'', closure:'', opened:TODAY });
+    this.appendAudit(owner||'Felix', 'Finding '+id+' ('+sev+') opened by '+source);
+    return id;
+  },
+  closeFinding: function(id, closure){ var f=this.findings.filter(function(x){ return x.id===id; })[0]; if (!f || !closure) return false; f.state='closed'; f.closure=closure; this.emit('FEED','Finding '+id+' closed with evidence'); this.appendAudit('Felix','Finding '+id+' closed: '+closure); return true; },
+  openFindings: function(){ return this.findings.filter(function(f){ return f.state==='open'; }); },
+
+  // ---- monitors and engine ----
+  isExpired: function(w){ return daysUntil(w.expiry) < 0; },
+  fireLintCatch: function(){
+    if (this.firedLint) return; this.firedLint = true;
+    var mon = this.monitors.filter(function(x){ return x.id==='content-lint'; })[0];
+    mon.state='degraded'; mon.spark = spark(mon.id.length,true); mon.history.unshift({ t:hhmm(), r:'fail' }); mon.last=hhmm();
+    var id = this.raiseFinding('P2','Content lint sweep','mock/press-preview.html','RULE-CMP-04','Felix','Em dash found at #hero > p, autonomous catch, cited RULE-CMP-04');
+    this.emit('FEED','Content lint sweep caught a dash on mock/press-preview.html, opened '+id);
+  },
+  fireLockoutBurst: function(){
+    if (this.firedLockout) return; this.firedLockout = true;
+    var mon = this.monitors.filter(function(x){ return x.id==='auth-watch'; })[0];
+    mon.state='degraded'; mon.spark = spark(mon.id.length,true); mon.history.unshift({ t:hhmm(), r:'burst' }); mon.last=hhmm();
+    this._iid++; var inc = { id:'INC-'+this._iid, title:'Lockout burst on /haus/admin', sev:'P0', opened:TODAY+' '+clock(), state:'open',
+      timeline:[
+        { t:clock(), kind:'Detection', text:'Auth watch registered 5 lockouts from 74.12.x.x in 90 seconds' },
+        { t:clock(), kind:'Action', text:'Pre-authorized: abusive source blocked at the edge' },
+        { t:clock(), kind:'Notification', text:'ALERT emitted to the Vauxhall Live Feed, Gary paged (P0)' }
+      ], findings:[], rootCause:'' };
+    var fid = this.raiseFinding('P1','Auth watch','/haus/admin','RULE-SEC-03','Felix','Lockout burst pattern, incident '+inc.id+' assembled');
+    inc.findings.push(fid); this.incidents.unshift(inc);
+    this.banner = { level:'P0', text:'P0: lockout burst on /haus/admin, source blocked, incident '+inc.id+' open' };
+    this.emit('ALERT','P0: lockout burst on /haus/admin, abusive source blocked, incident opened');
+  },
+  tick: function(){
+    var self = this;
+    this.monitors.forEach(function(mon){ if (mon.state==='green'){ mon.last = hhmm(); mon.history.unshift({ t:hhmm(), r:'pass' }); if (mon.history.length>12) mon.history.pop(); } });
+  },
+
+  // ---- precheck ----
+  runPrecheck: function(rc){
+    var pc = this.precheck[rc]; if (!pc) return;
+    var suite = ['Security headers','CSP frame-ancestors','Age gate synthetic','Warning band verbatim','Robots state','Dash lint','Claims lint','Dependency scan','RLS probe','Metrc sync freshness'];
+    pc.checks = suite.map(function(name){
+      var ok = true, cite='';
+      if (name==='Claims lint' && rc==='rc-118' && !pc.fixed){ ok=false; cite='RULE-CMP-04'; }
+      return { name:name, ok:ok, cite:cite };
+    });
+    var failed = pc.checks.filter(function(c){ return !c.ok; });
+    if (failed.length){ pc.status='blocked'; var f=failed[0]; this.appendAudit('Felix','Pre-Check on '+rc+' blocked at '+f.name+' ('+f.cite+')');
+      if (!this.findings.some(function(x){ return x.surface===rc && x.state==='open'; })) this.raiseFinding('P2','Pre-Check',rc,f.cite,'Carver','Blocked at '+f.name+' on '+rc+', remediation pending'); }
+    else { pc.status='passed'; pc.stamp = TODAY+' '+clock(); this.appendAudit('Felix','Pre-Check on '+rc+' passed, clearance stamped'); }
+    return pc.status;
+  },
+  fixPrecheck: function(rc){ var pc=this.precheck[rc]; if (!pc) return; pc.fixed=true; var f=this.findings.filter(function(x){ return x.surface===rc && x.state==='open'; })[0]; if (f){ this.closeFinding(f.id,'Claims phrase removed, verified clean'); } this.appendAudit('Carver','Fix applied to '+rc+', claims phrase removed'); },
+
+  // ---- scanner ----
+  runSweep: function(){ this.scanner.forEach(function(s){ s.last = hhmm(); }); this.emit('FEED','Scanner sweep complete across '+this.scanner.length+' sources'); },
+
+  emit: function(type, text){ this.feed.unshift({ id:'ev'+(this.feed.length+1), time:clock(), type:type, text:text }); },
+
+  scorecard: function(){
+    var f = this.findings;
+    return {
+      p0: f.filter(function(x){ return x.sev==='P0' && x.state==='open'; }).length,
+      p1: f.filter(function(x){ return x.sev==='P1' && x.state==='open'; }).length,
+      open: this.openFindings().length,
+      escapes: 0
+    };
+  }
+};
+
+// ================= rendering =================
+var main = document.getElementById('main');
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3000); }
+
+var findFilter = null, findSel = null, monSel = null, incSel = null, ruleGroup = null, pcSel = 'rc-117';
+
+function headerBar(title, subtitle, right){
+  return '<header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">'
+    + '<div><div style="font-family:\'GFS Didot\',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">'+esc(title)+'</div>'
+    + '<div style="font-size:12px;color:#6E685E;margin-top:2px">'+esc(subtitle)+'</div></div>'
+    + '<div style="display:flex;align-items:center;gap:10px">'+(right||'')+'</div></header>';
+}
+function previewFooter(note){ return '<footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">'+esc(note)+'</footer>'; }
+function pv(){ return '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>'; }
+function liveChip(){ return '<span class="chip" id="liveToggle"><span class="dot" style="background:'+(SecurityStore.live?'#7CBF4E;box-shadow:0 0 8px #7CBF4E':'#5E5A52')+'"></span>'+(SecurityStore.live?'Live':'Frozen')+'</span>'; }
+function scroller(inner){ return '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">'+bannerHtml()+inner+'</div>'; }
+function bannerHtml(){ var b = SecurityStore.banner; if (!b) return ''; return '<div class="card" style="border-color:#5A3A2A;background:#241614;margin-bottom:16px;display:flex;align-items:center;gap:12px"><span class="sev" style="background:#3A2220;color:#D4664C">'+esc(b.level)+'</span><span style="color:#E1DAD0">'+esc(b.text)+'</span><button class="act no" id="bannerAck" style="margin-left:auto">Acknowledge</button></div>'; }
+function sevTag(sev){ return '<span class="sev" style="background:'+SEV_BG[sev]+';color:'+SEV[sev]+'">'+esc(sev)+'</span>'; }
+function kv(k,v){ return '<div><div class="lbl">'+esc(k)+'</div><div style="color:#B0A99A;margin-top:4px">'+esc(v)+'</div></div>'; }
+function scorecard(){
+  var s = SecurityStore.scorecard();
+  return '<div class="score" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px">'
+    + '<div class="card"><div class="lbl">P0 findings . 30d</div><div class="kpi '+(s.p0?'':'good')+'" style="margin-top:10px;color:'+(s.p0?'#D4664C':'#7CBF4E')+'">'+s.p0+'</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Target zero</div></div>'
+    + '<div class="card"><div class="lbl">P1 findings . 30d</div><div class="kpi '+(s.p1?'':'good')+'" style="margin-top:10px;color:'+(s.p1?'#C08457':'#7CBF4E')+'">'+s.p1+'</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Target zero</div></div>'
+    + '<div class="card"><div class="lbl">Open findings</div><div class="kpi" style="margin-top:10px;color:#E3C270">'+s.open+'</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">Queue and review</div></div>'
+    + '<div class="card" style="border-color:#2E4A22"><div class="lbl">Dev-side escapes . 30d</div><div class="kpi good" style="margin-top:10px">'+s.escapes+'</div><div style="font-size:11.5px;color:#6E685E;margin-top:6px">The honesty metric</div></div>'
+    + '</div>';
+}
+function setRailActive(view){
+  document.querySelectorAll('.navitem').forEach(function(n){ n.classList.toggle('on', n.getAttribute('data-view')===view); });
+  var b = document.getElementById('findBadge'); if (b){ var c = SecurityStore.openFindings().length; b.textContent = c; b.style.display = c? '' : 'none'; }
+}
+
+// ---------- 1. Monitors ----------
+function renderMonitors(){
+  var head = headerBar('Monitors', 'The watch floor. Fourteen probes on their cadences, escalating by severity.', liveChip()+pv());
+  var grid = '<div class="mgrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">';
+  SecurityStore.monitors.forEach(function(mon){
+    var c = MON_COLOR[mon.state];
+    var bars = mon.spark.map(function(v,i){ return '<i class="'+(v>85?'bad':'')+'" style="height:'+Math.round(v/100*26)+'px"></i>'; }).join('');
+    grid += '<div class="card monCard" data-mon="'+mon.id+'" style="cursor:pointer"><div style="display:flex;justify-content:space-between;align-items:flex-start"><span style="color:#E1DAD0;font-size:13.5px">'+esc(mon.name)+'</span><span class="badge" style="border-color:'+c+'55;color:'+c+'"><span class="dot" style="background:'+c+';margin-right:5px"></span>'+mon.state+'</span></div>'
+      + '<div style="font-size:11px;color:#6E685E;margin-top:6px">'+esc(mon.cadence)+' . last '+esc(mon.last)+'</div>'
+      + '<div class="spark" style="margin-top:12px">'+bars+'</div>'
+      + '<div style="font-size:11px;color:#5E5A52;margin-top:10px" class="mono">'+esc(mon.ruleId)+'</div></div>';
+  });
+  grid += '</div>';
+  var triggers = SecurityStore.live ? '' : '<div class="card" style="margin-top:16px;border-color:#3A2E1C"><div class="lbl" style="margin-bottom:10px">Trigger panel . design preview only</div><div style="font-size:12px;color:#8E887C;margin-bottom:12px">The scheduler is frozen. Fire a scripted failure to see the autonomy, or switch to Live and watch it happen on its own.</div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="act no" id="trigLint">Fire lint catch</button><button class="act no" id="trigLockout">Fire lockout burst</button></div></div>';
+  var detail = '';
+  if (monSel){ var mon = SecurityStore.monitors.filter(function(x){ return x.id===monSel; })[0]; if (mon){
+    detail = '<div class="card" style="margin-top:16px;border-color:#5A3F2C55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(mon.name)+'</div><span class="badge" style="border-color:'+MON_COLOR[mon.state]+'55;color:'+MON_COLOR[mon.state]+'">'+mon.state+'</span></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;font-size:12.5px">'+kv('Cadence',mon.cadence)+kv('Rule',mon.ruleId)+kv('Failure severity',mon.sevmap.fail)+'</div>'
+      + '<div style="font-size:12.5px;color:#8E887C;margin-top:12px">Rule: '+esc(mon.rule)+'</div>'+(mon.sevmap.auto?'<div style="font-size:12px;color:#7CBF4E;margin-top:6px">Auto action: '+esc(mon.sevmap.auto)+'</div>':'')
+      + '<div class="lbl" style="margin-top:14px">Run history</div>'+mon.history.slice(0,8).map(function(h){ return '<div style="display:flex;gap:12px;font-size:12px;color:#8E887C;padding:3px 0"><span class="mono" style="color:#5E5A52;min-width:52px">'+esc(h.t)+'</span><span style="color:'+(h.r==='pass'?'#7CBF4E':'#C08457')+'">'+esc(h.r)+'</span></div>'; }).join('')+'</div>'; } }
+  main.innerHTML = head + scroller(scorecard() + grid + triggers + detail) + previewFooter('Design preview . mock data . in Live mode the watch floor opens findings and incidents with no human in the loop');
+}
+
+// ---------- 2. Findings ----------
+function renderFindings(){
+  var head = headerBar('Findings', 'Cite. Remediate. Document. Everything caught, with its evidence.', pv());
+  var chips = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"><span class="pill badge'+(!findFilter?' active':'')+'" data-ffilter="">All</span>'
+    + ['P0','P1','P2','P3','open','closed'].map(function(k){ return '<span class="pill badge'+(findFilter===k?' active':'')+'" data-ffilter="'+k+'">'+esc(k)+'</span>'; }).join('')+'</div>';
+  var rows = SecurityStore.findings.filter(function(f){ if (!findFilter) return true; if (findFilter==='open'||findFilter==='closed') return f.state===findFilter; return f.sev===findFilter; });
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Sev</th><th>ID</th><th>Source</th><th>Surface</th><th>Rule</th><th>Owner</th><th>Due</th><th>State</th></tr></thead><tbody>'
+    + rows.map(function(f){ return '<tr class="findRow" data-fid="'+f.id+'" style="cursor:pointer"><td>'+sevTag(f.sev)+'</td><td class="mono">'+esc(f.id)+'</td><td>'+esc(f.source)+'</td><td style="color:#E1DAD0">'+esc(f.surface)+'</td><td class="mono">'+esc(f.rule)+'</td><td>'+esc(f.owner)+'</td><td class="mono">'+esc(f.due)+'</td><td><span class="badge" style="border-color:'+(f.state==='open'?'#5A3F2C55;color:#C08457':'#2E4A2255;color:#7CBF4E')+'">'+esc(f.state)+'</span></td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  var detail = '';
+  if (findSel){ var f = SecurityStore.findings.filter(function(x){ return x.id===findSel; })[0]; if (f){
+    detail = '<div class="card" style="margin-top:16px;border-color:#5A3F2C55"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="display:flex;gap:10px;align-items:center">'+sevTag(f.sev)+'<span style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(f.id)+'</span></div><span class="badge">'+esc(f.state)+'</span></div>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;font-size:12.5px">'+kv('Source',f.source)+kv('Surface',f.surface)+kv('Rule cited',f.rule)+kv('Owner',f.owner)+kv('Due',f.due)+kv('Opened',f.opened)+'</div>'
+      + '<div class="lbl" style="margin-top:14px">Evidence</div><div style="color:#B0A99A;margin-top:4px;font-size:12.5px">'+esc(f.evidence||'none recorded')+'</div>'
+      + (f.state==='open'? '<div style="margin-top:14px"><div class="lbl" style="margin-bottom:6px">Closure evidence (required)</div><textarea id="closureText" class="vfield" rows="2" placeholder="State the remediation and its proof"></textarea><button class="act go" data-close="'+f.id+'" style="margin-top:10px">Close with evidence</button></div>' : '<div style="font-size:12.5px;color:#7CBF4E;margin-top:14px">Closed: '+esc(f.closure)+'</div>')
+      + '</div>'; } }
+  main.innerHTML = head + scroller(scorecard() + chips + table + detail) + previewFooter('Design preview . mock data . a monitor-opened finding carries its evidence automatically');
+}
+
+// ---------- 3. Incidents ----------
+function renderIncidents(){
+  var head = headerBar('Incidents', 'Things that happened, assembled autonomously from detection to root cause.', pv());
+  var body = SecurityStore.incidents.length ? SecurityStore.incidents.map(function(inc){
+    var tl = inc.timeline.map(function(t){ return '<div style="display:flex;gap:12px;padding:6px 0"><span class="mono" style="color:#5E5A52;min-width:64px">'+esc(t.t)+'</span><span class="badge" style="min-width:92px">'+esc(t.kind)+'</span><span style="color:#B0A99A;font-size:12.5px">'+esc(t.text)+'</span></div>'; }).join('');
+    return '<div class="card" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="display:flex;gap:10px;align-items:center">'+sevTag(inc.sev)+'<span style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(inc.id)+' . '+esc(inc.title)+'</span></div><span class="badge">'+esc(inc.state)+'</span></div>'
+      + '<div style="font-size:12px;color:#6E685E;margin-top:6px">Opened '+esc(inc.opened)+' . linked findings '+(inc.findings.join(', ')||'none')+'</div>'
+      + '<div class="lbl" style="margin-top:14px">Timeline</div><div style="margin-top:6px">'+tl+'</div>'
+      + '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button class="act" data-rootcause="'+inc.id+'">File root cause</button><span class="badge" style="align-self:center">M rollback linkage: '+(inc.rootCause?'ready':'pending root cause')+'</span></div>'
+      + (inc.rootCause?'<div style="font-size:12.5px;color:#8E887C;margin-top:10px">Root cause: '+esc(inc.rootCause)+'</div>':'')+'</div>';
+  }).join('') : '<div class="card" style="text-align:center;color:#7CBF4E;padding:40px">No open incidents. The floor is quiet.</div>';
+  main.innerHTML = head + scroller(body) + previewFooter('Design preview . mock data . the lockout burst incident assembles its own timeline in Live mode');
+}
+
+// ---------- 4. Rules ----------
+function renderRules(){
+  var head = headerBar('Rules', 'The enforced ruleset as data. Editing is an owner action and writes to the audit log.', pv());
+  var groups = ['Web security','Compliance','Platform','Agent conduct'];
+  var chips = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"><span class="pill badge'+(!ruleGroup?' active':'')+'" data-rgroup="">All</span>'
+    + groups.map(function(g){ return '<span class="pill badge'+(ruleGroup===g?' active':'')+'" data-rgroup="'+esc(g)+'">'+esc(g)+'</span>'; }).join('')+'</div>';
+  var rules = SecurityStore.rules.filter(function(r){ return !ruleGroup || r.group===ruleGroup; });
+  var body = rules.map(function(r){
+    return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><span class="mono" style="color:#8E887C">'+esc(r.id)+'</span> <span style="color:#E1DAD0">'+esc(r.name)+'</span></div><span class="badge">'+esc(r.group)+'</span></div>'
+      + '<div style="font-size:12.5px;color:#8E887C;margin-top:8px">Citation: '+esc(r.cite)+'</div>'
+      + '<div style="font-size:12px;color:#6E685E;margin-top:6px">Enforced by: '+r.monitors.join(', ')+' . findings history: '+r.history+'</div>'
+      + (r.agentLocked? '<div style="font-size:12px;color:#C08457;margin-top:10px">Read only. Changes to enforcement rules route through Felix and counsel.</div>' : '<div style="margin-top:12px"><button class="act" data-editrule="'+r.id+'">Edit rule</button></div>')+'</div>';
+  }).join('');
+  main.innerHTML = head + scroller(chips + body) + previewFooter('Design preview . mock data . agent-conduct rules cannot be edited even by the owner in the prototype');
+}
+
+// ---------- 5. Waivers ----------
+function renderWaivers(){
+  var head = headerBar('Waivers', 'Time-boxed exceptions with a compensating control and an expiry.', pv());
+  var body = SecurityStore.waivers.map(function(w){
+    var exp = SecurityStore.isExpired(w); var d = daysUntil(w.expiry);
+    return '<div class="card" style="margin-bottom:12px;border-color:'+(exp?'#5A3A2A':'#202220')+'"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div><span class="mono" style="color:#8E887C">'+esc(w.id)+'</span> <span style="color:#E1DAD0">'+esc(w.rule)+'</span></div>'+(exp?'<span class="badge" style="border-color:#5A3A2A;color:#D4664C">Expired . finding reopened</span>':'<span class="badge" style="border-color:#2E4A22;color:#7CBF4E">Active . '+d+'d left</span>')+'</div>'
+      + '<div style="font-size:12.5px;color:#8E887C;margin-top:8px">'+esc(w.scope)+'</div>'
+      + '<div style="font-size:12px;color:#6E685E;margin-top:6px">Control: '+esc(w.control)+' . expires '+esc(w.expiry)+' . approved by '+esc(w.approver)+(w.findingId?(' . reopened '+w.findingId):'')+'</div>'
+      + (exp? '<div style="margin-top:10px"><button class="act" data-renew="'+w.id+'">Renew 30 days</button></div>' : '')+'</div>';
+  }).join('');
+  main.innerHTML = head + scroller(body) + previewFooter('Design preview . mock data . an expired waiver reopens its finding automatically');
+}
+
+// ---------- 6. Audit ----------
+function renderAudit(){
+  var broken = SecurityStore.verifyChain();
+  var head = headerBar('Audit', 'The append only log with its hash chain. Cite. Remediate. Document.', '<button class="act go" id="verifyChain">Verify chain</button><button class="act no" id="tamperTest">Tamper test</button><button class="act" id="resetChain">Reset</button>'+pv());
+  var rows = SecurityStore.audit.map(function(e,i){ var ok = (i>broken || broken<0); var bad = broken>=0 && i>=broken;
+    return '<tr'+(e.tampered?' style="background:#241614"':'')+'><td class="mono">'+e.seq+'</td><td class="mono" style="color:#5E5A52">'+esc(e.ts)+'</td><td>'+esc(e.actor)+'</td><td style="color:#E1DAD0">'+esc(e.action)+'</td><td class="mono" style="color:#5E5A52">'+esc(e.prev.slice(0,8))+'</td><td class="mono" style="color:'+(bad?'#D4664C':'#7CBF4E')+'">'+esc(e.hash)+'</td></tr>'; }).join('');
+  var status = broken<0 ? '<div class="card" style="border-color:#2E4A22;margin-bottom:16px;color:#7CBF4E">Chain verified end to end. '+SecurityStore.audit.length+' entries, no breaks.</div>' : '<div class="card" style="border-color:#5A3A2A;background:#241614;margin-bottom:16px;color:#D4664C">Chain broken at entry '+(broken+1)+'. Tamper detected. P0 raised.</div>';
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Seq</th><th>Timestamp</th><th>Actor</th><th>Action</th><th>Prev</th><th>Hash</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  main.innerHTML = head + scroller(status + table) + previewFooter('Design preview . mock data . each entry hashes its predecessor; a broken link pages immediately');
+}
+
+// ---------- 7. DSAR ----------
+function renderDsar(){
+  var head = headerBar('DSAR', 'Data subject access requests with their clocks and fulfillment records.', pv());
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Request</th><th>Type</th><th>Identity</th><th>Opened</th><th>Days left</th><th>State</th><th>Record</th></tr></thead><tbody>'
+    + SecurityStore.dsar.map(function(d){ var left = daysUntil(d.due); return '<tr><td class="mono">'+esc(d.id)+'</td><td>'+esc(d.type)+'</td><td><span class="badge" style="border-color:#2E4A2255;color:#7CBF4E">'+esc(d.identity)+'</span></td><td class="mono">'+esc(d.opened)+'</td><td class="mono" style="color:'+(left<15?'#C08457':'#B0A99A')+'">'+(d.state==='completed'?'closed':left+'d')+'</td><td>'+(d.state==='completed'?'<span class="badge" style="border-color:#2E4A2255;color:#7CBF4E">completed</span>':'<span class="badge" style="border-color:#5A3F2C55;color:#C08457">open</span>')+'</td><td style="color:#8E887C">'+esc(d.record)+'</td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  main.innerHTML = head + scroller(table) + previewFooter('Design preview . mock data . New York and multistate response clocks tracked per request');
+}
+
+// ---------- 8. Vendors ----------
+function renderVendors(){
+  var head = headerBar('Vendors', 'The register. A renewal inside 60 days flags to Findings.', pv());
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Vendor</th><th>Scope</th><th>DPA</th><th>Renewal</th><th>Horizon</th></tr></thead><tbody>'
+    + SecurityStore.vendors.map(function(v){ var d=daysUntil(v.renewal); var flag=d<=60; var dc=v.dpa==='signed'?'#7CBF4E':'#E3C270'; return '<tr><td style="color:#E1DAD0">'+esc(v.name)+'</td><td>'+esc(v.scope)+'</td><td><span class="badge" style="border-color:'+dc+'55;color:'+dc+'">'+esc(v.dpa)+'</span></td><td class="mono">'+esc(v.renewal)+'</td><td>'+(flag?'<span class="badge" style="border-color:#5A3F2C;color:#C08457">'+d+'d . flagged</span>':'<span class="mono" style="color:#6E685E">'+d+'d</span>')+'</td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  main.innerHTML = head + scroller(table) + previewFooter('Design preview . mock data . the Vercel renewal inside 60 days is carried in Findings as FND');
+}
+
+// ---------- 9. Pre-Check ----------
+function renderPrecheck(){
+  var head = headerBar('Pre-Check', 'The gate M consumes. Green issues a stamped clearance; red blocks with the rule cited.', pv());
+  var tabs = '<div style="display:flex;gap:8px;margin-bottom:16px">'+Object.keys(SecurityStore.precheck).map(function(rc){ return '<span class="chip'+(pcSel===rc?' active':'')+'" data-pcsel="'+rc+'">'+esc(rc)+'</span>'; }).join('')+'</div>';
+  var pc = SecurityStore.precheck[pcSel];
+  var statusBadge = pc.status==='passed'? '<span class="badge" style="border-color:#2E4A22;color:#7CBF4E">Cleared to M gate</span>' : pc.status==='blocked'? '<span class="badge" style="border-color:#5A3A2A;color:#D4664C">Blocked</span>' : '<span class="badge">Not run</span>';
+  var checks = pc.checks.length ? '<div style="margin-top:14px">'+pc.checks.map(function(c){ return '<div style="display:flex;gap:12px;align-items:center;padding:5px 0;border-bottom:1px solid #1C1E1B"><span class="dot" style="background:'+(c.ok?'#7CBF4E':'#D4664C')+'"></span><span style="color:#E1DAD0;font-size:13px">'+esc(c.name)+'</span>'+(c.ok?'':'<span class="badge" style="margin-left:auto;border-color:#5A3A2A;color:#D4664C">'+esc(c.cite)+'</span>')+'</div>'; }).join('')+'</div>' : '<div style="font-size:12.5px;color:#6E685E;margin-top:14px">Run the suite to fill the checklist.</div>';
+  var actions = '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="act go" id="pcRun">Run Pre-Check</button>'
+    + (pc.status==='blocked' && !pc.fixed? '<button class="act no" id="pcFix">Apply fix</button>' : '')
+    + (pc.status==='passed'? '<span style="font-size:12px;color:#7CBF4E;align-self:center">Clearance stamped '+esc(pc.stamp||'')+'</span>' : '')+'</div>';
+  var card = '<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div style="font-family:\'GFS Didot\',Didot,serif;font-size:20px;color:#E1DAD0">'+esc(pcSel)+'</div>'+statusBadge+'</div>'+checks+actions+'</div>';
+  var queue = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:10px">Vauxhall queue reflection</div>'+Object.keys(SecurityStore.precheck).map(function(rc){ var p=SecurityStore.precheck[rc]; var c=p.status==='passed'?'#7CBF4E':p.status==='blocked'?'#D4664C':'#8E887C'; return '<div style="display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0"><span class="mono">'+esc(rc)+'</span><span style="color:'+c+'">'+(p.status==='passed'?'cleared to M gate':p.status==='blocked'?'blocked at Pre-Check':'awaiting Pre-Check')+'</span></div>'; }).join('')+'</div>';
+  main.innerHTML = head + scroller(tabs + card + queue) + previewFooter('Design preview . mock data . rc-118 fails once on a seeded lint hit, then passes after Apply fix');
+}
+
+// ---------- 10. Scanner ----------
+function renderScanner(){
+  var head = headerBar('Scanner', 'The bridge room. Code and dependency scans map into Findings automatically.', '<button class="act go" id="scanSweep">Run sweep</button>'+pv());
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Source</th><th>Last sweep</th><th>Critical</th><th>High</th><th>Moderate</th><th>Note</th></tr></thead><tbody>'
+    + SecurityStore.scanner.map(function(s){ return '<tr><td style="color:#E1DAD0">'+esc(s.source)+'</td><td class="mono">'+esc(s.last)+'</td><td class="mono" style="color:'+(s.critical?'#D4664C':'#7CBF4E')+'">'+s.critical+'</td><td class="mono" style="color:'+(s.high?'#C08457':'#7CBF4E')+'">'+s.high+'</td><td class="mono" style="color:'+(s.moderate?'#E3C270':'#7CBF4E')+'">'+s.moderate+'</td><td style="color:#8E887C">'+esc(s.note)+'</td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  var feed = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:10px">Ingestion feed</div>'+(SecurityStore.feed.length? SecurityStore.feed.slice(0,6).map(function(f){ var c=f.type==='ALERT'?'#D4664C':'#7CBF4E'; return '<div style="display:flex;gap:12px;font-size:12.5px;padding:6px 0"><span class="mono" style="color:#5E5A52;min-width:64px">'+esc(f.time)+'</span><span class="dot" style="background:'+c+';margin-top:6px"></span><span style="color:#B0A99A">'+esc(f.text)+'</span></div>'; }).join('') : '<div style="font-size:12.5px;color:#6E685E">Quiet. No new scan events.</div>')+'</div>';
+  main.innerHTML = head + scroller(table + feed) + previewFooter('Design preview . mock data . scan output maps to Findings with severity in the secured build');
+}
+
+// ---------- 11. Dashboards ----------
+function renderDashboards(){
+  var head = headerBar('Dashboards', 'Trends over 90 days. The escapes line is pinned at zero on purpose.', pv());
+  var weeks = [3,2,4,1,3,2,1,2,0,1,1,0]; var closed = [3,2,3,2,3,2,1,2,1,1,1,1];
+  var wmax = 4;
+  var openClose = '<div class="card"><div class="lbl">Findings opened versus closed . 12 weeks</div><div style="display:flex;gap:6px;align-items:flex-end;height:120px;margin-top:16px">'
+    + weeks.map(function(v,i){ return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;display:flex;gap:2px;align-items:flex-end;height:90px"><div style="flex:1;height:'+Math.round(v/wmax*90)+'px;background:#8A4A32;border-radius:1px"></div><div style="flex:1;height:'+Math.round(closed[i]/wmax*90)+'px;background:#4E8A2B;border-radius:1px"></div></div><div style="font-size:9px;color:#5E5A52">w'+(i+1)+'</div></div>'; }).join('')
+    + '</div><div style="display:flex;gap:16px;margin-top:10px;font-size:11px;color:#6E685E"><span><span class="dot" style="background:#8A4A32;margin-right:5px"></span>Opened</span><span><span class="dot" style="background:#4E8A2B;margin-right:5px"></span>Closed</span></div></div>';
+  var mttr = '<div class="card"><div class="lbl">Mean time to remediate by severity</div><div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">'
+    + [['P0','2 hours',0.1],['P1','1.2 days',0.35],['P2','4.5 days',0.7],['P3','11 days',1.0]].map(function(x){ return '<div><div style="display:flex;justify-content:space-between;font-size:13px"><span>'+x[0]+'</span><span class="mono" style="color:#8E887C">'+x[1]+'</span></div><div style="height:6px;background:#20221F;border-radius:3px;margin-top:6px"><div style="width:'+(x[2]*100)+'%;height:100%;background:'+SEV[x[0]]+';border-radius:3px"></div></div></div>'; }).join('')+'</div></div>';
+  var league = '<div class="card"><div class="lbl">Monitor uptime league</div><div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">'
+    + SecurityStore.monitors.slice(0,6).map(function(m,i){ var up = (99.99 - i*0.03).toFixed(2); return '<div style="display:flex;justify-content:space-between;font-size:12.5px"><span>'+esc(m.name)+'</span><span class="mono good">'+up+' percent</span></div>'; }).join('')+'</div></div>';
+  var escapes = '<div class="card" style="border-color:#2E4A22"><div class="lbl">Dev-side escapes . 90 days</div><div style="display:flex;align-items:flex-end;height:60px;gap:4px;margin-top:16px">'+[0,0,0,0,0,0,0,0,0,0,0,0].map(function(){ return '<div style="flex:1;height:2px;background:#2E4A22;border-radius:1px"></div>'; }).join('')+'</div><div style="font-size:12px;color:#7CBF4E;margin-top:12px">The honesty metric. Flat at zero.</div></div>';
+  main.innerHTML = head + scroller('<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">'+openClose+mttr+league+escapes+'</div>') + previewFooter('Design preview . mock data . every trend recomputes from the findings ledger in the secured build');
+}
+
+// ---------- 12. SOC 2 ----------
+function renderSoc2(){
+  var head = headerBar('SOC 2', 'Control families mapped to evidence sources, exportable as a pack.', '<button class="act go" id="soc2Export">Export evidence pack</button>'+pv());
+  var families = [
+    ['CC1','Control environment','Audit log, Rules',96], ['CC2','Communication and information','Audit log, DSAR',92], ['CC3','Risk assessment','Findings, Monitors',94],
+    ['CC4','Monitoring activities','Monitors, Dashboards',99], ['CC5','Control activities','Rules, Pre-Check',95], ['CC6','Logical and physical access','RLS probe, Auth watch, Vendors',97],
+    ['CC7','System operations','Monitors, Incidents, Scanner',98], ['CC8','Change management','Pre-Check, Audit log',96], ['CC9','Risk mitigation','Waivers, Vendors, Findings',93]
+  ];
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Family</th><th>Name</th><th>Mapped evidence</th><th>Coverage</th></tr></thead><tbody>'
+    + families.map(function(f){ return '<tr><td class="mono" style="color:#E1DAD0">'+f[0]+'</td><td style="color:#E1DAD0">'+esc(f[1])+'</td><td>'+esc(f[2])+'</td><td><div style="display:flex;align-items:center;gap:8px"><div style="width:80px;height:6px;background:#20221F;border-radius:3px"><div style="width:'+f[3]+'%;height:100%;background:#4E8A2B;border-radius:3px"></div></div><span class="mono">'+f[3]+' percent</span></div></td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  main.innerHTML = head + scroller(table + '<div style="font-size:12px;color:#6E685E;margin-top:14px">Export downloads a client-side JSON bundle of the mapped records: scorecard, findings, monitors, waivers, and the audit chain.</div>') + previewFooter('Design preview . mock data . the evidence pack assembles from live store records');
+}
+
+// ================= router =================
+function route(){
+  var h = location.hash || '#/security/monitors';
+  var parts = h.replace(/^#\//,'').split('/');
+  var wing = parts[0] || 'security'; var view = parts[1] || 'monitors';
+  if (wing !== 'security'){ var map = { vauxhall:'Vauxhall.dc.html', product:'Product.dc.html', social:'Social.dc.html' }; if (map[wing]){ window.location.href = map[wing]; return; } view = 'monitors'; }
+  setRailActive(view);
+  switch(view){
+    case 'findings': renderFindings(); break;
+    case 'incidents': renderIncidents(); break;
+    case 'rules': renderRules(); break;
+    case 'waivers': renderWaivers(); break;
+    case 'audit': renderAudit(); break;
+    case 'dsar': renderDsar(); break;
+    case 'vendors': renderVendors(); break;
+    case 'precheck': renderPrecheck(); break;
+    case 'scanner': renderScanner(); break;
+    case 'dashboards': renderDashboards(); break;
+    case 'soc2': renderSoc2(); break;
+    default: renderMonitors();
+  }
+}
+function go(view){ location.hash = '#/security/'+view; }
+
+// ================= autonomous scheduler =================
+var tickTimer = null, lintTimer = null, lockTimer = null;
+function setLive(on){
+  SecurityStore.live = on;
+  if (on){
+    tickTimer = setInterval(function(){ SecurityStore.tick(); if ((location.hash||'').indexOf('/monitors')!==-1) renderMonitors(); }, 5000);
+    lintTimer = setTimeout(function(){ SecurityStore.fireLintCatch(); if ((location.hash||'').indexOf('/security')!==-1) route(); }, 4000);
+    lockTimer = setTimeout(function(){ SecurityStore.fireLockoutBurst(); if ((location.hash||'').indexOf('/security')!==-1) route(); }, 8000);
+  } else {
+    if (tickTimer) clearInterval(tickTimer); if (lintTimer) clearTimeout(lintTimer); if (lockTimer) clearTimeout(lockTimer);
+  }
+}
+
+// ================= events =================
+document.addEventListener('click', function(ev){
+  var t = ev.target;
+  if (t.id==='liveToggle' || t.closest('#liveToggle')){ setLive(!SecurityStore.live); renderMonitors(); toast(SecurityStore.live?'Live. The watch floor is ticking.':'Frozen. Scheduler paused.'); return; }
+  if (t.id==='bannerAck'){ SecurityStore.banner=null; route(); return; }
+
+  var mc = t.closest('.monCard'); if (mc){ monSel = mc.getAttribute('data-mon'); renderMonitors(); return; }
+  if (t.id==='trigLint'){ SecurityStore.fireLintCatch(); toast('Lint catch fired. P2 finding opened autonomously.'); renderMonitors(); return; }
+  if (t.id==='trigLockout'){ SecurityStore.fireLockoutBurst(); toast('Lockout burst fired. Incident assembled, ALERT emitted.'); renderMonitors(); return; }
+
+  var ff = t.closest('[data-ffilter]'); if (ff){ findFilter = ff.getAttribute('data-ffilter')||null; renderFindings(); return; }
+  var fr = t.closest('.findRow'); if (fr){ findSel = fr.getAttribute('data-fid'); renderFindings(); return; }
+  var cl = t.closest('[data-close]'); if (cl){ var txt=(document.getElementById('closureText')||{}).value||''; if (!txt.trim()){ toast('Closure requires evidence.'); return; } if (SecurityStore.closeFinding(cl.getAttribute('data-close'), txt.trim())){ toast('Finding closed. Scorecard updated.'); findSel=null; renderFindings(); } return; }
+
+  var rc = t.closest('[data-rootcause]'); if (rc){ var inc=SecurityStore.incidents.filter(function(x){ return x.id===rc.getAttribute('data-rootcause'); })[0]; if (inc){ inc.rootCause='Credential stuffing from a single source, rate limit held, no access gained'; inc.timeline.push({ t:clock(), kind:'Resolution', text:'Root cause filed, incident ready for M rollback review' }); SecurityStore.appendAudit('Felix','Root cause filed for '+inc.id); toast('Root cause filed.'); renderIncidents(); } return; }
+
+  var rg = t.closest('[data-rgroup]'); if (rg){ ruleGroup = rg.getAttribute('data-rgroup')||null; renderRules(); return; }
+  var er = t.closest('[data-editrule]'); if (er){ SecurityStore.appendAudit('Gary','Rule '+er.getAttribute('data-editrule')+' edited by owner'); toast('Rule edit recorded to the audit log.'); return; }
+
+  var rn = t.closest('[data-renew]'); if (rn){ var w=SecurityStore.waivers.filter(function(x){ return x.id===rn.getAttribute('data-renew'); })[0]; if (w){ w.expiry='2026-08-25'; if (w.findingId){ SecurityStore.closeFinding(w.findingId,'Waiver renewed, compensating control restored'); w.findingId=null; } toast('Waiver renewed, finding closed.'); renderWaivers(); } return; }
+
+  if (t.id==='verifyChain'){ var b=SecurityStore.verifyChain(); toast(b<0?'Chain verified green.':'Chain broken at entry '+(b+1)+'.'); renderAudit(); return; }
+  if (t.id==='tamperTest'){ SecurityStore.tamperAudit(); toast('Tamper injected. Chain verification failed, P0 raised.'); renderAudit(); return; }
+  if (t.id==='resetChain'){ SecurityStore.resetAudit(); toast('Chain restored.'); renderAudit(); return; }
+
+  var ps = t.closest('[data-pcsel]'); if (ps){ pcSel = ps.getAttribute('data-pcsel'); renderPrecheck(); return; }
+  if (t.id==='pcRun'){ var st=SecurityStore.runPrecheck(pcSel); toast(st==='passed'?'Pre-Check green. Clearance stamped.':'Blocked. Rule cited, finding linked.'); renderPrecheck(); return; }
+  if (t.id==='pcFix'){ SecurityStore.fixPrecheck(pcSel); SecurityStore.runPrecheck(pcSel); toast('Fix applied. Pre-Check rerun green.'); renderPrecheck(); return; }
+
+  if (t.id==='scanSweep'){ SecurityStore.runSweep(); toast('Sweep complete.'); renderScanner(); return; }
+  if (t.id==='soc2Export'){ exportSoc2(); return; }
+});
+
+function exportSoc2(){
+  var bundle = { generated:TODAY, scorecard:SecurityStore.scorecard(), findings:SecurityStore.findings, monitors:SecurityStore.monitors.map(function(m){ return { name:m.name, state:m.state, rule:m.ruleId }; }), waivers:SecurityStore.waivers, auditChain:SecurityStore.audit.map(function(e){ return { seq:e.seq, actor:e.actor, action:e.action, hash:e.hash }; }) };
+  var name = 'soc2-evidence-' + TODAY.replace(/-/g,'') + '.json';
+  var blob = new Blob([JSON.stringify(bundle,null,2)], { type:'application/json' });
+  var url = URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('Exported ' + name);
+}
+
+window.addEventListener('hashchange', route);
+SecurityStore.seed();
+if (!location.hash) location.hash = '#/security/monitors';
+route();
+</script>
 </body>
 </html>
