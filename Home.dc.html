@@ -366,7 +366,9 @@ class Component extends DCLogic {
     // Hold the hero cascade until the age gate is dismissed, so it plays into
     // view rather than behind the gate overlay. If the gate is bypassed, release now.
     const releaseHero = () => { const t = document.getElementById('top'); if (t) t.classList.remove('hero-hold'); };
-    if (this.props.gateBypass) releaseHero();
+    let ageRemembered = false;
+    try { const raw = localStorage.getItem('bond_age_ok'); if (raw) { const ts = parseInt(raw, 10); if (!isNaN(ts) && Date.now() - ts < 30 * 24 * 3600 * 1000) ageRemembered = true; } } catch (e) {}
+    if (this.props.gateBypass || ageRemembered) releaseHero();
     else addEventListener('bond-entered', releaseHero, { once: true });
   }
   componentWillUnmount() {
