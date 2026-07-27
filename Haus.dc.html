@@ -76,7 +76,7 @@ var GUIDE = [
   { id:'ritual', title:'The Ritual', kind:'ritual' }
 ];
 var INTENTIONS = ['Clarity','Rest','Presence','Creativity','Connection'];
-var NAV = [['salon','Salon'],['library','Library'],['guide','Guide'],['reserve','Reserve'],['events','Events'],['ritual','Ritual'],['account','Account']];
+var NAV = [['salon','Salon'],['dashboard','Dashboard'],['library','Library'],['guide','Guide'],['reserve','Reserve'],['events','Events'],['ritual','Ritual'],['account','Account']];
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function comp(id){ return COMPS.filter(function(c){ return c.id===id; })[0]; }
@@ -237,6 +237,53 @@ function renderSalon(){
   var inner = '<div class="didot" style="font-size:clamp(26px,4vw,38px);letter-spacing:0.03em;color:#E1DAD0">'+greeting()+', '+esc(m.first)+'.</div>'
     + '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px">'+tonight+onShelf+writes+'</div>'+evCard;
   chrome('salon', inner);
+}
+
+// ================= 1b. Dashboard =================
+function renderDashboard(){
+  var m = HausStore.member;
+  var shelfN = m.shelf.length, claimsN = m.claims.length, ritualsN = m.sessions.length;
+  var evReq = m.events.filter(function(e){ return e.rsvp==='requested' || e.rsvp==='confirmed'; }).length;
+  function stat(n, label){ return '<div class="card" style="text-align:center"><div class="didot" style="font-size:34px;color:#E1DAD0">'+n+'</div><div class="lbl" style="margin-top:8px">'+esc(label)+'</div></div>'; }
+  var stats = '<div class="grid3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">'+stat(shelfN,'On the shelf')+stat(claimsN,'Reserve numbers')+stat(ritualsN,'Rituals kept')+stat(evReq,'Evenings')+'</div>';
+
+  // shelf
+  var shelfBody = shelfN
+    ? m.shelf.slice(0,3).map(function(b){ var c=comp(b.comp); return '<div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div style="width:3px;height:30px;background:'+c.accent+';border-radius:2px"></div><div><div style="color:#E1DAD0;font-size:13px">'+esc(b.cultivar)+'</div><div class="didot" style="font-size:11px;color:#6E685E">'+esc(c.name)+'</div></div></div>'; }).join('') + (shelfN>3?'<div style="font-size:11.5px;color:#6E685E;margin-top:10px">and '+(shelfN-3)+' more</div>':'')
+    : '<p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">Your shelf is waiting. Register your first batch from its card.</p>';
+  var shelfCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">The shelf</span><a href="#/haus/library" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Open</a></div>'+shelfBody+'</div>';
+
+  // reserve
+  var resBody = claimsN
+    ? m.claims.map(function(cl){ var c=comp(cl.comp); return '<div style="margin-top:12px"><div class="didot" style="font-size:22px;color:#E1DAD0;letter-spacing:0.02em">No. '+cl.number+' of '+cl.size+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:3px">'+esc(cl.cultivar)+' . '+esc(c.name)+'</div></div>'; }).join('')
+    : '<p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">No Reserve numbers yet. Register a Reserve batch to claim one.</p>';
+  var resCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Reserve numbers</span><a href="#/haus/reserve" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Room</a></div>'+resBody+'</div>';
+
+  // evenings
+  var upcoming = m.events.filter(function(e){ return e.capacity !== 'past'; });
+  var evBody = upcoming.length
+    ? upcoming.map(function(e){ var col = e.rsvp==='confirmed'?'#C29A45':e.rsvp==='requested'?'#B0A99A':'#6E685E'; return '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-top:12px"><div><div style="color:#E1DAD0;font-size:13px">'+esc(e.name)+'</div><div style="font-size:11px;color:#6E685E">'+esc(e.date)+' . '+esc(e.city)+'</div></div><span style="font-size:11px;color:'+col+';white-space:nowrap">'+esc(rsvpLabel(e))+'</span></div>'; }).join('')
+    : '<p style="font-size:13px;color:#8E887C;margin-top:12px">No evenings on the calendar.</p>';
+  var evCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Evenings</span><a href="#/haus/events" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">All</a></div>'+evBody+'</div>';
+
+  // rituals
+  var ritBody = ritualsN
+    ? (function(){ var s=m.sessions[0]; var c=comp(s.comp); return '<div style="margin-top:12px"><div style="font-size:13px;color:#B0A99A">'+ritualsN+' kept</div><div style="font-size:11.5px;color:#8E887C;margin-top:8px"><span class="didot">'+esc(s.date)+'</span> . <span style="color:'+c.accent+'">'+esc(c.name)+'</span> . '+esc(s.intention)+' . '+s.duration+' min</div></div>'; })()
+    : '<p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">No sessions yet. Begin a ritual when ready.</p>';
+  var ritCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Rituals</span><a href="#/haus/ritual" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Begin</a></div>'+ritBody+'</div>';
+
+  // guide
+  var gCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">The Guide</span><a href="#/haus/guide" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Read</a></div>'
+    + '<div style="margin-top:12px"><div class="didot" style="font-size:17px;color:#E1DAD0">'+esc(GUIDE[m.guidePlace].title)+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:4px">Chapter '+(m.guidePlace+1)+' of '+GUIDE.length+' . your ribbon is here</div></div></div>';
+
+  // account
+  var aCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Account</span><a href="#/haus/account" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Manage</a></div>'
+    + '<div style="margin-top:12px;font-size:12.5px;color:#B0A99A">'+esc(m.name)+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:4px">'+esc(m.email)+'</div>'
+    + '<div style="font-size:11.5px;color:#6E685E;margin-top:8px">Circle correspondence '+(m.circle?'on':'off')+'</div></div>';
+
+  var grid = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">'+shelfCard+resCard+evCard+ritCard+gCard+aCard+'</div>';
+  var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">Your Haus</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Everything you keep here, in one place.</p>'+stats+grid;
+  chrome('dashboard', inner);
 }
 
 // ================= 2. Library =================
@@ -443,6 +490,7 @@ function route(){
   if (!m.signedIn){ renderDoor(false); return; }
   if (!m.entered || view==='welcome'){ renderWelcome(); return; }
   switch(view){
+    case 'dashboard': renderDashboard(); break;
     case 'library': libSel=null; renderLibrary(); break;
     case 'guide': renderGuide(); break;
     case 'reserve': renderReserve(); break;
