@@ -153,8 +153,12 @@ function haversine(a, b){ var R=3959; function r(d){ return d*Math.PI/180; } var
 function carrierSet(){ try { var raw=localStorage.getItem('bondBondCarriers'); if (raw) return JSON.parse(raw); } catch(e){} return DISPENSARIES.filter(function(d){ return d.bond; }).map(function(d){ return d.lic; }); }
 function carries(lic){ return carrierSet().indexOf(lic) !== -1; }
 
-// publish the directory so the admin room can list it without duplicating the seed
-try { localStorage.setItem('bondDispensaryDir', JSON.stringify(DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]||[0,0,'','']; return { lic:d.lic, name:d.name, city:d.city, addr:d.addr, county:c[2], region:c[3], bond:d.bond }; }))); } catch(e){}
+// publish the directory (with coordinates) and the city table so other pages,
+// including the Bond Haus Reserve Room, can find the nearest carrier
+try {
+  localStorage.setItem('bondDispensaryDir', JSON.stringify(DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]||[0,0,'','']; return { lic:d.lic, name:d.name, city:d.city, addr:d.addr, county:c[2], region:c[3], lat:c[0], lng:c[1], bond:d.bond }; })));
+  localStorage.setItem('bondNyCities', JSON.stringify(NY_CITIES));
+} catch(e){}
 
 var lastCity = '';
 function render(){
