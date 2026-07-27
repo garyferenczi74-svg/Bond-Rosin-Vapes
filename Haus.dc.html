@@ -4,61 +4,495 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bond Haus</title>
+<meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; overflow-x: hidden; max-width: 100%; }
-  body { min-height: 100vh; background: #1B1D1C; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; }
-  @supports (height: 100dvh) { .screen { min-height: 100dvh; } }
+  body { min-height: 100vh; background: #1B1D1C; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-decoration: none; }
-  @keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
-  @keyframes gateRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; } }
-  .field { background: transparent; border: 1px solid #3A3C3B; border-radius: 2px; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; font-size: 15px; padding: 15px 18px; width: 100%; outline: none; transition: border-color .3s; }
+  @keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes soft { from { opacity: 0; } to { opacity: 1; } }
+  .breathe { transform-origin: center; animation: breatheScale 3.6s ease-in-out infinite; }
+  .rise { animation: rise .7s cubic-bezier(0.22,1,0.36,1) both; }
+  .soft { animation: soft .5s ease both; }
+  @media (prefers-reduced-motion: reduce) { .breathe, .rise, .soft { animation: none; } }
+  .field { background: transparent; border: 1px solid #3A3C3B; border-radius: 2px; color: #E1DAD0; font-family: inherit; font-size: 15px; padding: 14px 16px; width: 100%; outline: none; transition: border-color .3s; }
   .field:focus { border-color: #C29A45; }
   .field::placeholder { color: #6E685E; }
+  .didot { font-family: 'GFS Didot', Didot, serif; }
+  .gold { background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .navlink { font-family: 'GFS Didot', Didot, serif; font-size: 12.5px; letter-spacing: 0.18em; text-transform: uppercase; color: #8E887C; padding: 6px 0; border-bottom: 1px solid transparent; transition: color .3s, border-color .3s; cursor: pointer; }
+  .navlink:hover { color: #E1DAD0; }
+  .navlink.on { color: #E1DAD0; border-bottom-color: #C29A45; }
+  .htab { background: transparent; border: 1px solid #3A3C3B; border-radius: 2px; color: #B0A99A; font-family: inherit; font-size: 12px; letter-spacing: 0.06em; padding: 9px 16px; cursor: pointer; transition: border-color .3s, color .3s; }
+  .htab:hover { border-color: #C29A45; color: #E1DAD0; }
+  .htab.on { border-color: #C29A45; color: #E1DAD0; }
+  .htab[disabled] { opacity: 0.4; cursor: not-allowed; }
+  .card { background: #1E201E; border: 1px solid #2A2C29; border-radius: 4px; padding: 22px 24px; position: relative; overflow: hidden; }
+  .lbl { font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: #6E685E; }
+  .hair { height: 1px; background: #2A2C29; border: none; }
+  .spine { display: flex; align-items: center; gap: 14px; padding: 15px 18px; background: #191B18; border: 1px solid #2A2C29; border-radius: 3px; cursor: pointer; transition: border-color .3s, transform .3s; }
+  .spine:hover { border-color: #4E4A43; transform: translateX(3px); }
+  .toast { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px); background: #232522; border: 1px solid #4E4A43; color: #E1DAD0; padding: 13px 24px; border-radius: 3px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 12px 40px rgba(0,0,0,0.55); max-width: 90vw; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  @media (max-width: 820px) { .grid3 { grid-template-columns: 1fr !important; } .grid2 { grid-template-columns: 1fr !important; } .nav { gap: 14px !important; } }
 </style>
 </head>
 <body>
-  <div class="screen" style="position:relative;min-height:100vh;display:flex;flex-direction:column">
-    <div style="position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 34%, rgba(194,154,69,0.06), transparent 70%),radial-gradient(1200px 700px at 50% 100%, rgba(13,15,14,0.9), transparent 80%);pointer-events:none"></div>
+<div id="app" style="min-height:100vh;display:flex;flex-direction:column"></div>
+<div id="toast" class="toast"></div>
 
-    <header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:26px clamp(20px,4vw,56px)">
-      <a href="Home.dc.html" style="font-family:'GFS Didot',Didot,serif;font-size:19px;letter-spacing:0.35em;color:#E8E1D5;padding-left:0.35em">BOND</a>
-      <a href="Home.dc.html" style="font-family:'GFS Didot',Didot,serif;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C">Back to site</a>
-    </header>
+<script>
+// Bond Haus, the members floor. In memory member model with a clean seam.
+// House voice throughout, second person made personal. This floor holds no
+// commerce: nothing is sold, no basket, no acquiring anywhere. No em dashes, no
+// en dashes, no exclamation points in copy. Triads are period separated. Everything
+// a member records is private, optional, and erasable. Refresh resets by design.
 
-    <main style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
-      <div style="text-align:center;max-width:460px;width:100%;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
-        <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(52px,9vw,88px);letter-spacing:0.35em;padding-left:0.35em;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(2px 3px 3px rgba(0,0,0,0.7));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">BOND</div>
-        <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(16px,2vw,22px);letter-spacing:0.16em;color:#E1DAD0;margin:22px 0 0">The Haus is for members.</p>
-        <div style="width:min(360px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:34px auto 0"></div>
+var DEMO_EMAIL = 'member@bond.test';
+var GOLD = 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%)';
+var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        <form id="hausForm" style="margin:36px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left">
-          <input class="field" type="email" name="email" placeholder="Email" autocomplete="email">
-          <input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">
-          <button type="submit" style="margin-top:6px;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:17px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Enter the Haus</button>
-        </form>
-        <p id="hausNote" style="font-size:12.5px;line-height:1.7;color:#8E887C;margin:18px 0 0;min-height:18px"></p>
+var COMPS = [
+  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Bright','Clear','Social'], top:['Citrus peel','Green anise'], heart:['Pine','Black pepper'], base:['Cedar','Warm earth'] },
+  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Calm','Round','Quiet'], top:['Lavender','Bergamot'], heart:['Chamomile','Clove'], base:['Sandalwood','Musk'] },
+  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Deep','Full','Rare'], top:['Ripe mango','Blood orange'], heart:['Gardenia','Fennel'], base:['Amber','Loam'] }
+];
+var BATCH_RECORDS = {
+  'BND-1-0518': { comp:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', batch:'BND-1-0518', run:null },
+  'BND-2-0731': { comp:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', batch:'BND-2-0731', run:null },
+  'BND-3-0214': { comp:'no3', cultivar:'Midnight Zkittlez', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
+};
+var GUIDE = [
+  { id:'cover', title:'The Experience Guide', kind:'cover' },
+  { id:'notes', title:'On Notes', kind:'essay', body:'A note is a memory before it is a smell. The house presses so the plant arrives whole, its top notes lifting first, its heart holding the middle, its base staying after the rest has gone. Read a composition the way you would read a room: what greets you, what stays, what lingers when you have left.' },
+  { id:'no1', title:'No. 1 Dialed', kind:'comp', comp:'no1' },
+  { id:'no2', title:'No. 2 Unwind', kind:'comp', comp:'no2' },
+  { id:'no3', title:'No. 3 Peak', kind:'comp', comp:'no3' },
+  { id:'ritual', title:'The Ritual', kind:'ritual' }
+];
+var INTENTIONS = ['Clarity','Rest','Presence','Creativity','Connection'];
+var NAV = [['salon','Salon'],['library','Library'],['guide','Guide'],['reserve','Reserve'],['events','Events'],['ritual','Ritual'],['account','Account']];
 
-        <p style="font-size:13px;line-height:1.7;color:#8E887C;margin:34px 0 0">Not yet a member?
-          <a href="Home.dc.html#circle" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Join the Circle for first access.</a>
-        </p>
-      </div>
-    </main>
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function comp(id){ return COMPS.filter(function(c){ return c.id===id; })[0]; }
+function greeting(){ var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; }
 
-    <footer style="position:relative;text-align:center;padding:28px;font-size:11px;letter-spacing:0.04em;color:#6E685E">
-      21+ Cannabis products. Keep out of reach of children.
-    </footer>
-  </div>
+var HausStore = {
+  member: null,
+  seed: function(){
+    this.member = {
+      signedIn:false, entered:false, first:'Gary', name:'Gary Ferenczi', email:DEMO_EMAIL, circle:true, age21:false,
+      shelf: [], claims: [], guidePlace: 0,
+      events: [
+        { id:'ev1', name:'An Evening of Three', date:'2026-08-14', city:'Manhattan', line:'The three compositions, poured slowly, in a quiet room.', capacity:'open', rsvp:'none' },
+        { id:'ev2', name:'The Listening Room', date:'2026-08-28', city:'Brooklyn', line:'Records, low light, and a single considered pour.', capacity:'open', rsvp:'requested' },
+        { id:'ev3', name:'Harvest Supper', date:'2026-06-20', city:'Hudson Valley', line:'A long table at the close of the season.', capacity:'past', rsvp:'none' }
+      ],
+      sessions: []
+    };
+    this.reserveRuns = [
+      { id:'run-mz', comp:'no3', cultivar:'Midnight Zkittlez', pressing:'2026-03-30', size:1000, status:'current' },
+      { id:'run-ag', comp:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, status:'closed' }
+    ];
+    this.houseWrites = [
+      { text:'A Reserve run has been pressed. No. 3 Peak, Midnight Zkittlez.', view:'reserve' },
+      { text:'The Experience Guide, chapter On Notes, is open.', view:'guide' }
+    ];
+  },
+  registerBatch: function(num){
+    var rec = BATCH_RECORDS[String(num).trim().toUpperCase()];
+    if (!rec) return null;
+    if (this.member.shelf.filter(function(b){ return b.batch===rec.batch; }).length) return this.member.shelf.filter(function(b){ return b.batch===rec.batch; })[0];
+    var entry = { comp:rec.comp, cultivar:rec.cultivar, harvest:rec.harvest, pressing:rec.pressing, batch:rec.batch, run:rec.run, notes:'' };
+    this.member.shelf.push(entry);
+    return entry;
+  },
+  claimRun: function(batch){
+    var b = this.member.shelf.filter(function(x){ return x.batch===batch; })[0];
+    if (!b || !b.run) return false;
+    if (this.member.claims.filter(function(c){ return c.batch===batch; }).length) return true;
+    this.member.claims.push({ batch:batch, comp:b.comp, cultivar:b.cultivar, number:b.run.number, size:b.run.size });
+    return true;
+  },
+  logSession: function(compId, intention, duration){ this.member.sessions.unshift({ date:new Date().toISOString().slice(0,10), comp:compId, intention:intention, duration:duration, reflection:'' }); return this.member.sessions[0]; },
+  eraseNotes: function(){ this.member.shelf.forEach(function(b){ b.notes=''; }); },
+  eraseReflections: function(){ this.member.sessions.forEach(function(s){ s.reflection=''; }); },
+  eraseHistory: function(){ this.member.sessions = []; },
+  record: function(){ var m=this.member; return { name:m.name, email:m.email, circleCorrespondence:m.circle, shelf:m.shelf, reserveClaims:m.claims, ritualHistory:m.sessions, guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; }
+};
 
-  <script>
-    // Preview only: real member accounts open with the Bond Haus app layer.
-    document.getElementById('hausForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      document.getElementById('hausNote').textContent = 'Member accounts open with the Bond Haus app layer. The Circle opens the door first.';
-    });
-  </script>
+// ================= chrome =================
+var app = document.getElementById('app');
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2800); }
+
+function complianceBand(){
+  return '<div style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">'
+    + '<div class="gold" style="font-size:10px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>'
+    + '<p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>'
+    + '<p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">Cannabis may cause impairment and may be habit forming.</p>'
+    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:0">Licensed by the New York State Office of Cannabis Management. [OCM LICENSE NUMBER]</p></div></div>';
+}
+function chrome(active, inner){
+  var nav = NAV.map(function(n){ return '<a class="navlink'+(active===n[0]?' on':'')+'" href="#/haus/'+n[0]+'">'+esc(n[1])+'</a>'; }).join('');
+  var head = '<header style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:22px clamp(20px,4vw,56px);border-bottom:1px solid #2A2C29">'
+    + '<a href="#/haus/salon" class="didot" style="font-size:19px;letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5">BOND</a>'
+    + '<nav class="nav" style="display:flex;gap:22px;flex-wrap:wrap;align-items:center">'+nav+'</nav>'
+    + '<a id="signOut" style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8E887C;border:1px solid #3A3C3B;border-radius:2px;padding:7px 12px;cursor:pointer">Sign out</a></header>';
+  var body = '<main class="scroll rise" style="flex:1;overflow-y:auto"><div style="max-width:940px;margin:0 auto;padding:36px clamp(20px,4vw,56px) 20px">'+inner+'</div></main>';
+  app.innerHTML = head + body + complianceBand();
+}
+
+// ================= entry and welcome =================
+function renderDoor(fail){
+  clearRitualTimer();
+  app.innerHTML = '<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:100vh">'
+    + '<div style="position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 34%, rgba(194,154,69,0.06), transparent 70%);pointer-events:none"></div>'
+    + '<header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:26px clamp(20px,4vw,56px)"><a href="Home.dc.html" class="didot" style="font-size:19px;letter-spacing:0.35em;color:#E8E1D5;padding-left:0.35em">BOND</a><a href="Home.dc.html" class="didot" style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8E887C">Back to site</a></header>'
+    + '<main style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:24px"><div class="rise" style="text-align:center;max-width:460px;width:100%">'
+    + '<div class="didot gold breathe" style="font-weight:400;font-size:clamp(52px,9vw,88px);letter-spacing:0.35em;padding-left:0.35em;line-height:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,0.7))">BOND</div>'
+    + '<p class="didot" style="font-size:clamp(16px,2vw,22px);letter-spacing:0.16em;color:#E1DAD0;margin:22px 0 0">The Haus is for members.</p>'
+    + '<div style="width:min(360px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:34px auto 0"></div>'
+    + '<form id="doorForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left"><input class="field" type="email" name="email" placeholder="Email" autocomplete="email"><input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">'
+    + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Enter the Haus</button></form>'
+    + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px">'+(fail?'That did not open the door.':'')+'</p>'
+    + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:30px 0 0">Not yet a member? <a href="Home.dc.html#circle" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Join the Circle for first access.</a></p>'
+    + '<p style="font-size:11.5px;letter-spacing:0.04em;color:#6E685E;margin:14px 0 0">Membership is by invitation from the Circle.</p>'
+    + '</div></main>' + complianceBand() + '</div>';
+  var form = document.getElementById('doorForm');
+  form.addEventListener('submit', function(e){ e.preventDefault();
+    var email = form.email.value.trim().toLowerCase();
+    if (email === DEMO_EMAIL && form.password.value){ HausStore.member.signedIn = true; if (HausStore.member.entered){ location.hash = '#/haus/salon'; } else { location.hash = '#/haus/welcome'; } route(); }
+    else { renderDoor(true); }
+  });
+}
+function renderWelcome(){
+  clearRitualTimer();
+  app.innerHTML = '<main style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;min-height:100vh"><div class="rise" style="text-align:center;max-width:520px">'
+    + '<div class="didot" style="font-size:clamp(30px,5vw,44px);letter-spacing:0.04em;color:#E1DAD0">Welcome to the Haus.</div>'
+    + '<p style="font-size:15.5px;line-height:1.9;color:#B0A99A;margin:22px 0 0">This floor is yours. Your shelf, your guide, your rituals, kept quietly.</p>'
+    + '<p style="font-size:15.5px;line-height:1.9;color:#B0A99A;margin:8px 0 0">Everything here is private, optional, and yours to erase.</p>'
+    + '<div style="width:min(300px,70%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>'
+    + '<label style="display:flex;gap:10px;align-items:center;justify-content:center;margin:26px 0 0;font-size:13px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="wAge"> For adults 21 and over.</label>'
+    + '<button id="wEnter" class="didot" style="margin:22px 0 0;background:transparent;color:#E1DAD0;border:1px solid #C29A45;border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:15px 44px;cursor:pointer">Enter</button>'
+    + '</div></main>';
+  document.getElementById('wEnter').addEventListener('click', function(){
+    if (!document.getElementById('wAge').checked){ toast('Please confirm you are 21 and over.'); return; }
+    HausStore.member.entered = true; HausStore.member.age21 = true; location.hash = '#/haus/salon'; route();
+  });
+}
+
+// ================= 1. Salon =================
+function renderSalon(){
+  var m = HausStore.member;
+  var lastComp = m.sessions.length ? comp(m.sessions[0].comp) : comp('no1');
+  var tonight = '<div class="card"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+lastComp.accent+'"></div><div class="lbl">Tonight\'s ritual</div>'
+    + '<div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:12px">'+esc(lastComp.name)+'</div>'
+    + '<div style="font-size:12px;color:#8E887C;margin-top:4px">'+lastComp.triad.join(' . ')+'</div>'
+    + '<a href="#/haus/ritual" style="display:inline-block;margin-top:16px;font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid '+lastComp.accent+';padding-bottom:2px">Begin when ready</a></div>';
+  var shelf;
+  if (m.shelf.length){
+    shelf = m.shelf.slice(0,4).map(function(b){ var c=comp(b.comp); return '<div class="spine" data-shelf="'+esc(b.batch)+'"><div style="width:3px;height:34px;background:'+c.accent+';border-radius:2px"></div><div><div style="color:#E1DAD0;font-size:13.5px">'+esc(b.cultivar)+'</div><div style="font-size:11px;color:#6E685E" class="didot">'+esc(c.name)+'</div></div></div>'; }).join('');
+    shelf = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">'+shelf+'</div>';
+  } else {
+    shelf = '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin-top:14px">Your shelf is waiting. Register your first batch from its card.</p><a href="#/haus/library" style="display:inline-block;margin-top:10px;font-size:12.5px;color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Open the Library</a>';
+  }
+  var onShelf = '<div class="card"><div class="lbl">On the shelf</div>'+shelf+'</div>';
+  var writes = '<div class="card"><div class="lbl">The house writes</div>'+HausStore.houseWrites.map(function(w){ return '<a href="#/haus/'+w.view+'" style="display:block;margin-top:14px;font-size:13.5px;color:#B0A99A;border-bottom:1px solid #2A2C29;padding-bottom:8px">'+esc(w.text)+'</a>'; }).join('')+'</div>';
+  var ev = m.events.filter(function(e){ return e.capacity !== 'past'; })[0];
+  var evCard = ev ? '<div class="card" style="margin-top:16px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><div><div class="lbl">Next evening</div><div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:10px">'+esc(ev.name)+'</div><div style="font-size:12.5px;color:#8E887C;margin-top:4px">'+esc(ev.date)+' . '+esc(ev.city)+'</div></div><a href="#/haus/events" style="font-size:12px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid #C29A45;padding-bottom:2px;align-self:center">'+rsvpLabel(ev)+'</a></div></div>' : '';
+  var inner = '<div class="didot" style="font-size:clamp(26px,4vw,38px);letter-spacing:0.03em;color:#E1DAD0">'+greeting()+', '+esc(m.first)+'.</div>'
+    + '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px">'+tonight+onShelf+writes+'</div>'+evCard;
+  chrome('salon', inner);
+}
+
+// ================= 2. Library =================
+var libSel = null;
+function renderLibrary(){
+  var m = HausStore.member;
+  var reg = '<div class="card"><div class="lbl">Register a batch</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Enter the batch number from any unit\'s card and it joins your shelf with its full house record.</p>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap"><input id="batchIn" class="field" style="flex:1;min-width:200px" placeholder="Batch number, for example BND-3-0214"><button id="batchAdd" class="htab on" style="padding:0 22px">Shelve it</button></div>'
+    + '<p id="batchNote" style="font-size:12.5px;color:#8E887C;margin:12px 0 0;min-height:16px"></p></div>';
+  var shelf;
+  if (m.shelf.length){
+    shelf = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">'+m.shelf.map(function(b){ var c=comp(b.comp); return '<div class="spine" data-lib="'+esc(b.batch)+'"><div style="width:4px;height:40px;background:'+c.accent+';border-radius:2px"></div><div style="flex:1"><div class="didot" style="color:#E1DAD0;font-size:15px">'+esc(b.cultivar)+'</div><div style="font-size:11.5px;color:#6E685E">'+esc(c.name)+' . '+esc(b.batch)+'</div></div>'+(b.run?'<span style="font-size:11px;letter-spacing:0.06em;color:'+c.accent+'">Reserve</span>':'')+'</div>'; }).join('')+'</div>';
+  } else {
+    shelf = '<p style="font-size:13px;color:#8E887C;margin-top:14px">Your shelf is waiting. Register your first batch above.</p>';
+  }
+  var shelfCard = '<div class="card" style="margin-top:16px"><div class="lbl">The shelf</div>'+shelf+'</div>';
+  var detail = '';
+  if (libSel){ var b = m.shelf.filter(function(x){ return x.batch===libSel; })[0]; if (b) detail = batchEntry(b); }
+  chrome('library', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Library</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">What you own, and what you thought of it. Never what you did.</p>' + reg + shelfCard + detail);
+}
+function pyramid(c){
+  function tier(label, arr){ return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+arr.join(' . ')+'</span></div>'; }
+  return '<div style="margin-top:14px">'+tier('Top notes', c.top)+tier('Heart', c.heart)+tier('Base', c.base)+'</div>';
+}
+function batchEntry(b){
+  var c = comp(b.comp);
+  return '<div class="card soft" style="margin-top:16px"><div style="position:absolute;inset:0;background:'+c.tint+';pointer-events:none"></div><div style="position:relative">'
+    + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><div class="didot" style="font-size:24px;color:#E1DAD0">'+esc(b.cultivar)+'</div><span style="font-size:12px;color:'+c.accent+'" class="didot">'+esc(c.name)+'</span></div>'
+    + '<div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:#8E887C"><span>Harvest '+esc(b.harvest)+'</span><span>Pressed '+esc(b.pressing)+'</span><span style="font-family:ui-monospace,Menlo,monospace">'+esc(b.batch)+'</span><a style="color:#B0A99A;border-bottom:1px solid #3A3C3B">Certificate of analysis</a></div>'
+    + pyramid(c)
+    + (b.run?'<a href="#/haus/reserve" style="display:inline-block;margin-top:14px;font-size:12.5px;color:#E1DAD0;border-bottom:1px solid '+c.accent+';padding-bottom:2px">Claim your Reserve number in the Reserve Room</a>':'')
+    + '<div style="margin-top:20px"><div class="lbl">Your notes. Private, optional, and yours to erase.</div>'
+    + '<textarea id="noteIn" class="field" data-batch="'+esc(b.batch)+'" rows="3" style="margin-top:10px;resize:vertical" placeholder="What did it bring to mind">'+esc(b.notes)+'</textarea>'
+    + '<div style="display:flex;gap:10px;margin-top:10px"><button class="htab" data-savenote="'+esc(b.batch)+'">Save note</button>'+(b.notes?'<button class="htab" data-erasenote="'+esc(b.batch)+'">Erase note</button>':'')+'</div></div>'
+    + '</div></div>';
+}
+
+// ================= 3. Experience Guide =================
+function renderGuide(){
+  var m = HausStore.member; var idx = m.guidePlace; var ch = GUIDE[idx];
+  var page;
+  if (ch.kind==='cover'){
+    page = '<div style="background:#1B1D1C;border:1px solid #2A2C29;border-radius:4px;padding:70px 30px;text-align:center;position:relative;overflow:hidden">'
+      + '<div style="position:absolute;top:36px;left:50%;transform:translateX(-50%);display:flex;gap:16px;opacity:0.5">'+COMPS.map(function(c){ return '<span style="width:8px;height:8px;border-radius:50%;background:'+c.accent+'"></span>'; }).join('')+'</div>'
+      + '<div class="didot gold" style="font-size:clamp(30px,5vw,46px);letter-spacing:0.05em;margin-top:20px">The Experience Guide</div>'
+      + '<div style="font-size:12.5px;letter-spacing:0.24em;text-transform:uppercase;color:#8E887C;margin-top:16px">Bond Haus edition</div></div>';
+  } else if (ch.kind==='essay'){
+    page = paperSpread(ch.title, '<p style="font-size:15.5px;line-height:2;color:#4A463E;margin:0">'+esc(ch.body)+'</p>');
+  } else if (ch.kind==='comp'){
+    var c = comp(ch.comp);
+    page = '<div style="background:#F2ECE0;border-radius:4px;padding:44px clamp(24px,4vw,56px);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:'+c.tint.replace('0.05','0.14')+';pointer-events:none"></div><div style="position:relative">'
+      + '<div class="didot" style="font-size:30px;color:#2A2620">'+esc(c.name)+'</div><div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8270;margin-top:8px">'+c.triad.join(' . ')+'</div>'
+      + '<div style="height:1px;background:'+c.accent+';width:60px;margin:20px 0"></div>'
+      + '<div style="font-size:14px;line-height:1.9;color:#4A463E"><strong style="color:#2A2620">Top notes.</strong> '+c.top.join(', ')+'. <strong style="color:#2A2620">Heart.</strong> '+c.heart.join(', ')+'. <strong style="color:#2A2620">Base.</strong> '+c.base.join(', ')+'.</div></div></div>';
+  } else {
+    page = paperSpread('The Ritual', '<div style="display:flex;flex-direction:column;gap:0">'+[['Prepare','Clear the space. Remove distractions.'],['Pause','Breathe. Set your intention.'],['Elevate','Return elevated.']].map(function(s,i,a){ return '<div style="display:flex;gap:16px;align-items:flex-start"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:#C08457"></span>'+(i<a.length-1?'<span style="width:1px;height:42px;background:#C0845766"></span>':'')+'</div><div style="padding-bottom:26px"><div class="didot" style="font-size:19px;color:#2A2620">'+s[0]+'</div><div style="font-size:14px;color:#4A463E;margin-top:4px">'+s[1]+'</div></div></div>'; }).join('')+'</div>');
+  }
+  var ribbon = '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><button class="htab" id="gPrev"'+(idx===0?' disabled':'')+'>Previous</button><span style="font-size:12px;color:#6E685E">Chapter '+(idx+1)+' of '+GUIDE.length+' . '+esc(ch.title)+'</span><button class="htab" id="gNext"'+(idx===GUIDE.length-1?' disabled':'')+'>Next</button></div>';
+  chrome('guide', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Experience Guide</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">A reading ribbon keeps your place.</p><div class="soft">'+page+'</div>'+ribbon);
+}
+function paperSpread(title, body){
+  return '<div style="background:#F2ECE0;border-radius:4px;padding:44px clamp(24px,4vw,56px)"><div class="didot" style="font-size:28px;color:#2A2620">'+esc(title)+'</div><div style="height:1px;background:#C29A4566;width:60px;margin:18px 0 22px"></div>'+body+'</div>';
+}
+
+// ================= 4. Reserve Room =================
+function renderReserve(){
+  var m = HausStore.member;
+  var claims = m.claims.length ? m.claims.map(function(cl){ var c=comp(cl.comp); return '<div class="card" style="text-align:center;margin-bottom:16px"><div style="position:absolute;left:0;right:0;bottom:0;height:2px;background:'+c.accent+'"></div><div class="lbl">Your Reserve number</div><div class="didot" style="font-size:clamp(34px,6vw,56px);color:#E1DAD0;margin-top:12px;letter-spacing:0.02em">No. '+cl.number+' of '+cl.size+'</div><div style="font-size:13px;color:#8E887C;margin-top:8px" class="didot">'+esc(cl.cultivar)+' . '+esc(c.name)+'</div></div>'; }).join('') : '';
+  var claimable = m.shelf.filter(function(b){ return b.run && !m.claims.filter(function(c){ return c.batch===b.batch; }).length; });
+  var claimBox = claimable.length ? '<div class="card" style="margin-bottom:16px"><div class="lbl">Claim a number</div>'+claimable.map(function(b){ return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span style="font-size:13.5px;color:#B0A99A">'+esc(b.cultivar)+' . '+esc(b.batch)+'</span><button class="htab" data-claim="'+esc(b.batch)+'">Claim your run number</button></div>'; }).join('')+'</div>' : (m.claims.length ? '' : '<div class="card" style="margin-bottom:16px"><p style="font-size:13px;color:#8E887C;margin:0;line-height:1.7">Register a Reserve batch in the Library and its run number becomes yours to claim here.</p></div>');
+  var runs = '<div class="card"><div class="lbl">Runs the house has pressed</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:14px">'+HausStore.reserveRuns.map(function(r){ var c=comp(r.comp); return '<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid #2A2C29"><div style="width:3px;height:44px;background:'+c.accent+';border-radius:2px"></div><div style="flex:1"><div class="didot" style="font-size:17px;color:#E1DAD0">'+esc(r.cultivar)+'</div><div style="font-size:12px;color:#8E887C;margin-top:3px">'+esc(c.name)+' . pressed '+esc(r.pressing)+' . run of '+r.size+'</div>'+(r.status==='closed'?'<div style="font-size:12px;color:#6E685E;margin-top:6px">This run has ended.</div>':'<div style="font-size:12px;color:'+c.accent+';margin-top:6px">Current run</div>')+'</div></div>'; }).join('')+'</div><p style="font-size:11.5px;color:#6E685E;margin:16px 0 0;line-height:1.7">The Reserve Room is a registry of what has been pressed. It is a record, not a room for acquiring.</p></div>';
+  chrome('reserve', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Reserve Room</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">For No. 3 and every numbered run after it.</p>'+claims+claimBox+runs);
+}
+
+// ================= 5. Events =================
+function rsvpLabel(e){ if (e.capacity==='past') return 'This evening has passed'; if (e.capacity==='full') return 'This evening is full'; return e.rsvp==='confirmed'?'Confirmed':e.rsvp==='requested'?'Requested':'Request a place'; }
+function renderEvents(){
+  var m = HausStore.member;
+  var upcoming = m.events.filter(function(e){ return e.capacity !== 'past'; });
+  var past = m.events.filter(function(e){ return e.capacity==='past'; });
+  function card(e, quiet){
+    var c = e.capacity==='past'||quiet ? '#6E685E' : '#E1DAD0';
+    var action = (e.capacity==='past'||e.capacity==='full') ? '<span style="font-size:12px;color:#6E685E">'+rsvpLabel(e)+'</span>' : '<button class="htab'+(e.rsvp !== 'none'?' on':'')+'" data-rsvp="'+e.id+'">'+rsvpLabel(e)+'</button>';
+    return '<div class="card"'+(quiet?' style="opacity:0.66"':'')+'><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:baseline"><div><div class="didot" style="font-size:21px;color:'+c+'">'+esc(e.name)+'</div><div style="font-size:12.5px;color:#8E887C;margin-top:4px">'+esc(e.date)+' . '+esc(e.city)+'</div></div>'+action+'</div>'
+      + '<p style="font-size:13.5px;color:#B0A99A;margin:14px 0 0;line-height:1.7">'+esc(e.line)+'</p>'
+      + '<p style="font-size:11px;letter-spacing:0.04em;color:#6E685E;margin:12px 0 0">21 and over. Identification checked at the door.</p></div>';
+  }
+  var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">Events</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Private tastings and house evenings.</p>'
+    + '<div style="display:flex;flex-direction:column;gap:16px">'+upcoming.map(function(e){ return card(e,false); }).join('')+'</div>'
+    + (past.length?'<div class="lbl" style="margin:28px 0 12px">Passed</div><div style="display:flex;flex-direction:column;gap:16px">'+past.map(function(e){ return card(e,true); }).join('')+'</div>':'');
+  chrome('events', inner);
+}
+
+// ================= 6. Ritual companion =================
+var ritual = { phase:'setup', comp:'no1', intention:INTENTIONS[0], freeText:'', duration:20, remaining:0, total:0 };
+var ritualTimer = null;
+function clearRitualTimer(){ if (ritualTimer){ clearInterval(ritualTimer); ritualTimer=null; } }
+function renderRitual(){
+  var m = HausStore.member;
+  if (ritual.phase==='setup'){
+    var shelfComps = m.shelf.map(function(b){ return b.comp; });
+    var ordered = COMPS.slice().sort(function(a,b){ var ai=shelfComps.indexOf(a.id), bi=shelfComps.indexOf(b.id); return (bi>-1?1:0)-(ai>-1?1:0); });
+    var compPick = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+ordered.map(function(c){ var onShelf=shelfComps.indexOf(c.id)>-1; return '<button class="htab'+(ritual.comp===c.id?' on':'')+'" data-rcomp="'+c.id+'" style="border-color:'+(ritual.comp===c.id?c.accent:'#3A3C3B')+'">'+esc(c.name)+(onShelf?' . yours':'')+'</button>'; }).join('')+'</div>';
+    var intent = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+INTENTIONS.map(function(i){ return '<button class="htab'+(ritual.intention===i&&!ritual.freeText?' on':'')+'" data-rintent="'+esc(i)+'">'+esc(i)+'</button>'; }).join('')+'</div><input id="rFree" class="field" placeholder="Or set your own intention" value="'+esc(ritual.freeText)+'" style="margin-top:12px">';
+    var dur = '<div style="display:flex;gap:10px;margin-top:12px">'+[10,20,30].map(function(d){ return '<button class="htab'+(ritual.duration===d?' on':'')+'" data-rdur="'+d+'">'+d+' minutes</button>'; }).join('')+'</div>';
+    var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Ritual</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Choose a composition, set an intention, and begin when ready.</p>'
+      + '<div class="card"><div class="lbl">Composition</div>'+compPick+'<div class="lbl" style="margin-top:22px">Intention</div>'+intent+'<div class="lbl" style="margin-top:22px">Duration</div>'+dur
+      + '<button id="rBegin" class="didot" style="margin-top:24px;background:transparent;color:#E1DAD0;border:1px solid #C29A45;border-radius:2px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;padding:14px 40px;cursor:pointer">Begin</button></div>'
+      + historyCard();
+    chrome('ritual', inner);
+    return;
+  }
+  // running phases
+  var c = comp(ritual.comp);
+  var steps = [['Prepare','Clear the space. Remove distractions.','prepare'],['Pause','Breathe. Set your intention.','pause'],['Elevate','Return elevated.','elevate']];
+  var stepIdx = { prepare:0, pause:1, elevate:2 }[ritual.phase];
+  var stepper = '<div style="display:flex;flex-direction:column;gap:0;margin-top:8px">'+steps.map(function(s,i,a){ var state = i<stepIdx?'done':i===stepIdx?'now':'next'; var col = state==='now'?c.accent:state==='done'?'#7FA87A':'#3A3C3B'; var op = REDUCED&&state !== 'now'?0.4:1; return '<div style="display:flex;gap:16px;align-items:flex-start;opacity:'+op+'"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:'+col+';'+(state==='now'?'box-shadow:0 0 10px '+c.accent:'')+'"></span>'+(i<a.length-1?'<span style="width:1px;height:38px;background:#2A2C29"></span>':'')+'</div><div style="padding-bottom:22px"><div class="didot" style="font-size:18px;color:'+(state==='next'?'#6E685E':'#E1DAD0')+'">'+s[0]+'</div><div style="font-size:13px;color:#8E887C;margin-top:3px">'+s[1]+'</div></div></div>'; }).join('')+'</div>';
+  var center;
+  if (ritual.phase==='elevate'){
+    center = REDUCED ? '<div id="ritualClock" class="didot" style="font-size:64px;color:#E1DAD0;letter-spacing:0.02em">'+fmt(ritual.remaining)+'</div>' : ringSvg(c);
+  } else {
+    center = '<div class="didot" style="font-size:44px;color:'+c.accent+'">'+(ritual.phase==='prepare'?'Prepare':'Pause')+'</div>';
+  }
+  var controls;
+  if (ritual.phase==='elevate') controls = '<button id="rEnd" class="htab" style="margin-top:8px">End ritual</button>';
+  else controls = '<button id="rNext" class="didot" style="background:transparent;color:#E1DAD0;border:1px solid '+c.accent+';border-radius:2px;font-size:12.5px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 34px;cursor:pointer">Continue</button>';
+  var inner = '<div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;margin-top:10px">'
+    + '<div>'+stepper+'</div>'
+    + '<div style="text-align:center">'+center+'<div style="font-size:12.5px;color:#8E887C;margin-top:20px" class="didot">'+esc(c.name)+' . '+esc(ritual.freeText||ritual.intention)+'</div><div style="margin-top:16px">'+controls+'</div></div></div>';
+  if (ritual.phase==='reflect'){
+    var s0 = HausStore.member.sessions[0];
+    inner = '<div style="text-align:center;max-width:520px;margin:20px auto"><div class="didot" style="font-size:34px;color:#E1DAD0">Return elevated.</div>'
+      + '<p style="font-size:13.5px;color:#8E887C;margin:14px 0 0">One optional line, kept privately with the same erase rights as your notes.</p>'
+      + '<textarea id="rReflect" class="field" rows="3" style="margin-top:18px;resize:vertical;text-align:left" placeholder="A word on how it landed"></textarea>'
+      + '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px"><button id="rSaveReflect" class="htab on" style="padding:0 24px;height:40px">Save and close</button><button id="rSkip" class="htab" style="padding:0 24px;height:40px">Close without a note</button></div></div>';
+  }
+  chrome('ritual', '<div class="didot" style="font-size:clamp(22px,3vw,30px);color:#E1DAD0">The Ritual</div><p style="font-size:13px;color:#8E887C;margin:8px 0 22px">Your ritual is running. Let the rest of the room fall away.</p>'+inner);
+  if (ritual.phase==='elevate' && !REDUCED) updateRing();
+}
+function fmt(sec){ var m=Math.floor(sec/60), s=sec%60; return (m<10?'0':'')+m+':'+(s<10?'0':'')+s; }
+function ringSvg(c){
+  var R=92, C2=2*Math.PI*R;
+  var ticks=''; var mins=ritual.total/60;
+  for (var i=0;i<mins;i++){ var a=(i/mins)*2*Math.PI - Math.PI/2; var x1=110+Math.cos(a)*104, y1=110+Math.sin(a)*104, x2=110+Math.cos(a)*110, y2=110+Math.sin(a)*110; ticks+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="'+c.accent+'" stroke-width="1" opacity="0.28"/>'; }
+  return '<svg width="220" height="220" viewBox="0 0 220 220" style="display:block;margin:0 auto"><circle cx="110" cy="110" r="'+R+'" fill="none" stroke="#2A2C29" stroke-width="1.5"/>'
+    + '<circle id="ritualArc" cx="110" cy="110" r="'+R+'" fill="none" stroke="'+c.accent+'" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="'+C2.toFixed(1)+'" stroke-dashoffset="0" transform="rotate(-90 110 110)"/>'
+    + ticks
+    + '<text id="ritualClock" x="110" y="110" text-anchor="middle" dominant-baseline="central" font-family="GFS Didot, Didot, serif" font-size="42" fill="#E1DAD0">'+fmt(ritual.remaining)+'</text></svg>';
+}
+function updateRing(){
+  var arc = document.getElementById('ritualArc'); var clk = document.getElementById('ritualClock');
+  var R=92, C2=2*Math.PI*R;
+  var frac = ritual.total ? ritual.remaining/ritual.total : 0;
+  if (arc) arc.setAttribute('stroke-dashoffset', (C2*(1-frac)).toFixed(1));
+  if (clk) clk.textContent = fmt(ritual.remaining);
+}
+function historyCard(){
+  var m = HausStore.member;
+  if (!m.sessions.length) return '<div class="card" style="margin-top:16px"><div class="lbl">Your sessions</div><p style="font-size:13px;color:#8E887C;margin-top:12px">No sessions yet. Your history stays here, date and intention only, and you can erase all of it from Account.</p></div>';
+  return '<div class="card" style="margin-top:16px"><div class="lbl">Your sessions</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">'+m.sessions.map(function(s){ var c=comp(s.comp); return '<div style="display:flex;gap:14px;font-size:12.5px;color:#8E887C;padding-bottom:8px;border-bottom:1px solid #2A2C29"><span style="min-width:82px" class="didot">'+esc(s.date)+'</span><span style="color:'+c.accent+'">'+esc(c.name)+'</span><span>'+esc(s.intention)+'</span><span style="margin-left:auto">'+s.duration+' min</span></div>'; }).join('')+'</div><a href="#/haus/account" style="display:inline-block;margin-top:14px;font-size:12px;color:#8E887C;border-bottom:1px solid #3A3C3B">Erase all in Account</a></div>';
+}
+function beginRitual(){
+  ritual.total = ritual.duration*60; ritual.remaining = ritual.total; ritual.phase='prepare'; renderRitual();
+}
+function advanceRitual(){
+  if (ritual.phase==='prepare'){ ritual.phase='pause'; renderRitual(); return; }
+  if (ritual.phase==='pause'){ ritual.phase='elevate'; renderRitual(); startElevate(); return; }
+}
+function startElevate(){
+  clearRitualTimer();
+  ritualTimer = setInterval(function(){ ritual.remaining--; if (ritual.remaining<=0){ completeRitual(); } else { updateRing(); } }, 1000);
+}
+function completeRitual(){
+  clearRitualTimer();
+  var elapsed = Math.round((ritual.total - Math.max(0,ritual.remaining))/60) || ritual.duration;
+  HausStore.logSession(ritual.comp, ritual.freeText||ritual.intention, ritual.duration);
+  ritual.phase='reflect'; renderRitual();
+}
+
+// ================= 7. Account =================
+var eraseArm = null;
+function renderAccount(){
+  var m = HausStore.member;
+  var eraseRow = function(key, label){ var armed = eraseArm===key; return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #2A2C29"><span style="font-size:13.5px;color:#B0A99A">'+esc(label)+'</span>'+(armed?'<span><button class="htab" data-eraseconfirm="'+key+'" style="border-color:#C08457;color:#C08457">Confirm</button> <button class="htab" data-erasecancel="1">Keep</button></span>':'<button class="htab" data-erasearm="'+key+'">Erase</button>')+'</div>'; };
+  var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">Account</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Plain and complete. Everything the house holds, in your hands.</p>'
+    + '<div class="card"><div class="lbl">Member</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">'
+    + '<div><div style="font-size:11px;color:#6E685E">Name</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.name)+'</div></div>'
+    + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div>'
+    + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefCircle"'+(m.circle?' checked':'')+'> Circle correspondence</label></div></div>'
+    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises.</p>'
+    + '<button id="dlRecord" class="htab on" style="padding:0 22px;height:40px">Download my record</button>'
+    + '<div style="margin-top:18px">'+eraseRow('notes','Tasting notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
+  chrome('account', inner);
+}
+
+// ================= router =================
+function route(){
+  clearRitualTimer();
+  var m = HausStore.member;
+  var h = location.hash || '#/haus';
+  var parts = h.replace(/^#\//,'').split('/');
+  var wing = parts[0]; var view = parts[1] || '';
+  if (wing !== 'haus'){ location.hash = '#/haus'; return; }
+  if (!m.signedIn){ renderDoor(false); return; }
+  if (!m.entered || view==='welcome'){ renderWelcome(); return; }
+  switch(view){
+    case 'library': libSel=null; renderLibrary(); break;
+    case 'guide': renderGuide(); break;
+    case 'reserve': renderReserve(); break;
+    case 'events': renderEvents(); break;
+    case 'ritual': ritual.phase='setup'; renderRitual(); break;
+    case 'account': eraseArm=null; renderAccount(); break;
+    case 'salon': renderSalon(); break;
+    default: location.hash = '#/haus/salon';
+  }
+}
+
+// ================= events =================
+document.addEventListener('click', function(ev){
+  var t = ev.target;
+  if (t.id==='signOut'){ HausStore.member.signedIn=false; location.hash='#/haus'; route(); return; }
+
+  // salon shelf spine to library
+  var sp = t.closest('[data-shelf]'); if (sp){ libSel = sp.getAttribute('data-shelf'); location.hash='#/haus/library'; route(); libSel = sp.getAttribute('data-shelf'); renderLibrary(); return; }
+
+  // library
+  if (t.id==='batchAdd'){ var v=(document.getElementById('batchIn')||{}).value||''; var e=HausStore.registerBatch(v); var note=document.getElementById('batchNote'); if (e){ libSel=e.batch; toast('Shelved. '+e.cultivar+' is on your shelf.'); renderLibrary(); } else if (note){ note.textContent='That batch is not in the house records. Check the card and try again.'; } return; }
+  var lib = t.closest('[data-lib]'); if (lib){ libSel = lib.getAttribute('data-lib'); renderLibrary(); return; }
+  var sn = t.closest('[data-savenote]'); if (sn){ var b=HausStore.member.shelf.filter(function(x){return x.batch===sn.getAttribute('data-savenote');})[0]; var ta=document.getElementById('noteIn'); if (b&&ta){ b.notes=ta.value; toast('Your note is kept privately.'); renderLibrary(); } return; }
+  var en = t.closest('[data-erasenote]'); if (en){ var b2=HausStore.member.shelf.filter(function(x){return x.batch===en.getAttribute('data-erasenote');})[0]; if (b2){ b2.notes=''; toast('Erased. The house keeps no copy.'); renderLibrary(); } return; }
+
+  // guide
+  if (t.id==='gPrev'){ if (HausStore.member.guidePlace>0){ HausStore.member.guidePlace--; renderGuide(); } return; }
+  if (t.id==='gNext'){ if (HausStore.member.guidePlace<GUIDE.length-1){ HausStore.member.guidePlace++; renderGuide(); } return; }
+
+  // reserve
+  var cl = t.closest('[data-claim]'); if (cl){ if (HausStore.claimRun(cl.getAttribute('data-claim'))){ toast('Your run number is yours.'); renderReserve(); } return; }
+
+  // events
+  var rs = t.closest('[data-rsvp]'); if (rs){ var e2=HausStore.member.events.filter(function(x){return x.id===rs.getAttribute('data-rsvp');})[0]; if (e2){ e2.rsvp = e2.rsvp==='none'?'requested':e2.rsvp==='requested'?'confirmed':'requested'; toast(e2.rsvp==='requested'?'Your request is with the house.':'Your place is confirmed.'); renderEvents(); } return; }
+
+  // ritual
+  var rc = t.closest('[data-rcomp]'); if (rc){ ritual.comp=rc.getAttribute('data-rcomp'); renderRitual(); return; }
+  var ri = t.closest('[data-rintent]'); if (ri){ ritual.intention=ri.getAttribute('data-rintent'); ritual.freeText=''; renderRitual(); return; }
+  var rd = t.closest('[data-rdur]'); if (rd){ ritual.duration=+rd.getAttribute('data-rdur'); renderRitual(); return; }
+  if (t.id==='rBegin'){ var f=document.getElementById('rFree'); if (f&&f.value.trim()) ritual.freeText=f.value.trim(); beginRitual(); return; }
+  if (t.id==='rNext'){ advanceRitual(); return; }
+  if (t.id==='rEnd'){ completeRitual(); return; }
+  if (t.id==='rSaveReflect'){ var rt=document.getElementById('rReflect'); if (HausStore.member.sessions[0]) HausStore.member.sessions[0].reflection=(rt?rt.value:''); toast('Kept privately.'); ritual.phase='setup'; renderRitual(); return; }
+  if (t.id==='rSkip'){ ritual.phase='setup'; renderRitual(); return; }
+
+  // account
+  if (t.id==='dlRecord'){ downloadRecord(); return; }
+  var ea = t.closest('[data-erasearm]'); if (ea){ eraseArm=ea.getAttribute('data-erasearm'); renderAccount(); return; }
+  if (t.closest('[data-erasecancel]')){ eraseArm=null; renderAccount(); return; }
+  var ec = t.closest('[data-eraseconfirm]'); if (ec){ doErase(ec.getAttribute('data-eraseconfirm')); return; }
+});
+document.addEventListener('input', function(ev){
+  if (ev.target.id==='rFree' && ev.target.value.trim()){ ritual.freeText=ev.target.value; }
+});
+document.addEventListener('change', function(ev){
+  if (ev.target.id==='prefCircle'){ HausStore.member.circle=ev.target.checked; toast(ev.target.checked?'Circle correspondence on.':'Circle correspondence off.'); }
+});
+
+function downloadRecord(){
+  var blob = new Blob([JSON.stringify(HausStore.record(),null,2)], { type:'application/json' });
+  var url = URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='bond-haus-record.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('Your record is downloading.');
+}
+function doErase(key){
+  eraseArm=null;
+  if (key==='notes'){ HausStore.eraseNotes(); }
+  else if (key==='reflections'){ HausStore.eraseReflections(); }
+  else if (key==='history'){ HausStore.eraseHistory(); }
+  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. The house keeps no copy.'); route(); return; }
+  toast('Erased. The house keeps no copy.');
+  renderAccount();
+}
+
+window.addEventListener('hashchange', route);
+HausStore.seed();
+if (!location.hash) location.hash = '#/haus';
+route();
+</script>
 </body>
 </html>
