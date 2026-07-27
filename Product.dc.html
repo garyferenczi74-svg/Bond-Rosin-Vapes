@@ -86,6 +86,7 @@
       <a class="navitem" data-view="stock" href="#/product/stock">Stock</a>
       <a class="navitem" data-view="production" href="#/product/production">Stock in Process</a>
       <a class="navitem" data-view="accounts" href="#/product/accounts">Accounts</a>
+      <a class="navitem" data-view="dispensaries" href="#/product/dispensaries">Dispensaries</a>
       <a class="navitem" data-view="sales" href="#/product/sales">Sales</a>
       <a class="navitem" data-view="skus" href="#/product/skus">SKU Portfolio</a>
       <a class="navitem" data-view="alerts" href="#/product/alerts">Alerts and Risks <span id="alertBadge" style="float:right;background:#3A2E1C;color:#E3C270;border-radius:999px;font-size:10px;padding:1px 7px">0</span></a>
@@ -417,6 +418,48 @@ var toastTimer = null;
 function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3000); }
 
 var ordFilter = null, ordSel = null, acctSel = null, salesTab = 'sku', boardView = false;
+var dispFilter = 'bond', dispQuery = '';
+
+// The New York OCM directory, mirrored from the public finder seed so the admin
+// can mark which dispensaries carry Bond. The carrier selection is shared with
+// the finder through localStorage bondBondCarriers.
+var DIRECTORY = [
+  { lic:'OCM-AUR-0101', name:'Empire Botanical Co', city:'New York', region:'New York City', bond:true },
+  { lic:'OCM-AUR-0102', name:'Gotham Green Room', city:'New York', region:'New York City', bond:false },
+  { lic:'OCM-AUR-0103', name:'Union Square Reserve', city:'New York', region:'New York City', bond:true },
+  { lic:'OCM-AUR-0110', name:'Kings County Cannabis', city:'Brooklyn', region:'New York City', bond:true },
+  { lic:'OCM-AUR-0111', name:'Prospect Leaf', city:'Brooklyn', region:'New York City', bond:false },
+  { lic:'OCM-AUR-0120', name:'Flushing Fields', city:'Queens', region:'New York City', bond:true },
+  { lic:'OCM-AUR-0121', name:'LIC Collective', city:'Long Island City', region:'New York City', bond:false },
+  { lic:'OCM-AUR-0130', name:'Grand Concourse Cannabis', city:'Bronx', region:'New York City', bond:false },
+  { lic:'OCM-AUR-0140', name:'Harbor Botanicals', city:'Staten Island', region:'New York City', bond:false },
+  { lic:'OCM-AUR-0201', name:'Hudson Green', city:'Yonkers', region:'Hudson Valley', bond:true },
+  { lic:'OCM-AUR-0202', name:'Westchester Reserve', city:'White Plains', region:'Hudson Valley', bond:false },
+  { lic:'OCM-AUR-0203', name:'River Bend Dispensary', city:'Nyack', region:'Hudson Valley', bond:false },
+  { lic:'OCM-AUR-0204', name:'Mid Hudson Cannabis', city:'Poughkeepsie', region:'Hudson Valley', bond:true },
+  { lic:'OCM-AUR-0205', name:'Rondout Botanicals', city:'Kingston', region:'Hudson Valley', bond:true },
+  { lic:'OCM-AUR-0206', name:'Orange County Leaf', city:'Newburgh', region:'Hudson Valley', bond:false },
+  { lic:'OCM-AUR-0301', name:'South Shore Cannabis', city:'Hempstead', region:'Long Island', bond:true },
+  { lic:'OCM-AUR-0302', name:'North Shore Reserve', city:'Huntington', region:'Long Island', bond:false },
+  { lic:'OCM-AUR-0303', name:'East End Botanicals', city:'Riverhead', region:'Long Island', bond:false },
+  { lic:'OCM-AUR-0401', name:'Capital Cannabis Co', city:'Albany', region:'Capital Region', bond:true },
+  { lic:'OCM-AUR-0402', name:'Collar City Leaf', city:'Troy', region:'Capital Region', bond:false },
+  { lic:'OCM-AUR-0403', name:'Electric City Dispensary', city:'Schenectady', region:'Capital Region', bond:false },
+  { lic:'OCM-AUR-0404', name:'Spa City Reserve', city:'Saratoga Springs', region:'Capital Region', bond:true },
+  { lic:'OCM-AUR-0501', name:'Salt City Cannabis', city:'Syracuse', region:'Central New York', bond:true },
+  { lic:'OCM-AUR-0502', name:'Mohawk Valley Leaf', city:'Utica', region:'Mohawk Valley', bond:false },
+  { lic:'OCM-AUR-0503', name:'Cayuga Botanicals', city:'Ithaca', region:'Finger Lakes', bond:true },
+  { lic:'OCM-AUR-0504', name:'Southern Tier Reserve', city:'Binghamton', region:'Southern Tier', bond:false },
+  { lic:'OCM-AUR-0601', name:'Flower City Cannabis', city:'Rochester', region:'Finger Lakes', bond:true },
+  { lic:'OCM-AUR-0602', name:'Finger Lakes Leaf', city:'Geneva', region:'Finger Lakes', bond:false },
+  { lic:'OCM-AUR-0701', name:'Queen City Cannabis', city:'Buffalo', region:'Western New York', bond:true },
+  { lic:'OCM-AUR-0702', name:'Cataract Botanicals', city:'Niagara Falls', region:'Western New York', bond:false },
+  { lic:'OCM-AUR-0801', name:'North Country Reserve', city:'Plattsburgh', region:'North Country', bond:false },
+  { lic:'OCM-AUR-0802', name:'Watertown Cannabis Co', city:'Watertown', region:'North Country', bond:false }
+];
+function carrierSet(){ try { var raw=localStorage.getItem('bondBondCarriers'); if (raw) return JSON.parse(raw); } catch(e){} return DIRECTORY.filter(function(d){ return d.bond; }).map(function(d){ return d.lic; }); }
+function carriesBond(lic){ return carrierSet().indexOf(lic) !== -1; }
+function setCarrier(lic, on){ var set=carrierSet(); var i=set.indexOf(lic); if (on && i===-1) set.push(lic); if (!on && i!==-1) set.splice(i,1); try { localStorage.setItem('bondBondCarriers', JSON.stringify(set)); } catch(e){} }
 var newOrder = { accountId:'', lines:[], promised:'2026-08-15' };
 
 function headerBar(title, subtitle, right){
@@ -556,6 +599,26 @@ function renderAccounts(){
   main.innerHTML = head + scroller(table + detail + form) + previewFooter('Design preview . mock data . a license expiring inside 60 days carries a warning and appears in Alerts');
 }
 
+// ---------- Dispensaries (NY OCM directory, Bond carriers) ----------
+function renderDispensaries(){
+  var carrierCount = DIRECTORY.filter(function(d){ return carriesBond(d.lic); }).length;
+  var head = headerBar('Dispensaries', 'The New York OCM directory. Mark which shops carry Bond; the public finder reflects it.', '<span class="badge" style="border-color:#2E4A22;color:#7CBF4E">'+carrierCount+' carry Bond</span>'+pv());
+  var chips = '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    + '<span class="pill badge'+(dispFilter==='bond'?' active':'')+'" data-dispfilter="bond">Carrying Bond</span>'
+    + '<span class="pill badge'+(dispFilter==='all'?' active':'')+'" data-dispfilter="all">All licensed</span>'
+    + '<input id="dispSearch" class="vfield" style="width:auto;flex:1;min-width:180px" placeholder="Search name, city, or region" value="'+esc(dispQuery)+'"></div>';
+  var rows = DIRECTORY.filter(function(d){
+    if (dispFilter==='bond' && !carriesBond(d.lic)) return false;
+    if (dispQuery){ var q=dispQuery.toLowerCase(); if ((d.name+' '+d.city+' '+d.region+' '+d.lic).toLowerCase().indexOf(q)===-1) return false; }
+    return true;
+  });
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Dispensary</th><th>City</th><th>Region</th><th>License</th><th>Carries Bond</th></tr></thead><tbody>'
+    + rows.map(function(d){ var on=carriesBond(d.lic); return '<tr><td style="color:#E1DAD0">'+esc(d.name)+'</td><td>'+esc(d.city)+'</td><td>'+esc(d.region)+'</td><td class="mono" style="color:#6E685E">'+esc(d.lic)+'</td><td><button class="act'+(on?' go':'')+'" data-disptoggle="'+esc(d.lic)+'" style="border-color:'+(on?'#2E4A22':'#33352F')+';color:'+(on?'#7CBF4E':'#B0A99A')+'">'+(on?'Carries Bond':'Add Bond')+'</button></td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  if (!rows.length) table = '<div class="card" style="text-align:center;color:#6E685E">No dispensaries match this filter.</div>';
+  main.innerHTML = head + scroller(chips + table) + previewFooter('Design preview . sample directory . production syncs the live OCM registry . the public finder reads this selection');
+}
+
 // ---------- 6. Sales (board metrics and unit economics) ----------
 function renderSales(){
   var right = '<span class="chip'+(boardView?' active':'')+'" id="boardToggle">Board view</span>'+pv();
@@ -650,6 +713,7 @@ function route(){
     case 'stock': renderStock(); break;
     case 'production': renderProduction(); break;
     case 'accounts': renderAccounts(); break;
+    case 'dispensaries': renderDispensaries(); break;
     case 'sales': renderSales(); break;
     case 'skus': renderSkus(); break;
     case 'alerts': renderAlerts(); break;
@@ -662,6 +726,10 @@ function go(view){ location.hash = '#/product/'+view; }
 // ================= events =================
 document.addEventListener('click', function(ev){
   var t = ev.target;
+
+  // dispensaries
+  var dtog = t.closest('[data-disptoggle]'); if (dtog){ var lic=dtog.getAttribute('data-disptoggle'); var now=!carriesBond(lic); setCarrier(lic, now); toast(now? 'Marked as carrying Bond. The finder now shows it.' : 'Removed from Bond carriers.'); renderDispensaries(); return; }
+  var dfil = t.closest('[data-dispfilter]'); if (dfil){ dispFilter = dfil.getAttribute('data-dispfilter'); renderDispensaries(); return; }
 
   var or = t.closest('.ordRow'); if (or){ ordSel = or.getAttribute('data-oid'); if ((location.hash||'').indexOf('/orders')===-1) go('orders'); else renderOrders(); return; }
   var os = t.closest('[data-ostage]'); if (os){ ordFilter = os.getAttribute('data-ostage')||null; renderOrders(); return; }
@@ -691,7 +759,10 @@ document.addEventListener('click', function(ev){
   var rsv = t.closest('[data-resolve]'); if (rsv){ ProductStore.resolveInvestigation(rsv.getAttribute('data-resolve')); toast('Reconciled to Metrc. Finding closed.'); renderTrace(); return; }
 });
 
-document.addEventListener('input', function(ev){ if (ev.target.id==='noPromised'){ newOrder.promised = ev.target.value; } });
+document.addEventListener('input', function(ev){
+  if (ev.target.id==='noPromised'){ newOrder.promised = ev.target.value; return; }
+  if (ev.target.id==='dispSearch'){ dispQuery = ev.target.value; renderDispensaries(); var s=document.getElementById('dispSearch'); if (s){ s.focus(); s.setSelectionRange(s.value.length, s.value.length); } return; }
+});
 document.addEventListener('change', function(ev){
   var t = ev.target;
   if (t.id==='noAcct'){ newOrder.accountId = t.value; return; }

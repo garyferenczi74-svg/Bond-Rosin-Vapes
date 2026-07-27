@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Find Bond . New York</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; overflow-x: hidden; max-width: 100%; }
+  body { min-height: 100vh; background: #1B1D1C; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .didot { font-family: 'GFS Didot', Didot, serif; }
+  .gold { background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .field { background: transparent; border: 1px solid #3A3C3B; border-radius: 2px; color: #E1DAD0; font-family: inherit; font-size: 15px; padding: 14px 16px; width: 100%; outline: none; transition: border-color .3s; }
+  .field:focus { border-color: #C29A45; }
+  .field::placeholder { color: #6E685E; }
+  .btn { background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); color: #141109; border: 1px solid rgba(227,194,112,0.7); border-radius: 2px; font-family: 'GFS Didot', Didot, serif; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; padding: 14px 30px; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,240,200,0.5); white-space: nowrap; }
+  .link { font-family: 'GFS Didot', Didot, serif; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: #8E887C; border: 1px solid #3A3C3B; border-radius: 2px; padding: 8px 14px; cursor: pointer; }
+  .card { background: #1E201E; border: 1px solid #2A2C29; border-radius: 4px; padding: 18px 20px; }
+  .lbl { font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase; color: #6E685E; }
+  .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .bondbadge { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #141109; background: linear-gradient(160deg,#C29A45,#E3C270); border-radius: 2px; padding: 3px 9px; white-space: nowrap; }
+  .toggle { font-size: 12.5px; letter-spacing: 0.04em; color: #8E887C; cursor: pointer; }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  @media (max-width: 720px) { .findrow { grid-template-columns: 1fr !important; } }
+</style>
+</head>
+<body>
+<div id="gate"></div>
+<div id="app" style="min-height:100vh;display:flex;flex-direction:column">
+  <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:24px clamp(20px,4vw,56px);border-bottom:1px solid #2A2C29">
+    <a href="Home.dc.html" class="didot" style="font-size:19px;letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5">BOND</a>
+    <div style="display:flex;gap:12px;align-items:center"><a href="Home.dc.html" class="link">Main page</a></div>
+  </header>
+  <main style="flex:1;padding:44px clamp(20px,4vw,56px) 20px">
+    <div style="max-width:900px;margin:0 auto">
+      <div class="didot" style="font-size:clamp(28px,4.5vw,44px);letter-spacing:0.05em">Find Bond in New York</div>
+      <p style="font-size:14.5px;line-height:1.75;color:#8E887C;max-width:560px;margin:16px 0 0">Bond is sold only at licensed New York State dispensaries. Enter your city and the house shows the licensed shops within fifty miles, and which of them carry Bond.</p>
+      <div class="findrow" style="display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:28px;max-width:560px">
+        <input id="cityIn" class="field" list="cityList" placeholder="Your city or town in New York" autocomplete="off">
+        <datalist id="cityList"></datalist>
+        <button id="findBtn" class="btn">Find</button>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+        <label class="toggle" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="allToggle"> Also show other licensed dispensaries nearby</label>
+      </div>
+      <div id="results" style="margin-top:28px"></div>
+    </div>
+  </main>
+  <div style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">
+    <div class="gold" style="font-size:10px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>
+    <p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
+    <p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">Cannabis may cause impairment and may be habit forming. Sold only at dispensaries licensed by New York State. This site does not sell cannabis and no one can lawfully ship these products to you.</p>
+    <p style="font-size:11px;line-height:1.7;color:#6E685E;margin:0">Sample directory pending live OCM sync. Verify any license with the New York State Office of Cannabis Management Dispensary Verification Tool.</p>
+  </div></div>
+</div>
+
+<script>
+// Bond dispensary finder, New York State only. A representative OCM style
+// directory: real cities, counties, regions, and coordinates so the fifty mile
+// radius is real; sample shop names and placeholder license numbers. The
+// production build syncs the live OCM registry. Admins mark which dispensaries
+// carry Bond from the Vauxhall Product wing; that selection is read here through
+// the shared bondBondCarriers key. No em dashes or en dashes anywhere.
+
+// New York places: name -> [lat, lng, county, region]
+var NY_CITIES = {
+  'New York':[40.7128,-74.0060,'New York','New York City'],
+  'Brooklyn':[40.6782,-73.9442,'Kings','New York City'],
+  'Queens':[40.7282,-73.7949,'Queens','New York City'],
+  'Long Island City':[40.7447,-73.9485,'Queens','New York City'],
+  'Bronx':[40.8448,-73.8648,'Bronx','New York City'],
+  'Staten Island':[40.5795,-74.1502,'Richmond','New York City'],
+  'Yonkers':[40.9312,-73.8988,'Westchester','Hudson Valley'],
+  'White Plains':[41.0340,-73.7629,'Westchester','Hudson Valley'],
+  'New Rochelle':[40.9115,-73.7824,'Westchester','Hudson Valley'],
+  'Nyack':[41.0909,-73.9179,'Rockland','Hudson Valley'],
+  'Poughkeepsie':[41.7004,-73.9210,'Dutchess','Hudson Valley'],
+  'Kingston':[41.9270,-73.9974,'Ulster','Hudson Valley'],
+  'Newburgh':[41.5034,-74.0104,'Orange','Hudson Valley'],
+  'Middletown':[41.4459,-74.4229,'Orange','Hudson Valley'],
+  'Hempstead':[40.7062,-73.6187,'Nassau','Long Island'],
+  'Huntington':[40.8681,-73.4257,'Suffolk','Long Island'],
+  'Riverhead':[40.9170,-72.6620,'Suffolk','Long Island'],
+  'Albany':[42.6526,-73.7562,'Albany','Capital Region'],
+  'Troy':[42.7284,-73.6918,'Rensselaer','Capital Region'],
+  'Schenectady':[42.8142,-73.9396,'Schenectady','Capital Region'],
+  'Saratoga Springs':[43.0831,-73.7846,'Saratoga','Capital Region'],
+  'Glens Falls':[43.3095,-73.6440,'Warren','Capital Region'],
+  'Amsterdam':[42.9384,-74.1882,'Montgomery','Mohawk Valley'],
+  'Utica':[43.1009,-75.2327,'Oneida','Mohawk Valley'],
+  'Syracuse':[43.0481,-76.1474,'Onondaga','Central New York'],
+  'Cortland':[42.6012,-76.1805,'Cortland','Central New York'],
+  'Auburn':[42.9317,-76.5661,'Cayuga','Finger Lakes'],
+  'Ithaca':[42.4440,-76.5019,'Tompkins','Finger Lakes'],
+  'Geneva':[42.8695,-76.9777,'Ontario','Finger Lakes'],
+  'Canandaigua':[42.8870,-77.2814,'Ontario','Finger Lakes'],
+  'Rochester':[43.1566,-77.6088,'Monroe','Finger Lakes'],
+  'Binghamton':[42.0987,-75.9180,'Broome','Southern Tier'],
+  'Oneonta':[42.4530,-75.0638,'Otsego','Southern Tier'],
+  'Elmira':[42.0898,-76.8077,'Chemung','Southern Tier'],
+  'Corning':[42.1428,-77.0547,'Steuben','Southern Tier'],
+  'Buffalo':[42.8864,-78.8784,'Erie','Western New York'],
+  'Niagara Falls':[43.0962,-79.0377,'Niagara','Western New York'],
+  'Jamestown':[42.0970,-79.2353,'Chautauqua','Western New York'],
+  'Watertown':[43.9748,-75.9108,'Jefferson','North Country'],
+  'Plattsburgh':[44.6995,-73.4529,'Clinton','North Country']
+};
+
+// Representative OCM directory. bond: true marks a default Bond carrier.
+var DISPENSARIES = [
+  { lic:'OCM-AUR-0101', name:'Empire Botanical Co', city:'New York', addr:'120 Broadway', bond:true },
+  { lic:'OCM-AUR-0102', name:'Gotham Green Room', city:'New York', addr:'44 Bleecker Street', bond:false },
+  { lic:'OCM-AUR-0103', name:'Union Square Reserve', city:'New York', addr:'18 East 17th Street', bond:true },
+  { lic:'OCM-AUR-0110', name:'Kings County Cannabis', city:'Brooklyn', addr:'260 Bedford Avenue', bond:true },
+  { lic:'OCM-AUR-0111', name:'Prospect Leaf', city:'Brooklyn', addr:'615 Vanderbilt Avenue', bond:false },
+  { lic:'OCM-AUR-0120', name:'Flushing Fields', city:'Queens', addr:'136 Roosevelt Avenue', bond:true },
+  { lic:'OCM-AUR-0121', name:'LIC Collective', city:'Long Island City', addr:'21 Jackson Avenue', bond:false },
+  { lic:'OCM-AUR-0130', name:'Grand Concourse Cannabis', city:'Bronx', addr:'2380 Grand Concourse', bond:false },
+  { lic:'OCM-AUR-0140', name:'Harbor Botanicals', city:'Staten Island', addr:'900 Bay Street', bond:false },
+  { lic:'OCM-AUR-0201', name:'Hudson Green', city:'Yonkers', addr:'12 Main Street', bond:true },
+  { lic:'OCM-AUR-0202', name:'Westchester Reserve', city:'White Plains', addr:'55 Mamaroneck Avenue', bond:false },
+  { lic:'OCM-AUR-0203', name:'River Bend Dispensary', city:'Nyack', addr:'80 Main Street', bond:false },
+  { lic:'OCM-AUR-0204', name:'Mid Hudson Cannabis', city:'Poughkeepsie', addr:'30 Market Street', bond:true },
+  { lic:'OCM-AUR-0205', name:'Rondout Botanicals', city:'Kingston', addr:'22 Broadway', bond:true },
+  { lic:'OCM-AUR-0206', name:'Orange County Leaf', city:'Newburgh', addr:'140 Water Street', bond:false },
+  { lic:'OCM-AUR-0301', name:'South Shore Cannabis', city:'Hempstead', addr:'200 Fulton Avenue', bond:true },
+  { lic:'OCM-AUR-0302', name:'North Shore Reserve', city:'Huntington', addr:'320 New York Avenue', bond:false },
+  { lic:'OCM-AUR-0303', name:'East End Botanicals', city:'Riverhead', addr:'110 East Main Street', bond:false },
+  { lic:'OCM-AUR-0401', name:'Capital Cannabis Co', city:'Albany', addr:'90 State Street', bond:true },
+  { lic:'OCM-AUR-0402', name:'Collar City Leaf', city:'Troy', addr:'250 River Street', bond:false },
+  { lic:'OCM-AUR-0403', name:'Electric City Dispensary', city:'Schenectady', addr:'420 State Street', bond:false },
+  { lic:'OCM-AUR-0404', name:'Spa City Reserve', city:'Saratoga Springs', addr:'380 Broadway', bond:true },
+  { lic:'OCM-AUR-0501', name:'Salt City Cannabis', city:'Syracuse', addr:'210 Walton Street', bond:true },
+  { lic:'OCM-AUR-0502', name:'Mohawk Valley Leaf', city:'Utica', addr:'15 Genesee Street', bond:false },
+  { lic:'OCM-AUR-0503', name:'Cayuga Botanicals', city:'Ithaca', addr:'120 The Commons', bond:true },
+  { lic:'OCM-AUR-0504', name:'Southern Tier Reserve', city:'Binghamton', addr:'55 Court Street', bond:false },
+  { lic:'OCM-AUR-0601', name:'Flower City Cannabis', city:'Rochester', addr:'274 Park Avenue', bond:true },
+  { lic:'OCM-AUR-0602', name:'Finger Lakes Leaf', city:'Geneva', addr:'70 Seneca Street', bond:false },
+  { lic:'OCM-AUR-0701', name:'Queen City Cannabis', city:'Buffalo', addr:'500 Elmwood Avenue', bond:true },
+  { lic:'OCM-AUR-0702', name:'Cataract Botanicals', city:'Niagara Falls', addr:'340 Third Street', bond:false },
+  { lic:'OCM-AUR-0801', name:'North Country Reserve', city:'Plattsburgh', addr:'12 Margaret Street', bond:false },
+  { lic:'OCM-AUR-0802', name:'Watertown Cannabis Co', city:'Watertown', addr:'160 Court Street', bond:false }
+];
+var RADIUS_MILES = 50;
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function haversine(a, b){ var R=3959; function r(d){ return d*Math.PI/180; } var dLat=r(b[0]-a[0]), dLng=r(b[1]-a[1]); var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLng/2)*Math.sin(dLng/2); return 2*R*Math.asin(Math.min(1,Math.sqrt(x))); }
+// admin managed carrier set: the licenses that carry Bond
+function carrierSet(){ try { var raw=localStorage.getItem('bondBondCarriers'); if (raw) return JSON.parse(raw); } catch(e){} return DISPENSARIES.filter(function(d){ return d.bond; }).map(function(d){ return d.lic; }); }
+function carries(lic){ return carrierSet().indexOf(lic) !== -1; }
+
+// publish the directory so the admin room can list it without duplicating the seed
+try { localStorage.setItem('bondDispensaryDir', JSON.stringify(DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]||[0,0,'','']; return { lic:d.lic, name:d.name, city:d.city, addr:d.addr, county:c[2], region:c[3], bond:d.bond }; }))); } catch(e){}
+
+var lastCity = '';
+function render(){
+  var input = document.getElementById('cityIn').value.trim();
+  var showAll = document.getElementById('allToggle').checked;
+  var out = document.getElementById('results');
+  if (!input){ out.innerHTML = '<div class="card" style="color:#8E887C">Enter your city to see licensed dispensaries within fifty miles.</div>'; return; }
+  // match a New York place
+  var keys = Object.keys(NY_CITIES);
+  var exact = keys.filter(function(k){ return k.toLowerCase() === input.toLowerCase(); })[0];
+  var starts = keys.filter(function(k){ return k.toLowerCase().indexOf(input.toLowerCase()) === 0; })[0];
+  var key = exact || starts;
+  if (!key){ out.innerHTML = '<div class="card" style="color:#C08457">We could not find '+esc(input)+' in New York. Try a nearby city or town.</div>'; return; }
+  var origin = NY_CITIES[key];
+  var near = DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]; return { d:d, miles: c ? haversine(origin, c) : 9999 }; }).filter(function(x){ return x.miles <= RADIUS_MILES; }).sort(function(a,b){ return a.miles - b.miles; });
+  var carriers = near.filter(function(x){ return carries(x.d.lic); });
+  var others = near.filter(function(x){ return !carries(x.d.lic); });
+  function row(x, isBond){ var d=x.d; var c=NY_CITIES[d.city]; return '<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start'+(isBond?';border-color:#5A4A2A':'')+'"><div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="didot" style="font-size:17px;color:#E1DAD0">'+esc(d.name)+'</span>'+(isBond?'<span class="bondbadge">Carries Bond</span>':'')+'</div><div style="font-size:12.5px;color:#8E887C;margin-top:5px">'+esc(d.addr)+' . '+esc(d.city)+', NY . '+esc(c[2])+' County</div><div class="mono" style="font-size:11px;color:#5E5A52;margin-top:5px">'+esc(d.lic)+'</div></div><div style="text-align:right"><div class="didot" style="font-size:20px;color:#E1DAD0">'+Math.round(x.miles)+'</div><div class="lbl">miles</div></div></div>'; }
+  var html = '<div class="lbl">Carrying Bond within fifty miles of '+esc(key)+'</div>';
+  if (carriers.length) html += '<div style="margin-top:12px">'+carriers.map(function(x){ return row(x, true); }).join('')+'</div>';
+  else html += '<div class="card" style="margin-top:12px;color:#8E887C">No shops carrying Bond within fifty miles of '+esc(key)+' yet. <a href="Home.dc.html#circle" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B">Join the Haus</a> to hear when Bond arrives near you.</div>';
+  if (showAll){
+    html += '<div class="lbl" style="margin-top:28px">Other licensed dispensaries within fifty miles</div>';
+    html += others.length ? '<div style="margin-top:12px">'+others.map(function(x){ return row(x, false); }).join('')+'</div>' : '<div class="card" style="margin-top:12px;color:#6E685E">No other licensed dispensaries within fifty miles.</div>';
+  }
+  html += '<p style="font-size:11.5px;color:#6E685E;margin-top:20px;line-height:1.7">'+near.length+' licensed dispensaries within fifty miles of '+esc(key)+'. Distances are approximate, measured from the center of each city.</p>';
+  out.innerHTML = html;
+  lastCity = input;
+}
+
+// datalist of New York places
+(function(){ var dl=document.getElementById('cityList'); dl.innerHTML = Object.keys(NY_CITIES).sort().map(function(k){ return '<option value="'+esc(k)+'"></option>'; }).join(''); })();
+
+document.getElementById('findBtn').addEventListener('click', render);
+document.getElementById('cityIn').addEventListener('keydown', function(e){ if (e.key==='Enter') render(); });
+document.getElementById('allToggle').addEventListener('change', function(){ if (lastCity) render(); });
+render();
+
+// ---- compact age gate, shares the 30 day remember with the rest of the site ----
+function ageOk(){ try { var raw=localStorage.getItem('bond_age_ok'); if (raw){ var ts=parseInt(raw,10); if (!isNaN(ts) && Date.now()-ts < 30*24*3600*1000) return true; localStorage.removeItem('bond_age_ok'); } } catch(e){} return false; }
+function showGate(){
+  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var now=new Date().getFullYear(); var years=''; for (var y=now;y>=now-100;y--) years+='<option>'+y+'</option>';
+  document.getElementById('gate').innerHTML = '<div style="position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;align-items:center;justify-content:center;padding:24px">'
+    + '<div style="text-align:center;max-width:460px;width:100%">'
+    + '<div class="didot gold" style="font-size:clamp(46px,8vw,72px);letter-spacing:0.35em;padding-left:0.35em;line-height:1">BOND</div>'
+    + '<p class="didot" style="font-size:16px;letter-spacing:0.14em;color:#E1DAD0;margin:22px 0 0">Intentional elevation is for adults.</p>'
+    + '<p style="font-size:12.5px;line-height:1.7;color:#8E887C;margin:16px 0 0">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>'
+    + '<div style="display:flex;gap:12px;margin:26px 0 0"><select id="gMonth" class="field"><option value="">Birth month</option>'+months.map(function(m,i){ return '<option value="'+i+'">'+m+'</option>'; }).join('')+'</select><select id="gYear" class="field"><option value="">Birth year</option>'+years+'</select></div>'
+    + '<button id="gEnter" class="btn" style="margin-top:18px;width:100%;padding:16px">Enter</button>'
+    + '<p id="gFail" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:16px 0 0;min-height:20px"></p>'
+    + '</div></div>';
+  document.getElementById('gEnter').addEventListener('click', function(){
+    var m=document.getElementById('gMonth').value, yr=document.getElementById('gYear').value; var fail=document.getElementById('gFail');
+    if (m==='' || yr===''){ fail.textContent='Please choose your birth month and year.'; return; }
+    var b=new Date(parseInt(yr,10), parseInt(m,10), 1), d=new Date(); var age=d.getFullYear()-b.getFullYear(); if (d.getMonth()<b.getMonth()) age--;
+    if (age>=21){ try { localStorage.setItem('bond_age_ok', String(Date.now())); } catch(e){} document.getElementById('gate').innerHTML=''; }
+    else { fail.textContent='You must be 21 or older to enter.'; }
+  });
+}
+if (!ageOk()) showGate();
+</script>
+</body>
+</html>
