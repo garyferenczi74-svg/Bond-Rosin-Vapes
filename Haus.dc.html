@@ -82,6 +82,13 @@ function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace
 function comp(id){ return COMPS.filter(function(c){ return c.id===id; })[0]; }
 function greeting(){ var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; }
 
+// Shared content published from the Vauxhall Haus wing (localStorage). The member
+// floor reads it so a published admin edit reaches the Salon, Library, and Reserve.
+// Member-written content (notes, reflections, sessions) is never stored here.
+var HAUS_SHARED = null;
+try { var _rawShared = localStorage.getItem('bondHausContent'); if (_rawShared) HAUS_SHARED = JSON.parse(_rawShared); } catch(e){}
+function sharedBatch(num){ if (!HAUS_SHARED || !HAUS_SHARED.batches) return null; num=String(num).trim().toUpperCase(); return HAUS_SHARED.batches.filter(function(b){ return String(b.batch).toUpperCase()===num; })[0] || null; }
+
 var HausStore = {
   member: null,
   seed: function(){
@@ -103,14 +110,27 @@ var HausStore = {
       { text:'A Reserve run has been pressed. No. 3 Peak, Midnight Zkittlez.', view:'reserve' },
       { text:'The Experience Guide, chapter On Notes, is open.', view:'guide' }
     ];
+    // published admin content overrides the defaults
+    if (HAUS_SHARED){
+      if (HAUS_SHARED.houseWrites){ var hw = HAUS_SHARED.houseWrites.filter(function(w){ return w.state==='published'; }).sort(function(a,b){ return (a.order||0)-(b.order||0); }); if (hw.length) this.houseWrites = hw.map(function(w){ return { text:w.body, view:(w.link||'salon') }; }); }
+      if (HAUS_SHARED.reserveRuns && HAUS_SHARED.reserveRuns.length){ this.reserveRuns = HAUS_SHARED.reserveRuns.map(function(r){ return { id:r.id, comp:r.sku, cultivar:r.cultivar, pressing:r.pressing, size:r.size, status:(r.state==='ended'?'closed':'current') }; }); }
+    }
   },
   registerBatch: function(num){
-    var rec = BATCH_RECORDS[String(num).trim().toUpperCase()];
+    var key = String(num).trim().toUpperCase();
+    var sb = sharedBatch(key);
+    if (sb){
+      if (sb.state==='retired') return { retired:true };
+      if (sb.state !== 'published') return null;
+      var found = this.member.shelf.filter(function(b){ return b.batch===sb.batch; })[0]; if (found) return found;
+      var entry = { comp:sb.sku, cultivar:sb.cultivar, harvest:sb.harvest, pressing:sb.pressing, batch:sb.batch, run:(sb.run&&sb.run.number?{number:sb.run.number,size:sb.run.size}:null), notes:'', top:sb.top, heart:sb.heart, base:sb.base };
+      this.member.shelf.push(entry); return entry;
+    }
+    var rec = BATCH_RECORDS[key];
     if (!rec) return null;
-    if (this.member.shelf.filter(function(b){ return b.batch===rec.batch; }).length) return this.member.shelf.filter(function(b){ return b.batch===rec.batch; })[0];
-    var entry = { comp:rec.comp, cultivar:rec.cultivar, harvest:rec.harvest, pressing:rec.pressing, batch:rec.batch, run:rec.run, notes:'' };
-    this.member.shelf.push(entry);
-    return entry;
+    var ex = this.member.shelf.filter(function(b){ return b.batch===rec.batch; })[0]; if (ex) return ex;
+    var e2 = { comp:rec.comp, cultivar:rec.cultivar, harvest:rec.harvest, pressing:rec.pressing, batch:rec.batch, run:rec.run, notes:'' };
+    this.member.shelf.push(e2); return e2;
   },
   claimRun: function(batch){
     var b = this.member.shelf.filter(function(x){ return x.batch===batch; })[0];
@@ -308,12 +328,21 @@ function pyramid(c){
   function tier(label, arr){ return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+arr.join(' . ')+'</span></div>'; }
   return '<div style="margin-top:14px">'+tier('Top notes', c.top)+tier('Heart', c.heart)+tier('Base', c.base)+'</div>';
 }
+function batchPyramid(b, c){
+  var sb = sharedBatch(b.batch);
+  function toArr(v){ return v==null||v===''?null:(Array.isArray(v)?v:String(v).split(',').map(function(s){ return s.trim(); }).filter(Boolean)); }
+  var top = toArr(sb?sb.top:null) || toArr(b.top) || c.top;
+  var heart = toArr(sb?sb.heart:null) || toArr(b.heart) || c.heart;
+  var base = toArr(sb?sb.base:null) || toArr(b.base) || c.base;
+  function tier(label, arr){ return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+esc(arr.join(' . '))+'</span></div>'; }
+  return '<div style="margin-top:14px">'+tier('Top notes', top)+tier('Heart', heart)+tier('Base', base)+'</div>';
+}
 function batchEntry(b){
   var c = comp(b.comp);
   return '<div class="card soft" style="margin-top:16px"><div style="position:absolute;inset:0;background:'+c.tint+';pointer-events:none"></div><div style="position:relative">'
     + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><div class="didot" style="font-size:24px;color:#E1DAD0">'+esc(b.cultivar)+'</div><span style="font-size:12px;color:'+c.accent+'" class="didot">'+esc(c.name)+'</span></div>'
     + '<div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:#8E887C"><span>Harvest '+esc(b.harvest)+'</span><span>Pressed '+esc(b.pressing)+'</span><span style="font-family:ui-monospace,Menlo,monospace">'+esc(b.batch)+'</span><a style="color:#B0A99A;border-bottom:1px solid #3A3C3B">Certificate of analysis</a></div>'
-    + pyramid(c)
+    + batchPyramid(b, c)
     + (b.run?'<a href="#/haus/reserve" style="display:inline-block;margin-top:14px;font-size:12.5px;color:#E1DAD0;border-bottom:1px solid '+c.accent+';padding-bottom:2px">Claim your Reserve number in the Reserve Room</a>':'')
     + '<div style="margin-top:20px"><div class="lbl">Your notes. Private, optional, and yours to erase.</div>'
     + '<textarea id="noteIn" class="field" data-batch="'+esc(b.batch)+'" rows="3" style="margin-top:10px;resize:vertical" placeholder="What did it bring to mind">'+esc(b.notes)+'</textarea>'
@@ -511,7 +540,7 @@ document.addEventListener('click', function(ev){
   var sp = t.closest('[data-shelf]'); if (sp){ libSel = sp.getAttribute('data-shelf'); location.hash='#/haus/library'; route(); libSel = sp.getAttribute('data-shelf'); renderLibrary(); return; }
 
   // library
-  if (t.id==='batchAdd'){ var v=(document.getElementById('batchIn')||{}).value||''; var e=HausStore.registerBatch(v); var note=document.getElementById('batchNote'); if (e){ libSel=e.batch; toast('Shelved. '+e.cultivar+' is on your shelf.'); renderLibrary(); } else if (note){ note.textContent='That batch is not in the house records. Check the card and try again.'; } return; }
+  if (t.id==='batchAdd'){ var v=(document.getElementById('batchIn')||{}).value||''; var e=HausStore.registerBatch(v); var note=document.getElementById('batchNote'); if (e && e.batch){ libSel=e.batch; toast('Shelved. '+e.cultivar+' is on your shelf.'); renderLibrary(); } else if (e && e.retired){ if (note) note.textContent='That batch is no longer in the house records.'; } else if (note){ note.textContent='That batch is not in the house records. Check the card and try again.'; } return; }
   var lib = t.closest('[data-lib]'); if (lib){ libSel = lib.getAttribute('data-lib'); renderLibrary(); return; }
   var sn = t.closest('[data-savenote]'); if (sn){ var b=HausStore.member.shelf.filter(function(x){return x.batch===sn.getAttribute('data-savenote');})[0]; var ta=document.getElementById('noteIn'); if (b&&ta){ b.notes=ta.value; toast('Your note is kept privately.'); renderLibrary(); } return; }
   var en = t.closest('[data-erasenote]'); if (en){ var b2=HausStore.member.shelf.filter(function(x){return x.batch===en.getAttribute('data-erasenote');})[0]; if (b2){ b2.notes=''; toast('Erased. The house keeps no copy.'); renderLibrary(); } return; }

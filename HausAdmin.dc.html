@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vauxhall . Haus</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #141615; color: #E1DAD0; font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', Inter, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+  .navitem { display: block; padding: 9px 14px; border-radius: 3px; color: #8E887C; font-size: 13px; letter-spacing: 0.02em; cursor: pointer; transition: background .2s, color .2s; }
+  .navitem:hover { background: #201F1D; color: #E1DAD0; }
+  .navitem.on { background: #23221E; color: #E1DAD0; box-shadow: inset 2px 0 0 #D8CFBE; }
+  .wing { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 3px; cursor: pointer; transition: background .2s; color: #8E887C; }
+  .wing:hover { background: #201F1D; }
+  .wing.on { background: #201F1D; color: #E1DAD0; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid #2E302D; border-radius: 999px; font-size: 12px; color: #B0A99A; white-space: nowrap; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .chip.active { background: #23221E; color: #E1DAD0; border-color: #55503F; }
+  .badge { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; white-space: nowrap; }
+  .pill { cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+  .pill.active { background: #23221E; color: #E1DAD0; border-color: #55503F; }
+  .card { background: #191B18; border: 1px solid #202220; border-radius: 5px; padding: 16px 18px; }
+  .kpi { font-family: 'GFS Didot', Didot, serif; font-size: 30px; line-height: 1; color: #E1DAD0; }
+  .lbl { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #6E685E; }
+  .act { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 14px; border-radius: 3px; border: 1px solid #33352F; color: #B0A99A; background: transparent; cursor: pointer; transition: background .2s, color .2s, border-color .2s; font-family: inherit; }
+  .act:hover { background: #201F1D; color: #E1DAD0; border-color: #4E4A43; }
+  .act.go:hover { border-color: #2E4A22; color: #7CBF4E; }
+  .act.no:hover { border-color: #5A3A2A; color: #C08457; }
+  .act[disabled] { opacity: 0.4; cursor: not-allowed; }
+  .vfield { background: #141615; border: 1px solid #2E302D; border-radius: 3px; color: #E1DAD0; font-family: inherit; font-size: 14px; padding: 11px 13px; width: 100%; outline: none; transition: border-color .2s; }
+  .vfield:focus { border-color: #D8CFBE; }
+  .vfield::placeholder { color: #6E685E; }
+  .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #23221E; border: 1px solid #55503F; color: #E1DAD0; padding: 12px 22px; border-radius: 4px; font-size: 13px; letter-spacing: 0.04em; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 200; box-shadow: 0 10px 40px rgba(0,0,0,0.5); max-width: 90vw; text-align: center; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data th { text-align: left; font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #5E5A52; padding: 10px 12px; border-bottom: 1px solid #202220; }
+  table.data td { padding: 10px 12px; border-bottom: 1px solid #1C1E1B; color: #B0A99A; vertical-align: top; }
+  table.data tr:hover td { background: #191B19; }
+  .bar { height: 6px; background: #20221F; border-radius: 3px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: #8E887C; border-radius: 3px; }
+  @media (max-width: 900px) { .rail { display: none; } .grid4 { grid-template-columns: repeat(2,1fr) !important; } .grid3 { grid-template-columns: 1fr !important; } .grid2 { grid-template-columns: 1fr !important; } .split { grid-template-columns: 1fr !important; } }
+</style>
+</head>
+<body>
+<div style="display:flex;min-height:100vh">
+  <aside class="rail" style="width:248px;flex-shrink:0;background:#181815;border-right:1px solid #202220;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:22px 18px 16px;border-bottom:1px solid #202220">
+      <div style="font-family:'GFS Didot',Didot,serif;font-size:22px;letter-spacing:0.34em;padding-left:0.34em;color:#E8E1D5">VAUXHALL</div>
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#6E685E;margin-top:6px">Haus . Content and members</div>
+    </div>
+    <div style="padding:16px 12px 6px">
+      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Wings</div>
+      <a class="wing" href="Vauxhall.dc.html"><span class="dot" style="background:#E1DAD0"></span><span>Vauxhall</span></a>
+      <a class="wing" href="Product.dc.html"><span class="dot" style="background:#7CBF4E"></span><span>Product</span></a>
+      <a class="wing" href="Security.dc.html"><span class="dot" style="background:#C08457"></span><span>Security</span></a>
+      <a class="wing" href="Social.dc.html"><span class="dot" style="background:#6C8FB8"></span><span>Social</span></a>
+      <a class="wing on" href="HausAdmin.dc.html"><span class="dot" style="background:#D8CFBE"></span><span>Haus</span></a>
+    </div>
+    <div style="padding:14px 12px;flex:1;overflow-y:auto" class="scroll">
+      <div style="font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:#5E5A52;padding:0 6px 8px">Haus</div>
+      <a class="navitem" data-view="dashboard" href="#/haus-admin/dashboard">Dashboard</a>
+      <a class="navitem" data-view="content" href="#/haus-admin/content">Content</a>
+      <a class="navitem" data-view="batches" href="#/haus-admin/batches">Batches</a>
+      <a class="navitem" data-view="reserve" href="#/haus-admin/reserve">Reserve</a>
+      <a class="navitem" data-view="events" href="#/haus-admin/events">Events</a>
+      <a class="navitem" data-view="guide" href="#/haus-admin/guide">Guide</a>
+      <a class="navitem" data-view="members" href="#/haus-admin/members">Members</a>
+      <a class="navitem" data-view="settings" href="#/haus-admin/settings">Settings</a>
+    </div>
+    <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div><div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div></div>
+      <a href="Home.dc.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;border:1px solid #2E302D;border-radius:3px;padding:7px 11px">Main page</a>
+    </div>
+  </aside>
+  <main id="main" style="flex:1;min-width:0;display:flex;flex-direction:column"></main>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+// Vauxhall Haus wing. Administers the members floor content on a shared store
+// persisted to localStorage, so a published admin edit reaches the member floor.
+// Admins curate the house; they never read the guest book. Member notes,
+// reflections, and session content are structurally absent from this store: it
+// holds only counts. No em dashes, no en dashes, no exclamation points in copy.
+
+var STORE_KEY = 'bondHausContent';
+var EMDASH = String.fromCharCode(0x2014), ENDASH = String.fromCharCode(0x2013);
+var DASH_RE = new RegExp('[' + EMDASH + ENDASH + ']');
+var BANG = String.fromCharCode(33);
+var FORBIDDEN = ['lit','dope','fire','vibes','insane','crazy','banger','epic'];
+var CLAIMS = ['cure','heal','treat','therapeutic','medical','remedy','prevents','prevent'];
+var SKUS = [['no1','No. 1 Dialed','#B8946A'],['no2','No. 2 Unwind','#7E93A8'],['no3','No. 3 Peak','#C08457']];
+var STATE_COLOR = { draft:'#8E887C', published:'#7CBF4E', retired:'#6E685E', active:'#7CBF4E', open:'#7CBF4E', ended:'#6E685E', full:'#C08457', past:'#6E685E', suspended:'#C08457', erased:'#6E685E', issued:'#E3C270', accepted:'#7CBF4E', expired:'#C08457' };
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function clock(){ var d=new Date(); function p(n){ return (n<10?'0':'')+n; } return p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds()); }
+function skuName(id){ var s=SKUS.filter(function(x){return x[0]===id;})[0]; return s?s[1]:id; }
+function skuTint(id){ var s=SKUS.filter(function(x){return x[0]===id;})[0]; return s?s[2]:'#8E887C'; }
+function daysUntil(d){ return Math.round((new Date(d).getTime()-new Date('2026-07-27').getTime())/86400000); }
+
+function lint(text){
+  var low=(text||'').toLowerCase(), hits=[];
+  if (DASH_RE.test(text||'')) hits.push({ kind:'Long dash', detail:'a long dash', hard:false });
+  if ((text||'').indexOf(BANG) !== -1) hits.push({ kind:'Exclamation', detail:'an exclamation point', hard:false });
+  var v=FORBIDDEN.filter(function(w){ return new RegExp('\\b'+w+'\\b').test(low); }); if (v.length) hits.push({ kind:'Vocabulary', detail:v.join(', '), hard:false });
+  var c=CLAIMS.filter(function(w){ return new RegExp('\\b'+w+'\\b').test(low); }); if (c.length) hits.push({ kind:'Claims language', detail:c.join(', '), hard:true });
+  return hits;
+}
+
+var Store = {
+  data: null,
+  load: function(){
+    try { var raw = localStorage.getItem(STORE_KEY); if (raw){ this.data = JSON.parse(raw); return; } } catch(e){}
+    this.seed(); this.save();
+  },
+  save: function(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(this.data)); } catch(e){} },
+  seed: function(){
+    var d = {
+      houseWrites: [
+        { id:'HW-1', title:'A Reserve run has been pressed', body:'No. 3 Peak, Midnight Zkittlez.', link:'reserve', from:'2026-07-20', until:'', order:1, state:'published' },
+        { id:'HW-2', title:'The Experience Guide', body:'Chapter On Notes is open.', link:'guide', from:'2026-07-18', until:'', order:2, state:'published' },
+        { id:'HW-3', title:'The cleanest press', body:'The cleanest press we have made' + EMDASH + ' bright and pure.', link:'', from:'', until:'', order:3, state:'draft' },
+        { id:'HW-4', title:'An honest calm', body:'A calm that can cure a long day.', link:'', from:'', until:'', order:4, state:'draft' }
+      ],
+      batches: [
+        { batch:'BND-1-0518', sku:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', coa:'COA-0518', top:'Citrus peel, Green anise', heart:'Pine, Black pepper', base:'Cedar, Warm earth', run:null, state:'published', shelfCount:9 },
+        { batch:'BND-2-0731', sku:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', coa:'COA-0731', top:'Lavender, Bergamot', heart:'Chamomile, Clove', base:'Sandalwood, Musk', run:null, state:'published', shelfCount:6 },
+        { batch:'BND-3-0214', sku:'no3', cultivar:'Midnight Zkittlez', harvest:'2026-03-18', pressing:'2026-03-30', coa:'COA-0214', top:'Ripe mango, Blood orange', heart:'Gardenia, Fennel', base:'Amber, Loam', run:{ number:214, size:1000 }, state:'published', shelfCount:14 },
+        { batch:'BND-3-0198', sku:'no3', cultivar:'Autumn Gelato', harvest:'2025-10-30', pressing:'2025-11-12', coa:'COA-0198', top:'Stone fruit, Clove', heart:'Rose, Cardamom', base:'Oud, Loam', run:{ number:0, size:500 }, state:'retired', shelfCount:3 },
+        { batch:'BND-1-0603', sku:'no1', cultivar:'Morning Mimosa', harvest:'2026-06-01', pressing:'2026-06-14', coa:'', top:'Orange blossom, Anise', heart:'Pine, Pepper', base:'Cedar, Amber', run:null, state:'draft', shelfCount:0 }
+      ],
+      reserveRuns: [
+        { id:'run-mz', sku:'no3', cultivar:'Midnight Zkittlez', pressing:'2026-03-30', size:1000, claimed:214, state:'open' },
+        { id:'run-ag', sku:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, claimed:500, state:'ended' }
+      ],
+      events: [
+        { id:'ev1', name:'An Evening of Three', date:'2026-08-14', city:'Manhattan', line:'The three compositions, poured slowly, in a quiet room.', capacity:40, confirmed:37, state:'open', requests:[{code:'MAN-014',state:'requested'},{code:'MAN-021',state:'requested'},{code:'MAN-033',state:'confirmed'}] },
+        { id:'ev2', name:'The Listening Room', date:'2026-08-28', city:'Brooklyn', line:'Records, low light, and a single considered pour.', capacity:30, confirmed:12, state:'open', requests:[{code:'BK-004',state:'requested'}] },
+        { id:'ev3', name:'Harvest Supper', date:'2026-06-20', city:'Hudson Valley', line:'A long table at the close of the season.', capacity:24, confirmed:24, state:'past', requests:[] }
+      ],
+      guide: [
+        { id:'cover', title:'The Experience Guide', kind:'cover', body:'', tint:'', order:1, state:'published', versions:[] },
+        { id:'notes', title:'On Notes', kind:'essay', body:'A note is a memory before it is a smell.', tint:'', order:2, state:'published', versions:[] },
+        { id:'no1', title:'No. 1 Dialed', kind:'comp', body:'Bright. Clear. Social.', tint:'no1', order:3, state:'published', versions:[] },
+        { id:'no2', title:'No. 2 Unwind', kind:'comp', body:'Calm. Round. Quiet.', tint:'no2', order:4, state:'published', versions:[] },
+        { id:'no3', title:'No. 3 Peak', kind:'comp', body:'Deep. Full. Rare.', tint:'no3', order:5, state:'published', versions:[] },
+        { id:'ritual', title:'The Ritual', kind:'ritual', body:'Prepare. Pause. Elevate.', tint:'', order:6, state:'published', versions:[] }
+      ],
+      invitations: [
+        { email:'circle-1@example.com', state:'issued', issued:'2026-07-24', expires:'2026-08-23' },
+        { email:'circle-2@example.com', state:'issued', issued:'2026-06-30', expires:'2026-07-30' },
+        { email:'circle-3@example.com', state:'accepted', issued:'2026-07-02', expires:'2026-08-01' },
+        { email:'circle-4@example.com', state:'expired', issued:'2026-06-01', expires:'2026-07-01' }
+      ],
+      circleList: ['circle-5@example.com','circle-6@example.com','circle-7@example.com'],
+      accounts: [
+        { email:'member@bond.test', state:'active' },
+        { email:'nora@example.com', state:'active' },
+        { email:'ellis@example.com', state:'suspended' }
+      ],
+      counts: { members:3, activeShelves:2, ritualsThisMonth:11, notesHeld:14, rsvpTotals:49 },
+      settings: { invitationWindow:true, registrationPause:false, welcomeText:'This floor is yours. Your shelf, your guide, your rituals, kept quietly.', privacyWall:'The house does not read the guest book. Member tasting notes, ritual reflections, and session histories are structurally unreadable from any admin context. There is no override.' },
+      audit: [
+        { ts:'2026-07-27 09:02:11', actor:'Gary', action:'Published House Write HW-1', before:'draft', after:'published' },
+        { ts:'2026-07-27 09:05:40', actor:'Gary', action:'Published batch BND-3-0214', before:'draft', after:'published' }
+      ]
+    };
+    this.data = d;
+  },
+
+  audit: function(action, before, after){ this.data.audit.unshift({ ts:'2026-07-27 '+clock(), actor:'Gary', action:action, before:(before==null?'':String(before)), after:(after==null?'':String(after)) }); },
+
+  // ---- content helpers ----
+  byId: function(list, id, key){ key=key||'id'; return this.data[list].filter(function(x){ return x[key]===id; })[0]; },
+  lintEntry: function(fields){ var all=fields.join('  '); return lint(all); },
+  publish: function(list, id, key, fields){
+    var hits = this.lintEntry(fields);
+    if (hits.length) return { ok:false, hits:hits };
+    var it = this.byId(list, id, key); if (!it) return { ok:false, hits:[] };
+    var before = it.state; it.state='published'; this.audit('Published '+id, before, 'published'); this.save();
+    return { ok:true };
+  },
+  retire: function(list, id, key){ var it=this.byId(list,id,key); if (!it) return; var before=it.state; it.state='retired'; this.audit('Retired '+id, before, 'retired'); this.save(); },
+  setState: function(list, id, key, state){ var it=this.byId(list,id,key); if (!it) return; var before=it.state; it.state=state; this.audit('State '+id+' to '+state, before, state); this.save(); },
+
+  // ---- reserve integrity ----
+  canResize: function(run){ return run.claimed===0; },
+  closeRun: function(id){ var r=this.byId('reserveRuns',id); if (!r||r.state==='ended') return; r.state='ended'; this.audit('Closed run '+id, 'open', 'ended'); this.save(); },
+
+  // ---- events ----
+  confirmRequest: function(evId, code){ var e=this.byId('events',evId); var r=e.requests.filter(function(x){return x.code===code;})[0]; if (!r) return; if (e.confirmed>=e.capacity){ r.state='filled'; this.audit('RSVP '+code+' filled before request','requested','filled'); } else { r.state='confirmed'; e.confirmed++; this.audit('Confirmed RSVP '+code,'requested','confirmed'); } if (e.confirmed>=e.capacity) e.state='full'; this.save(); },
+  declineRequest: function(evId, code){ var e=this.byId('events',evId); var r=e.requests.filter(function(x){return x.code===code;})[0]; if (!r) return; r.state='declined'; this.audit('Declined RSVP '+code,'requested','declined'); this.save(); },
+
+  // ---- members ----
+  issueInvitation: function(email){ this.data.invitations.unshift({ email:email, state:'issued', issued:'2026-07-27', expires:'2026-08-26' }); this.data.circleList = this.data.circleList.filter(function(e){ return e !== email; }); this.audit('Issued invitation '+email, '', 'issued'); this.save(); },
+  reissueInvitation: function(email){ var i=this.byId('invitations',email,'email'); if (i){ i.state='issued'; i.issued='2026-07-27'; i.expires='2026-08-26'; this.audit('Reissued invitation '+email, 'expired', 'issued'); this.save(); } },
+  revokeInvitation: function(email){ var i=this.byId('invitations',email,'email'); if (i){ var b=i.state; i.state='revoked'; this.audit('Revoked invitation '+email, b, 'revoked'); this.save(); } },
+  suspendAccount: function(email, reason){ var a=this.byId('accounts',email,'email'); if (a){ a.state='suspended'; a.reason=reason; this.audit('Suspended '+email+' ('+reason+')','active','suspended'); this.save(); } },
+  reinstateAccount: function(email){ var a=this.byId('accounts',email,'email'); if (a){ a.state='active'; this.audit('Reinstated '+email,'suspended','active'); this.save(); } },
+  eraseAccount: function(email){ var a=this.byId('accounts',email,'email'); if (a){ a.state='erased'; this.audit('Erased account '+email,'active','erased'); this.save(); } },
+
+  // ---- privacy wall: only counts, never content. There is deliberately no
+  // method here that returns a note, a reflection, or a session record. ----
+  noteCount: function(batch){ var b=this.byId('batches',batch,'batch'); return b?b.shelfCount:0; },
+
+  // ---- dashboard aggregates ----
+  publishedWrites: function(){ return this.data.houseWrites.filter(function(w){ return w.state==='published'; }); },
+  attention: function(){
+    var out=[], self=this;
+    this.data.houseWrites.forEach(function(w){ if (w.state==='draft' && lint([w.title,w.body].join('  ')).length) out.push({ kind:'Lint blocked draft', text:w.title, view:'content' }); });
+    this.data.invitations.forEach(function(i){ if (i.state==='issued'){ var d=daysUntil(i.expires); if (d>=0 && d<=7) out.push({ kind:'Invitation expiring', text:i.email+' in '+d+' days', view:'members' }); } });
+    this.data.events.forEach(function(e){ if (e.state==='open' && e.confirmed >= e.capacity*0.9) out.push({ kind:'Event near capacity', text:e.name+' '+e.confirmed+' of '+e.capacity, view:'events' }); });
+    this.data.batches.forEach(function(b){ if (b.state !== 'retired' && !b.coa) out.push({ kind:'Batch missing COA', text:b.batch+' cannot publish', view:'batches' }); });
+    return out;
+  }
+};
+
+// ================= rendering =================
+var main = document.getElementById('main');
+var toastEl = document.getElementById('toast');
+var toastTimer = null;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3000); }
+
+var contentSel = null, batchSel = null, eventSel = null, guideSel = null, contentFilter = null, boardFilter = null;
+
+function headerBar(title, subtitle, right){
+  return '<header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid #202220;background:#161816;position:sticky;top:0;z-index:5">'
+    + '<div><div style="font-family:\'GFS Didot\',Didot,serif;font-size:24px;letter-spacing:0.06em;color:#E1DAD0">'+esc(title)+'</div>'
+    + '<div style="font-size:12px;color:#6E685E;margin-top:2px">'+esc(subtitle)+'</div></div>'
+    + '<div style="display:flex;align-items:center;gap:10px">'+(right||'')+'</div></header>';
+}
+function pv(){ return '<span class="badge" style="border-color:#3A2E1C;color:#E3C270">Design preview</span>'; }
+function scroller(inner){ return '<div class="scroll" style="flex:1;overflow-y:auto;padding:20px clamp(16px,3vw,32px)">'+inner+'</div>'; }
+function footer(note){ return '<footer style="padding:16px clamp(16px,3vw,32px);border-top:1px solid #202220;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#4E4A43">'+esc(note)+'</footer>'; }
+function stateChip(s){ var c=STATE_COLOR[s]||'#8E887C'; return '<span class="badge" style="border-color:'+c+'55;color:'+c+'">'+esc(s)+'</span>'; }
+function kv(k,v){ return '<div><div class="lbl">'+esc(k)+'</div><div style="color:#B0A99A;margin-top:4px">'+esc(v)+'</div></div>'; }
+function lintRail(fields){
+  var hits = lint(fields.join('  '));
+  if (!hits.length) return '<div style="font-size:12px;color:#7CBF4E">Lint clean. Publish is open.</div>';
+  return hits.map(function(h){ return '<div style="font-size:12px;color:'+(h.hard?'#D4664C':'#C08457')+';margin-bottom:4px">'+esc(h.kind)+': '+esc(h.detail)+(h.hard?' (hard block)':'')+'</div>'; }).join('')+'<div style="font-size:11.5px;color:#8E887C;margin-top:6px">Publish is blocked until this clears.</div>';
+}
+function setRailActive(view){ document.querySelectorAll('.navitem').forEach(function(n){ n.classList.toggle('on', n.getAttribute('data-view')===view); }); }
+
+// ---------- Dashboard ----------
+function renderDashboard(){
+  var d = Store.data;
+  var head = headerBar('Dashboard', 'The house counts; it does not read.', pv());
+  var c = d.counts;
+  function kcard(view, filter, label, val, sub){ return '<a class="card" href="#/haus-admin/'+view+(filter?('?'+filter):'')+'"><div class="lbl">'+esc(label)+'</div><div class="kpi" style="margin-top:10px">'+val+'</div>'+(sub?'<div style="font-size:11.5px;color:#6E685E;margin-top:6px">'+esc(sub)+'</div>':'')+'</a>'; }
+  var kpis = '<div class="grid4" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">'
+    + kcard('members','','Active members', d.accounts.filter(function(a){return a.state==='active';}).length, '')
+    + kcard('members','','Invitations out', d.invitations.filter(function(i){return i.state==='issued';}).length, '')
+    + kcard('members','','Shelves holding', c.activeShelves, '')
+    + kcard('members','','Rituals this month', c.ritualsThisMonth, '')
+    + kcard('members','','Notes held', c.notesHeld, 'count only')
+    + kcard('content','','House Writes live', Store.publishedWrites().length, '')
+    + '</div>';
+  // publishing board
+  var types = [['House Writes','houseWrites','content'],['Batches','batches','batches'],['Guide chapters','guide','guide'],['Events','events','events']];
+  var board = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">Publishing board</div><table class="data"><thead><tr><th>Type</th><th>Draft</th><th>Published</th><th>Retired</th></tr></thead><tbody>';
+  types.forEach(function(t){
+    var list=d[t[1]];
+    function cell(state){ var n=list.filter(function(x){ return (x.state||'')===state; }).length; var blocked = state==='draft' && list.filter(function(x){ return x.state==='draft' && lint([x.title||'',x.body||x.cultivar||x.name||''].join('  ')).length; }).length; var col = (state==='draft'&&blocked)?'#C08457':'#B0A99A'; return '<td><a href="#/haus-admin/'+t[2]+'?state='+state+'" style="color:'+col+'" class="mono">'+n+'</a></td>'; }
+    board += '<tr><td style="color:#E1DAD0">'+t[0]+'</td>'+cell('draft')+cell('published')+cell('retired')+'</tr>';
+  });
+  board += '</tbody></table></div>';
+  // event fill + reserve ring
+  var fills = d.events.filter(function(e){ return e.state==='open'; }).map(function(e){ var pct=Math.round(e.confirmed/e.capacity*100); return '<a href="#/haus-admin/events?ev='+e.id+'" style="display:block;margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:12.5px"><span>'+esc(e.name)+'</span><span class="mono" style="color:#8E887C">'+e.confirmed+' of '+e.capacity+'</span></div><div class="bar" style="margin-top:6px"><span style="width:'+pct+'%;background:'+(pct>=90?'#C08457':'#8E887C')+'"></span></div></a>'; }).join('');
+  var evFill = '<div class="card"><div class="lbl">Event fill</div>'+fills+'</div>';
+  var run = d.reserveRuns.filter(function(r){ return r.state==='open'; })[0];
+  var ring = run ? reserveRing(run) : '<div style="color:#6E685E">No open run</div>';
+  var reserveCard = '<a class="card" href="#/haus-admin/reserve" style="display:block;text-align:center"><div class="lbl">Reserve progress</div>'+ring+'</a>';
+  // invitation funnel
+  var iss=d.invitations.length, acc=d.invitations.filter(function(i){return i.state==='accepted';}).length, exp=d.invitations.filter(function(i){return i.state==='expired';}).length;
+  var funnel = '<div class="card"><div class="lbl">Invitation funnel . 30 days</div><div style="display:flex;gap:18px;margin-top:14px;font-size:13px"><span>Issued <span class="mono" style="color:#E1DAD0">'+iss+'</span></span><span>Accepted <span class="mono" style="color:#7CBF4E">'+acc+'</span></span><span>Expired <span class="mono" style="color:#C08457">'+exp+'</span></span></div><div style="font-size:12px;color:#8E887C;margin-top:10px">Conversion '+(iss?Math.round(acc/iss*100):0)+' percent</div>'+(exp?'<button class="act" id="reissueExpiring" style="margin-top:12px">Reissue expiring</button>':'')+'</div>';
+  // attention strip
+  var att = Store.attention();
+  var attStrip = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:10px">Attention</div>'+(att.length? att.map(function(a){ return '<a href="#/haus-admin/'+a.view+'" style="display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid #1C1E1B"><span class="badge" style="border-color:#5A3A2A;color:#C08457">'+esc(a.kind)+'</span><span style="color:#B0A99A;font-size:12.5px">'+esc(a.text)+'</span></a>'; }).join('') : '<div style="font-size:13px;color:#7CBF4E">The house is in order.</div>')+'</div>';
+  // activity
+  var activity = '<div class="card" style="margin-top:16px;padding:0"><div style="padding:14px 16px;border-bottom:1px solid #202220;color:#E1DAD0;font-size:12.5px">Activity . admin actions only</div>'+d.audit.slice(0,20).map(function(a){ return '<div style="display:flex;gap:14px;padding:9px 16px;border-bottom:1px solid #1C1E1B;font-size:12px"><span class="mono" style="color:#5E5A52;min-width:130px">'+esc(a.ts)+'</span><span style="color:#B0A99A">'+esc(a.action)+'</span></div>'; }).join('')+'</div>';
+  // quick actions
+  var quick = '<div class="card"><div class="lbl" style="margin-bottom:12px">Quick actions</div><div style="display:flex;flex-direction:column;gap:10px"><button class="act" id="qNewWrite">New House Write</button><button class="act" id="qNewBatch">New Batch</button><button class="act" id="qNewEvent">New Event</button><button class="act" id="qInvite">Issue invitation</button></div></div>';
+  var body = kpis + board
+    + '<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">'+evFill+reserveCard+'</div>'
+    + '<div class="split" style="display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:16px">'+funnel+quick+'</div>'
+    + attStrip + activity;
+  main.innerHTML = head + scroller(body) + footer('Design preview . shared store . member private content is not represented here, only counts');
+}
+function reserveRing(run){
+  var R=70, C=2*Math.PI*R, frac=run.claimed/run.size;
+  return '<svg width="180" height="180" viewBox="0 0 180 180" style="display:block;margin:12px auto 0"><circle cx="90" cy="90" r="'+R+'" fill="none" stroke="#2A2C29" stroke-width="1.5"/><circle cx="90" cy="90" r="'+R+'" fill="none" stroke="#C08457" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1-frac)).toFixed(1)+'" transform="rotate(-90 90 90)"/><text x="90" y="90" text-anchor="middle" dominant-baseline="central" font-family="GFS Didot, Didot, serif" font-size="26" fill="#E1DAD0">'+run.claimed+' of '+run.size+'</text></svg><div style="font-size:12px;color:#8E887C">'+esc(run.cultivar)+'</div>';
+}
+
+// ---------- Content (House Writes) ----------
+function renderContent(){
+  var head = headerBar('Content', 'The House Writes the Salon shows. Publish pushes a line into the member Salon.', '<button class="act go" id="newWrite">New</button>'+pv());
+  var chips = '<div style="display:flex;gap:8px;margin-bottom:16px"><span class="pill badge'+(!contentFilter?' active':'')+'" data-cf="">All</span>'+['draft','published','retired'].map(function(s){ return '<span class="pill badge'+(contentFilter===s?' active':'')+'" data-cf="'+s+'">'+s+'</span>'; }).join('')+'</div>';
+  var rows = Store.data.houseWrites.filter(function(w){ return !contentFilter || w.state===contentFilter; }).sort(function(a,b){ return a.order-b.order; });
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Title</th><th>Body</th><th>Link</th><th>State</th></tr></thead><tbody>'
+    + rows.map(function(w){ var blocked = w.state==='draft' && lint([w.title,w.body].join('  ')).length; return '<tr class="cRow" data-cid="'+w.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(w.title)+'</td><td>'+esc(w.body)+'</td><td class="mono" style="color:#6E685E">'+esc(w.link||'')+'</td><td>'+stateChip(w.state)+(blocked?' <span class="badge" style="border-color:#5A3A2A;color:#C08457">lint</span>':'')+'</td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  var editor = '';
+  if (contentSel){ var w=Store.byId('houseWrites',contentSel); if (w) editor = writeEditor(w); }
+  main.innerHTML = head + scroller(chips + table + editor) + footer('Design preview . a published House Write reaches the member Salon on next visit');
+}
+function writeEditor(w){
+  var len = (w.body||'').length; var rail = lintRail([w.title||'', w.body||'']);
+  return '<div class="card" style="margin-top:16px;border-color:#55503F55"><div class="lbl" style="margin-bottom:12px">Edit '+esc(w.id)+'</div>'
+    + '<div class="lbl">Title</div><input class="vfield wField" data-wf="title" data-wid="'+w.id+'" value="'+esc(w.title)+'" style="margin-top:6px">'
+    + '<div class="lbl" style="margin-top:14px">Body . one line, '+len+' of 90</div><input class="vfield wField" data-wf="body" data-wid="'+w.id+'" maxlength="90" value="'+esc(w.body)+'" style="margin-top:6px">'
+    + '<div class="split" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px">'
+    + '<div><div class="lbl">Link target</div><select class="vfield wField" data-wf="link" data-wid="'+w.id+'" style="margin-top:6px"><option value=""'+(!w.link?' selected':'')+'>None</option><option value="guide"'+(w.link==='guide'?' selected':'')+'>Guide</option><option value="reserve"'+(w.link==='reserve'?' selected':'')+'>Reserve</option><option value="events"'+(w.link==='events'?' selected':'')+'>Event</option></select></div>'
+    + '<div><div class="lbl">From</div><input type="date" class="vfield wField" data-wf="from" data-wid="'+w.id+'" value="'+esc(w.from)+'" style="margin-top:6px"></div>'
+    + '<div><div class="lbl">Order</div><input type="number" class="vfield wField" data-wf="order" data-wid="'+w.id+'" value="'+w.order+'" style="margin-top:6px"></div></div>'
+    + '<div id="wRail" style="margin-top:14px;padding-top:12px;border-top:1px solid #202220">'+rail+'</div>'
+    + '<div style="display:flex;gap:10px;margin-top:14px">'+(w.state !== 'published'?'<button class="act go" data-wpublish="'+w.id+'">Publish to the Haus</button>':'')+(w.state==='published'?'<button class="act no" data-wretire="'+w.id+'">Retire</button>':'')+'</div></div>';
+}
+
+// ---------- Batches ----------
+function renderBatches(){
+  var head = headerBar('Batches', 'The house records the member Library checks. A retired batch cannot be newly registered.', '<button class="act go" id="newBatch">New</button>'+pv());
+  var rows = Store.data.batches;
+  var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Batch</th><th>SKU</th><th>Cultivar</th><th>Pressed</th><th>COA</th><th>Shelves</th><th>State</th></tr></thead><tbody>'
+    + rows.map(function(b){ return '<tr class="bRow" data-bid="'+b.batch+'" style="cursor:pointer"><td class="mono">'+esc(b.batch)+'</td><td>'+esc(skuName(b.sku))+'</td><td style="color:#E1DAD0">'+esc(b.cultivar)+'</td><td class="mono">'+esc(b.pressing)+'</td><td class="mono" style="color:'+(b.coa?'#7CBF4E':'#C08457')+'">'+esc(b.coa||'missing')+'</td><td class="mono">'+b.shelfCount+'</td><td>'+stateChip(b.state)+'</td></tr>'; }).join('')
+    + '</tbody></table></div>';
+  var editor = '';
+  if (batchSel){ var b=Store.byId('batches',batchSel,'batch'); if (b) editor = batchEditor(b); }
+  main.innerHTML = head + scroller(table + editor) + footer('Design preview . editing terpene notes updates every member shelf entry live . names are never listed');
+}
+function batchEditor(b){
+  function f(k,label,val){ return '<div><div class="lbl">'+label+'</div><input class="vfield bField" data-bf="'+k+'" data-bid="'+esc(b.batch)+'" value="'+esc(val)+'" style="margin-top:6px"></div>'; }
+  return '<div class="card" style="margin-top:16px;border-color:#55503F55"><div style="display:flex;justify-content:space-between"><span class="lbl">Edit '+esc(b.batch)+'</span><span>'+stateChip(b.state)+'</span></div>'
+    + '<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">'+f('cultivar','Cultivar',b.cultivar)+f('harvest','Harvest',b.harvest)+f('pressing','Pressing',b.pressing)+f('coa','COA stub',b.coa)+'</div>'
+    + '<div class="lbl" style="margin-top:14px">Terpene notes</div><div class="split" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:6px">'+f('top','Top',b.top)+f('heart','Heart',b.heart)+f('base','Base',b.base)+'</div>'
+    + '<div style="font-size:12px;color:#8E887C;margin-top:12px">'+b.shelfCount+' members shelve this batch. Names are never listed.</div>'
+    + '<div style="display:flex;gap:10px;margin-top:14px">'+(b.state !== 'published'?'<button class="act go" data-bpublish="'+esc(b.batch)+'">Publish</button>':'')+(b.state !== 'retired'?'<button class="act no" data-bretire="'+esc(b.batch)+'">Retire</button>':'')+'</div>'
+    + (b.coa?'':'<div style="font-size:12px;color:#C08457;margin-top:10px">A COA stub is required before publish.</div>')+'</div>';
+}
+
+// ---------- Reserve ----------
+function renderReserve(){
+  var head = headerBar('Reserve', 'Numbered run registry. Size is immutable once the first number is claimed.', pv());
+  var rows = Store.data.reserveRuns.map(function(r){ var pct=Math.round(r.claimed/r.size*100); return '<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="didot" style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(r.cultivar)+' . '+esc(skuName(r.sku))+'</div>'+stateChip(r.state)+'</div>'
+    + '<div style="font-size:12px;color:#8E887C;margin-top:6px">Pressed '+esc(r.pressing)+' . run of '+r.size+' . '+r.claimed+' claimed</div>'
+    + '<div class="bar" style="margin-top:10px"><span style="width:'+pct+'%;background:#C08457"></span></div>'
+    + '<div style="display:flex;gap:10px;margin-top:12px">'+(r.state==='open'?'<button class="act no" data-closerun="'+r.id+'">Close run</button>':'<span style="font-size:12px;color:#6E685E;align-self:center">This run has ended.</span>')
+    + '<span style="font-size:11.5px;color:'+(Store.canResize(r)?'#7CBF4E':'#6E685E')+';align-self:center">'+(Store.canResize(r)?'size still editable':'size locked, numbers claimed')+'</span></div></div>'; }).join('');
+  var form = '<div class="card"><div class="lbl" style="margin-bottom:12px">New run</div><div class="split" style="display:grid;grid-template-columns:1fr 1fr 1fr 120px auto;gap:10px">'
+    + '<select id="nrSku" class="vfield">'+SKUS.map(function(s){ return '<option value="'+s[0]+'">'+esc(s[1])+'</option>'; }).join('')+'</select><input id="nrCultivar" class="vfield" placeholder="Cultivar"><input id="nrPress" type="date" class="vfield"><input id="nrSize" type="number" class="vfield" placeholder="Run size"><button id="nrAdd" class="act go">Create</button></div></div>';
+  main.innerHTML = head + scroller(rows + form) + footer('Design preview . claimed numbers are never reassigned, even after account erasure . no member identities shown');
+}
+
+// ---------- Events ----------
+function renderEvents(){
+  var head = headerBar('Events', 'Member evenings. The 21 and over line attaches to every event and is not editable.', '<button class="act go" id="newEvent">New</button>'+pv());
+  var rows = Store.data.events.map(function(e){ var pct=Math.round(e.confirmed/e.capacity*100); return '<div class="card eRow" data-eid="'+e.id+'" style="margin-bottom:12px;cursor:pointer"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="didot" style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(e.name)+'</div>'+stateChip(e.state)+'</div><div style="font-size:12px;color:#8E887C;margin-top:6px">'+esc(e.date)+' . '+esc(e.city)+' . '+e.confirmed+' of '+e.capacity+' confirmed</div><div class="bar" style="margin-top:10px"><span style="width:'+pct+'%;background:'+(pct>=90?'#C08457':'#8E887C')+'"></span></div></div>'; }).join('');
+  var detail = '';
+  if (eventSel){ var e=Store.byId('events',eventSel); if (e){
+    detail = '<div class="card" style="margin-top:4px;border-color:#55503F55"><div style="display:flex;justify-content:space-between"><span class="didot" style="font-family:\'GFS Didot\',Didot,serif;font-size:18px;color:#E1DAD0">'+esc(e.name)+'</span><button class="act" id="exportRsvp" data-ev="'+e.id+'">Export door list</button></div>'
+      + '<div style="font-size:11.5px;color:#6E685E;margin-top:6px">21 and over. Identification checked at the door.</div>'
+      + '<div class="lbl" style="margin-top:14px">Requests</div>'+(e.requests.length? '<table class="data" style="margin-top:6px"><tbody>'+e.requests.map(function(r){ return '<tr><td class="mono">'+esc(r.code)+'</td><td>'+stateChip(r.state)+'</td><td>'+(r.state==='requested'?'<button class="act go" data-rsvpok="'+e.id+'|'+r.code+'">Confirm</button> <button class="act no" data-rsvpno="'+e.id+'|'+r.code+'">Decline</button>':'')+'</td></tr>'; }).join('')+'</tbody></table>' : '<div style="font-size:12px;color:#6E685E;margin-top:6px">No open requests.</div>')+'</div>'; } }
+  main.innerHTML = head + scroller(rows + detail) + footer('Design preview . door list exports name and confirmation code only . past events archive by date');
+}
+
+// ---------- Guide ----------
+function renderGuide(){
+  var head = headerBar('Guide', 'The Experience Guide chapters. Publish updates the member Guide live.', pv());
+  var rows = Store.data.guide.sort(function(a,b){ return a.order-b.order; }).map(function(g){ return '<div class="card gRow" data-gid="'+g.id+'" style="margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center"><div><span class="mono" style="color:#5E5A52">'+g.order+'</span> <span style="color:#E1DAD0">'+esc(g.title)+'</span> <span class="badge">'+esc(g.kind)+'</span></div>'+stateChip(g.state)+'</div>'; }).join('');
+  var editor = '';
+  if (guideSel){ var g=Store.byId('guide',guideSel); if (g){
+    editor = '<div class="card" style="margin-top:12px;border-color:#55503F55"><div class="lbl" style="margin-bottom:10px">Edit '+esc(g.title)+'</div>'
+      + '<div class="lbl">Body</div><textarea class="vfield gField" data-gf="body" data-gid="'+g.id+'" rows="3" style="margin-top:6px;resize:vertical">'+esc(g.body)+'</textarea>'
+      + (g.kind==='comp'?'<div class="lbl" style="margin-top:12px">Environment tint</div><select class="vfield gField" data-gf="tint" data-gid="'+g.id+'" style="margin-top:6px">'+SKUS.map(function(s){ return '<option value="'+s[0]+'"'+(g.tint===s[0]?' selected':'')+'>'+esc(s[1])+'</option>'; }).join('')+'</select>':'')
+      + '<div id="gRail" style="margin-top:12px;padding-top:10px;border-top:1px solid #202220">'+lintRail([g.title,g.body])+'</div>'
+      + '<div style="display:flex;gap:10px;margin-top:12px"><button class="act" data-gver="'+g.id+'">Save version</button>'+(g.state !== 'published'?'<button class="act go" data-gpublish="'+g.id+'">Publish</button>':'<button class="act no" data-gretire="'+g.id+'">Retire</button>')+'</div>'
+      + (g.versions.length?'<div style="font-size:11.5px;color:#8E887C;margin-top:10px">'+g.versions.length+' saved version(s). <a data-grestore="'+g.id+'" style="color:#D8CFBE;border-bottom:1px solid #55503F;cursor:pointer">Restore latest</a></div>':'')+'</div>';
+  } }
+  main.innerHTML = head + scroller(rows + editor) + footer('Design preview . a mid-chapter reader keeps their place unless the chapter is retired');
+}
+
+// ---------- Members ----------
+function renderMembers(){
+  var d = Store.data;
+  var head = headerBar('Members', 'Administration without surveillance.', pv());
+  var inviteOpts = d.circleList.map(function(e){ return '<option value="'+esc(e)+'">'+esc(e)+'</option>'; }).join('');
+  var invites = '<div class="card"><div class="lbl" style="margin-bottom:12px">Invitations</div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap"><select id="inviteEmail" class="vfield" style="flex:1;min-width:200px"><option value="">Choose a Circle email</option>'+inviteOpts+'</select><button id="issueInvite" class="act go" style="padding:0 20px">Issue</button></div>'
+    + '<table class="data" style="margin-top:14px"><thead><tr><th>Email</th><th>State</th><th>Expires</th><th></th></tr></thead><tbody>'
+    + d.invitations.map(function(i){ return '<tr><td class="mono">'+esc(i.email)+'</td><td>'+stateChip(i.state)+'</td><td class="mono">'+esc(i.expires)+'</td><td>'+(i.state==='expired'?'<button class="act" data-reissue="'+esc(i.email)+'">Reissue</button> ':'')+(i.state==='issued'?'<button class="act no" data-revoke="'+esc(i.email)+'">Revoke</button>':'')+'</td></tr>'; }).join('')+'</tbody></table></div>';
+  var accounts = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">Accounts</div><table class="data"><thead><tr><th>Email</th><th>State</th><th></th></tr></thead><tbody>'
+    + d.accounts.map(function(a){ return '<tr><td class="mono">'+esc(a.email)+'</td><td>'+stateChip(a.state)+'</td><td>'+(a.state==='active'?'<button class="act no" data-suspend="'+esc(a.email)+'">Suspend</button> <button class="act no" data-erase="'+esc(a.email)+'">Erase</button>':'')+(a.state==='suspended'?'<button class="act go" data-reinstate="'+esc(a.email)+'">Reinstate</button>':'')+'</td></tr>'; }).join('')+'</tbody></table></div>';
+  var c = d.counts;
+  var agg = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">Aggregates</div><div class="grid4" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">'
+    + [['Members',c.members],['Shelves holding',c.activeShelves],['Rituals this month',c.ritualsThisMonth],['Notes held',c.notesHeld],['RSVP total',c.rsvpTotals]].map(function(x){ return '<div style="text-align:center"><div class="kpi" style="font-size:24px">'+x[1]+'</div><div class="lbl" style="margin-top:6px">'+x[0]+'</div></div>'; }).join('')
+    + '</div><div style="font-size:12px;color:#8E887C;margin-top:14px">The house counts; it does not read.</div></div>';
+  main.innerHTML = head + scroller(invites + accounts + agg) + footer('Design preview . an issued invitation admits registration at the door . suspend blocks sign-in with the neutral line');
+}
+
+// ---------- Settings ----------
+function renderSettings(){
+  var s = Store.data.settings;
+  var head = headerBar('Settings', 'Haus-wide switches, owner only. Every switch writes an audit entry.', pv());
+  function tog(k,label,val){ return '<label style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #202220;font-size:13.5px;color:#B0A99A"><span>'+label+'</span><input type="checkbox" class="setToggle" data-set="'+k+'"'+(val?' checked':'')+'></label>'; }
+  var body = '<div class="card">'+tog('invitationWindow','Invitation window open', s.invitationWindow)+tog('registrationPause','Pause new registration', s.registrationPause)+'</div>'
+    + '<div class="card" style="margin-top:16px"><div class="lbl">Welcome interstitial text</div><textarea id="welcomeText" class="vfield" rows="2" style="margin-top:8px;resize:vertical">'+esc(s.welcomeText)+'</textarea><div id="welcomeRail" style="margin-top:10px">'+lintRail([s.welcomeText])+'</div><button id="saveWelcome" class="act go" style="margin-top:10px">Save welcome text</button></div>'
+    + '<div class="card" style="margin-top:16px;border-color:#55503F55"><div class="lbl">The privacy wall . read only</div><p style="font-size:13px;color:#B0A99A;line-height:1.8;margin:12px 0 0">'+esc(s.privacyWall)+'</p><div style="font-size:11.5px;color:#6E685E;margin-top:10px">Enforced in the store: no method returns member note, reflection, or session content to any admin context.</div></div>';
+  main.innerHTML = head + scroller(body) + footer('Design preview . the privacy wall is not a setting; it cannot be switched off');
+}
+
+// ================= router =================
+function parseQuery(view){ var h=location.hash||''; var q=h.split('?')[1]||''; var out={}; q.split('&').forEach(function(p){ var kv=p.split('='); if (kv[0]) out[kv[0]]=decodeURIComponent(kv[1]||''); }); return out; }
+function route(){
+  var h = location.hash || '#/haus-admin/dashboard';
+  var path = h.replace(/^#\//,'').split('?')[0];
+  var parts = path.split('/'); var wing=parts[0]||'haus-admin', view=parts[1]||'dashboard';
+  if (wing !== 'haus-admin'){ var map={ vauxhall:'Vauxhall.dc.html', product:'Product.dc.html', security:'Security.dc.html', social:'Social.dc.html', haus:'Haus.dc.html' }; if (map[wing]){ window.location.href=map[wing]; return; } view='dashboard'; }
+  var q = parseQuery();
+  if (q.state) contentFilter = q.state; if (q.ev) eventSel = q.ev;
+  setRailActive(view);
+  switch(view){
+    case 'content': if (q.state) contentFilter=q.state; renderContent(); break;
+    case 'batches': if (q.state){} renderBatches(); break;
+    case 'reserve': renderReserve(); break;
+    case 'events': renderEvents(); break;
+    case 'guide': renderGuide(); break;
+    case 'members': renderMembers(); break;
+    case 'settings': renderSettings(); break;
+    default: renderDashboard();
+  }
+}
+function go(view){ location.hash = '#/haus-admin/'+view; }
+
+// ================= events =================
+document.addEventListener('click', function(ev){
+  var t = ev.target;
+  // dashboard quick actions
+  if (t.id==='qNewWrite' || t.id==='newWrite'){ var w={ id:'HW-'+(Store.data.houseWrites.length+1), title:'', body:'', link:'', from:'', until:'', order:Store.data.houseWrites.length+1, state:'draft' }; Store.data.houseWrites.push(w); Store.audit('Created '+w.id,'','draft'); Store.save(); contentSel=w.id; go('content'); renderContent(); return; }
+  if (t.id==='qNewBatch' || t.id==='newBatch'){ var b={ batch:'BND-NEW-'+(Store.data.batches.length+1), sku:'no1', cultivar:'', harvest:'', pressing:'', coa:'', top:'', heart:'', base:'', run:null, state:'draft', shelfCount:0 }; Store.data.batches.push(b); Store.audit('Created batch '+b.batch,'','draft'); Store.save(); batchSel=b.batch; go('batches'); renderBatches(); return; }
+  if (t.id==='qNewEvent' || t.id==='newEvent'){ var e={ id:'ev'+(Store.data.events.length+1), name:'New evening', date:'2026-09-01', city:'', line:'', capacity:30, confirmed:0, state:'draft', requests:[] }; Store.data.events.push(e); Store.audit('Created event '+e.id,'','draft'); Store.save(); eventSel=e.id; go('events'); renderEvents(); return; }
+  if (t.id==='qInvite'){ go('members'); return; }
+  if (t.id==='reissueExpiring'){ Store.data.invitations.forEach(function(i){ if (i.state==='expired') Store.reissueInvitation(i.email); }); toast('Expiring invitations reissued.'); renderDashboard(); return; }
+
+  // content
+  var cr=t.closest('.cRow'); if (cr){ contentSel=cr.getAttribute('data-cid'); renderContent(); return; }
+  var cf=t.closest('[data-cf]'); if (cf){ contentFilter=cf.getAttribute('data-cf')||null; renderContent(); return; }
+  var wp=t.closest('[data-wpublish]'); if (wp){ var w=Store.byId('houseWrites',wp.getAttribute('data-wpublish')); var r=Store.publish('houseWrites',w.id,'id',[w.title,w.body]); if (r.ok){ toast('Published to the Haus.'); renderContent(); } else { toast('Blocked: '+r.hits.map(function(h){return h.kind;}).join(', ')); } return; }
+  var wr=t.closest('[data-wretire]'); if (wr){ Store.retire('houseWrites',wr.getAttribute('data-wretire')); toast('Retired. It leaves the Salon.'); renderContent(); return; }
+
+  // batches
+  var br=t.closest('.bRow'); if (br){ batchSel=br.getAttribute('data-bid'); renderBatches(); return; }
+  var bp=t.closest('[data-bpublish]'); if (bp){ var b=Store.byId('batches',bp.getAttribute('data-bpublish'),'batch'); if (!b.coa){ toast('A COA stub is required before publish.'); return; } var r2=Store.publish('batches',b.batch,'batch',[b.cultivar,b.top,b.heart,b.base]); if (r2.ok){ toast('Published.'); renderBatches(); } else { toast('Blocked: '+r2.hits.map(function(h){return h.kind;}).join(', ')); } return; }
+  var bt=t.closest('[data-bretire]'); if (bt){ Store.retire('batches',bt.getAttribute('data-bretire'),'batch'); toast('Retired. It can no longer be newly registered.'); renderBatches(); return; }
+
+  // reserve
+  var clr=t.closest('[data-closerun]'); if (clr){ Store.closeRun(clr.getAttribute('data-closerun')); toast('Run closed. The member room shows it has ended.'); renderReserve(); return; }
+  if (t.id==='nrAdd'){ var sz=+valOf('nrSize'); if (!sz){ toast('Enter a run size.'); return; } var run={ id:'run-'+(Store.data.reserveRuns.length+1), sku:valOf('nrSku'), cultivar:valOf('nrCultivar')||'Untitled', pressing:valOf('nrPress')||'2026-08-01', size:sz, claimed:0, state:'open' }; Store.data.reserveRuns.push(run); Store.audit('Created run '+run.id,'','open'); Store.save(); toast('Run created.'); renderReserve(); return; }
+
+  // events
+  var er=t.closest('.eRow'); if (er){ eventSel=er.getAttribute('data-eid'); renderEvents(); return; }
+  var rok=t.closest('[data-rsvpok]'); if (rok){ var p=rok.getAttribute('data-rsvpok').split('|'); Store.confirmRequest(p[0],p[1]); toast('Confirmed.'); renderEvents(); return; }
+  var rno=t.closest('[data-rsvpno]'); if (rno){ var p2=rno.getAttribute('data-rsvpno').split('|'); Store.declineRequest(p2[0],p2[1]); toast('Declined.'); renderEvents(); return; }
+  if (t.id==='exportRsvp'){ exportRsvp(t.getAttribute('data-ev')); return; }
+
+  // guide
+  var gr=t.closest('.gRow'); if (gr){ guideSel=gr.getAttribute('data-gid'); renderGuide(); return; }
+  var gp=t.closest('[data-gpublish]'); if (gp){ var g=Store.byId('guide',gp.getAttribute('data-gpublish')); var r3=Store.publish('guide',g.id,'id',[g.title,g.body]); if (r3.ok){ toast('Published to the member Guide.'); renderGuide(); } else { toast('Blocked: '+r3.hits.map(function(h){return h.kind;}).join(', ')); } return; }
+  var gt=t.closest('[data-gretire]'); if (gt){ Store.retire('guide',gt.getAttribute('data-gretire')); toast('Retired. The ribbon moves to the contents page.'); renderGuide(); return; }
+  var gv=t.closest('[data-gver]'); if (gv){ var g2=Store.byId('guide',gv.getAttribute('data-gver')); g2.versions.push({ body:g2.body, ts:clock() }); Store.audit('Saved version of '+g2.id,'',''); Store.save(); toast('Version saved.'); renderGuide(); return; }
+  var grs=t.closest('[data-grestore]'); if (grs){ var g3=Store.byId('guide',grs.getAttribute('data-grestore')); if (g3.versions.length){ g3.body=g3.versions[g3.versions.length-1].body; Store.audit('Restored version of '+g3.id,'',''); Store.save(); toast('Restored.'); renderGuide(); } return; }
+
+  // members
+  if (t.id==='issueInvite'){ var em=valOf('inviteEmail'); if (!em){ toast('Choose a Circle email.'); return; } Store.issueInvitation(em); toast('Invitation issued.'); renderMembers(); return; }
+  var ri=t.closest('[data-reissue]'); if (ri){ Store.reissueInvitation(ri.getAttribute('data-reissue')); toast('Reissued.'); renderMembers(); return; }
+  var rv=t.closest('[data-revoke]'); if (rv){ Store.revokeInvitation(rv.getAttribute('data-revoke')); toast('Revoked. Registration will fail with the neutral line.'); renderMembers(); return; }
+  var su=t.closest('[data-suspend]'); if (su){ var reason=prompt('Reason for suspension:'); if (reason !== null){ Store.suspendAccount(su.getAttribute('data-suspend'), reason||'No reason recorded'); toast('Suspended. Sign-in shows the neutral door line.'); renderMembers(); } return; }
+  var re=t.closest('[data-reinstate]'); if (re){ Store.reinstateAccount(re.getAttribute('data-reinstate')); toast('Reinstated.'); renderMembers(); return; }
+  var ea=t.closest('[data-erase]'); if (ea){ Store.eraseAccount(ea.getAttribute('data-erase')); toast('Erased. The house keeps no copy.'); renderMembers(); return; }
+
+  // settings
+  if (t.id==='saveWelcome'){ var txt=valOf('welcomeText'); var hits=lint(txt); if (hits.length){ toast('Blocked: '+hits.map(function(h){return h.kind;}).join(', ')); return; } var b4=Store.data.settings.welcomeText; Store.data.settings.welcomeText=txt; Store.audit('Edited welcome text', b4, txt); Store.save(); toast('Saved.'); renderSettings(); return; }
+});
+
+document.addEventListener('input', function(ev){
+  var t = ev.target;
+  if (t.classList && t.classList.contains('wField')){ var w=Store.byId('houseWrites',t.getAttribute('data-wid')); var f=t.getAttribute('data-wf'); w[f]=(f==='order')?(+t.value):t.value; Store.save(); var rail=document.getElementById('wRail'); if (rail) rail.innerHTML=lintRail([w.title,w.body]); return; }
+  if (t.classList && t.classList.contains('bField')){ var b=Store.byId('batches',t.getAttribute('data-bid'),'batch'); b[t.getAttribute('data-bf')]=t.value; Store.save(); return; }
+  if (t.classList && t.classList.contains('gField')){ var g=Store.byId('guide',t.getAttribute('data-gid')); g[t.getAttribute('data-gf')]=t.value; Store.save(); var gr=document.getElementById('gRail'); if (gr) gr.innerHTML=lintRail([g.title,g.body]); return; }
+  if (t.id==='welcomeText'){ var wr=document.getElementById('welcomeRail'); if (wr) wr.innerHTML=lintRail([t.value]); return; }
+});
+document.addEventListener('change', function(ev){
+  var t = ev.target;
+  if (t.classList && t.classList.contains('setToggle')){ var k=t.getAttribute('data-set'); var b=Store.data.settings[k]; Store.data.settings[k]=t.checked; Store.audit('Setting '+k+' to '+t.checked, b, t.checked); Store.save(); toast('Saved.'); return; }
+});
+
+function valOf(id){ var el=document.getElementById(id); return el?el.value:''; }
+function exportRsvp(evId){
+  var e=Store.byId('events',evId); var confirmed=e.requests.filter(function(r){ return r.state==='confirmed'; });
+  var rows=[['name','confirmation_code']].concat(confirmed.map(function(r){ return ['(withheld until door)', r.code]; }));
+  var csv=rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var blob=new Blob([csv],{type:'text/csv'}); var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='haus-door-list-'+evId+'.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  toast('Door list exported.');
+}
+
+window.addEventListener('hashchange', route);
+Store.load();
+if (!location.hash) location.hash = '#/haus-admin/dashboard';
+route();
+</script>
+</body>
+</html>
