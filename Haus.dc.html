@@ -164,7 +164,7 @@ function complianceBand(){
 function chrome(active, inner){
   var nav = NAV.map(function(n){ return '<a class="navlink'+(active===n[0]?' on':'')+'" href="#/haus/'+n[0]+'">'+esc(n[1])+'</a>'; }).join('');
   var head = '<header style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:22px clamp(20px,4vw,56px);border-bottom:1px solid #2A2C29">'
-    + '<a href="#/haus/salon" class="didot" style="font-size:19px;letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5">BOND</a>'
+    + '<a href="#/haus/dashboard" class="didot" style="font-size:19px;letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5">BOND</a>'
     + '<nav class="nav" style="display:flex;gap:22px;flex-wrap:wrap;align-items:center">'+nav+'</nav>'
     + '<div style="display:flex;align-items:center;gap:12px">'
     + '<a href="Home.dc.html" style="font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#8E887C;border:1px solid #3A3C3B;border-radius:2px;padding:7px 12px">Main page</a>'
@@ -205,7 +205,7 @@ function renderDoor(fail){
   var form = document.getElementById('doorForm');
   if (form){ form.addEventListener('submit', function(e){ e.preventDefault();
     var email = form.email.value.trim().toLowerCase();
-    if (email === DEMO_EMAIL && form.password.value){ HausStore.member.signedIn = true; location.hash = HausStore.member.entered ? '#/haus/salon' : '#/haus/welcome'; route(); }
+    if (email === DEMO_EMAIL && form.password.value){ HausStore.member.signedIn = true; location.hash = HausStore.member.entered ? '#/haus/dashboard' : '#/haus/welcome'; route(); }
     else { renderDoor(true); }
   }); }
   var sup = document.getElementById('signupForm');
@@ -233,7 +233,7 @@ function renderWelcome(){
     + '</div></main>';
   document.getElementById('wEnter').addEventListener('click', function(){
     if (!document.getElementById('wAge').checked){ toast('Please confirm you are 21 and over.'); return; }
-    HausStore.member.entered = true; HausStore.member.age21 = true; location.hash = '#/haus/salon'; route();
+    HausStore.member.entered = true; HausStore.member.age21 = true; location.hash = '#/haus/dashboard'; route();
   });
 }
 
@@ -541,7 +541,7 @@ function route(){
     case 'ritual': ritual.phase='setup'; renderRitual(); break;
     case 'account': eraseArm=null; renderAccount(); break;
     case 'salon': renderSalon(); break;
-    default: location.hash = '#/haus/salon';
+    default: location.hash = '#/haus/dashboard';
   }
 }
 
