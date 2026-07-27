@@ -458,9 +458,9 @@ class Component extends DCLogic {
   renderVals() {
     const s = this.state;
     const skus = {
-      1: { recNo: 'No. 1', recName: 'DIALED', recAccent: '#79C84A', recTriad: 'Focus. Clarity. Momentum.', recBond: 'Bond with your potential.', recUrl: 'No1.dc.html' },
-      2: { recNo: 'No. 2', recName: 'UNWIND', recAccent: '#86ACE3', recTriad: 'Release. Stillness. Restoration.', recBond: 'Bond with the moment.', recUrl: 'No2.dc.html' },
-      3: { recNo: 'No. 3', recName: 'PEAK', recAccent: '#A53A28', recTriad: 'Reserve Edition. Edge. Elevation. Expansion.', recBond: 'Bond with your edge.', recUrl: 'No3.dc.html' }
+      1: { num: 1, comp: 'no1', recNo: 'No. 1', recName: 'DIALED', recAccent: '#79C84A', recTriad: 'Focus. Clarity. Momentum.', recBond: 'Bond with your potential.', recUrl: 'No1.dc.html' },
+      2: { num: 2, comp: 'no2', recNo: 'No. 2', recName: 'UNWIND', recAccent: '#86ACE3', recTriad: 'Release. Stillness. Restoration.', recBond: 'Bond with the moment.', recUrl: 'No2.dc.html' },
+      3: { num: 3, comp: 'no3', recNo: 'No. 3', recName: 'PEAK', recAccent: '#A53A28', recTriad: 'Reserve Edition. Edge. Elevation. Expansion.', recBond: 'Bond with your edge.', recUrl: 'No3.dc.html' }
     };
     let rec = null, recNote = null;
     if (s.exp && s.mom && s.set) {
@@ -469,6 +469,8 @@ class Component extends DCLogic {
       else if (s.exp === 'seasoned') rec = skus[3];
       else { rec = s.set === 'day' ? skus[1] : skus[2]; recNote = 'No. 3 Peak is our Reserve Edition, kept for seasoned hands. Begin here, and it will be waiting.'; }
     }
+    // carry the Find Your Bond result to the Bond Haus recommendations
+    if (rec) { try { var _fr = JSON.stringify({ num: rec.num, comp: rec.comp, recNo: rec.recNo, recName: rec.recName, recTriad: rec.recTriad, recBond: rec.recBond }); if (localStorage.getItem('bondFindResult') !== _fr) localStorage.setItem('bondFindResult', _fr); } catch (e) {} }
     const questions = {
       1: { stepLabel: 'Question 1 of 3', question: 'How familiar are you with live rosin?', options: [
         { label: 'New to it', pick: () => this.setState({ exp: 'new', step: 2 }) },

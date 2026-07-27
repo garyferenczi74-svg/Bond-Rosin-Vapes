@@ -88,6 +88,8 @@ function greeting(){ var h = new Date().getHours(); return h < 12 ? 'Good mornin
 var HAUS_SHARED = null;
 try { var _rawShared = localStorage.getItem('bondHausContent'); if (_rawShared) HAUS_SHARED = JSON.parse(_rawShared); } catch(e){}
 function sharedBatch(num){ if (!HAUS_SHARED || !HAUS_SHARED.batches) return null; num=String(num).trim().toUpperCase(); return HAUS_SHARED.batches.filter(function(b){ return String(b.batch).toUpperCase()===num; })[0] || null; }
+// the Find Your Bond result from the public site, read fresh so a retake updates the recommendation
+function findResult(){ try { var r = localStorage.getItem('bondFindResult'); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
 
 var HausStore = {
   member: null,
@@ -254,8 +256,14 @@ function renderSalon(){
   var writes = '<div class="card"><div class="lbl">The house writes</div>'+HausStore.houseWrites.map(function(w){ return '<a href="#/haus/'+w.view+'" style="display:block;margin-top:14px;font-size:13.5px;color:#B0A99A;border-bottom:1px solid #2A2C29;padding-bottom:8px">'+esc(w.text)+'</a>'; }).join('')+'</div>';
   var ev = m.events.filter(function(e){ return e.capacity !== 'past'; })[0];
   var evCard = ev ? '<div class="card" style="margin-top:16px"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><div><div class="lbl">Next evening</div><div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:10px">'+esc(ev.name)+'</div><div style="font-size:12.5px;color:#8E887C;margin-top:4px">'+esc(ev.date)+' . '+esc(ev.city)+'</div></div><a href="#/haus/events" style="font-size:12px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid #C29A45;padding-bottom:2px;align-self:center">'+rsvpLabel(ev)+'</a></div></div>' : '';
+  var fr = findResult(); var rc = fr ? comp(fr.comp) : null;
+  var recBand = rc ? '<div class="card" style="margin:22px 0 0;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+rc.accent+'"></div>'
+    + '<div class="lbl">Your number . from Find Your Bond</div>'
+    + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:baseline;margin-top:12px"><div class="didot" style="font-size:24px;color:#E1DAD0">'+esc(rc.name)+'</div><span style="font-size:12px;color:'+rc.accent+'" class="didot">'+rc.triad.join(' . ')+'</span></div>'
+    + '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px"><a href="#/haus/ritual" style="font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid '+rc.accent+';padding-bottom:2px">Begin a ritual with '+esc(rc.name)+'</a><a href="#/haus/guide" style="font-size:12.5px;letter-spacing:0.06em;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Read it in the Guide</a></div></div>' : '';
   var inner = '<div class="didot" style="font-size:clamp(26px,4vw,38px);letter-spacing:0.03em;color:#E1DAD0">'+greeting()+', '+esc(m.first)+'.</div>'
-    + '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px">'+tonight+onShelf+writes+'</div>'+evCard;
+    + recBand
+    + '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">'+tonight+onShelf+writes+'</div>'+evCard;
   chrome('salon', inner);
 }
 
@@ -301,8 +309,12 @@ function renderDashboard(){
     + '<div style="margin-top:12px;font-size:12.5px;color:#B0A99A">'+esc(m.name)+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:4px">'+esc(m.email)+'</div>'
     + '<div style="font-size:11.5px;color:#6E685E;margin-top:8px">Circle correspondence '+(m.circle?'on':'off')+'</div></div>';
 
+  var fr = findResult(); var rc = fr ? comp(fr.comp) : null;
+  var recCard = rc
+    ? '<div class="card" style="margin-top:16px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+rc.accent+'"></div><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><span class="lbl">Your number . recommended for you</span><a href="#/haus/ritual" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Begin</a></div><div style="display:flex;gap:14px;align-items:baseline;margin-top:12px"><span class="didot" style="font-size:22px;color:#E1DAD0">'+esc(rc.name)+'</span><span style="font-size:12px;color:'+rc.accent+'">'+rc.triad.join(' . ')+'</span></div></div>'
+    : '<div class="card" style="margin-top:16px"><div class="lbl">Your number</div><p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">Take Find Your Bond on the main site and your number appears here as a recommendation.</p></div>';
   var grid = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">'+shelfCard+resCard+evCard+ritCard+gCard+aCard+'</div>';
-  var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">Your Haus</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Everything you keep here, in one place.</p>'+stats+grid;
+  var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">Your Haus</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Everything you keep here, in one place.</p>'+stats+recCard+grid;
   chrome('dashboard', inner);
 }
 
@@ -408,6 +420,8 @@ function renderEvents(){
 
 // ================= 6. Ritual companion =================
 var ritual = { phase:'setup', comp:'no1', intention:INTENTIONS[0], freeText:'', duration:20, remaining:0, total:0 };
+// default the ritual composition to the Find Your Bond recommendation, if one exists
+(function(){ var fr = findResult(); if (fr && comp(fr.comp)) ritual.comp = fr.comp; })();
 var ritualTimer = null;
 function clearRitualTimer(){ if (ritualTimer){ clearInterval(ritualTimer); ritualTimer=null; } }
 function renderRitual(){
