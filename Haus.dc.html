@@ -152,6 +152,7 @@ function chrome(active, inner){
 }
 
 // ================= entry and welcome =================
+var doorMode = 'in';
 function renderDoor(fail){
   clearRitualTimer();
   app.innerHTML = '<div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:100vh">'
@@ -161,18 +162,42 @@ function renderDoor(fail){
     + '<div class="didot gold breathe" style="font-weight:400;font-size:clamp(52px,9vw,88px);letter-spacing:0.35em;padding-left:0.35em;line-height:1;filter:drop-shadow(2px 3px 3px rgba(0,0,0,0.7))">BOND</div>'
     + '<p class="didot" style="font-size:clamp(16px,2vw,22px);letter-spacing:0.16em;color:#E1DAD0;margin:22px 0 0">The Haus is for members.</p>'
     + '<div style="width:min(360px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:34px auto 0"></div>'
-    + '<form id="doorForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left"><input class="field" type="email" name="email" placeholder="Email" autocomplete="email"><input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">'
-    + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Enter the Haus</button></form>'
-    + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px">'+(fail?'That did not open the door.':'')+'</p>'
-    + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:30px 0 0">Not yet a member? <a href="Home.dc.html#circle" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Join the Circle for first access.</a></p>'
-    + '<p style="font-size:11.5px;letter-spacing:0.04em;color:#6E685E;margin:14px 0 0">Membership is by invitation from the Circle.</p>'
+    + (doorMode==='up'
+      ? ('<form id="signupForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left">'
+        + '<input class="field" type="text" name="first" placeholder="First name" autocomplete="given-name">'
+        + '<input class="field" type="email" name="email" placeholder="Email" autocomplete="email">'
+        + '<input class="field" type="password" name="password" placeholder="Choose a password" autocomplete="new-password">'
+        + '<input class="field" type="password" name="confirm" placeholder="Confirm password" autocomplete="new-password">'
+        + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Create your account</button></form>'
+        + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px"></p>'
+        + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:26px 0 0">Already have a key? <a id="toSignin" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px;cursor:pointer">Sign in.</a></p>'
+        + '<p style="font-size:11.5px;line-height:1.7;letter-spacing:0.02em;color:#6E685E;margin:14px 0 0">Your invitation comes from the Circle. <a href="Home.dc.html#circle" style="color:#8E887C;border-bottom:1px solid #2A2C29;padding-bottom:1px">Join the Circle for first access.</a></p>')
+      : ('<form id="doorForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left"><input class="field" type="email" name="email" placeholder="Email" autocomplete="email"><input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">'
+        + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Enter the Haus</button></form>'
+        + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px">'+(fail?'That did not open the door.':'')+'</p>'
+        + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:30px 0 0">New to the Haus? <a id="toSignup" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px;cursor:pointer">Create your account.</a></p>'
+        + '<p style="font-size:11.5px;letter-spacing:0.04em;color:#6E685E;margin:14px 0 0">Membership is by invitation from the Circle.</p>'))
     + '</div></main>' + complianceBand() + '</div>';
+  var toUp = document.getElementById('toSignup'); if (toUp){ toUp.addEventListener('click', function(){ doorMode='up'; renderDoor(false); }); }
+  var toIn = document.getElementById('toSignin'); if (toIn){ toIn.addEventListener('click', function(){ doorMode='in'; renderDoor(false); }); }
   var form = document.getElementById('doorForm');
-  form.addEventListener('submit', function(e){ e.preventDefault();
+  if (form){ form.addEventListener('submit', function(e){ e.preventDefault();
     var email = form.email.value.trim().toLowerCase();
-    if (email === DEMO_EMAIL && form.password.value){ HausStore.member.signedIn = true; if (HausStore.member.entered){ location.hash = '#/haus/salon'; } else { location.hash = '#/haus/welcome'; } route(); }
+    if (email === DEMO_EMAIL && form.password.value){ HausStore.member.signedIn = true; location.hash = HausStore.member.entered ? '#/haus/salon' : '#/haus/welcome'; route(); }
     else { renderDoor(true); }
-  });
+  }); }
+  var sup = document.getElementById('signupForm');
+  if (sup){ sup.addEventListener('submit', function(e){ e.preventDefault();
+    var first = sup.first.value.trim(), email = sup.email.value.trim(), pw = sup.password.value, cf = sup.confirm.value;
+    var note = document.getElementById('doorNote');
+    function say(msg){ if (note) note.textContent = msg; }
+    if (!first){ say('Please tell the house your first name.'); return; }
+    if (email.indexOf('@') === -1){ say('Please enter a valid email.'); return; }
+    if (!pw){ say('Please choose a password.'); return; }
+    if (pw !== cf){ say('Those passwords do not match.'); return; }
+    HausStore.member.email = email.toLowerCase(); HausStore.member.first = first; HausStore.member.name = first; HausStore.member.signedIn = true; HausStore.member.entered = false; doorMode = 'in';
+    location.hash = '#/haus/welcome'; route();
+  }); }
 }
 function renderWelcome(){
   clearRitualTimer();
