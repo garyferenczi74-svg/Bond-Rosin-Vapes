@@ -78,7 +78,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
       <p style="animation:riseIn 0.7s cubic-bezier(0.22,1,0.36,1) 1.7s both;font-family:'GFS Didot',Didot,serif;font-style:italic;font-size:clamp(15px,1.7vw,19px);line-height:2;color:#B0A99A;max-width:520px;margin:32px 0 0">What you consume matters. Cannabis is no exception.</p>
       <p style="animation:riseIn 0.7s cubic-bezier(0.22,1,0.36,1) 2.1s both;font-size:13px;letter-spacing:0.06em;line-height:1.9;color:#8E887C;max-width:460px;margin:14px 0 0">Bond is 100 percent solventless live rosin, made without chemical solvents, added terpenes, distillate, fillers, or additives.</p>
       <div style="animation:riseIn 0.7s cubic-bezier(0.22,1,0.36,1) 2.5s both;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:48px">
-        <a href="#choose" style="font-family:'GFS Didot',Didot,serif;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 44px;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55);text-shadow:0 1px 0 rgba(255,240,200,0.35);transition:box-shadow .4s,filter .4s" style-hover="box-shadow:0 8px 40px rgba(194,154,69,0.5), inset 0 1px 0 rgba(255,240,200,0.55);filter:brightness(1.08)">Choose Your Moment</a>
+        <a href="#choose" ref="{{ heroCtaRef }}" style="font-family:'GFS Didot',Didot,serif;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 44px;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55);text-shadow:0 1px 0 rgba(255,240,200,0.35);transition:box-shadow .4s,filter .4s" style-hover="box-shadow:0 8px 40px rgba(194,154,69,0.5), inset 0 1px 0 rgba(255,240,200,0.55);filter:brightness(1.08)">Choose Your Moment</a>
         <a href="#circle" style="font-family:'GFS Didot',Didot,serif;background:rgba(13,15,14,0.3);backdrop-filter:blur(6px);color:#C29A45;border:1px solid rgba(194,154,69,0.55);border-radius:2px;font-size:12px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 44px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.2);transition:background .4s,color .4s,border-color .4s,box-shadow .4s" style-hover="background:rgba(194,154,69,0.12);color:#E3C270;border-color:#C29A45;box-shadow:0 0 26px rgba(194,154,69,0.2)">Enter the Bond Haus</a>
       </div>
     </div>
@@ -328,6 +328,7 @@ class Component extends DCLogic {
   state = { narrow: false, reduced: false, modal: false, menu: false, step: 1, exp: null, mom: null, set: null, email: '', joined: false, age21: false, ageErr: false };
   canvasRef = React.createRef(); navBgRef = React.createRef(); pressWrapRef = React.createRef();
   heroBondRef = React.createRef(); navBondRef = React.createRef(); processHeadRef = React.createRef();
+  heroCtaRef = React.createRef();
   plateTopRef = React.createRef(); plateBottomRef = React.createRef(); amberRef = React.createRef();
   b1Ref = React.createRef(); b2Ref = React.createRef(); b3Ref = React.createRef();
   z0Ref = React.createRef(); z2Ref = React.createRef(); z3Ref = React.createRef(); z4Ref = React.createRef();
@@ -350,6 +351,15 @@ class Component extends DCLogic {
       const c = `rgba(${bone[0]},${bone[1]},${bone[2]},${(1 - k).toFixed(3)})`;
       if (this.heroBondRef.current) this.heroBondRef.current.style.color = c;
       if (this.navBondRef.current) this.navBondRef.current.style.color = c;
+      // Choose Your Moment button breathes the same bone-to-gold cycle in phase
+      // with the hero letters: k=0 washes the gold gradient toward bone, k=1 is
+      // full gold. Only the background is driven so hover box-shadow/filter stays.
+      if (this.heroCtaRef.current) {
+        const t = (1 - k) * 0.5;
+        const mix = (g) => `rgb(${lerp(g[0],bone[0],t)},${lerp(g[1],bone[1],t)},${lerp(g[2],bone[2],t)})`;
+        const s0 = [143,107,37], s1 = [194,154,69], s2 = [227,194,112];
+        this.heroCtaRef.current.style.background = `linear-gradient(160deg,${mix(s0)} 0%,${mix(s1)} 38%,${mix(s2)} 50%,${mix(s1)} 62%,${mix(s0)} 100%)`;
+      }
       this._pollRaf = requestAnimationFrame(poll);
     };
     poll();
@@ -492,6 +502,7 @@ class Component extends DCLogic {
       motionOk: !s.reduced, reduced: s.reduced,
       canvasRef: this.canvasRef, navBgRef: this.navBgRef, pressWrapRef: this.pressWrapRef,
       heroBondRef: this.heroBondRef, navBondRef: this.navBondRef, processHeadRef: this.processHeadRef,
+      heroCtaRef: this.heroCtaRef,
       plateTopRef: this.plateTopRef, plateBottomRef: this.plateBottomRef, amberRef: this.amberRef,
       b1Ref: this.b1Ref, b2Ref: this.b2Ref, b3Ref: this.b3Ref,
       z0Ref: this.z0Ref, z2Ref: this.z2Ref, z3Ref: this.z3Ref, z4Ref: this.z4Ref,
