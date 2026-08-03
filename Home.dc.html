@@ -98,7 +98,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#0D0F0E;overflow:hidden">
     <div class="hero-frame">
-      <video id="hero-video" muted playsinline preload="auto" poster="bond4_hero_first.webp"></video>
+      <video id="hero-video" muted playsinline preload="auto" poster="bond_hero_poster.webp"></video>
       <div class="hero-scrim"></div>
       <div id="hero-textstack" class="hero-text">
         <div class="hero-row hero-tagline" style="top:61.57%">
@@ -605,7 +605,7 @@ class Component extends DCLogic {
       if (frame !== null) {
         var bg = document.createElement('div');
         bg.className = 'hero-bg';
-        bg.style.backgroundImage = "url('bond4_hero_final.webp')";
+        bg.style.backgroundImage = "url('bond_hero_still.webp')";
         frame.insertBefore(bg, frame.firstChild);
       }
       if (v !== null) v.style.display = 'none';
@@ -620,7 +620,7 @@ class Component extends DCLogic {
     v.addEventListener('ended', runText);
     if (v.querySelector('source') === null) {
       var src = document.createElement('source');
-      src.src = 'bond4_hero.mp4'; src.type = 'video/mp4';
+      src.src = 'bond_hero.mp4'; src.type = 'video/mp4';
       v.appendChild(src);
       v.load();
     }
