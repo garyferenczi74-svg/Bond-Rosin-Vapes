@@ -49,13 +49,13 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-text.hero-instant .hero-row, .hero-text.hero-instant .hero-tagline h1, .hero-text.hero-instant .hero-rule { transition: none !important; }
 @media (max-width: 767px) {
   .hero-frame { aspect-ratio: auto; }
-  .hero-frame > video, .hero-frame > .hero-bg { position: relative; height: auto; aspect-ratio: 16 / 9; object-fit: contain; }
+  .hero-frame > video, .hero-frame > .hero-bg { position: relative; width: 100%; height: auto; aspect-ratio: 18 / 5; object-fit: cover; object-position: center 32%; }
   .hero-scrim { display: none; }
-  .hero-text { position: static; padding: 24px 20px 8px; }
+  .hero-text { position: static; padding: 20px 20px 8px; }
   .hero-text .hero-row { position: static; transform: translateY(14px); left: auto; width: 100%; margin: 0 auto; }
   .hero-text .hero-tagline { transform: translateY(0); }
   .hero-text.hero-in .hero-row { transform: translateY(0); }
-  .hero-text .hero-line2 { margin-top: 18px; } .hero-text .hero-subtext { margin-top: 14px; } .hero-text .hero-buttons { margin-top: 22px; }
+  .hero-text .hero-line2 { margin-top: 16px; } .hero-text .hero-subtext { margin-top: 12px; } .hero-text .hero-buttons { margin-top: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
 #top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
