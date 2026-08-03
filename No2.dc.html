@@ -77,7 +77,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <section data-screen-label="Product" style="background:#1B1D1C;padding:0 clamp(20px,4vw,56px) clamp(80px,10vw,140px)">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;max-width:1080px;margin:0 auto;align-items:center">
-      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5)"><image-slot id="no2-product" shape="rect" style="display:block;width:100%;height:100%" placeholder="No. 2 product still. KNURL-MACRO detail."></image-slot></div>
+      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5);background:#1B1D1C"><video id="no2-video" autoplay muted loop playsinline preload="auto" poster="Unwind_poster.webp" style="display:block;width:100%;height:100%;object-fit:cover"><source src="Unwind_promo_video_3x4.mp4" type="video/mp4"></video></div>
       <div>
         <div style="width:56px;height:1px;background:#86ACE3"></div>
         <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8E887C;margin-top:28px">LIVE ROSIN VAPE</div>
@@ -230,6 +230,31 @@ class Component extends DCLogic {
     };
   }
 }
+</script>
+<script>
+// Keep the No. 2 Unwind promo video muted, looping, and playing. The template
+// runtime recreates the video on re-render and drops the muted and loop boolean
+// attributes, and Chrome pauses video-only media once it drifts to the
+// background, so re-assert the state on a light interval and whenever the tab
+// returns to view.
+(function () {
+  var VID = 'no2-video';
+  function ensure() {
+    var v = document.getElementById(VID);
+    if (v === null) return;
+    if (v.muted === false) v.muted = true;
+    if (v.defaultMuted === false) v.defaultMuted = true;
+    if (v.loop === false) v.loop = true;
+    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
+      var p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+    }
+  }
+  setInterval(ensure, 250);
+  document.addEventListener('visibilitychange', ensure);
+  window.addEventListener('focus', ensure);
+  window.addEventListener('pageshow', ensure);
+})();
 </script>
 </body>
 </html>
