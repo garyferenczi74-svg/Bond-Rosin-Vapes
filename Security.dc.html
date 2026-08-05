@@ -90,7 +90,7 @@
     </div>
     <div style="padding:14px 16px;border-top:1px solid #202220;display:flex;align-items:center;justify-content:space-between">
       <div><div style="font-size:12.5px;color:#E1DAD0">Gary Ferenczi</div><div style="font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#6E685E">Owner</div></div>
-      <a id="signOut" href="Home.dc.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;border:1px solid #2E302D;border-radius:3px;padding:7px 11px">Sign out</a>
+      <a href="Home.dc.html" style="font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#8E887C;border:1px solid #2E302D;border-radius:3px;padding:7px 11px">Sign out</a>
     </div>
   </aside>
 
@@ -543,7 +543,6 @@ function setLive(on){
 // ================= events =================
 document.addEventListener('click', function(ev){
   var t = ev.target;
-  if (t.id==='signOut' || t.closest('#signOut')){ try { localStorage.removeItem('bond_age_ok'); } catch(e){} return; }
   if (t.id==='liveToggle' || t.closest('#liveToggle')){ setLive(!SecurityStore.live); renderMonitors(); toast(SecurityStore.live?'Live. The watch floor is ticking.':'Frozen. Scheduler paused.'); return; }
   if (t.id==='bannerAck'){ SecurityStore.banner=null; route(); return; }
 

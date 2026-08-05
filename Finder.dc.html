@@ -197,8 +197,8 @@ document.getElementById('cityIn').addEventListener('keydown', function(e){ if (e
 document.getElementById('allToggle').addEventListener('change', function(){ if (lastCity) render(); });
 render();
 
-// ---- compact age gate, shares the 30 day remember with the rest of the site ----
-function ageOk(){ try { var raw=localStorage.getItem('bond_age_ok'); if (raw){ var ts=parseInt(raw,10); if (!isNaN(ts) && Date.now()-ts < 30*24*3600*1000) return true; localStorage.removeItem('bond_age_ok'); } } catch(e){} return false; }
+// ---- compact age gate, shares the browser session remember with the rest of the site ----
+function ageOk(){ try { if (sessionStorage.getItem('bond_age_ok')) return true; } catch(e){} return false; }
 function showGate(){
   var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   var now=new Date().getFullYear(); var years=''; for (var y=now;y>=now-100;y--) years+='<option>'+y+'</option>';
@@ -215,7 +215,7 @@ function showGate(){
     var m=document.getElementById('gMonth').value, yr=document.getElementById('gYear').value; var fail=document.getElementById('gFail');
     if (m==='' || yr===''){ fail.textContent='Please choose your birth month and year.'; return; }
     var b=new Date(parseInt(yr,10), parseInt(m,10), 1), d=new Date(); var age=d.getFullYear()-b.getFullYear(); if (d.getMonth()<b.getMonth()) age--;
-    if (age>=21){ try { localStorage.setItem('bond_age_ok', String(Date.now())); } catch(e){} document.getElementById('gate').innerHTML=''; }
+    if (age>=21){ try { sessionStorage.setItem('bond_age_ok', String(Date.now())); } catch(e){} document.getElementById('gate').innerHTML=''; }
     else { fail.textContent='You must be 21 or older to enter.'; }
   });
 }

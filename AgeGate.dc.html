@@ -65,19 +65,16 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 class Component extends DCLogic {
   state = { verified: false, declined: false, month: '', year: '', checked: false };
   componentDidMount() {
-    // Remember the entry for 30 days. Once verified, the gate does not show again
-    // on return visits to any page, and it releases the hero cascade so the Home
-    // page does not stall waiting for the gate.
+    // Remember the entry for the browser session. Once verified, the gate does
+    // not show again while navigating the site, and closing the site clears it
+    // so the gate returns on the next visit. It also releases the hero cascade
+    // so the Home page does not stall waiting for the gate.
     try {
-      const raw = localStorage.getItem('bond_age_ok');
+      const raw = sessionStorage.getItem('bond_age_ok');
       if (raw) {
-        const ts = parseInt(raw, 10);
-        if (!isNaN(ts) && Date.now() - ts < 30 * 24 * 3600 * 1000) {
-          this.setState({ verified: true, checked: true });
-          try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
-          return;
-        }
-        localStorage.removeItem('bond_age_ok');
+        this.setState({ verified: true, checked: true });
+        try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
+        return;
       }
     } catch (e) {}
     this.setState({ checked: true });
@@ -106,7 +103,7 @@ class Component extends DCLogic {
         let age = nowD.getFullYear() - b.getFullYear();
         if (nowD.getMonth() < b.getMonth()) age--;
         if (age >= 21) {
-          try { localStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
+          try { sessionStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
           this.setState({ verified: true });
           try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
         } else this.setState({ declined: true });

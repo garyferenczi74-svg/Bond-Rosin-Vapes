@@ -628,7 +628,7 @@ function route(){
 // ================= events =================
 document.addEventListener('click', function(ev){
   var t = ev.target;
-  if (t.id==='signOut'){ try { localStorage.removeItem('bond_age_ok'); } catch(e){} HausStore.member.signedIn=false; location.hash='#/haus'; route(); return; }
+  if (t.id==='signOut'){ HausStore.member.signedIn=false; location.hash='#/haus'; route(); return; }
 
   // salon shelf spine to library
   var sp = t.closest('[data-shelf]'); if (sp){ libSel = sp.getAttribute('data-shelf'); location.hash='#/haus/library'; route(); libSel = sp.getAttribute('data-shelf'); renderLibrary(); return; }
