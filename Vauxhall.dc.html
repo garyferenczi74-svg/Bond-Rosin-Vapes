@@ -573,7 +573,7 @@ document.addEventListener('click', function(ev){
   }
 
   // sign out
-  if (t.id==='signOut'){ VauxhallStore.session=false; setLive(false); renderSignIn(); return; }
+  if (t.id==='signOut'){ try { localStorage.removeItem('bond_age_ok'); } catch(e){} VauxhallStore.session=false; setLive(false); renderSignIn(); return; }
 
   // feed row expand
   var row = t.closest('.event');
