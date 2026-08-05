@@ -65,6 +65,8 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 class Component extends DCLogic {
   state = { verified: false, declined: false, month: '', year: '', checked: false };
   componentDidMount() {
+    // One time cleanup of the pre session localStorage key so it does not linger.
+    try { localStorage.removeItem('bond_age_ok'); } catch (e) {}
     // Remember the entry for the browser session. Once verified, the gate does
     // not show again while navigating the site, and closing the site clears it
     // so the gate returns on the next visit. It also releases the hero cascade
