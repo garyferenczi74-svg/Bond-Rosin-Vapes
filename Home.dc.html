@@ -593,8 +593,6 @@ class Component extends DCLogic {
   try { wide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 1200; }
   var clip = wide ? 'bond_hero_desktop.mp4' : 'bond_hero_mobile.mp4';
   var poster = wide ? 'bond_hero_desktop_poster.webp' : 'bond_hero_mobile_poster.webp';
-  var pel = document.getElementById(POSTER);
-  if (pel !== null) pel.style.backgroundImage = "url('" + poster + "')";
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   function reveal(instant) {
@@ -608,6 +606,8 @@ class Component extends DCLogic {
     var s = document.getElementById(STACK);
     if (s === null) return;
     started = true;
+    var pel = document.getElementById(POSTER);
+    if (pel !== null) pel.style.backgroundImage = "url('" + poster + "')";
     var v = document.getElementById(VID);
     if (reduced === true) { if (v !== null) v.style.display = 'none'; reveal(true); return; }
     if (v === null) { reveal(false); return; }
