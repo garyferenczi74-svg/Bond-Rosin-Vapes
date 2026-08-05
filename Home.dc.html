@@ -27,12 +27,11 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 /* Hero (spec bond-hero-spec): full-bleed video plays once, then content rows roll in */
 #top { height: 100vh; min-height: 640px; max-width: 1920px; margin: 0 auto; overflow: hidden; }
 .hero-media { position: absolute; inset: 0; overflow: hidden; background: #000000; }
-.hero-poster { position: absolute; inset: 0; background-size: cover; background-position: center; }
 .hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
-@media (min-width: 1200px) { .hero-video { top: -40px; height: 115%; } }
+@media (min-width: 1200px) { .hero-video { top: -80px; height: 115%; } }
 @media (max-width: 1199px) { .hero-video { top: -120px; height: 115%; } }
-.hero-text { position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%); width: 100%; max-width: 720px; padding: 64px 32px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; pointer-events: none; }
+.hero-text { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); width: 100%; max-width: 720px; padding: 64px 32px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 43px; text-align: center; pointer-events: none; }
 .hero-text .hero-row { opacity: 0; transform: translateY(14px); transition: opacity .45s cubic-bezier(0.44,0,0.56,1), transform .45s cubic-bezier(0.44,0,0.56,1); }
 .hero-text.hero-in .hero-row { opacity: 1; transform: translateY(0); }
 .hero-text.hero-in .hero-tagline { transition-delay: 0s; }
@@ -109,7 +108,6 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
     <div class="hero-media">
-      <div id="hero-poster" class="hero-poster"></div>
       <video id="hero-video" class="hero-video" muted playsinline preload="auto"></video>
     </div>
     <div id="hero-textstack" class="hero-text">
@@ -588,11 +586,10 @@ class Component extends DCLogic {
 // the age gate release so it plays into view, never on scroll or tab return.
 // Reduced motion makes no video request and reveals the content at once.
 (function () {
-  var VID = 'hero-video', STACK = 'hero-textstack', POSTER = 'hero-poster';
+  var VID = 'hero-video', STACK = 'hero-textstack';
   var wide = false;
   try { wide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 1200; }
   var clip = wide ? 'bond_hero_desktop.mp4' : 'bond_hero_mobile.mp4';
-  var poster = wide ? 'bond_hero_desktop_poster.webp' : 'bond_hero_mobile_poster.webp';
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   function reveal(instant) {
@@ -606,8 +603,6 @@ class Component extends DCLogic {
     var s = document.getElementById(STACK);
     if (s === null) return;
     started = true;
-    var pel = document.getElementById(POSTER);
-    if (pel !== null) pel.style.backgroundImage = "url('" + poster + "')";
     var v = document.getElementById(VID);
     if (reduced === true) { if (v !== null) v.style.display = 'none'; reveal(true); return; }
     if (v === null) { reveal(false); return; }
