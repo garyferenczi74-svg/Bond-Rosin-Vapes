@@ -21,6 +21,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
 @keyframes dialedBreathe { 0% { color: rgba(27,29,28,0); } 50% { color: rgba(27,29,28,1); } 100% { color: rgba(27,29,28,0); } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
+@media (max-width: 767px) { .dialededit-line2 { display: block; } }
 </style>
 </helmet>
 <div style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;background:#EFEBE2;color:#1B1D1C">
@@ -97,7 +98,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
       <div style="font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#4E8A2B">The Dialed Edit</div>
       <div style="width:1px;height:28px;background:linear-gradient(180deg,#4E8A2B,transparent);margin:18px 0"></div>
       <h2 style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(26px,3.2vw,42px);letter-spacing:0.12em;color:#1B1D1C;margin:0">THE DIALED EDIT</h2>
-      <p style="font-size:14.5px;line-height:1.8;color:#1B1D1C;max-width:360px;margin:24px 0 0">Curated for clarity. Designed for forward motion.</p>
+      <p style="font-size:14.5px;line-height:1.8;color:#1B1D1C;max-width:360px;margin:24px 0 0">Curated for clarity. <span class="dialededit-line2">Designed for forward motion.</span></p>
       <p style="font-family:'GFS Didot',Didot,serif;font-style:italic;font-size:clamp(15px,1.7vw,19px);color:#1B1D1C;margin:10px 0 0"><span style="color:#79C84A">Bond</span> with your potential.</p>
     </div>
   </section>
