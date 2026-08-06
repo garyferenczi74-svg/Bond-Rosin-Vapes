@@ -22,7 +22,6 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
 @keyframes momentBreathe { 0% { color: #E1DAD0; } 50% { color: #86ACE3; } 100% { color: #E1DAD0; } }
 @keyframes unwindBreathe { 0% { color: rgba(225,218,208,0); } 50% { color: rgba(225,218,208,1); } 100% { color: rgba(225,218,208,0); } }
-@keyframes plateDrift { from { background-position: 0% 0%, 100% 100%, 50% 0%; } to { background-position: 60% 40%, 40% 60%, 30% 80%; } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
 </style>
 </helmet>
@@ -58,9 +57,10 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   </nav>
 
   <section data-screen-label="No. 2 World Hero" style="position:relative;height:100vh;min-height:600px;overflow:hidden;background:#0C131C">
-    <div style="position:absolute;inset:0;background-image:radial-gradient(900px 500px at 30% 75%, rgba(134,172,227,0.14), transparent 70%),radial-gradient(700px 800px at 75% 25%, rgba(134,172,227,0.08), transparent 70%),radial-gradient(1100px 600px at 55% 100%, rgba(13,22,34,0.9), transparent 75%);background-size:180% 180%;background-color:#0C131C;animation:plateDrift 30s ease-in-out infinite alternate"></div>
+    <video id="no2-hero-video" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0C131C"></video>
     <div style="position:absolute;inset:0;opacity:0.5;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIj48ZmlsdGVyIGlkPSJsIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSI0IiBzZWVkPSI3Ii8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIiBmaWx0ZXI9InVybCgjbCkiLz48L3N2Zz4=')"></div>
     <div style="position:absolute;inset:0;opacity:0.35;mix-blend-mode:soft-light;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MjAiIGhlaWdodD0iNTIwIj48ZmlsdGVyIGlkPSJnIj48ZmVUdXJidWxlbmNlIHR5cGU9InR1cmJ1bGVuY2UiIGJhc2VGcmVxdWVuY3k9IjAuMDEyIDAuMDIiIG51bU9jdGF2ZXM9IjMiIHNlZWQ9IjEzIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSI1MjAiIGhlaWdodD0iNTIwIiBmaWx0ZXI9InVybCgjZykiLz48L3N2Zz4=')"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 920px 640px at 50% 48%, rgba(12,19,28,0.62) 0%, rgba(12,19,28,0.34) 55%, rgba(12,19,28,0.12) 100%)"></div>
     <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(96px,17vw,210px);line-height:1;color:#E1DAD0">No. 2</div>
       <div style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .5s both;font-family:'GFS Didot',Didot,serif;font-size:clamp(20px,2.6vw,30px);letter-spacing:0.4em;color:transparent;background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;margin-top:28px;padding-left:0.35em;animation:unwindBreathe 6.5s ease-in-out infinite">UNWIND</div>
@@ -243,6 +243,39 @@ class Component extends DCLogic {
   function ensure() {
     var v = document.getElementById(VID);
     if (v === null) return;
+    if (v.muted === false) v.muted = true;
+    if (v.defaultMuted === false) v.defaultMuted = true;
+    if (v.loop === false) v.loop = true;
+    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
+      var p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+    }
+  }
+  setInterval(ensure, 250);
+  document.addEventListener('visibilitychange', ensure);
+  window.addEventListener('focus', ensure);
+  window.addEventListener('pageshow', ensure);
+})();
+</script>
+<script>
+// Keep the No. 2 hero background video responsive, muted, looping, and playing.
+// The runtime recreates the video on re-render and drops the source and the
+// muted and loop attributes, so pick the clip by width (16x9 on desktop, 9x16
+// on mobile) and re-assert on a light interval and whenever the tab returns.
+(function () {
+  var VID = 'no2-hero-video';
+  function clip() {
+    var wide = false;
+    try { wide = window.matchMedia('(min-width: 768px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 768; }
+    return wide ? 'Unwind_Forest_16x9.mp4' : 'Unwind_sky_9x16.mp4';
+  }
+  function ensure() {
+    var v = document.getElementById(VID);
+    if (v === null) return;
+    var want = clip();
+    var src = v.querySelector('source');
+    if (src === null) { src = document.createElement('source'); src.type = 'video/mp4'; v.appendChild(src); }
+    if (src.getAttribute('src') !== want) { src.setAttribute('src', want); v.load(); }
     if (v.muted === false) v.muted = true;
     if (v.defaultMuted === false) v.defaultMuted = true;
     if (v.loop === false) v.loop = true;
