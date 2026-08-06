@@ -21,7 +21,6 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
 @keyframes peakBreathe { 0% { color: rgba(225,218,208,0); } 50% { color: rgba(225,218,208,1); } 100% { color: rgba(225,218,208,0); } }
-@keyframes plateDrift { from { background-position: 0% 0%, 100% 100%, 50% 0%; } to { background-position: 60% 40%, 40% 60%, 30% 80%; } }
 @keyframes candleGlow { 0% { opacity: 0.75; } 42% { opacity: 1; } 58% { opacity: 0.82; } 74% { opacity: 0.96; } 100% { opacity: 0.75; } }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
 </style>
@@ -58,8 +57,9 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   </nav>
 
   <section data-screen-label="No. 3 World Hero" style="position:relative;height:100vh;min-height:600px;overflow:hidden;background:#140807">
-    <div style="position:absolute;inset:0;background-image:radial-gradient(800px 500px at 68% 72%, rgba(165,58,40,0.22), transparent 70%),radial-gradient(500px 700px at 25% 30%, rgba(165,58,40,0.10), transparent 70%),radial-gradient(1100px 600px at 50% 110%, rgba(20,8,7,0.9), transparent 75%);background-size:180% 180%;background-color:#140807;animation:plateDrift 28s ease-in-out infinite alternate"></div>
+    <video id="no3-hero-video" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#140807"></video>
     <div style="position:absolute;inset:0;background:radial-gradient(600px 400px at 70% 70%, rgba(217,120,60,0.08), transparent 70%);animation:candleGlow 5.5s ease-in-out infinite"></div>
+    <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 920px 640px at 50% 48%, rgba(20,8,7,0.62) 0%, rgba(20,8,7,0.34) 55%, rgba(20,8,7,0.12) 100%)"></div>
     <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(96px,17vw,210px);line-height:1;color:#E1DAD0">No. 3</div>
       <div style="animation:riseIn .6s cubic-bezier(0.22,1,0.36,1) .5s both;font-family:'GFS Didot',Didot,serif;font-size:clamp(20px,2.6vw,30px);letter-spacing:0.4em;color:transparent;background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;margin-top:28px;padding-left:0.35em;animation:peakBreathe 6.5s ease-in-out infinite">PEAK</div>
@@ -243,6 +243,39 @@ class Component extends DCLogic {
   function ensure() {
     var v = document.getElementById(VID);
     if (v === null) return;
+    if (v.muted === false) v.muted = true;
+    if (v.defaultMuted === false) v.defaultMuted = true;
+    if (v.loop === false) v.loop = true;
+    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
+      var p = v.play();
+      if (p && typeof p.catch === 'function') p.catch(function () {});
+    }
+  }
+  setInterval(ensure, 250);
+  document.addEventListener('visibilitychange', ensure);
+  window.addEventListener('focus', ensure);
+  window.addEventListener('pageshow', ensure);
+})();
+</script>
+<script>
+// Keep the No. 3 hero background video responsive, muted, looping, and playing.
+// The runtime recreates the video on re-render and drops the source and the
+// muted and loop attributes, so pick the clip by width (16x9 on desktop, 9x16
+// on mobile) and re-assert on a light interval and whenever the tab returns.
+(function () {
+  var VID = 'no3-hero-video';
+  function clip() {
+    var wide = false;
+    try { wide = window.matchMedia('(min-width: 768px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 768; }
+    return wide ? 'Peak_Fire_16x9.mp4' : 'Peak_Fire_9x16.mp4';
+  }
+  function ensure() {
+    var v = document.getElementById(VID);
+    if (v === null) return;
+    var want = clip();
+    var src = v.querySelector('source');
+    if (src === null) { src = document.createElement('source'); src.type = 'video/mp4'; v.appendChild(src); }
+    if (src.getAttribute('src') !== want) { src.setAttribute('src', want); v.load(); }
     if (v.muted === false) v.muted = true;
     if (v.defaultMuted === false) v.defaultMuted = true;
     if (v.loop === false) v.loop = true;
