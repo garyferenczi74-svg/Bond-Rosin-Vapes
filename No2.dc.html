@@ -267,7 +267,7 @@ class Component extends DCLogic {
   function clip() {
     var wide = false;
     try { wide = window.matchMedia('(min-width: 768px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 768; }
-    return wide ? 'Unwind_Forest_16x9.mp4' : 'Unwind_sky_9x16.mp4';
+    return wide ? 'Unwind_Sky_16x9.mp4' : 'Unwind_sky_9x16.mp4';
   }
   function ensure() {
     var v = document.getElementById(VID);
