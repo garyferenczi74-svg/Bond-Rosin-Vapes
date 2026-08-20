@@ -128,7 +128,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
-        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-aspect-ratio: 1/1)"
+        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
         data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v1.webm"
         data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v1.mp4"
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
@@ -618,7 +618,7 @@ class Component extends DCLogic {
 // so the lockup centers in 100svh with nav clearance. No per-viewport offsets.
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
-  var WIDE_MQ = '(min-aspect-ratio: 1/1)';
+  var WIDE_MQ = '(min-width: 1200px)';
   var DESK_L = { refW: 1920, refH: 1080, x: 312, y: 237, w: 1292, h: 311, base: 547 };
   var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
   var started = false, reduced = false;
@@ -668,7 +668,7 @@ class Component extends DCLogic {
 
   function isWideNow() {
     try { return window.matchMedia(WIDE_MQ).matches; } catch (e) {
-      return (window.innerWidth || 0) >= (window.innerHeight || 0);
+      return (window.innerWidth || 0) >= 1200;
     }
   }
 
@@ -685,9 +685,10 @@ class Component extends DCLogic {
       var isWide = isWideNow();
       var hidden = !v || v.style.display === 'none' || reduced === true;
       if (hidden || ch < 2 || cw < 2) { flowFallback(); return; }
+      var srcW = (v.videoWidth > 1) ? v.videoWidth : (isWide ? DESK_L.refW : MOB_L.refW);
+      var srcH = (v.videoHeight > 1) ? v.videoHeight : (isWide ? DESK_L.refH : MOB_L.refH);
+      if (v.videoWidth > 1 && v.videoHeight > 1) isWide = v.videoWidth >= v.videoHeight;
       var L = isWide ? DESK_L : MOB_L;
-      var srcW = (v.videoWidth > 1) ? v.videoWidth : L.refW;
-      var srcH = (v.videoHeight > 1) ? v.videoHeight : L.refH;
       var sx = srcW / L.refW, sy = srcH / L.refH;
       var lx = L.x * sx, ly = L.y * sy, lw = L.w * sx, lh = L.h * sy;
       var h1 = s.querySelector('.hero-tagline h1');
