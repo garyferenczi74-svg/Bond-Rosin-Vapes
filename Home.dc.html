@@ -689,11 +689,16 @@ class Component extends DCLogic {
     if (elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
-    var baseSrc = 1082 * (srcH / 2160);
+    // Original desktop clip: optical BOND feet at y=650 of 1080. v1 ladder sat at 541.
+    var baseSrc = 650 * (srcH / 1080);
+    var refSrc = 541 * (srcH / 1080);
     var scale = Math.max(elW / srcW, elH / srcH);
     var rendH = srcH * scale;
     var offY = (elH - rendH) / 2;
-    var baseY = v.offsetTop + offY + (baseSrc * scale);
+    var cropTop = -80;
+    var topPx = cropTop - ((baseSrc - refSrc) * scale);
+    v.style.top = topPx + 'px';
+    var baseY = topPx + offY + (baseSrc * scale);
     var h1 = s.querySelector('.hero-tagline h1');
     var fs = 28;
     if (h1) {
