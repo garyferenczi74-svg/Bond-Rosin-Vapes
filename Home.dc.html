@@ -17,8 +17,7 @@
 body { margin: 0; background: #1B1D1C; }
 html, body { overflow-x: hidden; max-width: 100%; }
 a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
-/* iOS 100vh fix: upgrade the hero to dynamic viewport height where supported */
-@supports (height: 100dvh) { #top { height: 100dvh !important; } }
+@supports (height: 100svh) { #top { height: 100svh; min-height: 100svh; } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes riseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scrollLine { 0% { transform: scaleY(0); opacity: 1; } 50% { transform: scaleY(1); opacity: 1; } 68% { opacity: 0.3; } 82% { opacity: 1; } 100% { transform: scaleY(1); opacity: 1; } }
@@ -26,12 +25,17 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes sweep { from { transform: translateX(-140%) skewX(-18deg); } to { transform: translateX(240%) skewX(-18deg); } }
 @keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
 /* Hero (spec bond-hero-spec): full-bleed video plays once, then content rows roll in */
-#top { height: 100vh; min-height: 640px; max-width: 1920px; margin: 0 auto; overflow: hidden; }
+#top {
+  --hero-wordmark-max: 0.86;
+  --hero-nav-clear: 1.5;
+  --hero-clear-min: 1;
+  --hero-clear-max: 2;
+  height: 100vh; min-height: 100vh; max-width: 1920px; margin: 0 auto; overflow: hidden;
+}
 .hero-media { position: absolute; inset: 0; overflow: hidden; background: #000000 center / cover no-repeat; }
-.hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
+.hero-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
-@media (min-width: 1200px) { .hero-video { top: -80px; height: 115%; } }
-@media (max-width: 1199px) { .hero-video { top: -120px; height: 115%; } }
+.hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(11px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
 .hero-text {
   --hero-tagline-size: 28px;
   --hero-tagline-gap: calc(1.6 * var(--hero-tagline-size));
@@ -68,7 +72,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 #top.hero-copy-flow { display: flex; flex-direction: column; }
 #top.hero-copy-flow .hero-media { position: relative; flex: 1 1 auto; min-height: 48vh; }
 #top.hero-copy-flow .hero-text { position: relative; left: auto; top: auto; transform: none; width: 100%; margin: 0 auto; padding: var(--hero-tagline-gap) 32px 32px; }
-@media (max-width: 1199px) {
+@media (max-width: 1199px) and (max-aspect-ratio: 1/1) {
   .hero-text { --hero-tagline-size: 17px; top: var(--hero-copy-top, 56%); bottom: auto; max-width: 342px; padding: 0 24px 24px; }
   #top.hero-copy-flow .hero-text { padding: var(--hero-tagline-gap) 24px 28px; }
   .hero-tagline { gap: 6px; }
@@ -93,7 +97,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(20px,4vw,56px)">
       <a href="#top" style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:19px;letter-spacing:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text" ref="{{ navBondRef }}">BOND</a>
       <sc-if value="{{ wideNav }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex;gap:38px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.2em;text-transform:uppercase">
+        <div class="hero-nav-links">
           <a href="No1.dc.html" onClick="{{ goNo1 }}" style="color:#E1DAD0;transition:color .3s" style-hover="background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#3E6E22 0%,#4E8A2B 38%,#7CBF4E 50%,#4E8A2B 62%,#3E6E22 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 1 Dialed</a>
           <a href="No2.dc.html" onClick="{{ goNo2 }}" style="color:#E1DAD0;transition:color .3s" style-hover="background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#4F719F 0%,#86ACE3 38%,#BCD6F7 50%,#86ACE3 62%,#4F719F 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 2 Unwind</a>
           <a href="No3.dc.html" onClick="{{ goNo3 }}" style="color:#E1DAD0;transition:color .3s" style-hover="background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;color:transparent" style-active="background:linear-gradient(160deg,#6E2417 0%,#A53A28 38%,#D4664C 50%,#A53A28 62%,#6E2417 100%);-webkit-background-clip:text;background-clip:text;color:transparent">No. 3 Peak</a>
@@ -124,7 +128,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
-        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
+        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-aspect-ratio: 1/1)"
         data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v1.webm"
         data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v1.mp4"
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
@@ -400,8 +404,8 @@ class Component extends DCLogic {
 
   componentDidMount() {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.setState({ reduced, narrow: innerWidth < 760 });
-    this._resize = () => this.setState({ narrow: innerWidth < 760 });
+    this.setState({ reduced, narrow: innerWidth < 1024 });
+    this._resize = () => this.setState({ narrow: innerWidth < 1024 });
     addEventListener('resize', this._resize);
     this._lastY = -1;
     const t0 = performance.now();
@@ -610,14 +614,13 @@ class Component extends DCLogic {
 // once, fade it in, then roll the content rows in on the ended event. Gated on
 // the age gate release so it plays into view, never on scroll or tab return.
 // Reduced motion makes no video request and reveals the content at once.
-// Prompt 6: tagline is locked below the video-baked BOND baseline using
-// cover-fit crop math. No per-breakpoint absolute offsets.
+// Prompt 6/6e: baked BOND is placed by cover-fit plus a width/height budget
+// so the lockup centers in 100svh with nav clearance. No per-viewport offsets.
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
-  var DESK_W = 3840, DESK_H = 2160, DESK_BASE = 1082;
-  var MOB_W = 1080, MOB_H = 1920, MOB_BASE = 849;
-  var wide = false;
-  try { wide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 1200; }
+  var WIDE_MQ = '(min-aspect-ratio: 1/1)';
+  var DESK_L = { refW: 1920, refH: 1080, x: 312, y: 237, w: 1292, h: 311, base: 547 };
+  var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   var layoutRaf = 0;
@@ -629,12 +632,43 @@ class Component extends DCLogic {
     s.classList.add('hero-in');
   }
 
+  function clearVideoBox(v) {
+    if (!v) return;
+    v.style.removeProperty('width');
+    v.style.removeProperty('height');
+    v.style.removeProperty('left');
+    v.style.removeProperty('top');
+    v.style.removeProperty('object-fit');
+    v.style.removeProperty('max-width');
+  }
+
   function flowFallback() {
     var t = document.getElementById(STAGE);
     var s = document.getElementById(STACK);
-    if (t) t.classList.add('hero-copy-flow');
-    if (s) {
-      s.style.removeProperty('--hero-copy-top');
+    var v = document.getElementById(VID);
+    if (t) {
+      t.classList.add('hero-copy-flow');
+      t.style.removeProperty('height');
+      t.style.removeProperty('min-height');
+    }
+    if (s) s.style.removeProperty('--hero-copy-top');
+    clearVideoBox(v);
+    var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.removeProperty('background-size');
+      media.style.removeProperty('background-position');
+      media.style.removeProperty('background-repeat');
+    }
+  }
+
+  function readNum(cs, name, fallback) {
+    var n = parseFloat(cs.getPropertyValue(name));
+    return (n > 0) ? n : fallback;
+  }
+
+  function isWideNow() {
+    try { return window.matchMedia(WIDE_MQ).matches; } catch (e) {
+      return (window.innerWidth || 0) >= (window.innerHeight || 0);
     }
   }
 
@@ -644,31 +678,101 @@ class Component extends DCLogic {
       var s = document.getElementById(STACK);
       var v = document.getElementById(VID);
       if (t === null || s === null) return;
+      t.style.removeProperty('height');
+      t.style.removeProperty('min-height');
       var ch = t.clientHeight;
-      var isWide = false;
-      try { isWide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { isWide = (window.innerWidth || 0) >= 1200; }
-      var elW = v ? v.clientWidth : 0;
-      var elH = v ? v.clientHeight : 0;
+      var cw = t.clientWidth || window.innerWidth || 0;
+      var isWide = isWideNow();
       var hidden = !v || v.style.display === 'none' || reduced === true;
-      if (hidden || elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
-      var srcW = (v.videoWidth > 1) ? v.videoWidth : (isWide ? DESK_W : MOB_W);
-      var srcH = (v.videoHeight > 1) ? v.videoHeight : (isWide ? DESK_H : MOB_H);
-      var baseSrc = isWide ? (DESK_BASE * (srcH / DESK_H)) : (MOB_BASE * (srcH / MOB_H));
-      var scale = Math.max(elW / srcW, elH / srcH);
-      var rendH = srcH * scale;
-      var offY = (elH - rendH) / 2;
-      var baseY = v.offsetTop + offY + (baseSrc * scale);
+      if (hidden || ch < 2 || cw < 2) { flowFallback(); return; }
+      var L = isWide ? DESK_L : MOB_L;
+      var srcW = (v.videoWidth > 1) ? v.videoWidth : L.refW;
+      var srcH = (v.videoHeight > 1) ? v.videoHeight : L.refH;
+      var sx = srcW / L.refW, sy = srcH / L.refH;
+      var lx = L.x * sx, ly = L.y * sy, lw = L.w * sx, lh = L.h * sy;
       var h1 = s.querySelector('.hero-tagline h1');
       var fs = isWide ? 28 : 17;
       if (h1) {
-        var computed = window.getComputedStyle(h1).fontSize;
-        var parsed = parseFloat(computed);
+        var parsed = parseFloat(window.getComputedStyle(h1).fontSize);
         if (parsed > 0) fs = parsed;
       }
       var gapEm = 1.6;
       if (gapEm < 0.75) gapEm = 0.75;
-      var copyTop = Math.ceil(baseY + (gapEm * fs));
+      var gapPx = gapEm * fs;
+      var tcs = window.getComputedStyle(t);
+      var wordMax = readNum(tcs, '--hero-wordmark-max', 0.86);
+      var navMul = readNum(tcs, '--hero-nav-clear', 1.5);
+      var clearMin = readNum(tcs, '--hero-clear-min', 1);
+      var largestGap = 2.5 * fs;
+      var tagEl = s.querySelector('.hero-tagline');
+      var btnEl = s.querySelector('.hero-buttons');
+      var copyH = 280;
+      if (tagEl && btnEl) {
+        var copySpan = btnEl.getBoundingClientRect().bottom - tagEl.getBoundingClientRect().top;
+        if (copySpan > 1) copyH = copySpan;
+      } else if (s.offsetHeight > 1) copyH = s.offsetHeight;
+      var nav = document.querySelector('nav');
+      var navR = nav ? nav.getBoundingClientRect() : { bottom: 64, height: 64, top: 0 };
+      var tR = t.getBoundingClientRect();
+      var navBottom = Math.max(0, navR.bottom - tR.top);
+      var navH = navR.height || 64;
+      var minTop = Math.ceil(Math.max(navMul * navH, clearMin * largestGap) + 2);
+      var minBot = Math.ceil(clearMin * largestGap);
+      var availH = ch - navBottom;
+      var maxBlock = availH - minTop - minBot;
+      if (!(maxBlock > 40)) maxBlock = Math.max(80, availH * 0.72);
+      var sW = (wordMax * cw) / lw;
+      var sH = (maxBlock - gapPx - copyH) / lh;
+      if (!(sH > 0)) sH = 0.15;
+      var scale = Math.min(sW, sH);
+      if (!(scale > 0) || scale !== scale) { flowFallback(); return; }
+      var wordH = lh * scale;
+      var blockH = wordH + gapPx + copyH;
+      var slack = availH - blockH;
+      if (slack < (minTop + minBot)) {
+        var need = navBottom + minTop + blockH + minBot;
+        t.style.height = need + 'px';
+        t.style.minHeight = need + 'px';
+        ch = need;
+        availH = ch - navBottom;
+        slack = availH - blockH;
+      }
+      var topClear = slack / 2;
+      var botClear = slack - topClear;
+      if (topClear < minTop) { topClear = minTop; botClear = slack - topClear; }
+      if (botClear < minBot) { botClear = minBot; topClear = slack - botClear; }
+      if (topClear < minTop) {
+        var need2 = navBottom + minTop + blockH + minBot;
+        t.style.height = need2 + 'px';
+        t.style.minHeight = need2 + 'px';
+        topClear = minTop;
+        botClear = minBot;
+      }
+      if (botClear > 0 && topClear > botClear * 1.25 && topClear > minTop) {
+        var mid = (topClear + botClear) / 2;
+        var lift = Math.min(mid * 0.08, topClear - minTop);
+        topClear = mid - lift;
+        botClear = slack - topClear;
+        if (topClear < minTop) { topClear = minTop; botClear = slack - topClear; }
+      }
+      var letterTop = navBottom + topClear;
+      var videoTop = letterTop - (ly * scale);
+      var letterLeft = (cw - lw * scale) / 2;
+      var videoLeft = letterLeft - (lx * scale);
+      var copyTop = Math.ceil(letterTop + wordH + gapPx);
       if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
+      v.style.width = (srcW * scale) + 'px';
+      v.style.height = (srcH * scale) + 'px';
+      v.style.left = videoLeft + 'px';
+      v.style.top = videoTop + 'px';
+      v.style.maxWidth = 'none';
+      v.style.objectFit = 'fill';
+      var media = document.querySelector('.hero-media');
+      if (media) {
+        media.style.backgroundSize = (srcW * scale) + 'px ' + (srcH * scale) + 'px';
+        media.style.backgroundPosition = videoLeft + 'px ' + videoTop + 'px';
+        media.style.backgroundRepeat = 'no-repeat';
+      }
       t.classList.remove('hero-copy-flow');
       s.style.setProperty('--hero-copy-top', copyTop + 'px');
     } catch (err) {
@@ -691,7 +795,7 @@ class Component extends DCLogic {
     started = true;
     var v = document.getElementById(VID);
     var media = document.querySelector('.hero-media');
-    var poster = wide ? 'media/posters/bond_hero_d.webp' : 'media/posters/bond_hero_m.webp';
+    var poster = isWideNow() ? 'media/posters/bond_hero_d.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
@@ -714,6 +818,9 @@ class Component extends DCLogic {
   }
   window.addEventListener('bond-entered', function () { start(); });
   window.addEventListener('resize', requestLayout);
+  window.addEventListener('orientationchange', requestLayout);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', requestLayout);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(requestLayout);
   var tries = 0;
   var iv = setInterval(function () {
     tries += 1;
