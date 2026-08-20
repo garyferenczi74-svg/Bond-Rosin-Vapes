@@ -132,7 +132,7 @@ var HausStore = {
   member: null,
   seed: function(){
     this.member = {
-      signedIn:false, entered:false, first:'Gary', name:'Gary Ferenczi', email:DEMO_EMAIL, circle:true, age21:false,
+      signedIn:false, entered:false, first:'Gary', name:'Gary Ferenczi', email:DEMO_EMAIL, circle:true, age21:false, // circle: Haus correspondence pref. Do not rename without a data migration.
       shelf: [], claims: [], reserveHolds: [], city: '', guidePlace: 0,
       events: [
         { id:'ev1', name:'An Evening of Three', date:'2026-08-14', city:'Manhattan', line:'The three compositions, poured slowly, in a quiet room.', capacity:'open', rsvp:'none' },
@@ -190,7 +190,7 @@ var HausStore = {
     return rec;
   },
   releaseHold: function(id){ this.member.reserveHolds = this.member.reserveHolds.filter(function(h){ return h.id !== id; }); },
-  record: function(){ var m=this.member; return { name:m.name, email:m.email, circleCorrespondence:m.circle, shelf:m.shelf, reserveClaims:m.claims, reserveHolds:m.reserveHolds, ritualHistory:m.sessions, guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; }
+  record: function(){ var m=this.member; return { name:m.name, email:m.email, circleCorrespondence:m.circle, shelf:m.shelf, reserveClaims:m.claims, reserveHolds:m.reserveHolds, ritualHistory:m.sessions, guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; } // circleCorrespondence: Haus email pref key. Do not rename without a data migration.
 };
 
 // ================= chrome =================
@@ -238,12 +238,12 @@ function renderDoor(fail){
         + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Create your account</button></form>'
         + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px"></p>'
         + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:26px 0 0">Already have a key? <a id="toSignin" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px;cursor:pointer">Sign in.</a></p>'
-        + '<p style="font-size:11.5px;line-height:1.7;letter-spacing:0.02em;color:#6E685E;margin:14px 0 0">Your invitation comes from the Circle. <a href="Home.dc.html#circle" style="color:#8E887C;border-bottom:1px solid #2A2C29;padding-bottom:1px">Join the Circle for first access.</a></p>')
+        + '<p style="font-size:11.5px;line-height:1.7;letter-spacing:0.02em;color:#6E685E;margin:14px 0 0">Your invitation comes from the Haus. <a href="Home.dc.html#haus" style="color:#8E887C;border-bottom:1px solid #2A2C29;padding-bottom:1px">Join the Haus for first access.</a></p>')
       : ('<form id="doorForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left"><input class="field" type="email" name="email" placeholder="Email" autocomplete="email"><input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">'
         + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Enter the Haus</button></form>'
         + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px">'+(fail?'That did not open the door.':'')+'</p>'
         + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:30px 0 0">New to the Haus? <a id="toSignup" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px;cursor:pointer">Create your account.</a></p>'
-        + '<p style="font-size:11.5px;letter-spacing:0.04em;color:#6E685E;margin:14px 0 0">Membership is by invitation from the Circle.</p>'))
+        + '<p style="font-size:11.5px;letter-spacing:0.04em;color:#6E685E;margin:14px 0 0">Membership is by invitation from the Haus.</p>'))
     + '</div></main>' + complianceBand() + '</div>';
   var toUp = document.getElementById('toSignup'); if (toUp){ toUp.addEventListener('click', function(){ doorMode='up'; renderDoor(false); }); }
   var toIn = document.getElementById('toSignin'); if (toIn){ toIn.addEventListener('click', function(){ doorMode='in'; renderDoor(false); }); }
@@ -352,7 +352,7 @@ function renderDashboard(){
   // account
   var aCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Account</span><a href="#/haus/account" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Manage</a></div>'
     + '<div style="margin-top:12px;font-size:12.5px;color:#B0A99A">'+esc(m.name)+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:4px">'+esc(m.email)+'</div>'
-    + '<div style="font-size:11.5px;color:#6E685E;margin-top:8px">Circle correspondence '+(m.circle?'on':'off')+'</div></div>';
+    + '<div style="font-size:11.5px;color:#6E685E;margin-top:8px">Haus correspondence '+(m.circle?'on':'off')+'</div></div>';
 
   var fr = findResult(); var rc = fr ? comp(fr.comp) : null;
   var recCard = rc
@@ -595,7 +595,7 @@ function renderAccount(){
     + '<div class="card"><div class="lbl">Member</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">'
     + '<div><div style="font-size:11px;color:#6E685E">Name</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.name)+'</div></div>'
     + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div>'
-    + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefCircle"'+(m.circle?' checked':'')+'> Circle correspondence</label></div></div>'
+    + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefHaus"'+(m.circle?' checked':'')+'> Haus correspondence</label></div></div>'
     + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises.</p>'
     + '<button id="dlRecord" class="htab on" style="padding:0 22px;height:40px">Download my record</button>'
     + '<div style="margin-top:18px">'+eraseRow('notes','Tasting notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
@@ -676,7 +676,7 @@ document.addEventListener('input', function(ev){
   if (ev.target.id==='rFree' && ev.target.value.trim()){ ritual.freeText=ev.target.value; }
 });
 document.addEventListener('change', function(ev){
-  if (ev.target.id==='prefCircle'){ HausStore.member.circle=ev.target.checked; toast(ev.target.checked?'Circle correspondence on.':'Circle correspondence off.'); }
+  if (ev.target.id==='prefHaus'){ HausStore.member.circle=ev.target.checked; toast(ev.target.checked?'Haus correspondence on.':'Haus correspondence off.'); }
 });
 
 function downloadRecord(){

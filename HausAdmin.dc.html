@@ -117,7 +117,7 @@ function lint(text){
 var Store = {
   data: null,
   load: function(){
-    try { var raw = localStorage.getItem(STORE_KEY); if (raw){ this.data = JSON.parse(raw); return; } } catch(e){}
+    try { var raw = localStorage.getItem(STORE_KEY); if (raw){ this.data = JSON.parse(raw); if (this.data.circleList && !this.data.hausList) this.data.hausList = this.data.circleList; return; } } catch(e){} // circleList: previous mock key. Haus is the canonical name.
     this.seed(); this.save();
   },
   save: function(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(this.data)); } catch(e){} },
@@ -154,12 +154,12 @@ var Store = {
         { id:'ritual', title:'The Ritual', kind:'ritual', body:'Prepare. Pause. Elevate.', tint:'', order:6, state:'published', versions:[] }
       ],
       invitations: [
-        { email:'circle-1@example.com', state:'issued', issued:'2026-07-24', expires:'2026-08-23' },
-        { email:'circle-2@example.com', state:'issued', issued:'2026-06-30', expires:'2026-07-30' },
-        { email:'circle-3@example.com', state:'accepted', issued:'2026-07-02', expires:'2026-08-01' },
-        { email:'circle-4@example.com', state:'expired', issued:'2026-06-01', expires:'2026-07-01' }
+        { email:'haus-1@example.com', state:'issued', issued:'2026-07-24', expires:'2026-08-23' },
+        { email:'haus-2@example.com', state:'issued', issued:'2026-06-30', expires:'2026-07-30' },
+        { email:'haus-3@example.com', state:'accepted', issued:'2026-07-02', expires:'2026-08-01' },
+        { email:'haus-4@example.com', state:'expired', issued:'2026-06-01', expires:'2026-07-01' }
       ],
-      circleList: ['circle-5@example.com','circle-6@example.com','circle-7@example.com'],
+      hausList: ['haus-5@example.com','haus-6@example.com','haus-7@example.com'],
       accounts: [
         { email:'member@bond.test', state:'active' },
         { email:'nora@example.com', state:'active' },
@@ -199,7 +199,7 @@ var Store = {
   declineRequest: function(evId, code){ var e=this.byId('events',evId); var r=e.requests.filter(function(x){return x.code===code;})[0]; if (!r) return; r.state='declined'; this.audit('Declined RSVP '+code,'requested','declined'); this.save(); },
 
   // ---- members ----
-  issueInvitation: function(email){ this.data.invitations.unshift({ email:email, state:'issued', issued:'2026-07-27', expires:'2026-08-26' }); this.data.circleList = this.data.circleList.filter(function(e){ return e !== email; }); this.audit('Issued invitation '+email, '', 'issued'); this.save(); },
+  issueInvitation: function(email){ this.data.invitations.unshift({ email:email, state:'issued', issued:'2026-07-27', expires:'2026-08-26' }); this.data.hausList = this.data.hausList.filter(function(e){ return e !== email; }); this.audit('Issued invitation '+email, '', 'issued'); this.save(); },
   reissueInvitation: function(email){ var i=this.byId('invitations',email,'email'); if (i){ i.state='issued'; i.issued='2026-07-27'; i.expires='2026-08-26'; this.audit('Reissued invitation '+email, 'expired', 'issued'); this.save(); } },
   revokeInvitation: function(email){ var i=this.byId('invitations',email,'email'); if (i){ var b=i.state; i.state='revoked'; this.audit('Revoked invitation '+email, b, 'revoked'); this.save(); } },
   suspendAccount: function(email, reason){ var a=this.byId('accounts',email,'email'); if (a){ a.state='suspended'; a.reason=reason; this.audit('Suspended '+email+' ('+reason+')','active','suspended'); this.save(); } },
@@ -389,9 +389,9 @@ function renderGuide(){
 function renderMembers(){
   var d = Store.data;
   var head = headerBar('Members', 'Administration without surveillance.', pv());
-  var inviteOpts = d.circleList.map(function(e){ return '<option value="'+esc(e)+'">'+esc(e)+'</option>'; }).join('');
+  var inviteOpts = d.hausList.map(function(e){ return '<option value="'+esc(e)+'">'+esc(e)+'</option>'; }).join('');
   var invites = '<div class="card"><div class="lbl" style="margin-bottom:12px">Invitations</div>'
-    + '<div style="display:flex;gap:10px;flex-wrap:wrap"><select id="inviteEmail" class="vfield" style="flex:1;min-width:200px"><option value="">Choose a Circle email</option>'+inviteOpts+'</select><button id="issueInvite" class="act go" style="padding:0 20px">Issue</button></div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap"><select id="inviteEmail" class="vfield" style="flex:1;min-width:200px"><option value="">Choose a Haus email</option>'+inviteOpts+'</select><button id="issueInvite" class="act go" style="padding:0 20px">Issue</button></div>'
     + '<table class="data" style="margin-top:14px"><thead><tr><th>Email</th><th>State</th><th>Expires</th><th></th></tr></thead><tbody>'
     + d.invitations.map(function(i){ return '<tr><td class="mono">'+esc(i.email)+'</td><td>'+stateChip(i.state)+'</td><td class="mono">'+esc(i.expires)+'</td><td>'+(i.state==='expired'?'<button class="act" data-reissue="'+esc(i.email)+'">Reissue</button> ':'')+(i.state==='issued'?'<button class="act no" data-revoke="'+esc(i.email)+'">Revoke</button>':'')+'</td></tr>'; }).join('')+'</tbody></table></div>';
   var accounts = '<div class="card" style="margin-top:16px"><div class="lbl" style="margin-bottom:12px">Accounts</div><table class="data"><thead><tr><th>Email</th><th>State</th><th></th></tr></thead><tbody>'
@@ -476,7 +476,7 @@ document.addEventListener('click', function(ev){
   var grs=t.closest('[data-grestore]'); if (grs){ var g3=Store.byId('guide',grs.getAttribute('data-grestore')); if (g3.versions.length){ g3.body=g3.versions[g3.versions.length-1].body; Store.audit('Restored version of '+g3.id,'',''); Store.save(); toast('Restored.'); renderGuide(); } return; }
 
   // members
-  if (t.id==='issueInvite'){ var em=valOf('inviteEmail'); if (!em){ toast('Choose a Circle email.'); return; } Store.issueInvitation(em); toast('Invitation issued.'); renderMembers(); return; }
+  if (t.id==='issueInvite'){ var em=valOf('inviteEmail'); if (!em){ toast('Choose a Haus email.'); return; } Store.issueInvitation(em); toast('Invitation issued.'); renderMembers(); return; }
   var ri=t.closest('[data-reissue]'); if (ri){ Store.reissueInvitation(ri.getAttribute('data-reissue')); toast('Reissued.'); renderMembers(); return; }
   var rv=t.closest('[data-revoke]'); if (rv){ Store.revokeInvitation(rv.getAttribute('data-revoke')); toast('Revoked. Registration will fail with the neutral line.'); renderMembers(); return; }
   var su=t.closest('[data-suspend]'); if (su){ var reason=prompt('Reason for suspension:'); if (reason !== null){ Store.suspendAccount(su.getAttribute('data-suspend'), reason||'No reason recorded'); toast('Suspended. Sign-in shows the neutral door line.'); renderMembers(); } return; }
