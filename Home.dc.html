@@ -31,7 +31,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-video.hero-vis { opacity: 1; }
 @media (min-width: 1200px) { .hero-video { top: -80px; height: 115%; } }
 @media (max-width: 1199px) { .hero-video { top: -120px; height: 115%; } }
-.hero-text { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); width: 100%; max-width: 720px; padding: 64px 32px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 43px; text-align: center; pointer-events: none; }
+.hero-text { position: absolute; left: 50%; top: var(--hero-copy-top, 62%); bottom: auto; transform: translateX(-50%); width: 100%; max-width: 720px; padding: 0 32px 24px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: var(--hero-stack-gap, 43px); text-align: center; pointer-events: none; }
 .hero-text .hero-row { opacity: 0; transform: translateY(14px); transition: opacity .45s cubic-bezier(0.44,0,0.56,1), transform .45s cubic-bezier(0.44,0,0.56,1); }
 .hero-text.hero-in .hero-row { opacity: 1; transform: translateY(0); }
 .hero-text.hero-in .hero-tagline { transition-delay: 0s; }
@@ -55,8 +55,12 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-btn-primary:hover { background: #FFE2A3; box-shadow: 0 12px 30px rgba(238,186,91,0.62); }
 .hero-btn-secondary { padding: 15px 32px; color: #E1DAD0; border: 1px solid #E9BD82; background: linear-gradient(105deg, rgba(41,24,10,0.68) 0%, rgba(0,0,0,0.35) 48%, rgba(75,47,17,0.58) 100%); box-shadow: inset 0 1px 0 rgba(255,231,170,0.32), 0 0 0 1px rgba(116,72,25,0.55), 0 3px 12px rgba(0,0,0,0.32); }
 .hero-btn-secondary:hover { background: #C48735; box-shadow: 0 12px 30px rgba(238,186,91,0.54); }
+#top.hero-copy-flow { display: flex; flex-direction: column; }
+#top.hero-copy-flow .hero-media { position: relative; flex: 1 1 auto; min-height: 48vh; }
+#top.hero-copy-flow .hero-text { position: relative; left: auto; top: auto; transform: none; width: 100%; margin: 0 auto; padding: 0.75em 32px 32px; }
 @media (max-width: 1199px) {
-  .hero-text { bottom: 88px; max-width: 342px; padding: 48px 24px; gap: 18px; }
+  .hero-text { top: var(--hero-copy-top, 56%); bottom: auto; max-width: 342px; padding: 0 24px 24px; gap: var(--hero-stack-gap, 18px); }
+  #top.hero-copy-flow .hero-text { padding: 0.75em 24px 28px; }
   .hero-tagline { gap: 6px; }
   .hero-tagline h1 { font-size: 17px; letter-spacing: 2px; padding-left: 2px; line-height: 1.15; }
   .hero-rule { width: 36px; }
@@ -586,34 +590,104 @@ class Component extends DCLogic {
 // once, fade it in, then roll the content rows in on the ended event. Gated on
 // the age gate release so it plays into view, never on scroll or tab return.
 // Reduced motion makes no video request and reveals the content at once.
+// Prompt 6: tagline is locked below the video-baked BOND baseline using
+// cover-fit crop math. No per-breakpoint absolute offsets.
 (function () {
-  var VID = 'hero-video', STACK = 'hero-textstack';
+  var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
+  var DESK_W = 3840, DESK_H = 2160, DESK_BASE = 1082;
+  var MOB_W = 1080, MOB_H = 1920, MOB_BASE = 845;
   var wide = false;
   try { wide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 1200; }
   var clip = wide ? 'bond_hero_desktop.mp4' : 'bond_hero_mobile.mp4';
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var layoutRaf = 0;
+
   function reveal(instant) {
     var s = document.getElementById(STACK);
     if (s === null) return;
     if (instant === true) s.classList.add('hero-instant');
     s.classList.add('hero-in');
   }
+
+  function flowFallback() {
+    var t = document.getElementById(STAGE);
+    var s = document.getElementById(STACK);
+    if (t) t.classList.add('hero-copy-flow');
+    if (s) {
+      s.style.removeProperty('--hero-copy-top');
+      s.style.removeProperty('--hero-stack-gap');
+    }
+  }
+
+  function layoutCopy() {
+    try {
+      var t = document.getElementById(STAGE);
+      var s = document.getElementById(STACK);
+      var v = document.getElementById(VID);
+      if (t === null || s === null) return;
+      var ch = t.clientHeight;
+      var isWide = false;
+      try { isWide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { isWide = (window.innerWidth || 0) >= 1200; }
+      var elW = v ? v.clientWidth : 0;
+      var elH = v ? v.clientHeight : 0;
+      var hidden = !v || v.style.display === 'none' || reduced === true;
+      if (hidden || elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
+      var srcW = (v.videoWidth > 1) ? v.videoWidth : (isWide ? DESK_W : MOB_W);
+      var srcH = (v.videoHeight > 1) ? v.videoHeight : (isWide ? DESK_H : MOB_H);
+      var baseSrc = isWide ? (DESK_BASE * (srcH / DESK_H)) : (MOB_BASE * (srcH / MOB_H));
+      var scale = Math.max(elW / srcW, elH / srcH);
+      var rendH = srcH * scale;
+      var offY = (elH - rendH) / 2;
+      var baseY = v.offsetTop + offY + (baseSrc * scale);
+      var h1 = s.querySelector('.hero-tagline h1');
+      var fs = isWide ? 28 : 17;
+      if (h1) {
+        var computed = window.getComputedStyle(h1).fontSize;
+        var parsed = parseFloat(computed);
+        if (parsed > 0) fs = parsed;
+      }
+      var copyTop = Math.ceil(baseY + (0.75 * fs));
+      if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
+      t.classList.remove('hero-copy-flow');
+      var defaultGap = isWide ? 43 : 18;
+      s.style.setProperty('--hero-copy-top', copyTop + 'px');
+      s.style.setProperty('--hero-stack-gap', defaultGap + 'px');
+      var need = s.offsetHeight;
+      var overflow = copyTop + need - ch;
+      if (overflow > 0) {
+        var tighter = Math.max(8, defaultGap - Math.ceil(overflow / 3));
+        s.style.setProperty('--hero-stack-gap', tighter + 'px');
+      }
+    } catch (err) {
+      flowFallback();
+    }
+  }
+
+  function requestLayout() {
+    if (layoutRaf) return;
+    layoutRaf = requestAnimationFrame(function () {
+      layoutRaf = 0;
+      layoutCopy();
+    });
+  }
+
   function start() {
     if (started === true) return;
     var s = document.getElementById(STACK);
     if (s === null) return;
     started = true;
     var v = document.getElementById(VID);
-    if (reduced === true) { if (v !== null) v.style.display = 'none'; reveal(true); return; }
-    if (v === null) { reveal(false); return; }
+    if (reduced === true) { if (v !== null) v.style.display = 'none'; requestLayout(); reveal(true); return; }
+    if (v === null) { requestLayout(); reveal(false); return; }
     v.muted = true;
     v.setAttribute('playsinline', '');
-    v.addEventListener('playing', function () { v.classList.add('hero-vis'); });
+    v.addEventListener('playing', function () { v.classList.add('hero-vis'); requestLayout(); });
+    v.addEventListener('loadedmetadata', requestLayout);
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
     v.addEventListener('ended', runText);
-    v.addEventListener('error', runText);
+    v.addEventListener('error', function () { requestLayout(); runText(); });
     if (v.querySelector('source') === null) {
       var src = document.createElement('source');
       src.src = clip; src.type = 'video/mp4';
@@ -623,21 +697,24 @@ class Component extends DCLogic {
     try { v.currentTime = 0; } catch (e) {}
     var p = v.play();
     if (p && typeof p.catch === 'function') {
-      p.catch(function () { runText(); });
+      p.catch(function () { requestLayout(); runText(); });
     }
+    requestLayout();
   }
   function released() {
-    var t = document.getElementById('top');
+    var t = document.getElementById(STAGE);
     if (t === null) return false;
     return t.classList.contains('hero-hold') === false;
   }
   window.addEventListener('bond-entered', function () { start(); });
+  window.addEventListener('resize', requestLayout);
   var tries = 0;
   var iv = setInterval(function () {
     tries += 1;
     if (released() === true) { clearInterval(iv); start(); }
     else if (tries > 600) { clearInterval(iv); start(); }
   }, 100);
+  requestLayout();
 })();
 </script>
 </body>
