@@ -33,8 +33,10 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   height: 100vh; min-height: 100vh; max-width: 1920px; margin: 0 auto; overflow: hidden;
 }
 .hero-media { position: absolute; inset: 0; overflow: hidden; background: #000000 center / cover no-repeat; }
-.hero-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
+.hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
+@media (min-width: 1200px) { .hero-video { top: -80px; height: 115%; } }
+@media (max-width: 1199px) { .hero-video { top: 0; height: 100%; } }
 .hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(11px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
 .hero-text {
   --hero-tagline-size: 28px;
@@ -129,13 +131,13 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
         data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
-        data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v1.webm"
-        data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v1.mp4"
+        data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v2.webm"
+        data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v2.mp4"
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
         data-mobile-mp4="media/ladder/bond_hero_m.1080.h264.v1.mp4"
-        data-desktop-poster="media/posters/bond_hero_d.webp"
+        data-desktop-poster="media/posters/bond_hero_d.v2.webp"
         data-mobile-poster="media/posters/bond_hero_m.webp"
-        poster="media/posters/bond_hero_d.webp"></video>
+        poster="media/posters/bond_hero_d.v2.webp"></video>
     </div>
     <div id="hero-textstack" class="hero-text">
       <div class="hero-row hero-tagline">
@@ -619,7 +621,6 @@ class Component extends DCLogic {
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
   var WIDE_MQ = '(min-width: 1200px)';
-  var DESK_L = { refW: 1920, refH: 1080, x: 312, y: 237, w: 1292, h: 311, base: 547 };
   var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
@@ -672,27 +673,63 @@ class Component extends DCLogic {
     }
   }
 
+  function layoutDesktop(t, s, v) {
+    clearVideoBox(v);
+    var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.removeProperty('background-size');
+      media.style.removeProperty('background-position');
+      media.style.removeProperty('background-repeat');
+    }
+    t.style.removeProperty('height');
+    t.style.removeProperty('min-height');
+    var ch = t.clientHeight;
+    var elW = v.clientWidth;
+    var elH = v.clientHeight;
+    if (elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var baseSrc = 1082 * (srcH / 2160);
+    var scale = Math.max(elW / srcW, elH / srcH);
+    var rendH = srcH * scale;
+    var offY = (elH - rendH) / 2;
+    var baseY = v.offsetTop + offY + (baseSrc * scale);
+    var h1 = s.querySelector('.hero-tagline h1');
+    var fs = 28;
+    if (h1) {
+      var parsed = parseFloat(window.getComputedStyle(h1).fontSize);
+      if (parsed > 0) fs = parsed;
+    }
+    var gapEm = 1.6;
+    if (gapEm < 0.75) gapEm = 0.75;
+    var copyTop = Math.ceil(baseY + (gapEm * fs));
+    if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
+    t.classList.remove('hero-copy-flow');
+    s.style.setProperty('--hero-copy-top', copyTop + 'px');
+  }
+
   function layoutCopy() {
     try {
       var t = document.getElementById(STAGE);
       var s = document.getElementById(STACK);
       var v = document.getElementById(VID);
       if (t === null || s === null) return;
+      var isWide = isWideNow();
+      var hidden = !v || v.style.display === 'none' || reduced === true;
+      if (hidden) { flowFallback(); return; }
+      if (isWide) { layoutDesktop(t, s, v); return; }
       t.style.removeProperty('height');
       t.style.removeProperty('min-height');
       var ch = t.clientHeight;
       var cw = t.clientWidth || window.innerWidth || 0;
-      var isWide = isWideNow();
-      var hidden = !v || v.style.display === 'none' || reduced === true;
-      if (hidden || ch < 2 || cw < 2) { flowFallback(); return; }
-      var srcW = (v.videoWidth > 1) ? v.videoWidth : (isWide ? DESK_L.refW : MOB_L.refW);
-      var srcH = (v.videoHeight > 1) ? v.videoHeight : (isWide ? DESK_L.refH : MOB_L.refH);
-      if (v.videoWidth > 1 && v.videoHeight > 1) isWide = v.videoWidth >= v.videoHeight;
-      var L = isWide ? DESK_L : MOB_L;
+      if (ch < 2 || cw < 2) { flowFallback(); return; }
+      var srcW = (v.videoWidth > 1) ? v.videoWidth : MOB_L.refW;
+      var srcH = (v.videoHeight > 1) ? v.videoHeight : MOB_L.refH;
+      var L = MOB_L;
       var sx = srcW / L.refW, sy = srcH / L.refH;
       var lx = L.x * sx, ly = L.y * sy, lw = L.w * sx, lh = L.h * sy;
       var h1 = s.querySelector('.hero-tagline h1');
-      var fs = isWide ? 28 : 17;
+      var fs = 17;
       if (h1) {
         var parsed = parseFloat(window.getComputedStyle(h1).fontSize);
         if (parsed > 0) fs = parsed;
@@ -796,7 +833,7 @@ class Component extends DCLogic {
     started = true;
     var v = document.getElementById(VID);
     var media = document.querySelector('.hero-media');
-    var poster = isWideNow() ? 'media/posters/bond_hero_d.webp' : 'media/posters/bond_hero_m.webp';
+    var poster = isWideNow() ? 'media/posters/bond_hero_d.v2.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
