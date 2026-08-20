@@ -1,0 +1,167 @@
+﻿{
+    "date":  "2026-08-20",
+    "masters":  [
+                    {
+                        "file":  "bond_hero_desktop.mp4",
+                        "role":  "home desktop 4K master"
+                    },
+                    {
+                        "file":  "bond_hero_mobile.mp4",
+                        "role":  "home mobile 9x16 master"
+                    },
+                    {
+                        "file":  "Dialed_waves_16x9.mp4",
+                        "role":  "No.1 hero 16x9 master"
+                    },
+                    {
+                        "file":  "Dialed_waves_9x16.mp4",
+                        "role":  "No.1 hero 9x16 master"
+                    },
+                    {
+                        "file":  "Peak_Fire_16x9.mp4",
+                        "role":  "No.3 hero 16x9 master"
+                    },
+                    {
+                        "file":  "Peak_Fire_9x16.mp4",
+                        "role":  "No.3 hero 9x16 master"
+                    },
+                    {
+                        "file":  "Unwind_Night_Sky_2_16x9.mp4",
+                        "role":  "No.2 hero 16x9 master"
+                    },
+                    {
+                        "file":  "Unwind_Night_Sky_2_9x16.mp4",
+                        "role":  "No.2 hero 9x16 master"
+                    },
+                    {
+                        "file":  "Dialed_promo_video_3x4.mp4",
+                        "role":  "No.1 promo 3x4 master"
+                    },
+                    {
+                        "file":  "Peak_promo_video_3x4.mp4",
+                        "role":  "No.3 promo 3x4 master"
+                    },
+                    {
+                        "file":  "Unwind_promo_video_3x4.mp4",
+                        "role":  "No.2 promo 3x4 master"
+                    }
+                ],
+    "note":  "Masters remain at repo root and are never referenced by video src. Ladder is two-pass H.264 High yuv420p and VP9, audio stripped, mp4 faststart, keyint 48.",
+    "derivatives":  [
+                        {
+                            "file":  "bond_hero_d.1080.h264.v1.mp4",
+                            "bytes":  5896879,
+                            "sha256":  "C74E59A5454B165ED0BCED0FF92EB14E36D9C747376FFD5D9DD7F1FFE77B8938"
+                        },
+                        {
+                            "file":  "bond_hero_d.1080.vp9.v1.webm",
+                            "bytes":  3968785,
+                            "sha256":  "739F1D070095ED564DABFB842479AC99F7B47A84127EDCD6C130AB29F1F5B3A0"
+                        },
+                        {
+                            "file":  "bond_hero_d.720.h264.v1.mp4",
+                            "bytes":  2900417,
+                            "sha256":  "B5B66A1A0E58E7D01580A0164AA8C2359AFAECB6CDF9722A0F564E4A1EBB5C25"
+                        },
+                        {
+                            "file":  "bond_hero_m.1080.h264.v1.mp4",
+                            "bytes":  3215203,
+                            "sha256":  "679322B2DB25B8C16CD2484129CE3E33A3FD9D4E98718C58037A3B1D57795129"
+                        },
+                        {
+                            "file":  "bond_hero_m.1080.vp9.v1.webm",
+                            "bytes":  2996717,
+                            "sha256":  "1F1D71E3A54899FFAB38F7E5ECC26AB02748FC198772BA4BEE9EB81C5271F309"
+                        },
+                        {
+                            "file":  "dialed_n.720.h264.v1.mp4",
+                            "bytes":  3729518,
+                            "sha256":  "79E903FD0E60E84EE285A9393BEB306AE668ED59256766B41A986D58170081F8"
+                        },
+                        {
+                            "file":  "dialed_n.720.vp9.v1.webm",
+                            "bytes":  3033056,
+                            "sha256":  "4F5FCDED11F65EB2904B5856DCA3A95F390270FA5C0D5599D63ECA0DE8331FCF"
+                        },
+                        {
+                            "file":  "dialed_p.3x4.h264.v1.mp4",
+                            "bytes":  3641127,
+                            "sha256":  "4CE10D559C36F344F9B3E2C147DCC019E9B2B33046AF9D41B0EC7A1CFB7A9139"
+                        },
+                        {
+                            "file":  "dialed_p.3x4.vp9.v1.webm",
+                            "bytes":  3099357,
+                            "sha256":  "C7F0EB560444521CFCE9D7B2F4C525C69909BAB7BFE423CFB3ECF92D90B1C75D"
+                        },
+                        {
+                            "file":  "dialed_w.720.h264.v1.mp4",
+                            "bytes":  3486072,
+                            "sha256":  "0C536EF7D1DC412CC68C67B137E20227A0BCEDFF80B93C3BA3A96895A4FF754E"
+                        },
+                        {
+                            "file":  "dialed_w.720.vp9.v1.webm",
+                            "bytes":  3215586,
+                            "sha256":  "9C897D701F11680DC27A309AA742FCBBCFA3C1816810310D141C01B39D75DAA6"
+                        },
+                        {
+                            "file":  "peak_n.720.h264.v1.mp4",
+                            "bytes":  3775373,
+                            "sha256":  "F8B2ED15D1F7F07DC61A0A5345F89E3D1931FDAFA5917DC691A9AAB7AA21895C"
+                        },
+                        {
+                            "file":  "peak_n.720.vp9.v1.webm",
+                            "bytes":  3080933,
+                            "sha256":  "8A5ECC1120EE101123784A21675D2061EF2C847895AD7D771E57DD827627C9B3"
+                        },
+                        {
+                            "file":  "peak_p.3x4.h264.v1.mp4",
+                            "bytes":  3742368,
+                            "sha256":  "8743B9A7A9FF0189C6F3FCEA4F502162B1FAB2B811028E7D2BB8B8FCFEE73CFB"
+                        },
+                        {
+                            "file":  "peak_p.3x4.vp9.v1.webm",
+                            "bytes":  3001615,
+                            "sha256":  "6BCEF5008B8BBBD96689520791C3B347FEEA79C769C51BBC791F9E8ED7C16EE5"
+                        },
+                        {
+                            "file":  "peak_w.720.h264.v1.mp4",
+                            "bytes":  3523331,
+                            "sha256":  "4A3AA627E80044FB5BB11F5E6A7BFB13FAB78D3BB2DB7548337587C7B762ACEE"
+                        },
+                        {
+                            "file":  "peak_w.720.vp9.v1.webm",
+                            "bytes":  2783831,
+                            "sha256":  "CC5A86D057BDE190A3325E8B4FEA17568BD687FB676C8185F4A8EAF009E17106"
+                        },
+                        {
+                            "file":  "unwind_n.720.h264.v1.mp4",
+                            "bytes":  3085099,
+                            "sha256":  "630BEF26632562C458247DBAF3A2E7D0C222CAE656BD16BDDD5F8DBB7F785329"
+                        },
+                        {
+                            "file":  "unwind_n.720.vp9.v1.webm",
+                            "bytes":  2671551,
+                            "sha256":  "D7BBBBD8606617A7749C9730EF2C657453AE5C2BB09812715B172FAAF9B3A95A"
+                        },
+                        {
+                            "file":  "unwind_p.3x4.h264.v1.mp4",
+                            "bytes":  3048957,
+                            "sha256":  "2EBD2DF58268B6851FBA9F750C4079A303428CF3776FBD88BEC7999C54FD39ED"
+                        },
+                        {
+                            "file":  "unwind_p.3x4.vp9.v1.webm",
+                            "bytes":  2460846,
+                            "sha256":  "C8CD07EA16BB6A1F8DF08BE8274977DDF1841804516FCA9B7FA3A8D8560AF75E"
+                        },
+                        {
+                            "file":  "unwind_w.720.h264.v1.mp4",
+                            "bytes":  3383119,
+                            "sha256":  "B96A14107F5050C011BE8F78629C60481D37FBF204443E463856EEFEA25AA2FA"
+                        },
+                        {
+                            "file":  "unwind_w.720.vp9.v1.webm",
+                            "bytes":  2762747,
+                            "sha256":  "86EE41755BEA8940DEF8E5F7F51D10E68FA02848F0172C5B2EC9551CD2C3FDF0"
+                        }
+                    ]
+}

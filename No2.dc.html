@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="./support.js"></script>
+<script src="./video-policy.js"></script>
 </head>
 <body>
 <x-dc>
@@ -57,7 +58,16 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   </nav>
 
   <section data-screen-label="No. 2 World Hero" style="position:relative;height:100vh;min-height:600px;overflow:hidden;background:#0C131C">
-    <video id="no2-hero-video" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0C131C;transform:translateZ(0);will-change:transform"></video>
+    <video id="no2-hero-video" muted loop playsinline preload="auto" disablepictureinpicture
+      data-bond-video data-hero="1" data-wide-mq="(min-width: 768px)"
+      data-desktop-webm="media/ladder/unwind_w.720.vp9.v1.webm"
+      data-desktop-mp4="media/ladder/unwind_w.720.h264.v1.mp4"
+      data-mobile-webm="media/ladder/unwind_n.720.vp9.v1.webm"
+      data-mobile-mp4="media/ladder/unwind_n.720.h264.v1.mp4"
+      data-desktop-poster="media/posters/unwind_w.webp"
+      data-mobile-poster="media/posters/unwind_n.webp"
+      poster="media/posters/unwind_w.webp"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0C131C;transform:translateZ(0)"></video>
     <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 920px 640px at 50% 48%, rgba(12,19,28,0.62) 0%, rgba(12,19,28,0.34) 55%, rgba(12,19,28,0.12) 100%)"></div>
     <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(96px,17vw,210px);line-height:1;color:#E1DAD0">No. 2</div>
@@ -76,7 +86,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <section data-screen-label="Product" style="background:#1B1D1C;padding:0 clamp(20px,4vw,56px) clamp(80px,10vw,140px)">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;max-width:1080px;margin:0 auto;align-items:center">
-      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5);background:#1B1D1C"><video id="no2-video" autoplay muted loop playsinline preload="auto" poster="Unwind_poster.webp" style="display:block;width:100%;height:100%;object-fit:cover"><source src="Unwind_promo_video_3x4.mp4" type="video/mp4"></video></div>
+      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5);background:#1B1D1C"><video id="no2-video" muted loop playsinline preload="metadata" disablepictureinpicture poster="Unwind_poster.webp" data-bond-video data-desktop-webm="media/ladder/unwind_p.3x4.vp9.v1.webm" data-desktop-mp4="media/ladder/unwind_p.3x4.h264.v1.mp4" data-mobile-webm="media/ladder/unwind_p.3x4.vp9.v1.webm" data-mobile-mp4="media/ladder/unwind_p.3x4.h264.v1.mp4" data-desktop-poster="Unwind_poster.webp" data-mobile-poster="Unwind_poster.webp" style="display:block;width:100%;height:100%;object-fit:cover"></video></div>
       <div>
         <div style="width:56px;height:1px;background:#86ACE3"></div>
         <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8E887C;margin-top:28px">LIVE ROSIN VAPE</div>
@@ -231,62 +241,7 @@ class Component extends DCLogic {
 }
 </script>
 <script>
-// Keep the No. 2 Unwind promo video muted, looping, and playing. The template
-// runtime recreates the video on re-render and drops the muted and loop boolean
-// attributes, and Chrome pauses video-only media once it drifts to the
-// background, so re-assert the state on a light interval and whenever the tab
-// returns to view.
-(function () {
-  var VID = 'no2-video';
-  function ensure() {
-    var v = document.getElementById(VID);
-    if (v === null) return;
-    if (v.muted === false) v.muted = true;
-    if (v.defaultMuted === false) v.defaultMuted = true;
-    if (v.loop === false) v.loop = true;
-    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
-      var p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(function () {});
-    }
-  }
-  setInterval(ensure, 250);
-  document.addEventListener('visibilitychange', ensure);
-  window.addEventListener('focus', ensure);
-  window.addEventListener('pageshow', ensure);
-})();
-</script>
-<script>
-// Keep the No. 2 hero background video responsive, muted, looping, and playing.
-// The runtime recreates the video on re-render and drops the source and the
-// muted and loop attributes, so pick the clip by width (16x9 on desktop, 9x16
-// on mobile) and re-assert on a light interval and whenever the tab returns.
-(function () {
-  var VID = 'no2-hero-video';
-  function clip() {
-    var wide = false;
-    try { wide = window.matchMedia('(min-width: 768px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 768; }
-    return wide ? 'Unwind_Night_Sky_2_16x9.mp4' : 'Unwind_Night_Sky_2_9x16.mp4';
-  }
-  function ensure() {
-    var v = document.getElementById(VID);
-    if (v === null) return;
-    var want = clip();
-    var src = v.querySelector('source');
-    if (src === null) { src = document.createElement('source'); src.type = 'video/mp4'; v.appendChild(src); }
-    if (src.getAttribute('src') !== want) { src.setAttribute('src', want); v.load(); }
-    if (v.muted === false) v.muted = true;
-    if (v.defaultMuted === false) v.defaultMuted = true;
-    if (v.loop === false) v.loop = true;
-    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
-      var p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(function () {});
-    }
-  }
-  setInterval(ensure, 250);
-  document.addEventListener('visibilitychange', ensure);
-  window.addEventListener('focus', ensure);
-  window.addEventListener('pageshow', ensure);
-})();
+// Video playback is owned by video-policy.js (Prompt 6a).
 </script>
 </body>
 </html>

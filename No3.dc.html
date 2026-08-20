@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="./support.js"></script>
+<script src="./video-policy.js"></script>
 </head>
 <body>
 <x-dc>
@@ -57,7 +58,16 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   </nav>
 
   <section data-screen-label="No. 3 World Hero" style="position:relative;height:100vh;min-height:600px;overflow:hidden;background:#140807">
-    <video id="no3-hero-video" autoplay muted loop playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#140807;transform:translateZ(0);will-change:transform"></video>
+    <video id="no3-hero-video" muted loop playsinline preload="auto" disablepictureinpicture
+      data-bond-video data-hero="1" data-wide-mq="(min-width: 768px)"
+      data-desktop-webm="media/ladder/peak_w.720.vp9.v1.webm"
+      data-desktop-mp4="media/ladder/peak_w.720.h264.v1.mp4"
+      data-mobile-webm="media/ladder/peak_n.720.vp9.v1.webm"
+      data-mobile-mp4="media/ladder/peak_n.720.h264.v1.mp4"
+      data-desktop-poster="media/posters/peak_w.webp"
+      data-mobile-poster="media/posters/peak_n.webp"
+      poster="media/posters/peak_w.webp"
+      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#140807;transform:translateZ(0)"></video>
     <div style="position:absolute;inset:0;background:radial-gradient(600px 400px at 70% 70%, rgba(217,120,60,0.08), transparent 70%);animation:candleGlow 5.5s ease-in-out infinite"></div>
     <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 920px 640px at 50% 48%, rgba(20,8,7,0.62) 0%, rgba(20,8,7,0.34) 55%, rgba(20,8,7,0.12) 100%)"></div>
     <div style="position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px">
@@ -78,7 +88,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <section data-screen-label="Product" style="background:#1B1D1C;padding:0 clamp(20px,4vw,56px) clamp(80px,10vw,140px)">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:56px;max-width:1080px;margin:0 auto;align-items:center">
-      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5);background:#1B1D1C"><video id="no3-video" autoplay muted loop playsinline preload="auto" poster="Peak_poster.webp" style="display:block;width:100%;height:100%;object-fit:cover"><source src="Peak_promo_video_3x4.mp4" type="video/mp4"></video></div>
+      <div style="aspect-ratio:4/5;overflow:hidden;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,0.5);background:#1B1D1C"><video id="no3-video" muted loop playsinline preload="metadata" disablepictureinpicture poster="Peak_poster.webp" data-bond-video data-desktop-webm="media/ladder/peak_p.3x4.vp9.v1.webm" data-desktop-mp4="media/ladder/peak_p.3x4.h264.v1.mp4" data-mobile-webm="media/ladder/peak_p.3x4.vp9.v1.webm" data-mobile-mp4="media/ladder/peak_p.3x4.h264.v1.mp4" data-desktop-poster="Peak_poster.webp" data-mobile-poster="Peak_poster.webp" style="display:block;width:100%;height:100%;object-fit:cover"></video></div>
       <div>
         <div style="width:56px;height:1px;background:#A53A28"></div>
         <div style="font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:#8E887C;margin-top:28px">LIVE ROSIN VAPE &middot; RESERVE EDITION</div>
@@ -233,62 +243,7 @@ class Component extends DCLogic {
 }
 </script>
 <script>
-// Keep the No. 3 Peak promo video muted, looping, and playing. The template
-// runtime recreates the video on re-render and drops the muted and loop boolean
-// attributes, and Chrome pauses video-only media once it drifts to the
-// background, so re-assert the state on a light interval and whenever the tab
-// returns to view.
-(function () {
-  var VID = 'no3-video';
-  function ensure() {
-    var v = document.getElementById(VID);
-    if (v === null) return;
-    if (v.muted === false) v.muted = true;
-    if (v.defaultMuted === false) v.defaultMuted = true;
-    if (v.loop === false) v.loop = true;
-    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
-      var p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(function () {});
-    }
-  }
-  setInterval(ensure, 250);
-  document.addEventListener('visibilitychange', ensure);
-  window.addEventListener('focus', ensure);
-  window.addEventListener('pageshow', ensure);
-})();
-</script>
-<script>
-// Keep the No. 3 hero background video responsive, muted, looping, and playing.
-// The runtime recreates the video on re-render and drops the source and the
-// muted and loop attributes, so pick the clip by width (16x9 on desktop, 9x16
-// on mobile) and re-assert on a light interval and whenever the tab returns.
-(function () {
-  var VID = 'no3-hero-video';
-  function clip() {
-    var wide = false;
-    try { wide = window.matchMedia('(min-width: 768px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 768; }
-    return wide ? 'Peak_Fire_16x9.mp4' : 'Peak_Fire_9x16.mp4';
-  }
-  function ensure() {
-    var v = document.getElementById(VID);
-    if (v === null) return;
-    var want = clip();
-    var src = v.querySelector('source');
-    if (src === null) { src = document.createElement('source'); src.type = 'video/mp4'; v.appendChild(src); }
-    if (src.getAttribute('src') !== want) { src.setAttribute('src', want); v.load(); }
-    if (v.muted === false) v.muted = true;
-    if (v.defaultMuted === false) v.defaultMuted = true;
-    if (v.loop === false) v.loop = true;
-    if (document.hidden === false && v.paused === true && v.readyState >= 2) {
-      var p = v.play();
-      if (p && typeof p.catch === 'function') p.catch(function () {});
-    }
-  }
-  setInterval(ensure, 250);
-  document.addEventListener('visibilitychange', ensure);
-  window.addEventListener('focus', ensure);
-  window.addEventListener('pageshow', ensure);
-})();
+// Video playback is owned by video-policy.js (Prompt 6a).
 </script>
 </body>
 </html>

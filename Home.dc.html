@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script src="./support.js"></script>
+<script src="./video-policy.js"></script>
 </head>
 <body>
 <x-dc>
@@ -26,7 +27,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 @keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
 /* Hero (spec bond-hero-spec): full-bleed video plays once, then content rows roll in */
 #top { height: 100vh; min-height: 640px; max-width: 1920px; margin: 0 auto; overflow: hidden; }
-.hero-media { position: absolute; inset: 0; overflow: hidden; background: #000000; }
+.hero-media { position: absolute; inset: 0; overflow: hidden; background: #000000 center / cover no-repeat; }
 .hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
 @media (min-width: 1200px) { .hero-video { top: -80px; height: 115%; } }
@@ -113,7 +114,15 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
     <div class="hero-media">
-      <video id="hero-video" class="hero-video" muted playsinline preload="auto"></video>
+      <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
+        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
+        data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v1.webm"
+        data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v1.mp4"
+        data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
+        data-mobile-mp4="media/ladder/bond_hero_m.1080.h264.v1.mp4"
+        data-desktop-poster="media/posters/bond_hero_d.webp"
+        data-mobile-poster="media/posters/bond_hero_m.webp"
+        poster="media/posters/bond_hero_d.webp"></video>
     </div>
     <div id="hero-textstack" class="hero-text">
       <div class="hero-row hero-tagline">
@@ -598,7 +607,6 @@ class Component extends DCLogic {
   var MOB_W = 1080, MOB_H = 1920, MOB_BASE = 845;
   var wide = false;
   try { wide = window.matchMedia('(min-width: 1200px)').matches; } catch (e) { wide = (window.innerWidth || 0) >= 1200; }
-  var clip = wide ? 'bond_hero_desktop.mp4' : 'bond_hero_mobile.mp4';
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   var layoutRaf = 0;
@@ -678,26 +686,20 @@ class Component extends DCLogic {
     if (s === null) return;
     started = true;
     var v = document.getElementById(VID);
-    if (reduced === true) { if (v !== null) v.style.display = 'none'; requestLayout(); reveal(true); return; }
-    if (v === null) { requestLayout(); reveal(false); return; }
-    v.muted = true;
-    v.setAttribute('playsinline', '');
-    v.addEventListener('playing', function () { v.classList.add('hero-vis'); requestLayout(); });
-    v.addEventListener('loadedmetadata', requestLayout);
+    var media = document.querySelector('.hero-media');
+    var poster = wide ? 'media/posters/bond_hero_d.webp' : 'media/posters/bond_hero_m.webp';
+    if (media) media.style.backgroundImage = 'url("' + poster + '")';
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
-    v.addEventListener('ended', runText);
-    v.addEventListener('error', function () { requestLayout(); runText(); });
-    if (v.querySelector('source') === null) {
-      var src = document.createElement('source');
-      src.src = clip; src.type = 'video/mp4';
-      v.appendChild(src);
-      v.load();
-    }
-    try { v.currentTime = 0; } catch (e) {}
-    var p = v.play();
-    if (p && typeof p.catch === 'function') {
-      p.catch(function () { requestLayout(); runText(); });
+    if (reduced === true) { if (v !== null) v.style.display = 'none'; requestLayout(); reveal(true); return; }
+    if (v === null) { requestLayout(); reveal(false); return; }
+    v._bondEnded = runText;
+    v._bondFail = function () { requestLayout(); runText(); };
+    v.addEventListener('playing', function () { v.classList.add('hero-vis'); requestLayout(); });
+    v.addEventListener('loadedmetadata', requestLayout);
+    if (window.BondVideo) {
+      window.BondVideo.release();
+      window.BondVideo.attach(v);
     }
     requestLayout();
   }
