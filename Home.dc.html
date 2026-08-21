@@ -36,7 +36,18 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
 @media (min-width: 1200px) {
-  .hero-video { top: -80px; height: 115%; min-height: 100%; object-fit: cover; }
+  .hero-video {
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: 86.25%;
+    max-width: 100%;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+    transform: translate(-50%, -50%);
+    object-fit: fill;
+    box-shadow: 0 0 70px 40px #000000;
+  }
   .hero-media::before {
     content: '';
     position: absolute; left: 0; right: 0; bottom: 0; height: 36%;
@@ -658,6 +669,8 @@ class Component extends DCLogic {
     v.style.removeProperty('top');
     v.style.removeProperty('object-fit');
     v.style.removeProperty('max-width');
+    v.style.removeProperty('min-height');
+    v.style.removeProperty('transform');
   }
 
   function flowFallback() {
@@ -693,11 +706,6 @@ class Component extends DCLogic {
   function layoutDesktop(t, s, v) {
     clearVideoBox(v);
     var media = document.querySelector('.hero-media');
-    if (media) {
-      media.style.removeProperty('background-size');
-      media.style.removeProperty('background-position');
-      media.style.removeProperty('background-repeat');
-    }
     t.style.removeProperty('height');
     t.style.removeProperty('min-height');
     var ch = t.clientHeight;
@@ -706,14 +714,14 @@ class Component extends DCLogic {
     if (elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1280;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 720;
-    // This clip: optical BOND feet at y=462 of 720.
+    // This clip: optical BOND feet at y=462 of 720. Box is 75% of the old 115% cover.
     var baseSrc = 462 * (srcH / 720);
     var scale = Math.max(elW / srcW, elH / srcH);
     var rendH = srcH * scale;
     var offY = (elH - rendH) / 2;
-    var cropTop = -130;
-    var topPx = cropTop;
-    v.style.top = topPx + 'px';
+    var tR = t.getBoundingClientRect();
+    var vR = v.getBoundingClientRect();
+    var topPx = vR.top - tR.top;
     var baseY = topPx + offY + (baseSrc * scale);
     var h1 = s.querySelector('.hero-tagline h1');
     var fs = 28;
@@ -724,7 +732,16 @@ class Component extends DCLogic {
     var gapEm = 1.6;
     if (gapEm < 0.75) gapEm = 0.75;
     var copyTop = Math.ceil(baseY + (gapEm * fs));
+    var copyH = s.offsetHeight || 280;
+    if (copyTop + copyH > ch) {
+      copyTop = Math.max(Math.ceil(gapEm * fs), ch - copyH);
+    }
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
+    if (media) {
+      media.style.backgroundSize = elW + 'px ' + elH + 'px';
+      media.style.backgroundPosition = (vR.left - tR.left) + 'px ' + topPx + 'px';
+      media.style.backgroundRepeat = 'no-repeat';
+    }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
   }
