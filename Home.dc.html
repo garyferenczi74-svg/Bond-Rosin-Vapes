@@ -36,18 +36,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
 @media (min-width: 1200px) {
-  .hero-video {
-    top: 50%;
-    left: 50%;
-    width: auto;
-    height: 86.25%;
-    max-width: 100%;
-    min-height: 0;
-    aspect-ratio: 16 / 9;
-    transform: translate(-50%, -50%);
-    object-fit: fill;
-    box-shadow: 0 0 70px 40px #000000;
-  }
+  .hero-video { top: -80px; height: 115%; min-height: 100%; object-fit: cover; }
   .hero-media::before {
     content: '';
     position: absolute; left: 0; right: 0; bottom: 0; height: 36%;
@@ -159,13 +148,13 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
         data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
-        data-desktop-webm="media/ladder/bond_hero_d.720.vp9.v5.webm"
-        data-desktop-mp4="media/ladder/bond_hero_d.720.h264.v5.mp4"
+        data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v2.webm"
+        data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v2.mp4"
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
         data-mobile-mp4="media/ladder/bond_hero_m.1080.h264.v1.mp4"
-        data-desktop-poster="media/posters/bond_hero_d.v5.webp"
+        data-desktop-poster="media/posters/bond_hero_d.v2.webp"
         data-mobile-poster="media/posters/bond_hero_m.webp"
-        poster="media/posters/bond_hero_d.v5.webp"></video>
+        poster="media/posters/bond_hero_d.v2.webp"></video>
     </div>
     <div id="hero-textstack" class="hero-text">
       <div class="hero-row hero-tagline">
@@ -706,22 +695,28 @@ class Component extends DCLogic {
   function layoutDesktop(t, s, v) {
     clearVideoBox(v);
     var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.removeProperty('background-size');
+      media.style.removeProperty('background-position');
+      media.style.removeProperty('background-repeat');
+    }
     t.style.removeProperty('height');
     t.style.removeProperty('min-height');
     var ch = t.clientHeight;
     var elW = v.clientWidth;
     var elH = v.clientHeight;
     if (elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
-    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1280;
-    var srcH = (v.videoHeight > 1) ? v.videoHeight : 720;
-    // This clip: optical BOND feet at y=462 of 720. Box is 75% of the old 115% cover.
-    var baseSrc = 462 * (srcH / 720);
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    // Original desktop clip: optical BOND feet at y=650 of 1080. Raise so feet match the 6c 541/1080 lock.
+    var baseSrc = 650 * (srcH / 1080);
+    var refSrc = 541 * (srcH / 1080);
     var scale = Math.max(elW / srcW, elH / srcH);
     var rendH = srcH * scale;
     var offY = (elH - rendH) / 2;
-    var tR = t.getBoundingClientRect();
-    var vR = v.getBoundingClientRect();
-    var topPx = vR.top - tR.top;
+    var cropTop = -80;
+    var topPx = cropTop - ((baseSrc - refSrc) * scale);
+    v.style.top = topPx + 'px';
     var baseY = topPx + offY + (baseSrc * scale);
     var h1 = s.querySelector('.hero-tagline h1');
     var fs = 28;
@@ -732,16 +727,7 @@ class Component extends DCLogic {
     var gapEm = 1.6;
     if (gapEm < 0.75) gapEm = 0.75;
     var copyTop = Math.ceil(baseY + (gapEm * fs));
-    var copyH = s.offsetHeight || 280;
-    if (copyTop + copyH > ch) {
-      copyTop = Math.max(Math.ceil(gapEm * fs), ch - copyH);
-    }
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
-    if (media) {
-      media.style.backgroundSize = elW + 'px ' + elH + 'px';
-      media.style.backgroundPosition = (vR.left - tR.left) + 'px ' + topPx + 'px';
-      media.style.backgroundRepeat = 'no-repeat';
-    }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
   }
@@ -871,7 +857,7 @@ class Component extends DCLogic {
     started = true;
     var v = document.getElementById(VID);
     var media = document.querySelector('.hero-media');
-    var poster = isWideNow() ? 'media/posters/bond_hero_d.v5.webp' : 'media/posters/bond_hero_m.webp';
+    var poster = isWideNow() ? 'media/posters/bond_hero_d.v2.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
