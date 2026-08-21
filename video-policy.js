@@ -72,6 +72,7 @@
   function hygiene(el) {
     el.muted = true;
     el.defaultMuted = true;
+    el.volume = 0;
     el.setAttribute('muted', '');
     el.setAttribute('playsinline', '');
     el.playsInline = true;
@@ -108,6 +109,8 @@
     if (!canPlay(el)) return;
     if (playing && playing !== el) stop(playing);
     playing = el;
+    el.muted = true;
+    el.volume = 0;
     var p = el.play();
     if (p && typeof p.catch === 'function') {
       p.catch(function () { log('play-reject', el); });
