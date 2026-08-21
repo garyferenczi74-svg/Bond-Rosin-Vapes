@@ -58,8 +58,8 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-text {
   --hero-tagline-size: 28px;
   --hero-tagline-gap: calc(1.6 * var(--hero-tagline-size));
-  --hero-gap-line2: calc(1.25 * var(--hero-tagline-gap));
-  --hero-gap-body: calc(1.25 * var(--hero-gap-line2));
+  --hero-gap-line2: var(--hero-tagline-gap);
+  --hero-gap-body: var(--hero-gap-line2);
   --hero-gap-cta: var(--hero-gap-body);
   --hero-gap-btn: calc(var(--hero-gap-cta) / 1.5);
   --hero-cta-width: min(88vw, 420px);
