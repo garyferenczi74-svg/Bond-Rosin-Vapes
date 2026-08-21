@@ -168,7 +168,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
         <img class="hero-endplate-img" alt="" decoding="async">
       </picture>
     </div>
-    <div id="hero-textstack" class="hero-text">
+    <div id="hero-textstack" class="hero-text hero-in">
       <div class="hero-row hero-tagline">
         <span class="hero-rule hero-rule-l"></span>
         <h1>WITH YOUR HIGHEST SELF</h1>
@@ -889,8 +889,8 @@ class Component extends DCLogic {
     var media = document.querySelector('.hero-media');
     var poster = isWideNow() ? 'media/posters/bond_hero_d.v6.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
-    var done = false;
-    function runText() { if (done === true) return; done = true; reveal(false); }
+    requestLayout();
+    reveal(false);
     if (reduced === true) {
       var plate = document.querySelector('.hero-endplate');
       var plateJpg = isWideNow()
@@ -903,9 +903,8 @@ class Component extends DCLogic {
       reveal(true);
       return;
     }
-    if (v === null) { requestLayout(); reveal(false); return; }
-    v._bondEnded = runText;
-    v._bondFail = function () { requestLayout(); runText(); };
+    if (v === null) { requestLayout(); return; }
+    v._bondFail = function () { requestLayout(); };
     v.addEventListener('playing', function () { v.classList.add('hero-vis'); requestLayout(); });
     v.addEventListener('loadedmetadata', requestLayout);
     if (window.BondVideo) {
