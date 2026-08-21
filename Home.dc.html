@@ -148,13 +148,13 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
         data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
-        data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v2.webm"
-        data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v2.mp4"
+        data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v6.webm"
+        data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v6.mp4"
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
         data-mobile-mp4="media/ladder/bond_hero_m.1080.h264.v1.mp4"
-        data-desktop-poster="media/posters/bond_hero_d.v2.webp"
+        data-desktop-poster="media/posters/bond_hero_d.v6.webp"
         data-mobile-poster="media/posters/bond_hero_m.webp"
-        poster="media/posters/bond_hero_d.v2.webp"></video>
+        poster="media/posters/bond_hero_d.v6.webp"></video>
     </div>
     <div id="hero-textstack" class="hero-text">
       <div class="hero-row hero-tagline">
@@ -708,8 +708,8 @@ class Component extends DCLogic {
     if (elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
-    // Original desktop clip: optical BOND feet at y=650 of 1080. Raise so feet match the 6c 541/1080 lock.
-    var baseSrc = 650 * (srcH / 1080);
+    // Dreamina clip: optical BOND feet at y=643 of 1080. Raise so feet match the 6c 541/1080 lock.
+    var baseSrc = 643 * (srcH / 1080);
     var refSrc = 541 * (srcH / 1080);
     var scale = Math.max(elW / srcW, elH / srcH);
     var rendH = srcH * scale;
@@ -857,7 +857,7 @@ class Component extends DCLogic {
     started = true;
     var v = document.getElementById(VID);
     var media = document.querySelector('.hero-media');
-    var poster = isWideNow() ? 'media/posters/bond_hero_d.v2.webp' : 'media/posters/bond_hero_m.webp';
+    var poster = isWideNow() ? 'media/posters/bond_hero_d.v6.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
