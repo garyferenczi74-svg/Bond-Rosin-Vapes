@@ -163,5 +163,33 @@
                             "bytes":  2762747,
                             "sha256":  "86EE41755BEA8940DEF8E5F7F51D10E68FA02848F0172C5B2EC9551CD2C3FDF0"
                         }
-                    ]
+                    ],
+    "endplates":  {
+                      "prompt":  "6g",
+                      "path":  "derived from master last frame, ffmpeg lanczos to 3840x2160 (desktop) and 2160x3840 (mobile)",
+                      "desktop_master":  "media/bond-hero-dreamina.mp4",
+                      "desktop_frame":  "t=7.98s of 8.064s (1920x1080)",
+                      "mobile_master":  "bond_hero_mobile.mp4",
+                      "mobile_frame":  "t=6.90s of 7.00s (1080x1920)",
+                      "files":  [
+                                    { "file":  "hero_endplate_16x9.1920.v1.avif", "bytes":  35201, "sha256":  "30808642CC8B5F5AE9A2108553D3C2C76483EA3636A59598A17E8F56F6E38A0F" },
+                                    { "file":  "hero_endplate_16x9.1920.v1.webp", "bytes":  74392, "sha256":  "B1C81C8D44E8E08DB43645BFF30FF2F7AD944C8CBC36354CB91F2EF330D45E45" },
+                                    { "file":  "hero_endplate_16x9.1920.v1.jpg", "bytes":  127208, "sha256":  "14958CDD2654544A5E641F11E0403C9FF739DD8010EE8B758509898F40A2F0B2" },
+                                    { "file":  "hero_endplate_16x9.2560.v1.avif", "bytes":  52226, "sha256":  "EDC4D11055D57ED50770115196F06281CA309A349F7E0E8A39E39DE8F919ED12" },
+                                    { "file":  "hero_endplate_16x9.2560.v1.webp", "bytes":  105900, "sha256":  "327B4019066F40185F97B49278EEB74AE8B41956658F53312030E4DBDBCB3434" },
+                                    { "file":  "hero_endplate_16x9.2560.v1.jpg", "bytes":  193620, "sha256":  "7812B4B633C9AA6C9292B49E1584B1C2FED225E2EBAD180333C6545AF0D02AC1" },
+                                    { "file":  "hero_endplate_16x9.3840.v1.avif", "bytes":  82683, "sha256":  "285B405D7C6DD0E2440C9A7CB107FE1D90976D50BD84FA4C489FAA25A7437A8F" },
+                                    { "file":  "hero_endplate_16x9.3840.v1.webp", "bytes":  178404, "sha256":  "88C64A80762BBD424FFE6FEDB6D4C13176EFA196118CA58F2EE46D761397DE82" },
+                                    { "file":  "hero_endplate_16x9.3840.v1.jpg", "bytes":  353220, "sha256":  "8DC9567327A09710CE95D4877973B17C683AE007AB68ED040DC81D883F44CD4B" },
+                                    { "file":  "hero_endplate_9x16.1080.v1.avif", "bytes":  6075, "sha256":  "A31EC73417678F09C40B02B1739EE8D4C4E8A1B53A308965306332D996185C5E" },
+                                    { "file":  "hero_endplate_9x16.1080.v1.webp", "bytes":  28332, "sha256":  "F2E9FFEC7AD1FB3854EC7F6B791D338B8BE70CB0F09645EF9CD5D1A8FC990841" },
+                                    { "file":  "hero_endplate_9x16.1080.v1.jpg", "bytes":  66407, "sha256":  "5375F5B53CFCC9A7F3BB951AF924FAF897282040C85EFC3D739B23D9EC7B6592" },
+                                    { "file":  "hero_endplate_9x16.1440.v1.avif", "bytes":  9467, "sha256":  "BBF07BD0D9660F4519516A8EB5382CD5CF1FCE97374222BC65E0FCF18552ACD1" },
+                                    { "file":  "hero_endplate_9x16.1440.v1.webp", "bytes":  42388, "sha256":  "AEF98FBE808F46C85CF80870FA35B6887F32B419B4A5D790BF4143A67AF049C8" },
+                                    { "file":  "hero_endplate_9x16.1440.v1.jpg", "bytes":  105159, "sha256":  "BA5267F65DCE7D01A1EDACCFD44A0B91936888B5C2D3BCD9303A2E4A64BD20AB" },
+                                    { "file":  "hero_endplate_9x16.2160.v1.avif", "bytes":  17209, "sha256":  "7CC6D3F804D1715EEB36C618990DF13CEC3B509D3A74E1E9CB715CF23C73EB34" },
+                                    { "file":  "hero_endplate_9x16.2160.v1.webp", "bytes":  73620, "sha256":  "CD4EF85FD9D6A12A57139DB6C6857350880CEC0345798B0FFC7FE88631CEAE44" },
+                                    { "file":  "hero_endplate_9x16.2160.v1.jpg", "bytes":  200633, "sha256":  "253B97CBB4EB7415BC557332A1716732BA90222FCB4FF262B4865FD8F8A67E7C" }
+                                ]
+                  }
 }

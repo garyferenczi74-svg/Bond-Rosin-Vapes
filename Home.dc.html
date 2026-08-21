@@ -35,8 +35,11 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-media { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #000000 center / cover no-repeat; }
 .hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
+.hero-endplate { position: absolute; left: 0; width: 100%; display: block; pointer-events: none; opacity: 0; transition: opacity .4s cubic-bezier(0.44,0,0.56,1); }
+.hero-endplate img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.hero-endplate.hero-endplate-on { opacity: 1; }
 @media (min-width: 1200px) {
-  .hero-video { top: -80px; height: 115%; min-height: 100%; object-fit: cover; }
+  .hero-video, .hero-endplate { top: -80px; height: 115%; min-height: 100%; object-fit: cover; }
   .hero-media::before {
     content: '';
     position: absolute; left: 0; right: 0; bottom: 0; height: 36%;
@@ -53,7 +56,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 48%, #000000 100%);
   }
 }
-@media (max-width: 1199px) { .hero-video { top: 0; height: 100%; } }
+@media (max-width: 1199px) { .hero-video, .hero-endplate { top: 0; height: 100%; } }
 .hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(11px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
 .hero-text {
   --hero-tagline-size: 28px;
@@ -155,6 +158,15 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
         data-desktop-poster="media/posters/bond_hero_d.v6.webp"
         data-mobile-poster="media/posters/bond_hero_m.webp"
         poster="media/posters/bond_hero_d.v6.webp"></video>
+      <picture class="hero-endplate" aria-hidden="true"
+        data-desk-avif="media/endplates/hero_endplate_16x9.1920.v1.avif 1920w, media/endplates/hero_endplate_16x9.2560.v1.avif 2560w, media/endplates/hero_endplate_16x9.3840.v1.avif 3840w"
+        data-desk-webp="media/endplates/hero_endplate_16x9.1920.v1.webp 1920w, media/endplates/hero_endplate_16x9.2560.v1.webp 2560w, media/endplates/hero_endplate_16x9.3840.v1.webp 3840w"
+        data-desk-jpg="media/endplates/hero_endplate_16x9.1920.v1.jpg"
+        data-mob-avif="media/endplates/hero_endplate_9x16.1080.v1.avif 1080w, media/endplates/hero_endplate_9x16.1440.v1.avif 1440w, media/endplates/hero_endplate_9x16.2160.v1.avif 2160w"
+        data-mob-webp="media/endplates/hero_endplate_9x16.1080.v1.webp 1080w, media/endplates/hero_endplate_9x16.1440.v1.webp 1440w, media/endplates/hero_endplate_9x16.2160.v1.webp 2160w"
+        data-mob-jpg="media/endplates/hero_endplate_9x16.1080.v1.jpg">
+        <img class="hero-endplate-img" alt="" decoding="async">
+      </picture>
     </div>
     <div id="hero-textstack" class="hero-text">
       <div class="hero-row hero-tagline">
@@ -662,6 +674,21 @@ class Component extends DCLogic {
     v.style.removeProperty('transform');
   }
 
+  function syncEndplate(v) {
+    var p = document.querySelector('.hero-endplate');
+    if (!p || !v) return;
+    var keys = ['width', 'height', 'left', 'top', 'maxWidth', 'minHeight', 'transform', 'objectFit'];
+    var i, name, css;
+    for (i = 0; i < keys.length; i++) {
+      name = keys[i];
+      if (v.style[name]) p.style[name] = v.style[name];
+      else {
+        css = name.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); });
+        p.style.removeProperty(css);
+      }
+    }
+  }
+
   function flowFallback() {
     var t = document.getElementById(STAGE);
     var s = document.getElementById(STACK);
@@ -673,6 +700,7 @@ class Component extends DCLogic {
     }
     if (s) s.style.removeProperty('--hero-copy-top');
     clearVideoBox(v);
+    syncEndplate(v);
     var media = document.querySelector('.hero-media');
     if (media) {
       media.style.removeProperty('background-size');
@@ -717,6 +745,7 @@ class Component extends DCLogic {
     var cropTop = -80;
     var topPx = cropTop - ((baseSrc - refSrc) * scale);
     v.style.top = topPx + 'px';
+    syncEndplate(v);
     var baseY = topPx + offY + (baseSrc * scale);
     var h1 = s.querySelector('.hero-tagline h1');
     var fs = 28;
@@ -829,6 +858,7 @@ class Component extends DCLogic {
       v.style.top = videoTop + 'px';
       v.style.maxWidth = 'none';
       v.style.objectFit = 'fill';
+      syncEndplate(v);
       var media = document.querySelector('.hero-media');
       if (media) {
         media.style.backgroundSize = (srcW * scale) + 'px ' + (srcH * scale) + 'px';
@@ -861,7 +891,18 @@ class Component extends DCLogic {
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
     var done = false;
     function runText() { if (done === true) return; done = true; reveal(false); }
-    if (reduced === true) { if (v !== null) v.style.display = 'none'; requestLayout(); reveal(true); return; }
+    if (reduced === true) {
+      var plate = document.querySelector('.hero-endplate');
+      var plateJpg = isWideNow()
+        ? 'media/endplates/hero_endplate_16x9.1920.v1.jpg'
+        : 'media/endplates/hero_endplate_9x16.1080.v1.jpg';
+      if (media) media.style.backgroundImage = 'url("' + plateJpg + '")';
+      if (plate) plate.classList.add('hero-endplate-on');
+      if (v !== null) v.style.display = 'none';
+      requestLayout();
+      reveal(true);
+      return;
+    }
     if (v === null) { requestLayout(); reveal(false); return; }
     v._bondEnded = runText;
     v._bondFail = function () { requestLayout(); runText(); };
