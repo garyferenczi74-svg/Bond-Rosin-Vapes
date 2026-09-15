@@ -62,7 +62,7 @@ export function ProductPortfolio() {
         <Metric label="Lifecycle" value={lifecycleLabel(metrics) || "None"} sub="Launch seed" />
       </div>
 
-      <div className="vx-sku-grid">
+      <div className="vx-sku-grid" aria-label="Standing SKUs">
         {skus.map((sku) => (
           <SkuCard key={sku.id} sku={sku} />
         ))}
