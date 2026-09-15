@@ -13,9 +13,6 @@ import type {
 } from "./types.ts";
 import { AGENTS } from "./types.ts";
 
-export const DEMO_OWNER_EMAIL = "owner@bond.test";
-export const SESSION_FLAG_KEY = "bond.vauxhall.session";
-
 type Listener = () => void;
 
 function pad(n: number): string {
@@ -26,21 +23,8 @@ function clockTime(now = new Date()): string {
   return `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 }
 
-function readSessionFlag(): boolean {
-  if (typeof window === "undefined") return true;
-  const raw = window.sessionStorage.getItem(SESSION_FLAG_KEY);
-  if (raw === "0") return false;
-  return true;
-}
-
-function writeSessionFlag(session: boolean): void {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.setItem(SESSION_FLAG_KEY, session ? "1" : "0");
-}
-
 export class VauxhallStore {
   revision = 0;
-  session = true;
   live = false;
   filter: StoreFilter = { agent: null, type: null, allData: false };
   events: AgentEvent[] = [];
@@ -51,11 +35,8 @@ export class VauxhallStore {
   canon: CanonDoc[] = [];
   private eid = 100;
   private listeners = new Set<Listener>();
-  private persistSession: boolean;
 
-  constructor(options?: { persistSession?: boolean; session?: boolean }) {
-    this.persistSession = options?.persistSession ?? false;
-    this.session = options?.session ?? (this.persistSession ? readSessionFlag() : true);
+  constructor() {
     this.seed();
   }
 
@@ -69,10 +50,6 @@ export class VauxhallStore {
   private emit(): void {
     this.revision += 1;
     this.listeners.forEach((listener) => listener());
-  }
-
-  private persist(): void {
-    if (this.persistSession) writeSessionFlag(this.session);
   }
 
   private nextId(): string {
@@ -94,15 +71,6 @@ export class VauxhallStore {
     this.eid = 100;
     this.filter = { agent: null, type: null, allData: false };
     this.live = false;
-  }
-
-  hydrateSession(): void {
-    if (!this.persistSession) return;
-    const next = readSessionFlag();
-    if (next !== this.session) {
-      this.session = next;
-      this.emit();
-    }
   }
 
   listEvents(): AgentEvent[] {
@@ -259,24 +227,8 @@ export class VauxhallStore {
   }
 
   signOut(): void {
-    this.session = false;
     this.live = false;
-    this.persist();
     this.emit();
-  }
-
-  restoreSession(): void {
-    this.session = true;
-    this.persist();
-    this.emit();
-  }
-
-  acceptDemoCredentials(email: string, password: string): boolean {
-    return email.trim().toLowerCase() === DEMO_OWNER_EMAIL && password.length > 0;
-  }
-
-  acceptDemoMfa(code: string): boolean {
-    return code.trim().length === 6;
   }
 
   agentSummary(name: AgentName): AgentSummary {
@@ -311,12 +263,12 @@ let singleton: VauxhallStore | null = null;
 
 export function getVauxhallStore(): VauxhallStore {
   if (!singleton) {
-    singleton = new VauxhallStore({ persistSession: typeof window !== "undefined" });
+    singleton = new VauxhallStore();
   }
   return singleton;
 }
 
-export function resetVauxhallStoreForTests(options?: { session?: boolean }): VauxhallStore {
-  singleton = new VauxhallStore({ persistSession: false, session: options?.session ?? true });
+export function resetVauxhallStoreForTests(): VauxhallStore {
+  singleton = new VauxhallStore();
   return singleton;
 }

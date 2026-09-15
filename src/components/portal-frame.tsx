@@ -9,14 +9,12 @@ export function PortalFrame({
   children,
   sections,
   sectionActive,
-  signOutSlot,
 }: {
   role: AdminRole;
   active: WingId;
   children: React.ReactNode;
   sections?: { id: string; href: string; title: string; badge?: number }[];
   sectionActive?: string;
-  signOutSlot?: React.ReactNode;
 }) {
   return (
     <div style={{ minHeight: "100vh", background: "#1B1D1C", color: "#E1DAD0" }}>
@@ -46,27 +44,25 @@ export function PortalFrame({
           <span className="lbl" style={{ margin: 0 }}>
             {role}
           </span>
-          {signOutSlot ?? (
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                style={{
-                  background: "transparent",
-                  border: "1px solid #3A3C3B",
-                  color: "#8E887C",
-                  borderRadius: 2,
-                  fontFamily: "inherit",
-                  fontSize: 11,
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  padding: "7px 12px",
-                  cursor: "pointer",
-                }}
-              >
-                Sign out
-              </button>
-            </form>
-          )}
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              style={{
+                background: "transparent",
+                border: "1px solid #3A3C3B",
+                color: "#8E887C",
+                borderRadius: 2,
+                fontFamily: "inherit",
+                fontSize: 11,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                padding: "7px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </header>
 

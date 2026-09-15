@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { csvFilename, eventsToCsv } from "./csv.ts";
 import { SEED_CANON, SEED_DRAFTS, SEED_EVENTS, SEED_RCS, SEED_REVIEW } from "./seed.ts";
 import { VauxhallStore } from "./store.ts";
@@ -10,7 +13,7 @@ function assertNoDashes(value: string, label: string) {
 }
 
 test("seed matches the approved Live Feed and side queues", () => {
-  const store = new VauxhallStore({ persistSession: false });
+  const store = new VauxhallStore();
   assert.equal(store.listEvents().length, 10);
   assert.equal(store.listEvents()[0]?.audit, "A-40912");
   assert.equal(store.listEvents()[9]?.summary.includes("Daily audit"), true);
@@ -21,6 +24,7 @@ test("seed matches the approved Live Feed and side queues", () => {
   assert.equal(store.listQueue().rcs[1]?.stage, 3);
   assert.equal(store.listQueue().drafts.length, 4);
   assert.equal(store.listCanon().length, 6);
+  assert.ok(store.listCanon().every((doc) => doc.name.startsWith("prototype/")));
   assert.equal(store.listTuning()[0]?.agent, "M");
   assert.deepEqual(
     store.listEvents().map((event) => event.id),
@@ -40,7 +44,7 @@ test("seed strings have zero em dashes or en dashes", () => {
 });
 
 test("agent and type filters compose", () => {
-  const store = new VauxhallStore({ persistSession: false });
+  const store = new VauxhallStore();
   store.toggleAgent("Felix");
   store.setType("Alert");
   const list = store.listEvents();
@@ -54,7 +58,7 @@ test("agent and type filters compose", () => {
 });
 
 test("approving all three Review items drops the badge and writes AGENT DECISION events", () => {
-  const store = new VauxhallStore({ persistSession: false });
+  const store = new VauxhallStore();
   for (const item of store.listReview()) {
     store.resolveReview(item.id, "approved");
   }
@@ -65,7 +69,7 @@ test("approving all three Review items drops the badge and writes AGENT DECISION
 });
 
 test("export CSV is the current filtered set", () => {
-  const store = new VauxhallStore({ persistSession: false });
+  const store = new VauxhallStore();
   store.toggleAgent("Q");
   const list = store.listEvents();
   const csv = eventsToCsv(list);
@@ -76,27 +80,32 @@ test("export CSV is the current filtered set", () => {
   assert.equal(list.length, 2);
 });
 
-test("steering, tuning, and sign out talk only through the store", () => {
-  const store = new VauxhallStore({ persistSession: false });
-  store.submitDirective("Hold the No. 3 Peak note until Felix clears the claim.", "M", "High", "2026-09-16");
-  assert.match(store.listEvents()[0]?.summary ?? "", /^Directive received: Hold the No. 3 Peak note/);
+test("steering and tuning talk only through the store", () => {
+  const store = new VauxhallStore();
+  store.submitDirective("Hold the prototype batch note until Felix clears the claim.", "M", "High", "2026-09-16");
+  assert.match(store.listEvents()[0]?.summary ?? "", /^Directive received: Hold the prototype batch note/);
   store.applyTuning("t1");
   assert.equal(store.listTuning()[0]?.state, "applied");
   store.rollbackTuning("t1");
   assert.equal(store.listTuning()[0]?.state, "proposed");
   store.rejectTuning("t1", "Not this cycle");
   assert.equal(store.listTuning()[0]?.state, "rejected");
-  assert.equal(store.acceptDemoCredentials("owner@bond.test", "any"), true);
-  assert.equal(store.acceptDemoCredentials("other@bond.test", "any"), false);
-  assert.equal(store.acceptDemoMfa("123456"), true);
+  store.setLive(true);
   store.signOut();
-  assert.equal(store.session, false);
-  store.restoreSession();
-  assert.equal(store.session, true);
+  assert.equal(store.live, false);
+});
+
+test("src does not ship the Prompt 2B mock sign-in demo", () => {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const store = readFileSync(join(here, "store.ts"), "utf8");
+  const app = readFileSync(join(here, "../../components/vauxhall/command-app.tsx"), "utf8");
+  assert.equal(store.includes("owner@bond.test"), false);
+  assert.equal(app.includes("SignInMock"), false);
+  assert.equal(app.includes("signOutSlot"), false);
 });
 
 test("Carver surfaces its blocker and refresh reseeds mock data", () => {
-  const store = new VauxhallStore({ persistSession: false });
+  const store = new VauxhallStore();
   store.addEvent(store.genEvent(new Date("2026-09-15T15:00:00")));
   assert.equal(store.listEvents().length, 11);
   assert.equal(store.agentSummary("Carver").blocker, "Awaiting Felix originality check");

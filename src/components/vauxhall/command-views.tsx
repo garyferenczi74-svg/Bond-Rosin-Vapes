@@ -711,7 +711,10 @@ export function KnowledgeView({ store }: { store: VauxhallStore }) {
 
   return (
     <div>
-      <ViewHeader title="Knowledge" subtitle="The canon browser. Edits route through the Moneypenny approval flow." />
+      <ViewHeader
+        title="Knowledge"
+        subtitle="Prototype canon. Mock contents only. Edits would route through Moneypenny."
+      />
       <div
         style={{
           display: "grid",

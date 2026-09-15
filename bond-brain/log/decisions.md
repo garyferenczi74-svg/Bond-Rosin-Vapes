@@ -20,3 +20,4 @@ Format: date | decision | reasoning | approved by
 - 2026-09-15 | Fix Vercel coexistence: copy marketing into public as real files, pin Next.js, rewrite / to Home.dc.html | PR3 alias 404 from public symlinks | Gary chose fix on main, no revert
 - 2026-09-15 | Waiver W-2026-09-15-P1-OVERRIDE: password-only admin entry to /vauxhall; Home Admin link restored to /haus; Admin.dc.html suite stays cloaked | Gary OVERRIDE for Phase 1 | Gary
 - 2026-09-15 | Prompt 2B unparked: wire Next /vauxhall Command Center against in-memory VauxhallStore. Mock data resets on refresh. Admin HTML suite stays cloaked. | Gary via Q | Q (build)
+- 2026-09-15 | Prompt 2B lock: Next /vauxhall only. Sign Out returns to live /haus. No mock MFA demo. Knowledge and product seeds stay prototype. Social stays placeholder. | Q/Felix | Q (build)

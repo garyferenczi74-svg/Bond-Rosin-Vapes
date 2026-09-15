@@ -6,7 +6,6 @@ import { PortalFrame } from "@/components/portal-frame";
 import { WingStub } from "@/components/wing-stub";
 import type { AdminRole } from "@/lib/tokens";
 import { commandHref, COMMAND_SECTIONS, parseVauxhallRoute, type VauxhallRoute } from "@/lib/vauxhall/routes";
-import { SignInMock } from "./sign-in-mock";
 import {
   AgentsView,
   EvolutionView,
@@ -23,10 +22,6 @@ export function CommandApp({ role, route }: { role: AdminRole; route: VauxhallRo
   const router = useRouter();
   const [toast, setToast] = useState("");
   const toastTimer = useRef<number | null>(null);
-
-  useEffect(() => {
-    store.hydrateSession();
-  }, [store]);
 
   useEffect(() => {
     if (!store.live) return;
@@ -67,18 +62,6 @@ export function CommandApp({ role, route }: { role: AdminRole; route: VauxhallRo
     toastTimer.current = window.setTimeout(() => setToast(""), 2500);
   }
 
-  if (!store.session) {
-    return (
-      <SignInMock
-        store={store}
-        onRestored={() => {
-          showToast("Welcome back.");
-          router.push(commandHref("live-feed"));
-        }}
-      />
-    );
-  }
-
   const sections = COMMAND_SECTIONS.map((section) => ({
     ...section,
     href: commandHref(section.id),
@@ -91,26 +74,6 @@ export function CommandApp({ role, route }: { role: AdminRole; route: VauxhallRo
       active={route.wing}
       sections={route.wing === "command" ? sections : undefined}
       sectionActive={route.wing === "command" ? route.view : undefined}
-      signOutSlot={
-        <button
-          type="button"
-          onClick={() => store.signOut()}
-          style={{
-            background: "transparent",
-            border: "1px solid #3A3C3B",
-            color: "#8E887C",
-            borderRadius: 2,
-            fontFamily: "inherit",
-            fontSize: 11,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            padding: "7px 12px",
-            cursor: "pointer",
-          }}
-        >
-          Sign out
-        </button>
-      }
     >
       {route.wing === "command" ? (
         <div>
