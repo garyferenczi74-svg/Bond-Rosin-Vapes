@@ -26,7 +26,7 @@ test("control room CSS stays on Bond tokens", () => {
   assert.match(CSS, /--security: #A53A28/);
   assert.match(CSS, /--social: #86ACE3/);
   assert.match(CSS, /\.vx-sku-card/);
-  assert.match(CSS, /\.vx-sku-card::before/);
+  assert.match(CSS, /box-shadow: inset 0 1px 0 var\(--sku-ink/);
   assert.equal(CSS.includes("#FF"), false);
   assert.equal(CSS.includes("orange"), false);
   assert.equal(CSS.includes("999px"), false);
