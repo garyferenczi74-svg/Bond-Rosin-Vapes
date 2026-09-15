@@ -137,3 +137,264 @@ export type SkuMetrics = {
   formats: number;
   lifecycle: Partial<Record<SkuLifecycle, number>>;
 };
+
+export const ORDER_STAGES = [
+  "draft",
+  "confirmed",
+  "in fulfillment",
+  "shipped",
+  "delivered",
+  "paid",
+] as const;
+export type OrderStage = (typeof ORDER_STAGES)[number];
+
+export const RUN_STAGES = ["fresh frozen", "washed", "pressed", "filled", "packaged", "ready"] as const;
+export type RunStage = (typeof RUN_STAGES)[number];
+
+export const LICENSE_STATES = ["active", "expiring", "expired"] as const;
+export type LicenseState = (typeof LICENSE_STATES)[number];
+
+export type InventoryLot = {
+  id: string;
+  skuId: string;
+  batchLabel: string;
+  onHand: number;
+  reserved: number;
+  location: string;
+  packagedOn: string;
+  agingDays: number;
+  coaNote: string;
+};
+
+export type ProductionRun = {
+  id: string;
+  skuId: string;
+  stage: RunStage;
+  expectedYield: number;
+  expectedCompletion: string;
+  late: boolean;
+  note: string;
+};
+
+export type WholesaleAccount = {
+  id: string;
+  name: string;
+  license: string;
+  licenseMark: string;
+  expiresOn: string;
+  contact: string;
+  terms: string;
+  region: string;
+  velocity: number;
+  notes: string;
+  receivableDays: number;
+};
+
+export type OrderLine = {
+  skuId: string;
+  format: string;
+  qty: number;
+  batchLabel: string;
+};
+
+export type WholesaleOrder = {
+  id: string;
+  accountId: string;
+  stage: OrderStage;
+  promisedOn: string;
+  late: boolean;
+  lines: OrderLine[];
+  documents: string;
+};
+
+export type SkuEconomics = {
+  skuId: string;
+  mockCost: number;
+  mockWholesale: number;
+  mockSellIn: number;
+  mockReorderPct: number;
+  mockMtdUnits: number;
+  mockPlanUnits: number;
+};
+
+export const ALERT_KINDS = [
+  "low stock",
+  "aging lot",
+  "late run",
+  "license expiry",
+  "receivables",
+  "felix flag",
+] as const;
+export type AlertKind = (typeof ALERT_KINDS)[number];
+
+export type ProductAlert = {
+  id: string;
+  kind: AlertKind;
+  title: string;
+  detail: string;
+  severity: "watch" | "action";
+};
+
+export type DashboardSnapshot = {
+  openOrders: number;
+  stageCounts: Partial<Record<OrderStage, number>>;
+  unitsOnHand: { skuId: string; onHand: number; reserved: number; available: number }[];
+  unitsInProcess: number;
+  weekShipments: number;
+  mtdUnits: number;
+  planUnits: number;
+  topAccounts: { id: string; name: string; velocity: number }[];
+};
+
+export const FINDING_SEVERITIES = ["P0", "P1", "P2", "P3"] as const;
+export type FindingSeverity = (typeof FINDING_SEVERITIES)[number];
+
+export type FindingState = "open" | "closed";
+
+export type Finding = {
+  id: string;
+  severity: FindingSeverity;
+  source: string;
+  surface: string;
+  citation: string;
+  owner: string;
+  due: string;
+  cite: string;
+  remediate: string;
+  document: string;
+  state: FindingState;
+  closedEvidence: string;
+  openedOn: string;
+  escape: boolean;
+};
+
+export type SecurityScorecard = {
+  p0_30d: number;
+  p1_30d: number;
+  open: number;
+  escapes_30d: number;
+};
+
+export type Incident = {
+  id: string;
+  title: string;
+  timeline: string;
+  impact: string;
+  actions: string;
+  rootCause: string;
+  findingId: string;
+};
+
+export type SecurityRule = {
+  id: string;
+  name: string;
+  citation: string;
+  enforcement: string;
+  gate: "pre-check" | "runtime" | "both";
+};
+
+export type Waiver = {
+  id: string;
+  findingId: string;
+  expiresOn: string;
+  control: string;
+  state: "active" | "expired";
+};
+
+export type AuditRow = {
+  id: string;
+  time: string;
+  actor: string;
+  action: string;
+  target: string;
+  note: string;
+};
+
+export type DsarRequest = {
+  id: string;
+  subject: string;
+  state: "intake" | "verify" | "fulfill" | "closed";
+  clock: string;
+  note: string;
+};
+
+export type Vendor = {
+  id: string;
+  name: string;
+  scope: string;
+  dpa: string;
+  renewal: string;
+};
+
+export type ScannerItem = {
+  id: string;
+  source: string;
+  note: string;
+  findingId: string;
+};
+
+export type PreCheckResult = {
+  id: string;
+  candidate: string;
+  verdict: "green" | "blocked";
+  reasons: string[];
+};
+
+export type Soc2Control = {
+  id: string;
+  control: string;
+  evidence: string;
+};
+
+export const SOCIAL_STAGES = ["draft", "felix", "owner", "approved", "held"] as const;
+export type SocialStage = (typeof SOCIAL_STAGES)[number];
+
+export type SocialPipelineItem = {
+  id: string;
+  title: string;
+  kind: string;
+  stage: SocialStage;
+  desk: string;
+  note: string;
+  approved: boolean;
+  auditFlags: string[];
+};
+
+export type SocialDeskStrip = {
+  id: string;
+  title: string;
+  state: "LIVE" | "PARKED" | "HELD";
+  line: string;
+};
+
+export type ResearchRow = {
+  id: string;
+  format: string;
+  hook: string;
+  remixFit: string;
+  provenance: string;
+  note: string;
+};
+
+export type ScriptVariation = {
+  id: string;
+  hook: string;
+  caption: string;
+  platform: string;
+  provenance: string;
+};
+
+export type SocialMetric = {
+  platform: string;
+  posts: string;
+  reach: string;
+  note: string;
+};
+
+export type OrderAttempt =
+  | { ok: true; id: string }
+  | { ok: false; reason: string };
+
+export type ScheduleAttempt =
+  | { ok: true; note: string }
+  | { ok: false; reason: string; findingId?: string };

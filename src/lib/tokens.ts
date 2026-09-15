@@ -57,6 +57,6 @@ export const wings: {
     href: "/vauxhall/social",
     title: "Social",
     hairline: tokens.social,
-    summary: "Carver desk. Placeholder until Prompt 2C.",
+    summary: "Carver drafts. Felix clears. Scheduler stays parked.",
   },
 ];

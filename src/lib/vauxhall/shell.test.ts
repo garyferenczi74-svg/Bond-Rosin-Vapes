@@ -57,14 +57,43 @@ test("command views keep Prompt 2B store methods", () => {
   assert.equal(VIEWS.includes("#E3C270"), false);
 });
 
-test("social mosaic stays framed placeholder copy", () => {
-  assert.match(MOSAIC, /Prompt 2C parked/);
-  assert.match(MOSAIC, /No scrape yet/);
-  assert.match(MOSAIC, /No invented SKU prices/);
+const PRODUCT = read("components/vauxhall/product-views.tsx");
+const SECURITY = read("components/vauxhall/security-views.tsx");
+const SOCIAL = read("components/vauxhall/social-views.tsx");
+
+test("wing mosaics dispatch store-driven consoles", () => {
+  assert.match(MOSAIC, /ProductWing/);
+  assert.match(MOSAIC, /SecurityWing/);
+  assert.match(MOSAIC, /SocialWing/);
+  assert.equal(MOSAIC.includes("WingStub"), false);
+  assert.equal(MOSAIC.includes("This wing is framed"), false);
+  assert.equal(MOSAIC.includes("Framed. Portal build."), false);
+});
+
+test("social stays non-publishing and parked", () => {
+  assert.match(SOCIAL, /Prompt 2C stays parked/);
+  assert.match(SOCIAL, /No scrape yet/);
+  assert.match(SOCIAL, /Scheduler/);
+  assert.match(SOCIAL, /attemptSchedule/);
+  assert.equal(SOCIAL.includes("\u2013"), false);
+  assert.equal(SOCIAL.includes("\u2014"), false);
+  assert.equal(SOCIAL.includes("!"), false);
+});
+
+test("product economics stay mock labeled", () => {
+  assert.match(PRODUCT, /Not investor figures/);
+  assert.match(PRODUCT, /Mock seed/);
+  assert.match(PRODUCT, /listSkus/);
+  assert.match(SECURITY, /Cite. Remediate. Document./);
+  assert.match(SECURITY, /mGateAllows/);
+  assert.equal(PRODUCT.includes("\u2013"), false);
+  assert.equal(PRODUCT.includes("\u2014"), false);
+  assert.equal(PRODUCT.includes("!"), false);
+  assert.equal(SECURITY.includes("!"), false);
 });
 
 test("product portfolio is store-driven and keeps hexes out of the UI", () => {
-  assert.match(MOSAIC, /ProductPortfolio/);
+  assert.match(PRODUCT, /ProductPortfolio/);
   assert.match(PORTFOLIO, /listSkus/);
   assert.match(PORTFOLIO, /skuMetrics/);
   assert.match(PORTFOLIO, /sku\.hex/);

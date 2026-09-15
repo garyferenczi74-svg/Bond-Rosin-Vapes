@@ -5,7 +5,29 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { csvFilename, eventsToCsv } from "./csv.ts";
 import { SKU_ACCENTS } from "../tokens.ts";
-import { SEED_CANON, SEED_DRAFTS, SEED_EVENTS, SEED_RCS, SEED_REVIEW, SEED_SKUS } from "./seed.ts";
+import {
+  SEED_ACCOUNTS,
+  SEED_AUDIT,
+  SEED_CANON,
+  SEED_DRAFTS,
+  SEED_DSAR,
+  SEED_ECONOMICS,
+  SEED_EVENTS,
+  SEED_FINDINGS,
+  SEED_INCIDENTS,
+  SEED_LOTS,
+  SEED_ORDERS,
+  SEED_PRECHECK,
+  SEED_RCS,
+  SEED_RESEARCH,
+  SEED_REVIEW,
+  SEED_RULES,
+  SEED_RUNS,
+  SEED_SKUS,
+  SEED_SOCIAL_PIPELINE,
+  SEED_VENDORS,
+  SEED_WAIVERS,
+} from "./seed.ts";
 import { VauxhallStore } from "./store.ts";
 
 function assertNoDashes(value: string, label: string) {
@@ -50,6 +72,26 @@ test("seed strings have zero em dashes or en dashes", () => {
       sku.batchNote,
       ...sku.formats,
     ]),
+    ...SEED_LOTS.flatMap((lot) => [lot.batchLabel, lot.location, lot.coaNote]),
+    ...SEED_RUNS.flatMap((run) => [run.note, run.stage]),
+    ...SEED_ACCOUNTS.flatMap((account) => [
+      account.name,
+      account.license,
+      account.licenseMark,
+      account.notes,
+      account.contact,
+    ]),
+    ...SEED_ORDERS.flatMap((order) => [order.id, order.documents, order.stage]),
+    ...SEED_FINDINGS.flatMap((item) => [item.cite, item.remediate, item.document, item.citation]),
+    ...SEED_INCIDENTS.flatMap((item) => [item.title, item.timeline, item.rootCause]),
+    ...SEED_RULES.flatMap((item) => [item.name, item.citation, item.enforcement]),
+    ...SEED_WAIVERS.map((item) => item.control),
+    ...SEED_AUDIT.map((item) => item.note),
+    ...SEED_DSAR.flatMap((item) => [item.subject, item.note, item.clock]),
+    ...SEED_VENDORS.flatMap((item) => [item.name, item.scope, item.dpa]),
+    ...SEED_PRECHECK.flatMap((item) => item.reasons),
+    ...SEED_SOCIAL_PIPELINE.flatMap((item) => [item.title, item.note, ...item.auditFlags]),
+    ...SEED_RESEARCH.flatMap((item) => [item.hook, item.provenance, item.note]),
   ];
   for (const blob of blobs) assertNoDashes(blob, blob.slice(0, 40));
 });
@@ -137,6 +179,92 @@ test("src does not ship the Prompt 2B mock sign-in demo", () => {
   assert.equal(store.includes("owner@bond.test"), false);
   assert.equal(app.includes("SignInMock"), false);
   assert.equal(app.includes("signOutSlot"), false);
+});
+
+test("adding a SKU propagates to inventory, orders, and reporting", () => {
+  const store = new VauxhallStore();
+  store.addSku({
+    id: "no-4",
+    number: "No. 4",
+    editionName: "Prototype Four",
+    moment: "Unset",
+    triad: "Hold. Hold. Hold.",
+    bondLine: "a later number",
+    accentToken: "No. 4",
+    hex: "#E1DAD0",
+    formats: ["1g"],
+    productTruth: "Mock SKU only. Nothing added. Nothing in the way.",
+    lifecycle: "active",
+    batchNote: "No lots recorded. No COA on file.",
+  });
+  assert.equal(store.listSkus().length, 4);
+  assert.ok(store.dashboardSnapshot().unitsOnHand.some((row) => row.skuId === "no-4" && row.onHand === 0));
+  assert.ok(store.listEconomics().some((row) => row.skuId === "no-4" && row.mockCost === 0));
+  assert.equal(store.unitsForSku("no-4").available, 0);
+});
+
+test("expired license and reserved stock cannot be sold twice", () => {
+  const store = new VauxhallStore();
+  const blocked = store.createOrder({
+    accountId: "acct-lapsed",
+    lines: [{ skuId: "no-1", format: "1g", qty: 1, batchLabel: "MOCK-LOT-D1" }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(blocked.ok, false);
+  if (!blocked.ok) assert.match(blocked.reason, /Expired/);
+  const avail = store.availableForSku("no-3");
+  assert.equal(avail, 16);
+  const ok = store.createOrder({
+    accountId: "acct-north",
+    lines: [{ skuId: "no-3", format: "1g", qty: 16, batchLabel: "MOCK-LOT-P1" }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(ok.ok, true);
+  const twice = store.createOrder({
+    accountId: "acct-north",
+    lines: [{ skuId: "no-3", format: "1g", qty: 1, batchLabel: "MOCK-LOT-P1" }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(twice.ok, false);
+  if (!twice.ok) assert.match(twice.reason, /double allocated/);
+});
+
+test("Pre-Check blocks the seeded violation and M refuses the candidate", () => {
+  const store = new VauxhallStore();
+  assert.equal(store.precheckFor("rc-117")?.verdict, "green");
+  assert.equal(store.mGateAllows("rc-117"), true);
+  assert.equal(store.precheckFor("rc-118")?.verdict, "blocked");
+  assert.equal(store.mGateAllows("rc-118"), false);
+  assert.match(store.precheckFor("rc-118")?.reasons[0] ?? "", /Seeded violation/);
+});
+
+test("unapproved social drafts raise a P1 and approved drafts still stay parked", () => {
+  const store = new VauxhallStore();
+  const before = store.scorecard();
+  assert.equal(before.p0_30d, 0);
+  assert.ok(before.p1_30d >= 1);
+  const denied = store.attemptSchedule("d-207");
+  assert.equal(denied.ok, false);
+  assert.equal(store.scorecard().p1_30d, before.p1_30d + 1);
+  const parked = store.attemptSchedule("d-211");
+  assert.equal(parked.ok, true);
+  if (parked.ok) assert.match(parked.note, /Prompt 2C stays parked/);
+});
+
+test("mock licenses and lots stay obviously fake", () => {
+  const store = new VauxhallStore();
+  assert.ok(store.listAccounts().every((account) => account.license.startsWith("MOCK-LIC-PROTO-")));
+  assert.ok(store.listAccounts().every((account) => account.licenseMark === "mock/prototype"));
+  assert.ok(store.listLots().every((lot) => lot.batchLabel.startsWith("MOCK-LOT-")));
+  assert.ok(store.listLots().every((lot) => lot.coaNote.includes("No COA") && !lot.coaNote.includes("http")));
+  const lapsed = store.accountById("acct-lapsed");
+  const west = store.accountById("acct-west");
+  assert.ok(lapsed);
+  assert.ok(west);
+  assert.equal(store.licenseState(lapsed), "expired");
+  assert.equal(store.licenseState(west), "expiring");
+  assert.equal(SEED_ECONOMICS.length, 3);
+  assert.equal(store.listAlerts().some((alert) => alert.kind === "late run"), true);
 });
 
 test("Carver surfaces its blocker and refresh reseeds mock data", () => {

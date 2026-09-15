@@ -108,7 +108,7 @@ export function CommandApp({
           {route.view === "live-feed" ? <LiveFeedView store={store} onToast={showToast} /> : null}
         </>
       ) : (
-        <WingMosaic id={route.wing} consoleId={route.view} />
+        <WingMosaic id={route.wing} consoleId={route.view} role={role} onToast={showToast} />
       )}
       <div className={`vx-toast${toast ? " show" : ""}`}>{toast}</div>
     </PortalFrame>

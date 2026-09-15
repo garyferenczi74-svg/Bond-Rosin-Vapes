@@ -1,13 +1,33 @@
 import { SKU_ACCENTS } from "../tokens.ts";
 import type {
   AgentEvent,
+  AuditRow,
   CanonDoc,
   CollectionFrame,
+  DsarRequest,
+  Finding,
+  Incident,
+  InventoryLot,
+  PreCheckResult,
+  ProductionRun,
   ReleaseCandidate,
+  ResearchRow,
   ReviewItem,
+  ScannerItem,
+  ScriptVariation,
+  SecurityRule,
   Sku,
+  SkuEconomics,
+  Soc2Control,
+  SocialDeskStrip,
   SocialDraft,
+  SocialMetric,
+  SocialPipelineItem,
   TuningProposal,
+  Vendor,
+  Waiver,
+  WholesaleAccount,
+  WholesaleOrder,
 } from "./types.ts";
 
 const PRODUCT_TRUTH =
@@ -333,4 +353,523 @@ export const EVENT_POOL: Omit<AgentEvent, "id" | "time" | "audit">[] = [
     summary: "Reorder signal steady on prototype SKU two",
     sub: "Mock velocity only. No SKU spec attached.",
   },
+];
+
+export const SEED_CLOCK = "2026-09-15";
+export const MOCK_COA_NOTE = "No COA on file. Mock seed.";
+
+export const SEED_LOTS: InventoryLot[] = [
+  {
+    id: "lot-d1",
+    skuId: "no-1",
+    batchLabel: "MOCK-LOT-D1",
+    onHand: 180,
+    reserved: 40,
+    location: "Prototype vault A",
+    packagedOn: "2026-08-12",
+    agingDays: 34,
+    coaNote: MOCK_COA_NOTE,
+  },
+  {
+    id: "lot-u1",
+    skuId: "no-2",
+    batchLabel: "MOCK-LOT-U1",
+    onHand: 90,
+    reserved: 12,
+    location: "Prototype vault A",
+    packagedOn: "2026-08-20",
+    agingDays: 26,
+    coaNote: MOCK_COA_NOTE,
+  },
+  {
+    id: "lot-p1",
+    skuId: "no-3",
+    batchLabel: "MOCK-LOT-P1",
+    onHand: 22,
+    reserved: 6,
+    location: "Prototype vault B",
+    packagedOn: "2026-06-27",
+    agingDays: 80,
+    coaNote: MOCK_COA_NOTE,
+  },
+];
+
+export const SEED_RUNS: ProductionRun[] = [
+  {
+    id: "run-01",
+    skuId: "no-1",
+    stage: "pressed",
+    expectedYield: 48,
+    expectedCompletion: "2026-09-18",
+    late: false,
+    note: "Mock press run. Not a live floor.",
+  },
+  {
+    id: "run-02",
+    skuId: "no-3",
+    stage: "washed",
+    expectedYield: 16,
+    expectedCompletion: "2026-09-10",
+    late: true,
+    note: "Mock late run. Held for owner review.",
+  },
+];
+
+export const SEED_ACCOUNTS: WholesaleAccount[] = [
+  {
+    id: "acct-north",
+    name: "Prototype Dispensary North",
+    license: "MOCK-LIC-PROTO-NORTH",
+    licenseMark: "mock/prototype",
+    expiresOn: "2027-06-01",
+    contact: "north.buyer@example.test",
+    terms: "Net 15 mock",
+    region: "North",
+    velocity: 42,
+    notes: "Standing mock account. License is fake.",
+    receivableDays: 18,
+  },
+  {
+    id: "acct-west",
+    name: "Prototype Dispensary West",
+    license: "MOCK-LIC-PROTO-WEST",
+    licenseMark: "mock/prototype",
+    expiresOn: "2026-10-20",
+    contact: "west.buyer@example.test",
+    terms: "Net 30 mock",
+    region: "West",
+    velocity: 18,
+    notes: "Mock license expires inside 60 days.",
+    receivableDays: 52,
+  },
+  {
+    id: "acct-lapsed",
+    name: "Prototype Dispensary Lapsed",
+    license: "MOCK-LIC-PROTO-LAPSED",
+    licenseMark: "mock/prototype",
+    expiresOn: "2026-08-01",
+    contact: "lapsed.buyer@example.test",
+    terms: "Hold",
+    region: "South",
+    velocity: 0,
+    notes: "Expired mock license. Orders blocked.",
+    receivableDays: 8,
+  },
+];
+
+export const SEED_ORDERS: WholesaleOrder[] = [
+  {
+    id: "ord-1001",
+    accountId: "acct-north",
+    stage: "in fulfillment",
+    promisedOn: "2026-09-17",
+    late: false,
+    lines: [{ skuId: "no-1", format: "1g", qty: 24, batchLabel: "MOCK-LOT-D1" }],
+    documents: "Mock pick ticket. No live BOL.",
+  },
+  {
+    id: "ord-1002",
+    accountId: "acct-west",
+    stage: "confirmed",
+    promisedOn: "2026-09-19",
+    late: false,
+    lines: [{ skuId: "no-2", format: "0.5g", qty: 12, batchLabel: "MOCK-LOT-U1" }],
+    documents: "Mock confirmation.",
+  },
+  {
+    id: "ord-1003",
+    accountId: "acct-north",
+    stage: "shipped",
+    promisedOn: "2026-09-14",
+    late: false,
+    lines: [{ skuId: "no-3", format: "1g", qty: 6, batchLabel: "MOCK-LOT-P1" }],
+    documents: "Mock shipment note.",
+  },
+  {
+    id: "ord-1004",
+    accountId: "acct-north",
+    stage: "draft",
+    promisedOn: "2026-09-22",
+    late: false,
+    lines: [
+      { skuId: "no-1", format: "0.5g", qty: 10, batchLabel: "MOCK-LOT-D1" },
+      { skuId: "no-2", format: "1g", qty: 8, batchLabel: "MOCK-LOT-U1" },
+    ],
+    documents: "Draft only.",
+  },
+];
+
+export const SEED_ECONOMICS: SkuEconomics[] = [
+  {
+    skuId: "no-1",
+    mockCost: 12,
+    mockWholesale: 28,
+    mockSellIn: 120,
+    mockReorderPct: 38,
+    mockMtdUnits: 86,
+    mockPlanUnits: 90,
+  },
+  {
+    skuId: "no-2",
+    mockCost: 12,
+    mockWholesale: 28,
+    mockSellIn: 80,
+    mockReorderPct: 31,
+    mockMtdUnits: 54,
+    mockPlanUnits: 60,
+  },
+  {
+    skuId: "no-3",
+    mockCost: 18,
+    mockWholesale: 40,
+    mockSellIn: 24,
+    mockReorderPct: 22,
+    mockMtdUnits: 11,
+    mockPlanUnits: 16,
+  },
+];
+
+export const SEED_FINDINGS: Finding[] = [
+  {
+    id: "f-p1-schedule",
+    severity: "P1",
+    source: "Felix review",
+    surface: "Social Scheduler",
+    citation: "Prompt 2 Social. Unapproved posts cannot schedule.",
+    owner: "Felix",
+    due: "2026-09-16",
+    cite: "An unapproved social post cannot reach Scheduler.",
+    remediate: "Hold the draft in Editor until Felix and owner clear it.",
+    document: "Mock seed. Standing rule recorded.",
+    state: "open",
+    closedEvidence: "",
+    openedOn: "2026-09-14",
+    escape: false,
+  },
+  {
+    id: "f-p2-dash",
+    severity: "P2",
+    source: "code scan",
+    surface: "prototype copy bank",
+    citation: "Dash lint. Zero em dash or en dash.",
+    owner: "Vesper",
+    due: "2026-09-20",
+    cite: "Dash lint is a release gate.",
+    remediate: "Replace any dash characters with a period or comma.",
+    document: "Mock seed. No live scan attached.",
+    state: "open",
+    closedEvidence: "",
+    openedOn: "2026-09-13",
+    escape: false,
+  },
+  {
+    id: "f-p3-closed",
+    severity: "P3",
+    source: "manual",
+    surface: "Age gate copy",
+    citation: "Age-gate integrity.",
+    owner: "M",
+    due: "2026-09-10",
+    cite: "Age gate must stay intact on every public route.",
+    remediate: "Confirmed on rc-117.",
+    document: "Closed with mock evidence note.",
+    state: "closed",
+    closedEvidence: "rc-117 age gate green. Mock close.",
+    openedOn: "2026-09-08",
+    escape: false,
+  },
+];
+
+export const SEED_INCIDENTS: Incident[] = [
+  {
+    id: "inc-01",
+    title: "Mock lockout on /haus/admin",
+    timeline: "14:32 lockout. Felix alert A-40912.",
+    impact: "Admin door stayed closed. No member data touched.",
+    actions: "Alert routed to Security wing.",
+    rootCause: "Five failed password attempts. Mock source 74.12.x.x.",
+    findingId: "f-p2-dash",
+  },
+];
+
+export const SEED_RULES: SecurityRule[] = [
+  {
+    id: "rule-headers",
+    name: "Web security headers and CSP",
+    citation: "OWASP headers. Bond CSP.",
+    enforcement: "Pre-Check and runtime.",
+    gate: "both",
+  },
+  {
+    id: "rule-age",
+    name: "Age-gate integrity",
+    citation: "Public age gate must not be bypassed.",
+    enforcement: "Pre-Check tests.",
+    gate: "pre-check",
+  },
+  {
+    id: "rule-claims",
+    name: "Claims-language lint",
+    citation: "Felix. No therapeutic claims.",
+    enforcement: "Pre-Check blocks on hit.",
+    gate: "pre-check",
+  },
+  {
+    id: "rule-dash",
+    name: "Dash lint",
+    citation: "Zero em dash or en dash in portal copy.",
+    enforcement: "Pre-Check and lint script.",
+    gate: "both",
+  },
+  {
+    id: "rule-deps",
+    name: "Dependency and secret policy",
+    citation: "No secrets in client. Dependency drift blocks at high.",
+    enforcement: "Pre-Check. M gate.",
+    gate: "pre-check",
+  },
+  {
+    id: "rule-agents",
+    name: "Claude Code enforcement set",
+    citation: "Agents may never touch production, alter canon silently, publish social, or modify this ruleset.",
+    enforcement: "Runtime plus owner.",
+    gate: "runtime",
+  },
+];
+
+export const SEED_WAIVERS: Waiver[] = [
+  {
+    id: "wav-01",
+    findingId: "f-p3-closed",
+    expiresOn: "2026-09-08",
+    control: "Mock compensating review on age-gate copy.",
+    state: "expired",
+  },
+  {
+    id: "wav-02",
+    findingId: "f-p2-dash",
+    expiresOn: "2026-09-30",
+    control: "Owner-approved time box on prototype copy bank.",
+    state: "active",
+  },
+];
+
+export const SEED_AUDIT: AuditRow[] = [
+  {
+    id: "aud-01",
+    time: "14:32:08",
+    actor: "Felix",
+    action: "alert.raise",
+    target: "/haus/admin",
+    note: "Lockout after 5 failed attempts. Mock seed.",
+  },
+  {
+    id: "aud-02",
+    time: "14:29:51",
+    actor: "JB",
+    action: "review.endorse",
+    target: "rc-118",
+    note: "Endorsed Vesper verdict. Routed to M.",
+  },
+  {
+    id: "aud-03",
+    time: "13:30:11",
+    actor: "JB",
+    action: "audit.daily",
+    target: "command",
+    note: "Daily audit posted. Mock digest.",
+  },
+];
+
+export const SEED_DSAR: DsarRequest[] = [
+  {
+    id: "dsar-01",
+    subject: "member.demo@example.test",
+    state: "intake",
+    clock: "Day 2 of 30. Mock clock.",
+    note: "Bond holds little personal data by design. Prototype request only.",
+  },
+];
+
+export const SEED_VENDORS: Vendor[] = [
+  {
+    id: "vnd-host",
+    name: "Prototype Host",
+    scope: "Static and Next.js hosting. Mock register.",
+    dpa: "Mock DPA on file. Not a live counterparty.",
+    renewal: "2027-01-15",
+  },
+  {
+    id: "vnd-auth",
+    name: "Prototype Auth",
+    scope: "Haus sign-in. No health data. No BAA regime.",
+    dpa: "Mock DPA on file.",
+    renewal: "2026-12-01",
+  },
+];
+
+export const SEED_SCANNER: ScannerItem[] = [
+  {
+    id: "scan-01",
+    source: "dependency audit",
+    note: "Mock scanner bridge. Flows into Findings.",
+    findingId: "f-p2-dash",
+  },
+];
+
+export const SEED_PRECHECK: PreCheckResult[] = [
+  {
+    id: "pc-117",
+    candidate: "rc-117",
+    verdict: "green",
+    reasons: ["headers", "CSP", "age gate", "claims lint", "dash lint"],
+  },
+  {
+    id: "pc-118",
+    candidate: "rc-118",
+    verdict: "blocked",
+    reasons: ["Seeded violation: claims lint on prototype copy"],
+  },
+];
+
+export const SEED_SOC2: Soc2Control[] = [
+  {
+    id: "cc6",
+    control: "CC6 logical access",
+    evidence: "Mock export. Haus cloak, admin role, audit log.",
+  },
+  {
+    id: "cc7",
+    control: "CC7 monitoring",
+    evidence: "Mock export. Findings, Pre-Check, scanner bridge.",
+  },
+];
+
+export const SEED_SOCIAL_PIPELINE: SocialPipelineItem[] = [
+  {
+    id: "d-207",
+    title: "Nothing added, everything real",
+    kind: "Reel",
+    stage: "felix",
+    desk: "Editor",
+    note: "Awaiting Felix originality check.",
+    approved: false,
+    auditFlags: ["originality hold"],
+  },
+  {
+    id: "d-208",
+    title: "The press, in 15 seconds",
+    kind: "Short",
+    stage: "felix",
+    desk: "Editor",
+    note: "Awaiting Felix originality check.",
+    approved: false,
+    auditFlags: ["originality hold"],
+  },
+  {
+    id: "d-209",
+    title: "With your highest self",
+    kind: "Carousel",
+    stage: "owner",
+    desk: "Editor",
+    note: "Felix cleared. Awaiting owner.",
+    approved: false,
+    auditFlags: [],
+  },
+  {
+    id: "d-210",
+    title: "Find your number",
+    kind: "Reel",
+    stage: "held",
+    desk: "Scriptwriter",
+    note: "Held on voice check.",
+    approved: false,
+    auditFlags: ["voice check"],
+  },
+  {
+    id: "d-211",
+    title: "Morning Routine",
+    kind: "Reel",
+    stage: "approved",
+    desk: "Editor",
+    note: "Last approved. 3 edits flagged and closed.",
+    approved: true,
+    auditFlags: [],
+  },
+];
+
+export const SEED_DESK_STRIPS: SocialDeskStrip[] = [
+  {
+    id: "strip-script",
+    title: "Scriptwriter",
+    state: "LIVE",
+    line: "Drafting: 10 hook variations for the current concept.",
+  },
+  {
+    id: "strip-editor",
+    title: "Editor",
+    state: "LIVE",
+    line: "Last approved: Morning Routine, 3 edits flagged.",
+  },
+  {
+    id: "strip-sched",
+    title: "Scheduler",
+    state: "PARKED",
+    line: "Prompt 2C parked. No live social post.",
+  },
+  {
+    id: "strip-analyzer",
+    title: "Analyzer",
+    state: "HELD",
+    line: "Processing 30-day engagement data across 6 platforms. Mock seed.",
+  },
+];
+
+export const SEED_RESEARCH: ResearchRow[] = [
+  {
+    id: "res-01",
+    format: "Process reveal",
+    hook: "The press, in 15 seconds",
+    remixFit: "High. Brand test pass.",
+    provenance: "Scout ledger mock. No scrape connected.",
+    note: "Positive content only.",
+  },
+  {
+    id: "res-02",
+    format: "Numbered collection",
+    hook: "Find your number",
+    remixFit: "Medium. Hold for owner voice.",
+    provenance: "Scout ledger mock. No scrape yet.",
+    note: "No live platform pull.",
+  },
+];
+
+export const SEED_VARIATIONS: ScriptVariation[] = [
+  {
+    id: "var-01",
+    hook: "Nothing added. Nothing in the way.",
+    caption: "When the product is pure, the experience is real.",
+    platform: "Short",
+    provenance: "Film Day asset library mock.",
+  },
+  {
+    id: "var-02",
+    hook: "Choose your moment.",
+    caption: "The Numbered Collection. Dialed. Unwind. Peak.",
+    platform: "Reel",
+    provenance: "Film Day asset library mock.",
+  },
+  {
+    id: "var-03",
+    hook: "With your highest self.",
+    caption: "What you consume matters.",
+    platform: "Carousel",
+    provenance: "Film Day asset library mock.",
+  },
+];
+
+export const SEED_SOCIAL_METRICS: SocialMetric[] = [
+  { platform: "TikTok", posts: "--", reach: "--", note: "No scrape yet" },
+  { platform: "Instagram", posts: "--", reach: "--", note: "No scrape yet" },
+  { platform: "YouTube", posts: "--", reach: "--", note: "No scrape yet" },
 ];
