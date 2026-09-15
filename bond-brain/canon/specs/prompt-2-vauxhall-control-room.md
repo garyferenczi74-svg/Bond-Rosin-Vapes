@@ -8,7 +8,8 @@ Brand lock: Matte Black #1B1D1C, Deep Charcoal #2A2A2A, Bone #E1DAD0, Aptos UI, 
 
 Wings:
 - Command Center keeps Prompt 2B VauxhallStore wiring (Live Feed, Review, Queue, filters, export, Sign Out to /haus).
-- Product and Security use the same shell with framed mosaics. No invented Bond SKU specs.
+- Product landing is SKU Portfolio from the standing catalog (Dialed, Unwind, Peak). Other Product consoles stay framed. No invented prices, COA URLs, or license numbers.
+- Security uses the same shell with a framed mosaic.
 - Social uses the same shell with placeholder copy. Prompt 2C stays parked.
 
 Standing bans: zero em dashes or en dashes. Marketing Home coexistence stays. Static admin HTML stays cloaked.

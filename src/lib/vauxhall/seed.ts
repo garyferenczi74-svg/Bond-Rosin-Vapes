@@ -1,11 +1,69 @@
+import { SKU_ACCENTS } from "../tokens.ts";
 import type {
   AgentEvent,
   CanonDoc,
+  CollectionFrame,
   ReleaseCandidate,
   ReviewItem,
+  Sku,
   SocialDraft,
   TuningProposal,
 } from "./types.ts";
+
+const PRODUCT_TRUTH =
+  "100% solventless live rosin from fresh-frozen cannabis. Nothing added. Nothing in the way.";
+const BATCH_NOTE = "No lots recorded. No COA on file.";
+
+export const NUMBERED_COLLECTION: CollectionFrame = {
+  name: "The Numbered Collection",
+  line: "Choose your moment.",
+  close: "When the product is pure, the experience is real.",
+};
+
+export const SEED_SKUS: Sku[] = [
+  {
+    id: "no-1",
+    number: "No. 1",
+    editionName: "Dialed",
+    moment: "Daytime",
+    triad: "Focus. Clarity. Momentum.",
+    bondLine: "your potential",
+    accentToken: "No. 1",
+    hex: SKU_ACCENTS["no-1"],
+    formats: ["0.5g", "1g"],
+    productTruth: PRODUCT_TRUTH,
+    lifecycle: "active",
+    batchNote: BATCH_NOTE,
+  },
+  {
+    id: "no-2",
+    number: "No. 2",
+    editionName: "Unwind",
+    moment: "Nighttime",
+    triad: "Release. Stillness. Restoration.",
+    bondLine: "the moment",
+    accentToken: "No. 2",
+    hex: SKU_ACCENTS["no-2"],
+    formats: ["0.5g", "1g"],
+    productTruth: PRODUCT_TRUTH,
+    lifecycle: "active",
+    batchNote: BATCH_NOTE,
+  },
+  {
+    id: "no-3",
+    number: "No. 3",
+    editionName: "Peak",
+    moment: "Reserve",
+    triad: "Edge. Elevation. Expansion.",
+    bondLine: "your edge",
+    accentToken: "No. 3",
+    hex: SKU_ACCENTS["no-3"],
+    formats: ["0.5g", "1g"],
+    productTruth: PRODUCT_TRUTH,
+    lifecycle: "active",
+    batchNote: BATCH_NOTE,
+  },
+];
 
 export const SEED_EVENTS: AgentEvent[] = [
   {

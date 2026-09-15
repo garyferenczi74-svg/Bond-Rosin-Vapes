@@ -7,6 +7,8 @@ Briefable:
 - specs/prompt-2-vauxhall.md (admin portal design, Gary 2026-09-15)
 - specs/prompt-2b-wire-vauxhall.md (Prompt 2B unpark: Command Center wiring on Next /vauxhall)
 - specs/prompt-2-vauxhall-control-room.md (ViaConnect layout density on Bond tokens)
+- specs/sku-portfolio.md (standing catalog: Dialed, Unwind, Peak; Prompt 1 wins)
+- specs/product-wing-sku-portfolio.md (Product wing SKU Portfolio build brief)
 - specs/deployment.md (public URL + portal stack notes)
 - specs/qc-checklist.md (Vesper standing lints; Framer acceptance still blocked)
 - specs/release-runbook.md (M)

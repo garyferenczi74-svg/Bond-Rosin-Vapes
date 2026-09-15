@@ -1,10 +1,18 @@
+export const SKU_ACCENTS = {
+  "no-1": "#79C84A",
+  "no-2": "#86ACE3",
+  "no-3": "#A53A28",
+} as const;
+
+export type SkuAccentId = keyof typeof SKU_ACCENTS;
+
 export const tokens = {
   matteBlack: "#1B1D1C",
   deepCharcoal: "#2A2A2A",
   bone: "#E1DAD0",
-  product: "#79C84A",
-  social: "#86ACE3",
-  security: "#A53A28",
+  product: SKU_ACCENTS["no-1"],
+  social: SKU_ACCENTS["no-2"],
+  security: SKU_ACCENTS["no-3"],
   muted: "#8E887C",
   line: "#3A3C3B",
 } as const;
@@ -35,7 +43,7 @@ export const wings: {
     href: "/vauxhall/product",
     title: "Product",
     hairline: tokens.product,
-    summary: "Wholesale spine. Framed until the portal build.",
+    summary: "The Numbered Collection. Choose your moment.",
   },
   {
     id: "security",

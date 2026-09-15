@@ -107,3 +107,33 @@ export type QueueSnapshot = {
   rcs: ReleaseCandidate[];
   drafts: SocialDraft[];
 };
+
+export const SKU_LIFECYCLES = ["active", "hold", "retired"] as const;
+export type SkuLifecycle = (typeof SKU_LIFECYCLES)[number];
+
+export type Sku = {
+  id: string;
+  number: string;
+  editionName: string;
+  moment: string;
+  triad: string;
+  bondLine: string;
+  accentToken: string;
+  hex: string;
+  formats: string[];
+  productTruth: string;
+  lifecycle: SkuLifecycle;
+  batchNote: string;
+};
+
+export type CollectionFrame = {
+  name: string;
+  line: string;
+  close: string;
+};
+
+export type SkuMetrics = {
+  active: number;
+  formats: number;
+  lifecycle: Partial<Record<SkuLifecycle, number>>;
+};

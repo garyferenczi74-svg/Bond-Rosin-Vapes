@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { COMMAND_SECTIONS, parseVauxhallRoute } from "./routes.ts";
+import { COMMAND_SECTIONS, PRODUCT_CONSOLES, parseVauxhallRoute } from "./routes.ts";
 
 test("Command Center module strip leads with Live Feed, Review, Queue", () => {
   assert.deepEqual(
@@ -21,12 +21,20 @@ test("command views parse from app router slugs", () => {
   assert.equal(parseVauxhallRoute(["review", "extra"]), null);
 });
 
+test("Product landing is SKU Portfolio", () => {
+  assert.equal(PRODUCT_CONSOLES[0]?.id, "sku-portfolio");
+  assert.equal(PRODUCT_CONSOLES[0]?.href, "/vauxhall/product");
+  assert.equal(PRODUCT_CONSOLES.some((item) => item.id === "dashboard"), true);
+});
+
 test("wing consoles parse and unknown slugs stay cloaked", () => {
   assert.deepEqual(parseVauxhallRoute(["product"]), {
     wing: "product",
-    view: "dashboard",
+    view: "sku-portfolio",
     path: "/vauxhall/product",
   });
+  assert.equal(parseVauxhallRoute(["product", "sku-portfolio"])?.view, "sku-portfolio");
+  assert.equal(parseVauxhallRoute(["product", "dashboard"])?.path, "/vauxhall/product/dashboard");
   assert.equal(parseVauxhallRoute(["security", "pre-check"])?.view, "pre-check");
   assert.equal(parseVauxhallRoute(["social", "scheduler"])?.path, "/vauxhall/social/scheduler");
   assert.equal(parseVauxhallRoute(["admin"]), null);
