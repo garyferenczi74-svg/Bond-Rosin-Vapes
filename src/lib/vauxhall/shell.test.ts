@@ -74,7 +74,9 @@ test("social stays non-publishing and parked", () => {
   assert.match(SOCIAL, /Prompt 2C stays parked/);
   assert.match(SOCIAL, /No scrape yet/);
   assert.match(SOCIAL, /Scheduler/);
-  assert.match(SOCIAL, /attemptSchedule/);
+  assert.match(SOCIAL, /listSocialPipeline/);
+  assert.equal(SOCIAL.includes("attemptSchedule"), false);
+  assert.equal(SOCIAL.includes("Attempt schedule"), false);
   assert.equal(SOCIAL.includes("\u2013"), false);
   assert.equal(SOCIAL.includes("\u2014"), false);
   assert.equal(SOCIAL.includes("!"), false);

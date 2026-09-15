@@ -52,7 +52,7 @@ export function SocialWing({
       {active === "auto-script" || active === "scriptwriter" ? <ScriptDesk store={store} /> : null}
       {active === "research" ? <ResearchDesk store={store} /> : null}
       {active === "editor" ? <EditorDesk store={store} onToast={onToast} /> : null}
-      {active === "scheduler" ? <SchedulerDesk store={store} onToast={onToast} /> : null}
+      {active === "scheduler" ? <SchedulerDesk /> : null}
       {active === "analyzer" || active === "post-tracking" ? <AnalyzerDesk store={store} /> : null}
     </div>
   );
@@ -283,46 +283,21 @@ function EditorDesk({
   );
 }
 
-function SchedulerDesk({
-  store,
-  onToast,
-}: {
-  store: VauxhallStore;
-  onToast: (msg: string) => void;
-}) {
-  const queue = store.listSocialPipeline();
+function SchedulerDesk() {
   return (
     <div>
       <ConsoleHeader
         title="Scheduler"
         subtitle="Parked. Prompt 2C stays parked for real Carver publish."
       />
-      <div className="card vx-parked" style={{ marginBottom: 16 }}>
+      <div className="card vx-parked">
         <p className="lbl" style={{ margin: "0 0 8px" }}>
           Parked
         </p>
         <p style={{ margin: 0, fontSize: 13, color: "#B0A99A", lineHeight: 1.6 }}>
-          No live social post. An unapproved draft cannot enter this queue without a P1 finding in
-          Felix wing. Approved drafts still sit here. Nothing schedules.
+          Live publish is out of scope. Scheduler and Prompt 2C stay parked. The Social shell shows
+          mock pipeline cards only. Nothing schedules from this desk.
         </p>
-      </div>
-      <div style={{ display: "grid", gap: 10 }}>
-        {queue.map((item) => (
-          <div key={item.id}>
-            <PipelineCard item={item} />
-            <button
-              type="button"
-              className="vx-act"
-              style={{ marginTop: 8 }}
-              onClick={() => {
-                const result = store.attemptSchedule(item.id);
-                onToast(result.ok ? result.note : result.reason);
-              }}
-            >
-              Attempt schedule
-            </button>
-          </div>
-        ))}
       </div>
     </div>
   );

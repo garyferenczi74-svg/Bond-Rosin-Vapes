@@ -238,7 +238,7 @@ test("Pre-Check blocks the seeded violation and M refuses the candidate", () => 
   assert.match(store.precheckFor("rc-118")?.reasons[0] ?? "", /Seeded violation/);
 });
 
-test("unapproved social drafts raise a P1 and approved drafts still stay parked", () => {
+test("store schedule lock stays closed even though Scheduler UI is parked", () => {
   const store = new VauxhallStore();
   const before = store.scorecard();
   assert.equal(before.p0_30d, 0);

@@ -87,6 +87,10 @@ test("new wing UI keeps Bond voice and never uses WingStub", () => {
   const app = read("components/vauxhall/command-app.tsx");
   const access = read("lib/access.ts");
   const actions = read("app/haus/actions.ts");
+  const social = read("components/vauxhall/social-views.tsx");
+  assert.match(social, /Prompt 2C stays parked/);
+  assert.equal(social.includes("Attempt schedule"), false);
+  assert.equal(social.includes("attemptSchedule"), false);
   assert.match(frame, /Sign out/);
   assert.match(app, /WingMosaic/);
   assert.match(actions, /redirect\("\/haus"\)/);
