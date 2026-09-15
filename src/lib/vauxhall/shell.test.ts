@@ -30,14 +30,19 @@ test("control room CSS stays on Bond tokens", () => {
   assert.equal(CSS.includes("#E3C270"), false);
 });
 
-test("shell uses sidebar plus top tabs", () => {
+test("shell uses sidebar plus a distinct top tab strip", () => {
   assert.match(FRAME, /vx-rail/);
-  assert.match(FRAME, /vx-tabs/);
+  assert.match(FRAME, /vx-wing-strip/);
+  assert.match(FRAME, /vx-module-strip/);
+  assert.match(FRAME, /aria-label="Wing tabs"/);
+  assert.match(FRAME, /aria-label="Module tabs"/);
   assert.match(FRAME, /Sign out/);
   assert.match(APP, /COMMAND_SECTIONS/);
   assert.match(APP, /WING_CONSOLES/);
   assert.match(APP, /WingMosaic/);
   assert.equal(APP.includes("owner@bond.test"), false);
+  assert.match(CSS, /\.vx-module-strip/);
+  assert.match(CSS, /border-radius: 2px/);
 });
 
 test("command views keep Prompt 2B store methods", () => {

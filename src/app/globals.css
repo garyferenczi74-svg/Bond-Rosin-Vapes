@@ -186,7 +186,33 @@ a {
 }
 
 .vx-stage-head {
-  padding: 22px clamp(16px, 3vw, 32px) 14px;
+  padding: 18px clamp(16px, 3vw, 32px) 16px;
+}
+
+.vx-wing-strip {
+  display: flex;
+  gap: 0;
+  padding: 0 clamp(16px, 3vw, 32px);
+  border-bottom: 1px solid var(--deep-charcoal);
+  overflow-x: auto;
+}
+
+.vx-wing-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 14px 11px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+}
+
+.vx-wing-tab.on {
+  color: var(--bone);
+  border-bottom-color: var(--wing-ink, var(--bone));
 }
 
 .vx-wing-rule {
@@ -207,30 +233,47 @@ a {
   color: var(--muted);
 }
 
-.vx-tabs {
+.vx-module-strip {
   display: flex;
-  gap: 0;
-  padding: 0 clamp(16px, 3vw, 32px);
-  border-bottom: 1px solid var(--deep-charcoal);
+  align-items: center;
+  gap: 2px;
+  margin-top: 16px;
+  padding: 4px;
+  background: var(--deep-charcoal);
+  border: 1px solid var(--line);
+  border-radius: 2px;
   overflow-x: auto;
+}
+
+.vx-module-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .vx-tab {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px 11px;
+  padding: 8px 12px;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 12px;
   letter-spacing: 0.04em;
   white-space: nowrap;
-  border-bottom: 1px solid transparent;
-  margin-bottom: -1px;
+  border: 1px solid transparent;
+  border-radius: 2px;
 }
 
 .vx-tab.on {
   color: var(--bone);
-  border-bottom-color: var(--bone);
+  border-color: var(--bone);
+}
+
+.vx-tab-break {
+  width: 1px;
+  height: 16px;
+  margin: 0 6px;
+  background: var(--line);
 }
 
 .vx-tab-badge {

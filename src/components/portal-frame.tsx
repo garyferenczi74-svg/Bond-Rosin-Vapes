@@ -2,6 +2,7 @@ import Link from "next/link";
 import { signOutAction } from "@/app/haus/actions";
 import type { AdminRole, WingId } from "@/lib/tokens";
 import { wings } from "@/lib/tokens";
+import { COMMAND_PRIMARY_TABS } from "@/lib/vauxhall/routes";
 
 export type PortalSection = {
   id: string;
@@ -27,6 +28,7 @@ export function PortalFrame({
 }) {
   const wing = wings.find((item) => item.id === active);
   const who = email?.split("@")[0] || role;
+  const primary = new Set<string>(COMMAND_PRIMARY_TABS);
 
   return (
     <div className="vx-shell">
@@ -82,42 +84,61 @@ export function PortalFrame({
       </aside>
 
       <div className="vx-stage">
-        <header className="vx-stage-head">
-          <div>
-            <div
-              className="vx-wing-rule"
-              style={{ background: wing?.hairline ?? "#E1DAD0" }}
-            />
-            <h1
-              className="didot vx-wing-title"
-              style={{
-                fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
-                fontWeight: 400,
-              }}
-            >
-              {wing?.title ?? "Vauxhall"}
-            </h1>
-            <p className="vx-wing-sub">{wing?.summary}</p>
-          </div>
-        </header>
+        <nav className="vx-wing-strip" aria-label="Wing tabs">
+          {wings.map((item) => {
+            const on = item.id === active;
+            return (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`vx-wing-tab${on ? " on" : ""}`}
+                style={{ ["--wing-ink" as string]: item.hairline }}
+              >
+                {item.title}
+              </Link>
+            );
+          })}
+        </nav>
 
-        {sections && sections.length > 0 ? (
-          <nav className="vx-tabs" aria-label="Module">
-            {sections.map((section) => {
-              const on = section.id === sectionActive;
-              return (
-                <Link
-                  key={section.id}
-                  href={section.href}
-                  className={`vx-tab${on ? " on" : ""}`}
-                >
-                  {section.title}
-                  {section.badge ? <span className="vx-tab-badge">{section.badge}</span> : null}
-                </Link>
-              );
-            })}
-          </nav>
-        ) : null}
+        <header className="vx-stage-head">
+          <div
+            className="vx-wing-rule"
+            style={{ background: wing?.hairline ?? "#E1DAD0" }}
+          />
+          <h1
+            className="didot vx-wing-title"
+            style={{
+              fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
+              fontWeight: 400,
+            }}
+          >
+            {wing?.title ?? "Vauxhall"}
+          </h1>
+          <p className="vx-wing-sub">{wing?.summary}</p>
+
+          {sections && sections.length > 0 ? (
+            <nav className="vx-module-strip" aria-label="Module tabs">
+              {sections.map((section, index) => {
+                const on = section.id === sectionActive;
+                const showBreak = active === "command" && section.id === "queue";
+                const next = sections[index + 1];
+                const afterPrimary = showBreak && next && !primary.has(next.id);
+                return (
+                  <span key={section.id} className="vx-module-item">
+                    <Link
+                      href={section.href}
+                      className={`vx-tab${on ? " on" : ""}${primary.has(section.id) ? " vx-tab-primary" : ""}`}
+                    >
+                      {section.title}
+                      {section.badge ? <span className="vx-tab-badge">{section.badge}</span> : null}
+                    </Link>
+                    {afterPrimary ? <span className="vx-tab-break" aria-hidden="true" /> : null}
+                  </span>
+                );
+              })}
+            </nav>
+          ) : null}
+        </header>
 
         <section className="vx-stage-body rise">{children}</section>
       </div>

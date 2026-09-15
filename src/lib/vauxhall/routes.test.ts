@@ -1,6 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseVauxhallRoute } from "./routes.ts";
+import { COMMAND_SECTIONS, parseVauxhallRoute } from "./routes.ts";
+
+test("Command Center module strip leads with Live Feed, Review, Queue", () => {
+  assert.deepEqual(
+    COMMAND_SECTIONS.slice(0, 3).map((section) => section.id),
+    ["live-feed", "review", "queue"],
+  );
+  assert.deepEqual(
+    COMMAND_SECTIONS.slice(0, 3).map((section) => section.title),
+    ["Live Feed", "Review", "Queue"],
+  );
+});
 
 test("command views parse from app router slugs", () => {
   assert.deepEqual(parseVauxhallRoute([]), { wing: "command", view: "live-feed", path: "/vauxhall" });
