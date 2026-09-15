@@ -1,22 +1,25 @@
 # Supabase (Gary)
 
-This repo does not apply SQL to production. The static marketing site does not call Supabase.
+Project: Bond-Rosin-Vapes
+Ref: ziruzhhkkndgmdouithb
+URL: https://ziruzhhkkndgmdouithb.supabase.co
 
-## Project
-- Name: Bond-Rosin-Vapes
-- Ref: ziruzhhkkndgmdouithb
-- URL: https://ziruzhhkkndgmdouithb.supabase.co
+The Next.js access shell uses the anon or publishable key only. Gary holds production and social publish keys elsewhere.
 
-## Run this PR's hardening
-File: `supabase/migrations/20260915183000_revoke_definer_execute_and_document_rls.sql`
+## Migrations
 
-1. Open the Supabase SQL editor for Bond-Rosin-Vapes.
-2. Paste and run that file.
-3. Confirm no row counts change. This script does not delete data.
+1. `20260915183000_revoke_definer_execute_and_document_rls.sql` (earlier hardening)
+2. `20260915194500_phase1_access_shell.sql` (admins gate, append-only audit, lockout stub)
+3. `20260915195000_auth_attempt_check_outcome.sql` (lockout pre-check)
 
-What it does:
-- Revokes EXECUTE on `public.is_admin()` from `anon` and `authenticated`. Keeps `postgres` and `service_role`.
-- Revokes EXECUTE on `public.rls_auto_enable()` from `anon` and `authenticated`. Keeps `postgres`.
-- Leaves `ny_cities` and `reserve_runs` with RLS on and no public policies (service role only). Adds table comments so that deny-all is intentional.
+These do not delete marketing data.
 
-Do not add anon SELECT on those tables until Phase 1 defines a public read model.
+What Phase 1 changes:
+
+- `is_admin()` reads `public.admins` (owner or operator, active) and requires JWT `aal=aal2`. It does not read `user_metadata`.
+- Anon cannot `EXECUTE` `is_admin` or `rls_auto_enable`.
+- `authenticated` can `EXECUTE` `is_admin` so RLS policies can run.
+- `audit_log` is insert plus select for authenticated admins. Update and delete are blocked by trigger.
+- `auth_attempts` is written only through `record_auth_attempt`.
+
+Seed an admin by inserting one `auth.users` row (no shared accounts), then one `public.admins` row for that `user_id`. MFA must be enrolled at `/haus`. A row without a verified authenticator cannot pass the portal gate.

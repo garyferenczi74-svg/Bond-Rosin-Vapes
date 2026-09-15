@@ -1,0 +1,26 @@
+{
+  "name": "bond-rosin-vapes",
+  "private": true,
+  "scripts": {
+    "predev": "node scripts/link-public.mjs",
+    "prebuild": "node scripts/link-public.mjs",
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "lint": "node scripts/dash-lint.mjs",
+    "test": "node --experimental-strip-types --test src/lib/access.test.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
+    "next": "^15.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.8.0"
+  }
+}

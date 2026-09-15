@@ -1,0 +1,24 @@
+export const CLOAK_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bond</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  html, body { margin: 0; min-height: 100%; background: #0D0F0E; color: #E1DAD0; }
+  body { font-family: Aptos, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif; display: flex; align-items: center; justify-content: center; }
+  main { text-align: center; padding: 40px 24px; }
+  .wordmark { font-family: 'GFS Didot', Didot, serif; font-weight: 400; font-size: 22px; letter-spacing: 0.4em; padding-left: 0.4em; color: #E1DAD0; margin: 0 0 28px; }
+  p { font-size: 14px; letter-spacing: 0.04em; color: #8E887C; margin: 0 0 28px; }
+  a { font-family: 'GFS Didot', Didot, serif; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #8E887C; text-decoration: none; border-bottom: 1px solid #3A3C3B; padding-bottom: 3px; }
+</style>
+</head>
+<body>
+  <main>
+    <p class="wordmark">BOND</p>
+    <p>This page is not available.</p>
+    <a href="/Home.dc.html">Return home</a>
+  </main>
+</body>
+</html>`;
