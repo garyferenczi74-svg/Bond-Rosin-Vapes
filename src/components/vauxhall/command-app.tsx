@@ -3,9 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PortalFrame } from "@/components/portal-frame";
-import { WingStub } from "@/components/wing-stub";
+import { WingMosaic } from "@/components/vauxhall/wing-mosaics";
 import type { AdminRole } from "@/lib/tokens";
-import { commandHref, COMMAND_SECTIONS, parseVauxhallRoute, type VauxhallRoute } from "@/lib/vauxhall/routes";
+import {
+  commandHref,
+  COMMAND_SECTIONS,
+  WING_CONSOLES,
+  parseVauxhallRoute,
+  type VauxhallRoute,
+} from "@/lib/vauxhall/routes";
 import {
   AgentsView,
   EvolutionView,
@@ -17,7 +23,15 @@ import {
 } from "./command-views";
 import { useVauxhallStore } from "./use-store";
 
-export function CommandApp({ role, route }: { role: AdminRole; route: VauxhallRoute }) {
+export function CommandApp({
+  role,
+  email,
+  route,
+}: {
+  role: AdminRole;
+  email?: string | null;
+  route: VauxhallRoute;
+}) {
   const store = useVauxhallStore();
   const router = useRouter();
   const [toast, setToast] = useState("");
@@ -62,34 +76,29 @@ export function CommandApp({ role, route }: { role: AdminRole; route: VauxhallRo
     toastTimer.current = window.setTimeout(() => setToast(""), 2500);
   }
 
-  const sections = COMMAND_SECTIONS.map((section) => ({
-    ...section,
-    href: commandHref(section.id),
-    badge: section.id === "review" ? store.openReviewCount() : undefined,
-  }));
+  const sections =
+    route.wing === "command"
+      ? COMMAND_SECTIONS.map((section) => ({
+          ...section,
+          href: commandHref(section.id),
+          badge: section.id === "review" ? store.openReviewCount() : undefined,
+        }))
+      : WING_CONSOLES[route.wing].map((item) => ({
+          id: item.id,
+          href: item.href,
+          title: item.title,
+        }));
 
   return (
     <PortalFrame
       role={role}
+      email={email}
       active={route.wing}
-      sections={route.wing === "command" ? sections : undefined}
-      sectionActive={route.wing === "command" ? route.view : undefined}
+      sections={sections}
+      sectionActive={route.view}
     >
       {route.wing === "command" ? (
-        <div>
-          <div style={{ height: 1, background: "#E1DAD0", width: 72, margin: "0 0 22px" }} />
-          <h1
-            className="didot"
-            style={{
-              fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
-              fontWeight: 400,
-              fontSize: "clamp(28px, 4vw, 40px)",
-              letterSpacing: "0.02em",
-              margin: "0 0 22px",
-            }}
-          >
-            Command Center
-          </h1>
+        <>
           {route.view === "agents" ? <AgentsView store={store} /> : null}
           {route.view === "review" ? <ReviewView store={store} onToast={showToast} /> : null}
           {route.view === "queue" ? <QueueView store={store} /> : null}
@@ -97,9 +106,9 @@ export function CommandApp({ role, route }: { role: AdminRole; route: VauxhallRo
           {route.view === "evolution" ? <EvolutionView store={store} onToast={showToast} /> : null}
           {route.view === "knowledge" ? <KnowledgeView store={store} /> : null}
           {route.view === "live-feed" ? <LiveFeedView store={store} onToast={showToast} /> : null}
-        </div>
+        </>
       ) : (
-        <WingStub id={route.wing} consoleId={route.view} />
+        <WingMosaic id={route.wing} consoleId={route.view} />
       )}
       <div className={`vx-toast${toast ? " show" : ""}`}>{toast}</div>
     </PortalFrame>

@@ -10,15 +10,22 @@ import { AGENTS, TYPE_PILLS } from "@/lib/vauxhall/types";
 const GATES = ["Vesper", "Felix", "M", "Owner"] as const;
 
 function statusColor(status: AgentStatus): string {
-  if (status === "Blocked") return "#C08457";
-  if (status === "Verifying") return "#E3C270";
-  return "#7FA87A";
+  if (status === "Blocked") return "#A53A28";
+  if (status === "Verifying") return "#E1DAD0";
+  return "#79C84A";
+}
+
+function isHotType(type: string): boolean {
+  return type === "Alert" || type === "Escalation" || type === "Error";
 }
 
 function typeBadge(type: string) {
-  const oxide = type === "Alert" || type === "Escalation" || type === "Error";
+  const hot = isHotType(type);
   return (
-    <span className="vx-pill" style={oxide ? { borderColor: "#4A3A2A", color: "#C08457", cursor: "default" } : { cursor: "default" }}>
+    <span
+      className="vx-pill"
+      style={hot ? { borderColor: "#A53A28", color: "#A53A28", cursor: "default" } : { cursor: "default" }}
+    >
       {type}
     </span>
   );
@@ -86,40 +93,60 @@ export function LiveFeedView({ store, onToast }: { store: VauxhallStore; onToast
     onToast(`Exported ${events.length} events.`);
   }
 
+  const queue = store.listQueue();
+
   return (
     <div>
+      <div className="vx-metrics">
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Events
+          </p>
+          <div className="vx-metric-value">{events.length}</div>
+          <p className="vx-metric-sub">{filter.agent || filter.type ? "Filtered set" : "Mock seed stream"}</p>
+        </div>
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Open review
+          </p>
+          <div className="vx-metric-value">{store.openReviewCount()}</div>
+          <p className="vx-metric-sub">Awaiting owner</p>
+        </div>
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Queue
+          </p>
+          <div className="vx-metric-value">{queue.rcs.length + queue.drafts.length}</div>
+          <p className="vx-metric-sub">
+            {queue.rcs.length} candidates . {queue.drafts.length} drafts
+          </p>
+        </div>
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Feed
+          </p>
+          <div className="vx-metric-value">{live ? "Live" : "Hold"}</div>
+          <p className="vx-metric-sub">Design preview mock</p>
+        </div>
+      </div>
+
       <ViewHeader
         title="Live Feed"
-        subtitle="The room where the Section is visible."
+        subtitle="Filter by agent and event type. Expand a row for source and audit."
         right={
           <>
             <button type="button" className="vx-chip" onClick={() => store.setLive(!live)}>
-              <span
-                className="vx-dot"
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  display: "inline-block",
-                  background: live ? "#7FA87A" : "#5E5A52",
-                  boxShadow: live ? "0 0 8px #7FA87A" : "none",
-                }}
-              />
+              <span className="vx-dot" style={{ color: live ? "#79C84A" : "#8E887C" }} />
               {live ? "Live" : "Paused"}
             </button>
-            <button
-              type="button"
-              className={`vx-pill${live ? "" : " active"}`}
-              style={{ borderColor: "#3A3C3B", color: "#E1DAD0" }}
-              onClick={() => store.setLive(!live)}
-            >
-              Design preview
+            <button type="button" className="vx-primary" onClick={exportCurrent}>
+              Export
             </button>
           </>
         }
       />
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+      <div className="vx-toolbar">
         {AGENTS.map((agent) => {
           const summary = store.agentSummary(agent);
           return (
@@ -129,22 +156,14 @@ export function LiveFeedView({ store, onToast }: { store: VauxhallStore; onToast
               className={`vx-chip${filter.agent === agent ? " active" : ""}`}
               onClick={() => store.toggleAgent(agent)}
             >
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  display: "inline-block",
-                  background: statusColor(summary.status),
-                }}
-              />
-              {agent} <span style={{ color: "#5E5A52" }}>{summary.status}</span>
+              <span className="vx-dot" style={{ color: statusColor(summary.status) }} />
+              {agent} <span style={{ color: "#8E887C" }}>{summary.status}</span>
             </button>
           );
         })}
       </div>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18, alignItems: "center" }}>
+      <div className="vx-toolbar">
         <button
           type="button"
           className={`vx-pill${filter.type ? "" : " active"}`}
@@ -162,25 +181,14 @@ export function LiveFeedView({ store, onToast }: { store: VauxhallStore; onToast
             {type}
           </button>
         ))}
-        <span style={{ marginLeft: "auto", fontSize: 12, color: "#6E685E" }}>
-          <button
-            type="button"
-            className="vx-pill"
-            style={{ border: "none", color: filter.allData ? "#E1DAD0" : "#6E685E", padding: 0 }}
-            onClick={() => store.toggleAllData()}
-          >
-            All Data view
-          </button>
-          {" . "}
-          <button
-            type="button"
-            className="vx-pill"
-            style={{ border: "none", color: "#6E685E", padding: 0 }}
-            onClick={exportCurrent}
-          >
-            Export
-          </button>
-        </span>
+        <button
+          type="button"
+          className={`vx-pill${filter.allData ? " active" : ""}`}
+          style={{ marginLeft: "auto" }}
+          onClick={() => store.toggleAllData()}
+        >
+          All Data
+        </button>
       </div>
 
       {filter.allData ? (
@@ -245,7 +253,8 @@ function FeedRow({
   return (
     <div>
       <button type="button" className={`vx-event${entering ? " enter" : ""}`} onClick={onToggle}>
-        <div style={{ color: "#6E685E", fontSize: 12.5, fontVariantNumeric: "tabular-nums" }}>{event.time}</div>
+        <span className={`vx-event-rule${isHotType(event.type) ? " hot" : ""}`} aria-hidden="true" />
+        <div style={{ color: "#8E887C", fontSize: 12.5, fontVariantNumeric: "tabular-nums" }}>{event.time}</div>
         <div>
           <span style={{ color: "#E1DAD0" }}>{event.agent}</span>
           <div className="etype" style={{ marginTop: 6 }}>
@@ -254,11 +263,11 @@ function FeedRow({
         </div>
         <div>
           <div style={{ color: "#E1DAD0" }}>{event.summary}</div>
-          <div style={{ fontSize: 12, color: "#6E685E", marginTop: 4 }}>{event.sub}</div>
+          <div style={{ fontSize: 12, color: "#8E887C", marginTop: 4 }}>{event.sub}</div>
         </div>
       </button>
       {open ? (
-        <div style={{ padding: "4px 0 18px 122px", fontSize: 13, color: "#8E887C" }}>
+        <div className="vx-event-detail">
           <div style={{ lineHeight: 1.7 }}>{event.sub}</div>
           <div style={{ marginTop: 8 }}>
             Source artifact:{" "}
@@ -286,13 +295,7 @@ export function AgentsView({ store }: { store: VauxhallStore }) {
   return (
     <div>
       <ViewHeader title="Agents" subtitle="The roster board. Status, task, and open recommendations per agent." />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 14,
-        }}
-      >
+      <div className="vx-mosaic">
         {store.roster().map((agent) => (
           <div key={agent.name} className="card">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -300,21 +303,13 @@ export function AgentsView({ store }: { store: VauxhallStore }) {
                 {agent.name}
               </span>
               <span className="vx-chip" style={{ cursor: "default" }}>
-                <span
-                  style={{
-                    width: 7,
-                    height: 7,
-                    borderRadius: "50%",
-                    display: "inline-block",
-                    background: statusColor(agent.status),
-                  }}
-                />
+                <span className="vx-dot" style={{ color: statusColor(agent.status) }} />
                 {agent.status}
               </span>
             </div>
             <div style={{ fontSize: 13, color: "#B0A99A", marginTop: 12 }}>{agent.task}</div>
             {agent.blocker ? (
-              <div style={{ fontSize: 12, color: "#C08457", marginTop: 6 }}>Blocker: {agent.blocker}</div>
+              <div style={{ fontSize: 12, color: "#A53A28", marginTop: 6 }}>Blocker: {agent.blocker}</div>
             ) : null}
             <div style={{ display: "flex", gap: 18, marginTop: 12, fontSize: 11.5, color: "#6E685E" }}>
               <span>Errors 24h: {agent.errors}</span>
@@ -354,15 +349,20 @@ function ReviewCard({
   const [note, setNote] = useState("");
 
   return (
-    <div className="card">
+    <div className="vx-review">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
-        <span style={{ color: "#E1DAD0", fontSize: 15 }}>{item.title}</span>
-        <span className="vx-pill" style={{ cursor: "default" }}>
-          {item.agent}
+        <span style={{ color: "#E1DAD0", fontSize: 14 }}>{item.title}</span>
+        <span style={{ display: "flex", gap: 6 }}>
+          <span className="vx-pill" style={{ cursor: "default" }}>
+            Open
+          </span>
+          <span className="vx-pill" style={{ cursor: "default" }}>
+            {item.agent}
+          </span>
         </span>
       </div>
       <div style={{ fontSize: 12.5, color: "#8E887C", marginTop: 8 }}>Evidence: {item.evidence}</div>
-      <div style={{ fontSize: 12.5, color: "#7FA87A", marginTop: 4 }}>{item.endorse}</div>
+      <div style={{ fontSize: 12.5, color: "#79C84A", marginTop: 4 }}>{item.endorse}</div>
       <input
         className="field"
         value={note}
@@ -410,6 +410,36 @@ export function ReviewView({ store, onToast }: { store: VauxhallStore; onToast: 
   const open = store.listReview().filter((item) => item.state === "open");
   return (
     <div>
+      <div className="vx-metrics">
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Open
+          </p>
+          <div className="vx-metric-value">{open.length}</div>
+          <p className="vx-metric-sub">Awaiting owner</p>
+        </div>
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Resolved
+          </p>
+          <div className="vx-metric-value">{store.listReview().length - open.length}</div>
+          <p className="vx-metric-sub">This session</p>
+        </div>
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Daily audit
+          </p>
+          <div className="vx-metric-value">Seed</div>
+          <p className="vx-metric-sub">Prototype digest</p>
+        </div>
+        <div className="vx-metric">
+          <p className="lbl" style={{ margin: 0 }}>
+            Badge
+          </p>
+          <div className="vx-metric-value">{store.openReviewCount()}</div>
+          <p className="vx-metric-sub">Shown on Review tab</p>
+        </div>
+      </div>
       <ViewHeader title="Review" subtitle="The decision inbox. Approve, reject, or send back with a note." />
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {open.length === 0 ? (
@@ -512,7 +542,7 @@ export function QueueView({ store }: { store: VauxhallStore }) {
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
                 <span style={{ color: "#E1DAD0" }}>{draft.title}</span>
-                <span className="vx-pill" style={{ borderColor: "#4A3A2A", color: "#C08457", cursor: "default" }}>
+                <span className="vx-pill" style={{ borderColor: "#A53A28", color: "#A53A28", cursor: "default" }}>
                   Blocked
                 </span>
               </div>
@@ -751,8 +781,8 @@ export function KnowledgeView({ store }: { store: VauxhallStore }) {
                 textAlign: "left",
                 padding: "10px 12px",
                 border: "none",
-                borderRadius: 3,
-                background: doc.id === current.id ? "#24261F" : "transparent",
+                borderRadius: 2,
+                background: doc.id === current.id ? "#2A2A2A" : "transparent",
                 color: doc.id === current.id ? "#E1DAD0" : "#8E887C",
                 cursor: "pointer",
                 fontFamily: "inherit",

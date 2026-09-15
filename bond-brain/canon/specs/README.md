@@ -6,6 +6,7 @@ Briefable:
 - copy-bank.md (Prompt 1, 2026-07-22)
 - specs/prompt-2-vauxhall.md (admin portal design, Gary 2026-09-15)
 - specs/prompt-2b-wire-vauxhall.md (Prompt 2B unpark: Command Center wiring on Next /vauxhall)
+- specs/prompt-2-vauxhall-control-room.md (ViaConnect layout density on Bond tokens)
 - specs/deployment.md (public URL + portal stack notes)
 - specs/qc-checklist.md (Vesper standing lints; Framer acceptance still blocked)
 - specs/release-runbook.md (M)
