@@ -13,7 +13,7 @@ This is the rule for Vercel. Preview must prove it before anyone promotes produc
 | `/FAQ.dc.html`, `/Terms.dc.html`, `/Privacy.dc.html` | Design Canvas | HTTP 200 |
 | `/Haus.dc.html` | Design Canvas members mock | HTTP 200 |
 | `/haus` | Next.js Bond Haus sign-in | HTTP 200. Do not rewrite `/Haus` to the mock; Next.js rewrite matching is case-insensitive and would steal this route. |
-| `/vauxhall` and nested wing routes | Next.js portal | Cloaked 404 unless AAL2 admin |
+| `/vauxhall` and nested wing routes | Next.js portal | Cloaked 404 unless an active `public.admins` session (waiver W-2026-09-15-P1-OVERRIDE: password only, MFA not required) |
 | `/Admin.dc.html`, `/Vauxhall.dc.html`, other admin HTML | Not copied into `public/` | Cloaked 404 |
 | `/bond-brain` | Blocked | Cloaked 404 |
 
@@ -66,18 +66,18 @@ curl -sI http://127.0.0.1:3000/bond-brain | head
 | `NEXT_PUBLIC_SUPABASE_URL` | Vercel + `.env.local` | `https://ziruzhhkkndgmdouithb.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + `.env.local` | Legacy anon or publishable key. Browser-safe. |
 
-There is no service role key in this app. There is no MFA bypass, skip, or dev override.
+There is no service role key in this app. Phase 1 MFA is waived under W-2026-09-15-P1-OVERRIDE (Gary). That is an owner waiver, not a hidden env toggle.
 
 Gary holds production and social publish keys. This repo does not store them. M releases to production only on Gary's go. Carver publishes social only on Gary's go.
 
 ## Access model
 
-1. `/haus` is the public sign-in. Visitors see Bond Haus only.
-2. Credentials that match an active `admins` row (role `owner` or `operator`) continue to MFA. After AAL2 they land on `/vauxhall`.
+1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`).
+2. Credentials that match an active `admins` row (role `owner` or `operator`) open `/vauxhall` after password auth. MFA enroll is not required under W-2026-09-15-P1-OVERRIDE.
 3. Non-admin sessions stay on Haus. They never see portal chrome.
 4. Unauthenticated or non-admin requests to `/vauxhall` and nested routes return HTTP 404. Never 403.
-5. MFA is mandatory. Password alone cannot open Vauxhall. No factor, or AAL1 only, fails closed.
-6. Roles are server-verified from `public.admins` plus Supabase Auth AAL2. RLS uses `is_admin()`. Client flags are not a gate.
+5. MFA is waived for Phase 1 by Gary override. Password alone opens Vauxhall for `public.admins`. Restore MFA by setting `PHASE1_MFA_WAIVED` false and putting AAL2 back on `is_admin()`.
+6. Roles are server-verified from `public.admins`. RLS uses `is_admin()`. Client flags are not a gate.
 7. Sessions idle out at 24 hours (`bond_idle_at` cookie, checked in middleware).
 8. Every portal action writes `audit_log`: who, what, before, after, when, from where (ip, user agent, path). The table is append-only.
 

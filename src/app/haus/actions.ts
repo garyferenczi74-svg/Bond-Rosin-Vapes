@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { GENERIC_DOOR } from "@/lib/access";
+import { GENERIC_DOOR, PHASE1_MFA_WAIVED, PHASE1_MFA_WAIVER_ID, isAdminRole } from "@/lib/access";
 import { writeAudit } from "@/lib/audit";
 import { readAdminRow } from "@/lib/gate";
 import { recordAuthAttempt } from "@/lib/lockout";
@@ -34,9 +34,30 @@ export async function signInAction(formData: FormData) {
 
   await recordAuthAttempt(supabase, email, meta.ip, "success");
 
-  const { admin } = await readAdminRow();
+  const { data: adminRow } = await supabase
+    .from("admins")
+    .select("user_id, role, status, mfa_enrolled")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+
+  const admin =
+    adminRow && isAdminRole(adminRow.role) && adminRow.status === "active" ? adminRow : null;
+
   if (!admin) {
     return { ok: true as const, next: "member" as const };
+  }
+
+  if (PHASE1_MFA_WAIVED) {
+    const meta = await readRequestMeta("/haus");
+    await writeAudit(supabase, {
+      actor: data.user.id,
+      action: "admin.sign_in",
+      target: "vauxhall",
+      before: { aal: "aal1", waiver: PHASE1_MFA_WAIVER_ID },
+      after: { aal: "aal1", role: admin.role, mfa: "waived" },
+      meta,
+    });
+    redirect("/vauxhall");
   }
 
   const { data: factors } = await supabase.auth.mfa.listFactors();

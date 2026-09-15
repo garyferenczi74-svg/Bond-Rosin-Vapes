@@ -29,7 +29,7 @@ These are Rules data for the Security wing. Citations point at Prompt 2. Enforce
 | P1-R7 | Admin sessions expire at 24 hours idle | Prompt 2 Access Model hard requirements | P1 |
 | P1-R8 | Sign-in is rate limited with lockout and alerting | Prompt 2 Access Model hard requirements | P1 |
 
-Waivers: time-boxed, owner-approved only, with expiry and compensating controls. Expired waivers reopen findings. No standing waiver for P1-R1 through P1-R5.
+Waivers: time-boxed, owner-approved only, with expiry and compensating controls. Expired waivers reopen findings. No standing waiver for P1-R1 through P1-R5 except owner override W-2026-09-15-P1-OVERRIDE (Gary, 2026-09-15): P1-R3 MFA waived for Phase 1; P1-R1 waived on Home.dc.html only so a public Admin link may point at /haus. Admin.dc.html suite stays cloaked. See /log/waivers/W-2026-09-15-P1-OVERRIDE.md.
 
 ---
 
