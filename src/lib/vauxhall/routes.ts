@@ -64,13 +64,15 @@ export const WING_CONSOLES: Record<Exclude<WingId, "command">, ConsoleItem[]> = 
 
 export const COMMAND_SECTIONS: { id: CommandView; href: string; title: string }[] = [
   { id: "live-feed", href: "/vauxhall/live-feed", title: "Live Feed" },
-  { id: "agents", href: "/vauxhall/agents", title: "Agents" },
   { id: "review", href: "/vauxhall/review", title: "Review" },
   { id: "queue", href: "/vauxhall/queue", title: "Queue" },
+  { id: "agents", href: "/vauxhall/agents", title: "Agents" },
   { id: "steering", href: "/vauxhall/steering", title: "Steering" },
   { id: "evolution", href: "/vauxhall/evolution", title: "Evolution" },
   { id: "knowledge", href: "/vauxhall/knowledge", title: "Knowledge" },
 ];
+
+export const COMMAND_PRIMARY_TABS = ["live-feed", "review", "queue"] as const;
 
 export type VauxhallRoute =
   | { wing: "command"; view: CommandView; path: string }

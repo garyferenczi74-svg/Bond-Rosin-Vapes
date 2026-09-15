@@ -26,5 +26,5 @@ export default async function VauxhallPage({
     meta: await readRequestMeta(route.path),
   });
 
-  return <CommandApp role={session.role} route={route} />;
+  return <CommandApp role={session.role} email={session.email} route={route} />;
 }
