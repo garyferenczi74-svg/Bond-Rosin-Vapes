@@ -1,13 +1,27 @@
-import { EVENT_POOL, SEED_CANON, SEED_DRAFTS, SEED_EVENTS, SEED_RCS, SEED_REVIEW, SEED_TUNING } from "./seed.ts";
+import {
+  EVENT_POOL,
+  NUMBERED_COLLECTION,
+  SEED_CANON,
+  SEED_DRAFTS,
+  SEED_EVENTS,
+  SEED_RCS,
+  SEED_REVIEW,
+  SEED_SKUS,
+  SEED_TUNING,
+} from "./seed.ts";
 import type {
   AgentEvent,
   AgentName,
   AgentSummary,
   CanonDoc,
+  CollectionFrame,
   EventType,
   QueueSnapshot,
   ReviewItem,
   ReviewState,
+  Sku,
+  SkuLifecycle,
+  SkuMetrics,
   StoreFilter,
   TuningProposal,
 } from "./types.ts";
@@ -33,6 +47,8 @@ export class VauxhallStore {
   drafts = SEED_DRAFTS.map((item) => ({ ...item }));
   tuning: TuningProposal[] = [];
   canon: CanonDoc[] = [];
+  skus: Sku[] = [];
+  collection: CollectionFrame = { ...NUMBERED_COLLECTION };
   private eid = 100;
   private listeners = new Set<Listener>();
 
@@ -68,6 +84,8 @@ export class VauxhallStore {
     this.drafts = SEED_DRAFTS.map((item) => ({ ...item }));
     this.tuning = SEED_TUNING.map((item) => ({ ...item }));
     this.canon = SEED_CANON.map((item) => ({ ...item }));
+    this.skus = SEED_SKUS.map((item) => ({ ...item, formats: item.formats.slice() }));
+    this.collection = { ...NUMBERED_COLLECTION };
     this.eid = 100;
     this.filter = { agent: null, type: null, allData: false };
     this.live = false;
@@ -224,6 +242,29 @@ export class VauxhallStore {
 
   listCanon(): CanonDoc[] {
     return this.canon.map((item) => ({ ...item }));
+  }
+
+  listSkus(): Sku[] {
+    return this.skus.map((item) => ({ ...item, formats: item.formats.slice() }));
+  }
+
+  collectionFrame(): CollectionFrame {
+    return { ...this.collection };
+  }
+
+  skuMetrics(): SkuMetrics {
+    const list = this.listSkus();
+    const formats = new Set<string>();
+    const lifecycle: Partial<Record<SkuLifecycle, number>> = {};
+    for (const sku of list) {
+      for (const format of sku.formats) formats.add(format);
+      lifecycle[sku.lifecycle] = (lifecycle[sku.lifecycle] ?? 0) + 1;
+    }
+    return {
+      active: list.filter((sku) => sku.lifecycle === "active").length,
+      formats: formats.size,
+      lifecycle,
+    };
   }
 
   signOut(): void {

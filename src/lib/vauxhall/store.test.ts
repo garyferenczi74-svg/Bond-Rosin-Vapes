@@ -4,7 +4,8 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { csvFilename, eventsToCsv } from "./csv.ts";
-import { SEED_CANON, SEED_DRAFTS, SEED_EVENTS, SEED_RCS, SEED_REVIEW } from "./seed.ts";
+import { SKU_ACCENTS } from "../tokens.ts";
+import { SEED_CANON, SEED_DRAFTS, SEED_EVENTS, SEED_RCS, SEED_REVIEW, SEED_SKUS } from "./seed.ts";
 import { VauxhallStore } from "./store.ts";
 
 function assertNoDashes(value: string, label: string) {
@@ -39,8 +40,42 @@ test("seed strings have zero em dashes or en dashes", () => {
     ...SEED_RCS.flatMap((item) => [item.title, item.note]),
     ...SEED_DRAFTS.flatMap((item) => [item.title, item.blocker]),
     ...SEED_CANON.flatMap((item) => [item.body, item.prior]),
+    ...SEED_SKUS.flatMap((sku) => [
+      sku.number,
+      sku.editionName,
+      sku.moment,
+      sku.triad,
+      sku.bondLine,
+      sku.productTruth,
+      sku.batchNote,
+      ...sku.formats,
+    ]),
   ];
   for (const blob of blobs) assertNoDashes(blob, blob.slice(0, 40));
+});
+
+test("SKU seed is the Prompt 1 standing catalog", () => {
+  const store = new VauxhallStore();
+  const skus = store.listSkus();
+  assert.equal(skus.length, 3);
+  assert.deepEqual(
+    skus.map((sku) => sku.editionName),
+    ["Dialed", "Unwind", "Peak"],
+  );
+  assert.equal(skus[0]?.triad, "Focus. Clarity. Momentum.");
+  assert.equal(skus[1]?.triad, "Release. Stillness. Restoration.");
+  assert.equal(skus[2]?.triad, "Edge. Elevation. Expansion.");
+  assert.equal(skus[0]?.hex, SKU_ACCENTS["no-1"]);
+  assert.equal(skus[1]?.hex, SKU_ACCENTS["no-2"]);
+  assert.equal(skus[2]?.hex, SKU_ACCENTS["no-3"]);
+  assert.ok(skus.every((sku) => sku.lifecycle === "active"));
+  assert.ok(skus.every((sku) => sku.batchNote.includes("No COA")));
+  assert.ok(skus.every((sku) => !sku.batchNote.includes("http")));
+  const metrics = store.skuMetrics();
+  assert.equal(metrics.active, 3);
+  assert.equal(metrics.formats, 2);
+  assert.equal(metrics.lifecycle.active, 3);
+  assert.equal(store.collectionFrame().name, "The Numbered Collection");
 });
 
 test("agent and type filters compose", () => {

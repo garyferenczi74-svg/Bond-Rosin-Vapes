@@ -16,6 +16,7 @@ const FRAME = read("components/portal-frame.tsx");
 const APP = read("components/vauxhall/command-app.tsx");
 const VIEWS = read("components/vauxhall/command-views.tsx");
 const MOSAIC = read("components/vauxhall/wing-mosaics.tsx");
+const PORTFOLIO = read("components/vauxhall/product-portfolio.tsx");
 
 test("control room CSS stays on Bond tokens", () => {
   assert.match(CSS, /--matte-black: #1B1D1C/);
@@ -24,6 +25,8 @@ test("control room CSS stays on Bond tokens", () => {
   assert.match(CSS, /--product: #79C84A/);
   assert.match(CSS, /--security: #A53A28/);
   assert.match(CSS, /--social: #86ACE3/);
+  assert.match(CSS, /\.vx-sku-card/);
+  assert.match(CSS, /\.vx-sku-card::before/);
   assert.equal(CSS.includes("#FF"), false);
   assert.equal(CSS.includes("orange"), false);
   assert.equal(CSS.includes("999px"), false);
@@ -58,4 +61,19 @@ test("social mosaic stays framed placeholder copy", () => {
   assert.match(MOSAIC, /Prompt 2C parked/);
   assert.match(MOSAIC, /No scrape yet/);
   assert.match(MOSAIC, /No invented SKU prices/);
+});
+
+test("product portfolio is store-driven and keeps hexes out of the UI", () => {
+  assert.match(MOSAIC, /ProductPortfolio/);
+  assert.match(PORTFOLIO, /listSkus/);
+  assert.match(PORTFOLIO, /skuMetrics/);
+  assert.match(PORTFOLIO, /sku\.hex/);
+  assert.equal(PORTFOLIO.includes("#79C84A"), false);
+  assert.equal(PORTFOLIO.includes("#86ACE3"), false);
+  assert.equal(PORTFOLIO.includes("#A53A28"), false);
+  assert.equal(PORTFOLIO.includes("GFS Didot"), false);
+  assert.equal(PORTFOLIO.includes("didot"), false);
+  assert.equal(PORTFOLIO.includes("\u2013"), false);
+  assert.equal(PORTFOLIO.includes("\u2014"), false);
+  assert.equal(PORTFOLIO.includes("!"), false);
 });

@@ -2,12 +2,8 @@ import Link from "next/link";
 import type { WingId } from "@/lib/tokens";
 import { tokens, wings } from "@/lib/tokens";
 import { WING_CONSOLES } from "@/lib/vauxhall/routes";
-
-const PRODUCT_NUMBERS = [
-  { id: "no-1", name: "No. 1", note: "Prototype SKU. Specs stay in canon." },
-  { id: "no-2", name: "No. 2", note: "Prototype SKU. Specs stay in canon." },
-  { id: "no-3", name: "No. 3", note: "Prototype SKU. Specs stay in canon." },
-] as const;
+import { Metric } from "./metric";
+import { ProductPortfolio } from "./product-portfolio";
 
 const SOCIAL_DESKS = [
   { id: "scriptwriter", title: "Scriptwriter", state: "Framed", note: "Drafting stays parked." },
@@ -21,26 +17,6 @@ const SOCIAL_ROWS = [
   { platform: "Instagram", note: "No scrape yet" },
   { platform: "YouTube", note: "No scrape yet" },
 ] as const;
-
-function Metric({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-}) {
-  return (
-    <div className="vx-metric">
-      <p className="lbl" style={{ margin: 0 }}>
-        {label}
-      </p>
-      <div className="vx-metric-value">{value}</div>
-      <p className="vx-metric-sub">{sub}</p>
-    </div>
-  );
-}
 
 export function WingMosaic({
   id,
@@ -56,93 +32,65 @@ export function WingMosaic({
   return <SocialMosaic consoleId={consoleId} />;
 }
 
+function framedCopy(consoleId: string): { title: string; body: string } {
+  if (consoleId === "board-metrics" || consoleId === "unit-economics") {
+    return {
+      title: consoleId === "board-metrics" ? "Board Metrics" : "Unit Economics",
+      body: "This console is framed. No invented SKU prices or investor figures.",
+    };
+  }
+  if (consoleId === "inventory") {
+    return {
+      title: "Inventory",
+      body: "No warehouse snapshot connected. Demand and safety stock are not generated.",
+    };
+  }
+  if (consoleId === "orders") {
+    return {
+      title: "Orders",
+      body: "No orders yet. This console stays framed this pass.",
+    };
+  }
+  if (consoleId === "accounts") {
+    return {
+      title: "Accounts",
+      body: "The wholesale book is framed. No license numbers on file.",
+    };
+  }
+  if (consoleId === "alerts-and-risks") {
+    return {
+      title: "Alerts and Risks",
+      body: "No live operational alerts.",
+    };
+  }
+  if (consoleId === "dashboard") {
+    return {
+      title: "Dashboard",
+      body: "Today at a glance stays framed. SKU Portfolio is the standing catalog this pass.",
+    };
+  }
+  return {
+    title: "Product",
+    body: "This console is framed. SKU Portfolio is the standing catalog this pass.",
+  };
+}
+
 function ProductMosaic({ consoleId }: { consoleId?: string }) {
   const consoles = WING_CONSOLES.product;
-  const active = consoleId ?? consoles[0]?.id;
+  const active = consoleId ?? consoles[0]?.id ?? "sku-portfolio";
+
+  if (active === "sku-portfolio") {
+    return <ProductPortfolio />;
+  }
+
+  const copy = framedCopy(active);
 
   return (
-    <div>
-      <div className="card" style={{ marginBottom: 10 }}>
-        <p className="lbl" style={{ margin: "0 0 8px" }}>
-          Board metrics
-        </p>
-        <p style={{ margin: 0, fontSize: 13, color: "#8E887C", lineHeight: 1.6 }}>
-          Board metrics stay empty until a finance snapshot is connected. No invented SKU prices
-          or investor figures.
-        </p>
-      </div>
-
-      <div className="vx-mosaic" style={{ marginBottom: 10 }}>
-        <div className="card" style={{ padding: 0 }}>
-          <div style={{ padding: "14px 16px", borderBottom: "1px solid #232323", display: "flex", justifyContent: "space-between" }}>
-            <span style={{ color: "#E1DAD0", fontSize: 13 }}>Catalog</span>
-            <span className="lbl" style={{ margin: 0 }}>
-              3 SKUs
-            </span>
-          </div>
-          {PRODUCT_NUMBERS.map((sku) => (
-            <div
-              key={sku.id}
-              style={{
-                padding: "12px 16px",
-                borderBottom: "1px solid #232323",
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-              }}
-            >
-              <div>
-                <div style={{ color: "#E1DAD0", fontSize: 13 }}>{sku.name}</div>
-                <div style={{ color: "#8E887C", fontSize: 12, marginTop: 4 }}>{sku.note}</div>
-              </div>
-              <span className="vx-pill" style={{ cursor: "default", color: tokens.product, borderColor: tokens.product }}>
-                Framed
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <div className="card">
-          <p className="lbl" style={{ margin: "0 0 8px" }}>
-            Orders
-          </p>
-          <p style={{ margin: 0, fontSize: 13, color: "#8E887C" }}>No orders yet.</p>
-        </div>
-      </div>
-
-      <div className="vx-mosaic" style={{ marginBottom: 16 }}>
-        <div className="card">
-          <p className="lbl" style={{ margin: "0 0 8px" }}>
-            Alerts
-          </p>
-          <p style={{ margin: 0, fontSize: 13, color: "#8E887C" }}>No live operational alerts.</p>
-        </div>
-        <div className="card">
-          <p className="lbl" style={{ margin: "0 0 8px" }}>
-            Inventory
-          </p>
-          <p style={{ margin: 0, fontSize: 13, color: "#8E887C" }}>
-            No warehouse snapshot connected. Demand and safety stock are not generated.
-          </p>
-        </div>
-      </div>
-
-      <p className="lbl" style={{ margin: "0 0 10px" }}>
-        Consoles
+    <div className="card" style={{ maxWidth: 720 }}>
+      <p className="lbl" style={{ margin: "0 0 8px" }}>
+        {copy.title}
       </p>
-      <div className="vx-tiles">
-        {consoles.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href}
-            className={`vx-tile${item.id === active ? " on" : ""}`}
-            style={{ ["--wing-ink" as string]: tokens.product }}
-          >
-            <div className="vx-tile-label">{item.title}</div>
-            <div className="vx-tile-sub">Framed. Portal build.</div>
-          </Link>
-        ))}
-      </div>
+      <p style={{ margin: 0, fontSize: 13, color: "#8E887C", lineHeight: 1.6 }}>{copy.body}</p>
     </div>
   );
 }

@@ -19,10 +19,10 @@ export type ConsoleItem = {
 };
 
 export const PRODUCT_CONSOLES: ConsoleItem[] = [
-  { id: "dashboard", title: "Dashboard", href: "/vauxhall/product" },
+  { id: "sku-portfolio", title: "SKU Portfolio", href: "/vauxhall/product" },
+  { id: "dashboard", title: "Dashboard", href: "/vauxhall/product/dashboard" },
   { id: "board-metrics", title: "Board Metrics", href: "/vauxhall/product/board-metrics" },
   { id: "unit-economics", title: "Unit Economics", href: "/vauxhall/product/unit-economics" },
-  { id: "sku-portfolio", title: "SKU Portfolio", href: "/vauxhall/product/sku-portfolio" },
   { id: "alerts-and-risks", title: "Alerts and Risks", href: "/vauxhall/product/alerts-and-risks" },
   { id: "inventory", title: "Inventory", href: "/vauxhall/product/inventory" },
   { id: "orders", title: "Orders", href: "/vauxhall/product/orders" },
@@ -82,6 +82,7 @@ const COMMAND_SET = new Set<string>(COMMAND_VIEWS);
 const WING_SET = new Set(["product", "security", "social"]);
 
 function defaultConsole(wing: Exclude<WingId, "command">): string {
+  if (wing === "product") return "sku-portfolio";
   return WING_CONSOLES[wing][0]?.id ?? "dashboard";
 }
 
