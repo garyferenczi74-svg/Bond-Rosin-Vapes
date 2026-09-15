@@ -7,10 +7,14 @@ export function PortalFrame({
   role,
   active,
   children,
+  sections,
+  sectionActive,
 }: {
   role: AdminRole;
   active: WingId;
   children: React.ReactNode;
+  sections?: { id: string; href: string; title: string; badge?: number }[];
+  sectionActive?: string;
 }) {
   return (
     <div style={{ minHeight: "100vh", background: "#1B1D1C", color: "#E1DAD0" }}>
@@ -98,6 +102,49 @@ export function PortalFrame({
               </Link>
             );
           })}
+          {sections && sections.length > 0 ? (
+            <div style={{ marginTop: 18, display: "grid", gap: 4 }}>
+              <p className="lbl" style={{ margin: "0 0 4px", padding: "0 12px" }}>
+                Vauxhall
+              </p>
+              {sections.map((section) => {
+                const on = section.id === sectionActive;
+                return (
+                  <Link
+                    key={section.id}
+                    href={section.href}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 8,
+                      padding: "10px 12px",
+                      borderTop: on ? "1px solid #E1DAD0" : "1px solid transparent",
+                      color: on ? "#E1DAD0" : "#8E887C",
+                      fontSize: 13,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    <span>{section.title}</span>
+                    {section.badge ? (
+                      <span
+                        style={{
+                          background: "#2A2A2A",
+                          color: "#E1DAD0",
+                          border: "1px solid #3A3C3B",
+                          borderRadius: 999,
+                          fontSize: 10,
+                          padding: "1px 7px",
+                        }}
+                      >
+                        {section.badge}
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </div>
+          ) : null}
         </nav>
         <section className="rise" style={{ padding: "clamp(20px, 3vw, 36px)" }}>
           {children}
