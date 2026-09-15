@@ -19,16 +19,23 @@ export function isIdleExpired(lastActiveMs: number, now = Date.now()): boolean {
   return now - lastActiveMs > IDLE_MS;
 }
 
+// Waiver W-2026-09-15-P1-OVERRIDE. Password-only admin entry for Phase 1.
+// MFA enroll and AAL2 are not required. Restore MFA by setting this false
+// and putting the AAL2 checks back in is_admin().
+export const PHASE1_MFA_WAIVED = true;
+export const PHASE1_MFA_WAIVER_ID = "W-2026-09-15-P1-OVERRIDE";
+
 export function adminPortalAllowed(input: {
   admin: Pick<AdminRow, "role" | "status"> | null;
-  aal: string | null | undefined;
-  verifiedFactorCount: number;
+  aal?: string | null;
+  verifiedFactorCount?: number;
 }): boolean {
   if (!input.admin) return false;
   if (input.admin.status !== "active") return false;
   if (!isAdminRole(input.admin.role)) return false;
+  if (PHASE1_MFA_WAIVED) return true;
   if (input.aal !== "aal2") return false;
-  if (input.verifiedFactorCount < 1) return false;
+  if ((input.verifiedFactorCount ?? 0) < 1) return false;
   return true;
 }
 

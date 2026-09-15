@@ -33,22 +33,12 @@ export async function readAdminRow() {
 }
 
 export async function requirePortalSession(): Promise<PortalSession> {
-  const { supabase, user, admin } = await readAdminRow();
+  const { user, admin } = await readAdminRow();
   if (!user || !admin) {
     notFound();
   }
 
-  const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  const { data: factors } = await supabase.auth.mfa.listFactors();
-  const verifiedFactorCount = (factors?.totp ?? []).filter((f) => f.status === "verified").length;
-
-  if (
-    !adminPortalAllowed({
-      admin,
-      aal: aalData?.currentLevel ?? null,
-      verifiedFactorCount,
-    })
-  ) {
+  if (!adminPortalAllowed({ admin })) {
     notFound();
   }
 

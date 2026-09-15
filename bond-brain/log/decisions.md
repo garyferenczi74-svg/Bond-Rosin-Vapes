@@ -18,3 +18,4 @@ Format: date | decision | reasoning | approved by
 - 2026-09-15 | Log Design Canvas awareness into deployment.md and Phase 1 Pre-Check (Admin trace in Home.dc.html; Phase 1 Next.js beside marketing, no rewrite) | Q via JB; ruling unchanged; no ship | Felix (awareness)
 - 2026-09-15 | Phase 1 Next.js access shell beside Design Canvas; /haus sign-in; /vauxhall 404 cloak; MFA fail closed; append-only audit | Gary Phase 1 greenlight via JB | Q (build), pending Vesper and Felix
 - 2026-09-15 | Fix Vercel coexistence: copy marketing into public as real files, pin Next.js, rewrite / to Home.dc.html | PR3 alias 404 from public symlinks | Gary chose fix on main, no revert
+- 2026-09-15 | Waiver W-2026-09-15-P1-OVERRIDE: password-only admin entry to /vauxhall; Home Admin link restored to /haus; Admin.dc.html suite stays cloaked | Gary OVERRIDE for Phase 1 | Gary
