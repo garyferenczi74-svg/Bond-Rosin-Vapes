@@ -1,4 +1,2 @@
 User-agent: *
-Disallow: /Admin
-Disallow: /admin
 Disallow: /bond-brain/

@@ -16,3 +16,4 @@ Format: date | decision | reasoning | approved by
 - 2026-09-15 | File Phase 1 Pre-Check and Rules under /canon/specs/phase-1-precheck-rules.md | MFA, 404 cloak never 403, audit immutability, zero public admin traces; Pre-Check gate for Q candidates | Felix (JB Phase 1 route)
 - 2026-09-15 | Treat Bond-Rosin-Vapes as Design Canvas static site with in-repo public Admin link; Phase 1 adds Next layer and removes public Admin traces | Q public-tree inspect | JB (pending access)
 - 2026-09-15 | Log Design Canvas awareness into deployment.md and Phase 1 Pre-Check (Admin trace in Home.dc.html; Phase 1 Next.js beside marketing, no rewrite) | Q via JB; ruling unchanged; no ship | Felix (awareness)
+- 2026-09-15 | Phase 1 Next.js access shell beside Design Canvas; /haus sign-in; /vauxhall 404 cloak; MFA fail closed; append-only audit | Gary Phase 1 greenlight via JB | Q (build), pending Vesper and Felix
