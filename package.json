@@ -2,10 +2,10 @@
   "name": "bond-rosin-vapes",
   "private": true,
   "scripts": {
-    "predev": "node scripts/link-public.mjs",
-    "prebuild": "node scripts/link-public.mjs",
+    "sync:public": "node scripts/sync-public.mjs",
+    "predev": "node scripts/sync-public.mjs",
     "dev": "next dev --port 3000",
-    "build": "next build",
+    "build": "node scripts/sync-public.mjs && next build",
     "start": "next start --port 3000",
     "lint": "node scripts/dash-lint.mjs",
     "test": "node --experimental-strip-types --test src/lib/access.test.ts"

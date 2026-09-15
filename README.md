@@ -2,24 +2,37 @@
 
 Design Canvas marketing pages stay in the repo root. Phase 1 adds a Next.js App Router layer for Bond Haus and Vauxhall beside those pages.
 
-## How static marketing and Next.js coexist
+## Coexistence contract
 
-Next.js is the Vercel framework for this repo. Marketing HTML, JS, and `media/` stay where they are. They are not rewritten.
+This is the rule for Vercel. Preview must prove it before anyone promotes production.
 
-`scripts/link-public.mjs` runs on `predev` and `prebuild`. It symlinks the public marketing files into `public/` so Next can serve the same URLs (`/Home.dc.html`, `/No1.dc.html`, `/FAQ.dc.html`, and the rest).
+| Path | Owner | Expected |
+| --- | --- | --- |
+| `/` and `/Home.dc.html` | Design Canvas file in `public/` | HTTP 200, homepage |
+| `/No1.dc.html`, `/No2.dc.html`, `/No3.dc.html` | Design Canvas | HTTP 200 |
+| `/FAQ.dc.html`, `/Terms.dc.html`, `/Privacy.dc.html` | Design Canvas | HTTP 200 |
+| `/Haus.dc.html` | Design Canvas members mock | HTTP 200 |
+| `/haus` | Next.js Bond Haus sign-in | HTTP 200. Do not rewrite `/Haus` to the mock; Next.js rewrite matching is case-insensitive and would steal this route. |
+| `/vauxhall` and nested wing routes | Next.js portal | Cloaked 404 unless AAL2 admin |
+| `/Admin.dc.html`, `/Vauxhall.dc.html`, other admin HTML | Not copied into `public/` | Cloaked 404 |
+| `/bond-brain` | Blocked | Cloaked 404 |
 
-Next.js owns:
+Marketing HTML is never rewritten. `scripts/sync-public.mjs` **copies** allowlisted root files into `public/` as real files (not symlinks) before `next build`. It also writes `public/index.html` from `Home.dc.html` so `/` has a static file if the dashboard still treats the project as Other. Admin HTML is not in that list. The script fails the build if a copy stays a symlink or if admin HTML appears under `public/`.
 
-- `/` (redirects to `/Home.dc.html`)
-- `/haus` Bond Haus sign-in
-- `/vauxhall` and nested wing routes
-- Cloaked 404 for unknown routes and for non-admin portal requests
+`vercel.json` pins `framework` to `nextjs` and sets `buildCommand` to `node scripts/sync-public.mjs && next build`. It also lists the marketing rewrites, including `/` to `/Home.dc.html`. It does not rewrite `/haus` or `/vauxhall`.
 
-`next.config.ts` keeps extensionless marketing aliases (`/No1` to `/No1.dc.html`, `/Haus` to `/Haus.dc.html`). It does not alias `/haus`. That path is the Next sign-in.
+`next.config.ts` repeats those marketing rewrites under `beforeFiles` so `next dev` and `next start` match Vercel.
 
-Admin Design Canvas files stay in git (`Admin.dc.html`, `Vauxhall.dc.html`, `HausAdmin.dc.html`, `Product.dc.html`, `Security.dc.html`, `Social.dc.html`). They are not linked from marketing chrome and are not copied into `public/`. Requests to those paths rewrite to the same cloaked 404 as any unknown page. Marketing does not link to Admin.
+Do not set a Vercel Output Directory. Next.js owns the output. A leftover `public` output on a static/Other project will serve an empty folder and 404 the whole alias. The dashboard `framework` field is still `null`. The repo pin is what makes this deploy a Next.js app.
 
-`robots.txt` and `src/app/robots.ts` do not name Vauxhall or Admin. The sitemap lists marketing pages only.
+## Why PR #3 404'd the alias
+
+1. Marketing files live at the repo root. Next.js only publishes files that exist as real files under `public/` at build time.
+2. PR #3 gitignored `public/**` and created **symlinks** via `prebuild`. Vercel ran `next build`. The output kept those symlinks. The CDN/static file map did not contain `Home.dc.html` or the SKU pages.
+3. `/` was a Next.js redirect to `/Home.dc.html`, so the homepage alias also failed.
+4. The Vercel project `framework` field is still `null` (legacy Other/static). An empty `public/` is the classic static output folder. That combination is unsafe if Next.js is not pinned.
+
+This branch copies real files (including `index.html`), pins Next.js, and adds explicit marketing rewrites.
 
 ## Local
 
@@ -29,12 +42,22 @@ cp .env.example .env.local
 npm install
 npm test
 npm run lint
-npm run dev
+npm run build
+npm run start
 ```
 
-- http://localhost:3000/haus
-- http://localhost:3000/vauxhall (404 unless an AAL2 admin session)
-- http://localhost:3000/Home.dc.html
+Verify:
+
+```
+curl -sI http://127.0.0.1:3000/ | head
+curl -sI http://127.0.0.1:3000/Home.dc.html | head
+curl -sI http://127.0.0.1:3000/haus | head
+curl -sI http://127.0.0.1:3000/vauxhall | head
+curl -sI http://127.0.0.1:3000/Admin.dc.html | head
+curl -sI http://127.0.0.1:3000/bond-brain | head
+```
+
+`/` and `/Home.dc.html` must be 200. `/haus` must be 200. `/vauxhall`, `/Admin.dc.html`, and `/bond-brain` must be 404.
 
 ## Env vars
 
@@ -82,6 +105,6 @@ Anon `EXECUTE` on `is_admin()` and `rls_auto_enable()` is revoked. `is_admin()` 
 
 ## Deploy
 
-Vercel project `bond-rosin-vapes`. Framework is Next.js (`npm run build`). Set the two `NEXT_PUBLIC_SUPABASE_*` env vars on the project. Keep existing marketing files at the repo root.
+Vercel project `bond-rosin-vapes`. `vercel.json` sets framework to Next.js and the build command above. Set the two `NEXT_PUBLIC_SUPABASE_*` env vars on the project. Keep existing marketing files at the repo root.
 
 No production ship without Vesper PASS, Felix clearance, and Gary go through JB.
