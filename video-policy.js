@@ -7,8 +7,12 @@
   var attached = [];
   var reduced = false;
   var saveData = false;
-  try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  try { saveData = !!(navigator.connection && navigator.connection.saveData); } catch (e) {}
+
+  function refreshFlags() {
+    try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+    try { saveData = !!(navigator.connection && navigator.connection.saveData); } catch (e) {}
+  }
+  refreshFlags();
   var gateOpen = false;
   try { if (sessionStorage.getItem('bond_age_ok')) gateOpen = true; } catch (e) {}
 
@@ -264,14 +268,33 @@
     }, 400);
   }
 
+  function holdPlate(el) {
+    posterOnly(el);
+    fillPlate(el);
+    var rp = platePic(el);
+    if (rp) {
+      rp.classList.add('hero-endplate-on');
+      el._bondPlateTries = 0;
+    } else if (el.getAttribute('data-loop') === '0') {
+      el._bondPlateTries = (el._bondPlateTries || 0) + 1;
+      if (el._bondPlateTries < 40) {
+        window.setTimeout(function () { holdPlate(el); }, 50);
+      }
+    }
+    if (typeof el._bondFail === 'function') el._bondFail();
+  }
+
   function armEndplate(el) {
     if (el.getAttribute('data-loop') !== '0') return;
-    if (el._bondPlateBound) return;
-    el._bondPlateBound = true;
     var pic = platePic(el);
     if (!pic) return;
     var img = pic.querySelector('img');
     if (!img) return;
+    if (el._bondPlateBound) {
+      if (reduced || saveData) fillPlate(el);
+      return;
+    }
+    el._bondPlateBound = true;
 
     img.addEventListener('load', function () {
       if (el._bondFadeStarted || el.ended) showPlate(el);
@@ -314,10 +337,15 @@
   }
 
   function attach(el) {
+    refreshFlags();
     if (el._bondBound) {
       hygiene(el);
+      if (reduced || saveData) {
+        holdPlate(el);
+        return;
+      }
       var nowWide = wideOf(el);
-      if (!reduced && !saveData && gateOpen) fillSources(el);
+      if (gateOpen) fillSources(el);
       el._bondWide = nowWide;
       watchVisible(el);
       tryStart(el);
@@ -356,10 +384,7 @@
     armEndplate(el);
 
     if (reduced || saveData) {
-      posterOnly(el);
-      var rp = platePic(el);
-      if (rp) rp.classList.add('hero-endplate-on');
-      if (typeof el._bondFail === 'function') el._bondFail();
+      holdPlate(el);
       return;
     }
 
@@ -401,6 +426,7 @@
   }
 
   function boot() {
+    refreshFlags();
     var list = document.querySelectorAll(SELECTOR);
     for (var i = 0; i < list.length; i++) attach(list[i]);
   }
