@@ -30,16 +30,35 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   --hero-nav-clear: 1.5;
   --hero-clear-min: 1;
   --hero-clear-max: 2;
+  --hero-media-left: 0;
+  --hero-media-width: 100%;
+  --hero-media-top: 0;
+  --hero-media-height: 100%;
+  --hero-media-object-fit: cover;
   height: 100vh; min-height: 100vh; max-width: 1920px; margin: 0 auto; overflow: hidden;
 }
 .hero-media { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #000000 center / cover no-repeat; }
-.hero-video { position: absolute; left: 0; width: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
+.hero-video, .hero-endplate {
+  position: absolute;
+  left: var(--hero-media-left, 0);
+  width: var(--hero-media-width, 100%);
+  top: var(--hero-media-top, 0);
+  height: var(--hero-media-height, 100%);
+  max-width: var(--hero-media-max-width, none);
+  min-height: var(--hero-media-min-height, 0);
+  object-fit: var(--hero-media-object-fit, cover);
+}
+.hero-video { display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
-.hero-endplate { position: absolute; left: 0; width: 100%; display: block; pointer-events: none; opacity: 0; transition: opacity .4s cubic-bezier(0.44,0,0.56,1); }
+.hero-endplate { display: block; pointer-events: none; opacity: 0; transition: opacity .4s cubic-bezier(0.44,0,0.56,1); }
 .hero-endplate img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 .hero-endplate.hero-endplate-on { opacity: 1; }
 @media (min-width: 1200px) {
-  .hero-video, .hero-endplate { top: -80px; height: 115%; min-height: 100%; object-fit: cover; }
+  #top {
+    --hero-media-top: -80px;
+    --hero-media-height: 115%;
+    --hero-media-min-height: 100%;
+  }
   .hero-media::before {
     content: '';
     position: absolute; left: 0; right: 0; bottom: 0; height: 36%;
@@ -56,7 +75,12 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 48%, #000000 100%);
   }
 }
-@media (max-width: 1199px) { .hero-video, .hero-endplate { top: 0; height: 100%; } }
+@media (max-width: 1199px) {
+  #top {
+    --hero-media-top: 0;
+    --hero-media-height: 100%;
+  }
+}
 .hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(11px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
 .hero-text {
   --hero-tagline-size: 28px;
@@ -643,16 +667,24 @@ class Component extends DCLogic {
 }
 </script>
 <script>
-// Hero (spec bond-hero-spec): pick the desktop or mobile clip by width, play it
-// once, fade it in, then roll the content rows in on the ended event. Gated on
-// the age gate release so it plays into view, never on scroll or tab return.
-// Reduced motion makes no video request and reveals the content at once.
-// Prompt 6/6e: baked BOND is placed by cover-fit plus a width/height budget
-// so the lockup centers in 100svh with nav clearance. No per-viewport offsets.
+// Home hero layout helper only (Prompt 6 unify).
+// Case A --hero-copy-top plus flow fallback. No attach. No endplate ownership.
+// video-policy.js is the sole owner of attach, playback, IO, reduced-motion,
+// Save-Data, and endplate fillPlate/showPlate.
+// This IIFE may listen to bond-entered for layout only. Never re-attach.
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
   var WIDE_MQ = '(min-width: 1200px)';
   var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
+  var MEDIA_VARS = [
+    '--hero-media-left',
+    '--hero-media-top',
+    '--hero-media-width',
+    '--hero-media-height',
+    '--hero-media-max-width',
+    '--hero-media-min-height',
+    '--hero-media-object-fit'
+  ];
   var started = false, reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   var layoutRaf = 0;
@@ -664,45 +696,22 @@ class Component extends DCLogic {
     s.classList.add('hero-in');
   }
 
-  function clearVideoBox(v) {
-    if (!v) return;
-    v.style.removeProperty('width');
-    v.style.removeProperty('height');
-    v.style.removeProperty('left');
-    v.style.removeProperty('top');
-    v.style.removeProperty('object-fit');
-    v.style.removeProperty('max-width');
-    v.style.removeProperty('min-height');
-    v.style.removeProperty('transform');
-  }
-
-  function syncEndplate(v) {
-    var p = document.querySelector('.hero-endplate');
-    if (!p || !v) return;
-    var keys = ['width', 'height', 'left', 'top', 'maxWidth', 'minHeight', 'transform', 'objectFit'];
-    var i, name, css;
-    for (i = 0; i < keys.length; i++) {
-      name = keys[i];
-      if (v.style[name]) p.style[name] = v.style[name];
-      else {
-        css = name.replace(/[A-Z]/g, function (m) { return '-' + m.toLowerCase(); });
-        p.style.removeProperty(css);
-      }
-    }
+  function clearMediaBox(t) {
+    if (!t) return;
+    var i;
+    for (i = 0; i < MEDIA_VARS.length; i++) t.style.removeProperty(MEDIA_VARS[i]);
   }
 
   function flowFallback() {
     var t = document.getElementById(STAGE);
     var s = document.getElementById(STACK);
-    var v = document.getElementById(VID);
     if (t) {
       t.classList.add('hero-copy-flow');
       t.style.removeProperty('height');
       t.style.removeProperty('min-height');
     }
     if (s) s.style.removeProperty('--hero-copy-top');
-    clearVideoBox(v);
-    syncEndplate(v);
+    clearMediaBox(t);
     var media = document.querySelector('.hero-media');
     if (media) {
       media.style.removeProperty('background-size');
@@ -723,7 +732,7 @@ class Component extends DCLogic {
   }
 
   function layoutDesktop(t, s, v) {
-    clearVideoBox(v);
+    clearMediaBox(t);
     var media = document.querySelector('.hero-media');
     if (media) {
       media.style.removeProperty('background-size');
@@ -746,8 +755,7 @@ class Component extends DCLogic {
     var offY = (elH - rendH) / 2;
     var cropTop = -80;
     var topPx = cropTop - ((baseSrc - refSrc) * scale);
-    v.style.top = topPx + 'px';
-    syncEndplate(v);
+    t.style.setProperty('--hero-media-top', topPx + 'px');
     var baseY = topPx + offY + (baseSrc * scale);
     var h1 = s.querySelector('.hero-tagline h1');
     var fs = 28;
@@ -854,13 +862,12 @@ class Component extends DCLogic {
       var videoLeft = letterLeft - (lx * scale);
       var copyTop = Math.ceil(letterTop + wordH + gapPx);
       if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
-      v.style.width = (srcW * scale) + 'px';
-      v.style.height = (srcH * scale) + 'px';
-      v.style.left = videoLeft + 'px';
-      v.style.top = videoTop + 'px';
-      v.style.maxWidth = 'none';
-      v.style.objectFit = 'fill';
-      syncEndplate(v);
+      t.style.setProperty('--hero-media-width', (srcW * scale) + 'px');
+      t.style.setProperty('--hero-media-height', (srcH * scale) + 'px');
+      t.style.setProperty('--hero-media-left', videoLeft + 'px');
+      t.style.setProperty('--hero-media-top', videoTop + 'px');
+      t.style.setProperty('--hero-media-max-width', 'none');
+      t.style.setProperty('--hero-media-object-fit', 'fill');
       var media = document.querySelector('.hero-media');
       if (media) {
         media.style.backgroundSize = (srcW * scale) + 'px ' + (srcH * scale) + 'px';
@@ -894,25 +901,14 @@ class Component extends DCLogic {
     requestLayout();
     reveal(false);
     if (reduced === true) {
-      var plate = document.querySelector('.hero-endplate');
-      var plateJpg = isWideNow()
-        ? 'media/endplates/hero_endplate_16x9.1920.v1.jpg'
-        : 'media/endplates/hero_endplate_9x16.1080.v1.jpg';
-      if (media) media.style.backgroundImage = 'url("' + plateJpg + '")';
-      if (plate) plate.classList.add('hero-endplate-on');
-      if (v !== null) v.style.display = 'none';
       requestLayout();
       reveal(true);
       return;
     }
     if (v === null) { requestLayout(); return; }
     v._bondFail = function () { requestLayout(); };
-    v.addEventListener('playing', function () { v.classList.add('hero-vis'); requestLayout(); });
+    v.addEventListener('playing', requestLayout);
     v.addEventListener('loadedmetadata', requestLayout);
-    if (window.BondVideo) {
-      window.BondVideo.release();
-      window.BondVideo.attach(v);
-    }
     requestLayout();
   }
   function released() {

@@ -1,4 +1,6 @@
-/* Bond site-wide background video policy (Prompt 6a). Native video only. */
+/* Bond site-wide background video policy (Prompt 6a / Prompt 6 unify).
+   Sole owner of attach, playback, IO, reduced-motion, Save-Data, and
+   endplate fillPlate/showPlate. Home must not call attach or release. */
 (function (global) {
   var SELECTOR = 'video[data-bond-video]';
   var playing = null;

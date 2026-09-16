@@ -1,5 +1,5 @@
 # Spec library
-Version: 2026-09-16 (Prompt 6b residual Haus-only membership word ingested)
+Version: 2026-09-16 (Prompt 6 dual Home hero controller unify ingested. Series stays PARTIAL)
 
 Briefable:
 - brand-tokens.md (Prompt 1 public tokens + Prompt 2 Vauxhall admin language)
@@ -24,6 +24,8 @@ Briefable:
 - specs/prompt-4-flags.md (Prompt 4 flags. C5 gold/design OUT)
 - specs/prompt-6b-residual-haus-only-membership.md (Prompt 6b residual: Haus-only door word + SKU footer retarget. Full 6-series stays PARTIAL)
 - specs/prompt-6b-flags.md (Prompt 6b residual flags. Dual controller and MFA out)
+- specs/prompt-6-dual-hero-controller-unify.md (Prompt 6 unify only. video-policy.js sole Home attach and endplate owner. Series stays PARTIAL)
+- specs/prompt-6-dual-hero-controller-unify-flags.md (Prompt 6 unify flags. 6c / 6d / 6f and Vesper matrices out)
 
 Unbriefable for marketing build:
 - Brand Guidelines
