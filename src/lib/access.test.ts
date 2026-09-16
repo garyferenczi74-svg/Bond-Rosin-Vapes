@@ -163,7 +163,7 @@ test("SKU footer Bond Haus points at Next /haus", () => {
 test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {
   const home = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../Home.dc.html"), "utf8");
   assert.match(home, /id="circle"/);
-  assert.match(home, /hash alias/);
+  assert.match(home, /Hash alias/);
   assert.match(home, /localStorage\.getItem\('bond_circle'\)/);
   assert.match(home, /localStorage\.setItem\('bond_circle'/);
   assert.match(home, /Haus is the canonical membership name/);
