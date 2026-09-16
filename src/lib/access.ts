@@ -42,6 +42,7 @@ export function adminPortalAllowed(input: {
 export const CLOAKED_STATIC_PATHS = [
   "/Admin.dc.html",
   "/Vauxhall.dc.html",
+  "/Haus.dc.html",
   "/HausAdmin.dc.html",
   "/Product.dc.html",
   "/Security.dc.html",
