@@ -30,6 +30,11 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+export function isMemberEmail(email: string): boolean {
+  const value = normalizeEmail(email);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 export function isDemoMemberEmail(email: string): boolean {
   return normalizeEmail(email) === DEMO_MEMBER_EMAIL;
 }
@@ -51,7 +56,7 @@ export function parseMemberSession(raw: string | null | undefined): MemberSessio
   try {
     const value = JSON.parse(raw) as Partial<MemberSession>;
     if (!value || typeof value.email !== "string") return null;
-    if (!isDemoMemberEmail(value.email)) return null;
+    if (!isMemberEmail(value.email)) return null;
     if (value.role !== "member") return null;
     return seedMemberSession(value.email);
   } catch {
@@ -64,7 +69,7 @@ export function parseMemberAck(raw: string | null | undefined): MemberAck | null
   try {
     const value = JSON.parse(raw) as Partial<MemberAck>;
     if (!value || typeof value.email !== "string") return null;
-    if (!isDemoMemberEmail(value.email)) return null;
+    if (!isMemberEmail(value.email)) return null;
     return {
       email: normalizeEmail(value.email),
       welcomeSeen: value.welcomeSeen === true,

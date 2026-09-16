@@ -751,6 +751,65 @@ select.field {
   vertical-align: top;
 }
 
+.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.vx-haus-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.vx-haus-kpi {
+  display: block;
+  box-shadow: inset 0 1px 0 var(--bone);
+}
+
+.vx-haus-kpi-inert {
+  cursor: default;
+}
+
+.vx-fill-bar {
+  height: 6px;
+  background: #20221F;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.vx-fill-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.vx-preview {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--bone);
+  color: var(--bone);
+  white-space: nowrap;
+}
+
+.vx-parked-haus {
+  box-shadow: inset 0 1px 0 var(--bone);
+}
+
+.vx-haus-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #232323;
+  font-size: 13.5px;
+  color: #B0A99A;
+}
+
 .vx-stepdot {
   width: 8px;
   height: 8px;
@@ -794,7 +853,8 @@ select.field {
   .vx-cite-grid,
   .vx-strip-stack,
   .vx-social-metrics,
-  .vx-lanes {
+  .vx-lanes,
+  .vx-haus-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -905,7 +965,8 @@ select.field {
   .vx-strip-stack,
   .vx-social-metrics,
   .vx-lanes,
-  .vx-monitor-grid {
+  .vx-monitor-grid,
+  .vx-haus-kpis {
     grid-template-columns: 1fr;
   }
 }

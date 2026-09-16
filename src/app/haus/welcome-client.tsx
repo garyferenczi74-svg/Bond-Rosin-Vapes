@@ -4,7 +4,13 @@ import { useState, useTransition } from "react";
 import { enterHausAction } from "@/app/haus/actions";
 import { tokens } from "@/lib/tokens";
 
-export function WelcomeClient({ needsAge }: { needsAge: boolean }) {
+export function WelcomeClient({
+  needsAge,
+  welcomeText,
+}: {
+  needsAge: boolean;
+  welcomeText?: string;
+}) {
   const [message, setMessage] = useState("");
   const [pending, start] = useTransition();
 
@@ -51,7 +57,7 @@ export function WelcomeClient({ needsAge }: { needsAge: boolean }) {
             margin: "22px 0 0",
           }}
         >
-          This floor is yours. Your shelf, your guide, your rituals, kept quietly.
+          {welcomeText ?? "This floor is yours. Your shelf, your guide, your rituals, kept quietly."}
         </p>
         <p
           style={{

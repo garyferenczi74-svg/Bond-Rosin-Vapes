@@ -10,6 +10,10 @@ export function SeedBanner({ ink }: { ink?: string }) {
   );
 }
 
+export function DesignPreviewBadge() {
+  return <span className="vx-preview">Design preview</span>;
+}
+
 export function ConsoleHeader({
   title,
   subtitle,

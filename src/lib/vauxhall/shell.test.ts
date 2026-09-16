@@ -65,6 +65,7 @@ test("wing mosaics dispatch store-driven consoles", () => {
   assert.match(MOSAIC, /ProductWing/);
   assert.match(MOSAIC, /SecurityWing/);
   assert.match(MOSAIC, /SocialWing/);
+  assert.match(MOSAIC, /HausWing/);
   assert.equal(MOSAIC.includes("WingStub"), false);
   assert.equal(MOSAIC.includes("This wing is framed"), false);
   assert.equal(MOSAIC.includes("Framed. Portal build."), false);

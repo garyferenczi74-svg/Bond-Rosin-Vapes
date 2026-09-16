@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   COMMAND_SECTIONS,
+  HAUS_CONSOLES,
   PRODUCT_CONSOLES,
   SECURITY_CONSOLES,
   SOCIAL_CONSOLES,
@@ -53,7 +54,18 @@ test("wing consoles parse and unknown slugs stay cloaked", () => {
   assert.equal(parseVauxhallRoute(["security", "pre-check"])?.view, "pre-check");
   assert.equal(parseVauxhallRoute(["security", "weekly-audit"])?.view, "weekly-audit");
   assert.equal(parseVauxhallRoute(["social", "scheduler"])?.path, "/vauxhall/social/scheduler");
+  assert.deepEqual(parseVauxhallRoute(["haus"]), {
+    wing: "haus",
+    view: "dashboard",
+    path: "/vauxhall/haus",
+  });
+  assert.equal(parseVauxhallRoute(["haus", "dashboard"])?.path, "/vauxhall/haus/dashboard");
+  assert.equal(parseVauxhallRoute(["haus", "content"])?.view, "content");
+  assert.equal(parseVauxhallRoute(["haus", "members"])?.view, "members");
+  assert.equal(parseVauxhallRoute(["haus", "settings"])?.view, "settings");
+  assert.equal(parseVauxhallRoute(["haus", "batches"])?.view, "batches");
   assert.equal(parseVauxhallRoute(["admin"]), null);
+  assert.equal(parseVauxhallRoute(["haus", "admin"]), null);
   assert.equal(parseVauxhallRoute(["product", "missing"]), null);
 });
 
@@ -71,6 +83,9 @@ test("every sidebar console parses and unknown slugs stay cloaked", () => {
   assert.equal(SECURITY_CONSOLES.some((item) => item.id === "findings"), true);
   assert.equal(SECURITY_CONSOLES.some((item) => item.id === "pre-check"), true);
   assert.equal(SOCIAL_CONSOLES.some((item) => item.id === "scheduler"), true);
+  assert.equal(HAUS_CONSOLES[0]?.id, "dashboard");
+  assert.equal(HAUS_CONSOLES[0]?.href, "/vauxhall/haus");
   assert.equal(parseVauxhallRoute(["security", "unknown"]), null);
   assert.equal(parseVauxhallRoute(["social", "publish"]), null);
+  assert.equal(parseVauxhallRoute(["haus", "unknown"]), null);
 });
