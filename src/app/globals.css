@@ -822,6 +822,21 @@ select.field {
   border-radius: 2px;
 }
 
+.vx-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 16px;
+}
+
+.vx-live-off {
+  box-shadow: inset 0 1px 0 var(--security);
+  border-color: var(--security);
+  color: var(--security);
+  cursor: default;
+}
+
 .vx-monitor-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -50,6 +50,7 @@ test("critical navigation reaches a real console for every wing destination", ()
       "scanner-bridge",
       "pre-check",
       "soc-2-exporter",
+      "weekly-audit",
     ],
     social: [
       "overview",

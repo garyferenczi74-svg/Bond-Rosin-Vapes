@@ -4,12 +4,22 @@ import { useEffect, useState } from "react";
 import type { AdminRole } from "@/lib/tokens";
 import { tokens } from "@/lib/tokens";
 import { downloadJson } from "@/lib/vauxhall/csv";
+import { DRY_RUN_BADGE, LIVE_OFF_BADGE } from "@/lib/vauxhall/plumbing";
 import type { VauxhallStore } from "@/lib/vauxhall/store";
 import type { FindingSeverity, MonitorId, RuleGroup } from "@/lib/vauxhall/types";
 import { RULE_GROUPS } from "@/lib/vauxhall/types";
 import { ConsoleHeader, SeedBanner } from "./console-chrome";
 import { Metric } from "./metric";
 import { useVauxhallStore } from "./use-store";
+
+function StatusBadges() {
+  return (
+    <div className="vx-badge-row">
+      <span className="vx-pill vx-live-off">{DRY_RUN_BADGE}</span>
+      <span className="vx-pill vx-live-off">{LIVE_OFF_BADGE}</span>
+    </div>
+  );
+}
 
 function TableCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -151,7 +161,7 @@ export function SecurityWing({
       {banner ? <div className="vx-p0">{banner}</div> : null}
       <Scorecard store={store} />
       <DemoBar store={store} owner={owner} onToast={onToast} />
-      {active === "monitors" ? <MonitorsView store={store} /> : null}
+      {active === "monitors" ? <MonitorsView store={store} owner={owner} onToast={onToast} /> : null}
       {active === "findings" ? <FindingsView store={store} onToast={onToast} /> : null}
       {active === "incidents" ? <IncidentsView store={store} /> : null}
       {active === "rules" ? <RulesView store={store} owner={owner} onToast={onToast} /> : null}
@@ -160,9 +170,10 @@ export function SecurityWing({
       {active === "dsar" ? <DsarView store={store} /> : null}
       {active === "vendors" ? <VendorsView store={store} /> : null}
       {active === "dashboards" ? <SecurityDashView store={store} /> : null}
-      {active === "scanner-bridge" ? <ScannerView store={store} /> : null}
+      {active === "scanner-bridge" ? <ScannerView store={store} onToast={onToast} /> : null}
       {active === "pre-check" ? <PreCheckView store={store} onToast={onToast} /> : null}
       {active === "soc-2-exporter" ? <Soc2View store={store} onToast={onToast} /> : null}
+      {active === "weekly-audit" ? <WeeklyAuditView store={store} /> : null}
     </div>
   );
 }
@@ -177,9 +188,21 @@ function Sparkline({ values }: { values: number[] }) {
   );
 }
 
-function MonitorsView({ store }: { store: VauxhallStore }) {
+function MonitorsView({
+  store,
+  owner,
+  onToast,
+}: {
+  store: VauxhallStore;
+  owner: boolean;
+  onToast: (msg: string) => void;
+}) {
   const monitors = store.listMonitors();
+  const schedules = store.listMonitorSchedules();
+  const plumbingRuns = store.listPlumbingRuns();
+  const actions = store.listAutoActions();
   const [openId, setOpenId] = useState<string | null>(null);
+  const [dryId, setDryId] = useState<MonitorId>("site-liveness");
   const selected = monitors.find((item) => item.id === openId);
   const rule = selected ? store.listRules().find((item) => item.id === selected.ruleId) : undefined;
 
@@ -189,6 +212,83 @@ function MonitorsView({ store }: { store: VauxhallStore }) {
         title="Monitors"
         subtitle="Fourteen monitors. Cite. Remediate. Document. Felix owns the catalog."
       />
+      <StatusBadges />
+      <div className="vx-toolbar">
+        <button
+          type="button"
+          className="vx-act"
+          disabled={owner === false}
+          onClick={() => {
+            store.refreshMonitorSchedules();
+            onToast("Schedules refreshed. No probe fired.");
+          }}
+        >
+          Refresh schedules
+        </button>
+        <label className="lbl" style={{ margin: 0 }} htmlFor="dry-run-id">
+          Dry-run
+        </label>
+        <select
+          id="dry-run-id"
+          className="field"
+          style={{ width: "auto", minWidth: 180, padding: "6px 10px", fontSize: 12 }}
+          value={dryId}
+          disabled={owner === false}
+          onChange={(ev) => setDryId(ev.target.value as MonitorId)}
+        >
+          {monitors.map((mon) => (
+            <option key={mon.id} value={mon.id}>
+              {mon.name}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="vx-act"
+          disabled={owner === false}
+          onClick={() => {
+            store.runPlumbingDry(dryId, "owner");
+            onToast(`Dry-run recorded ${dryId}. Live OFF.`);
+          }}
+        >
+          Run dry-run
+        </button>
+        <button
+          type="button"
+          className="vx-act"
+          disabled={owner === false}
+          onClick={() => {
+            store.runAllPlumbingDry();
+            onToast("Fourteen dry-run records written. Live OFF.");
+          }}
+        >
+          Run all dry-run
+        </button>
+      </div>
+      <TableCard title="Schedules">
+        <table className="vx-data">
+          <thead>
+            <tr>
+              <th>Monitor</th>
+              <th>Cadence</th>
+              <th>Seconds</th>
+              <th>Mode</th>
+              <th>Live</th>
+            </tr>
+          </thead>
+          <tbody>
+            {schedules.map((row) => (
+              <tr key={row.id}>
+                <td style={{ color: "#E1DAD0" }}>{row.name}</td>
+                <td>{row.cadence}</td>
+                <td>{row.cadenceSeconds}</td>
+                <td>{row.executionMode}</td>
+                <td>OFF</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </TableCard>
       <div className="vx-monitor-grid">
         {monitors.map((mon) => (
           <button
@@ -233,6 +333,42 @@ function MonitorsView({ store }: { store: VauxhallStore }) {
           )}
         </article>
       ) : null}
+      <article className="card vx-ink-card" style={{ ["--wing-ink" as string]: tokens.security, marginTop: 12 }}>
+        <p className="lbl">Dry-run history</p>
+        {plumbingRuns.length === 0 ? (
+          <p style={{ margin: "10px 0 0", fontSize: 13, color: "#8E887C" }}>No dry-run records yet. Live OFF.</p>
+        ) : (
+          <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "#B0A99A", fontSize: 13 }}>
+            {plumbingRuns.map((run) => (
+              <li key={run.id}>
+                {run.at} . {run.monitorId} . {run.state} . {run.note}
+                {run.findingId ? ` . ${run.findingId}` : ""}
+              </li>
+            ))}
+          </ul>
+        )}
+      </article>
+      <article className="card vx-ink-card" style={{ ["--wing-ink" as string]: tokens.security, marginTop: 12 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <p className="lbl" style={{ margin: 0 }}>
+            Auto-actions
+          </p>
+          <StatusBadges />
+        </div>
+        <p style={{ margin: "10px 0 0", fontSize: 13, color: "#8E887C" }}>
+          Allowlist draft. Pending Felix counsel. Every toggle stays disabled.
+        </p>
+        <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
+          {actions.map((item) => (
+            <label key={item.id} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: "#B0A99A" }}>
+              <input type="checkbox" checked={false} disabled />
+              <span>
+                {item.label} . {item.status}
+              </span>
+            </label>
+          ))}
+        </div>
+      </article>
     </div>
   );
 }
@@ -253,9 +389,27 @@ function FindingsView({ store, onToast }: { store: VauxhallStore; onToast: (msg:
     setEvidence("");
   }
 
+  const drafts = store.listPlumbingFindings();
   return (
     <div>
       <ConsoleHeader title="Findings" subtitle="Cite. Remediate. Document. Every row is that record." />
+      {drafts.length ? (
+        <article className="card vx-ink-card" style={{ ["--wing-ink" as string]: tokens.security, marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <p className="lbl" style={{ margin: 0 }}>
+              Dry-run drafts
+            </p>
+            <span className="vx-pill vx-live-off">{DRY_RUN_BADGE}</span>
+          </div>
+          <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "#B0A99A", fontSize: 13 }}>
+            {drafts.slice(0, 8).map((draft) => (
+              <li key={draft.id}>
+                {draft.id} . {draft.severity} . {draft.cite}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ) : null}
       <div className="vx-toolbar">
         {(["P0", "P1", "P2", "P3"] as FindingSeverity[]).map((pill) => (
           <span key={pill} className="vx-pill" style={{ cursor: "default" }}>
@@ -565,6 +719,21 @@ function AuditLogView({
       <p style={{ margin: "0 0 12px", fontSize: 13, color: verify.ok ? "#B0A99A" : "#A53A28" }}>
         {verify.ok ? "Chain verify green." : `Chain verify failed at ${verify.brokenAt}.`}
       </p>
+      <p style={{ margin: "0 0 12px", fontSize: 13, color: "#8E887C" }}>
+        Tamper Test is Demo only. Production audit_events never uses it.
+      </p>
+      <div className="vx-toolbar">
+        <button
+          type="button"
+          className="vx-act"
+          onClick={() => {
+            const prod = store.verifyProductionAudit();
+            onToast(prod.note);
+          }}
+        >
+          Verify production chain
+        </button>
+      </div>
       <TableCard title="Portal actions">
         <table className="vx-data">
           <thead>
@@ -722,10 +891,44 @@ function SecurityDashView({ store }: { store: VauxhallStore }) {
   );
 }
 
-function ScannerView({ store }: { store: VauxhallStore }) {
+function ScannerView({ store, onToast }: { store: VauxhallStore; onToast: (msg: string) => void }) {
+  const [payload, setPayload] = useState(
+    '{"source":"github-actions","workflow":"security-scan","artifact":"scan-summary.json","findings":[{"kind":"dependency","severity":"P1","title":"Mock CVE on a seed package","package":"mock-lib","cve":"CVE-2026-0000"}]}',
+  );
   return (
     <div>
-      <ConsoleHeader title="Scanner Bridge" subtitle="Code and dependency output flowing into Findings." />
+      <ConsoleHeader
+        title="Scanner Bridge"
+        subtitle="Code and dependency output flowing into Findings."
+        right={
+          <button
+            type="button"
+            className="vx-act"
+            onClick={() => {
+              try {
+                store.ingestScanPayload(JSON.parse(payload) as unknown);
+              } catch {
+                store.ingestScanPayload({ findings: [] });
+              }
+              onToast("CI scan mapped into findings drafts. Merge block stays off.");
+            }}
+          >
+            Ingest CI stub
+          </button>
+        }
+      />
+      <StatusBadges />
+      <label className="lbl" htmlFor="scan-json">
+        CI artifact JSON
+      </label>
+      <textarea
+        id="scan-json"
+        className="field"
+        rows={5}
+        value={payload}
+        onChange={(ev) => setPayload(ev.target.value)}
+        style={{ marginBottom: 14 }}
+      />
       <TableCard title="Inbound">
         <table className="vx-data">
           <thead>
@@ -765,10 +968,21 @@ function PreCheckView({ store, onToast }: { store: VauxhallStore; onToast: (msg:
     );
   }
 
+  function runServer() {
+    const result = store.runPreCheckServerDry(candidate);
+    onToast(
+      result.verdict === "green"
+        ? `${candidate} server dry-run green. Trace mock only.`
+        : `${candidate} server dry-run blocked. ${result.reasons[0] ?? "Rule cited."}`,
+    );
+  }
+
   function fix() {
     store.applyPreCheckFix(candidate);
     onToast("Fix Applied. Run again.");
   }
+
+  const ship = store.shipPrecondition(candidate);
 
   return (
     <div>
@@ -793,12 +1007,19 @@ function PreCheckView({ store, onToast }: { store: VauxhallStore; onToast: (msg:
             <button type="button" className="vx-act" onClick={run}>
               Run
             </button>
+            <button type="button" className="vx-act" onClick={runServer}>
+              Server dry-run
+            </button>
             <button type="button" className="vx-act" onClick={fix} disabled={candidate === "rc-118" ? false : true}>
               Fix Applied
             </button>
           </>
         }
       />
+      <StatusBadges />
+      <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8E887C" }}>
+        {store.shipPreconditionText()} {ship.ready ? "Signals green on this seed." : `Missing ${ship.missing.join(", ")}.`}
+      </p>
       <div style={{ display: "grid", gap: 10 }}>
         {checks.map((check) => {
           const mAllows = store.mGateAllows(check.candidate);
@@ -825,6 +1046,26 @@ function PreCheckView({ store, onToast }: { store: VauxhallStore; onToast: (msg:
             </article>
           );
         })}
+        {store.listPlumbingPreChecks().map((check) => (
+          <article
+            key={check.id}
+            className="card vx-ink-card"
+            style={{ ["--wing-ink" as string]: tokens.security }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+              <span style={{ color: "#E1DAD0" }}>{check.candidate} . server path</span>
+              <span className="vx-pill vx-live-off">{DRY_RUN_BADGE}</span>
+            </div>
+            <p style={{ margin: "10px 0 0", fontSize: 13, color: "#8E887C" }}>
+              Metrc source {check.metrcSource} . {check.verdict}
+            </p>
+            <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "#B0A99A", fontSize: 13 }}>
+              {check.reasons.map((reason) => (
+                <li key={`srv-${reason}`}>{reason}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
       </div>
     </div>
   );
@@ -875,6 +1116,32 @@ function Soc2View({
           </tbody>
         </table>
       </TableCard>
+    </div>
+  );
+}
+
+function WeeklyAuditView({ store }: { store: VauxhallStore }) {
+  const audit = store.weeklyAudit();
+  return (
+    <div>
+      <ConsoleHeader
+        title={audit.title}
+        subtitle="Named checklist. Schedule stub only. Owner Vesper. Weekly cadence."
+      />
+      <StatusBadges />
+      <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8E887C" }}>{audit.note}</p>
+      <div style={{ display: "grid", gap: 10 }}>
+        {audit.items.map((item) => (
+          <article key={item.id} className="card vx-ink-card" style={{ ["--wing-ink" as string]: tokens.security }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+              <span style={{ color: "#E1DAD0" }}>{item.prompt}</span>
+              <span className="vx-pill" style={{ cursor: "default" }}>
+                {item.state}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

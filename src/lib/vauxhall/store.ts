@@ -42,6 +42,26 @@ import {
   pushSpark,
   seedMonitors,
 } from "./monitors.ts";
+import {
+  AUTO_ACTION_ALLOWLIST,
+  M_SHIP_PRECONDITION_TEXT,
+  VESPER_WEEKLY_AUDIT,
+  appendAuditEvent,
+  checkpointAuditOffsite,
+  evaluateShipPrecondition,
+  executeAutoAction,
+  ingestScanArtifact,
+  runMonitorDry,
+  runPreCheckServerDry,
+  scheduledVerifyJobStub,
+  seedMonitorSchedules,
+  type AutoActionItem,
+  type MonitorSchedule,
+  type PlumbingAuditEvent,
+  type PreCheckServerRun,
+  type ShipPrecondition,
+  type WeeklyAuditChecklist,
+} from "./plumbing/index.ts";
 import type { TraceProvider, TraceSnapshot, TraceTestStatus } from "./trace.ts";
 import { DISCREPANCY_THRESHOLD_PCT, isAllocatableStatus, metrcStamp, variancePercent } from "./trace.ts";
 import type {
@@ -161,6 +181,11 @@ export class VauxhallStore {
   traceSnap: TraceSnapshot;
   demoLive = false;
   monitors: Monitor[] = [];
+  plumbingSchedules: MonitorSchedule[] = [];
+  plumbingRuns: MonitorRun[] = [];
+  plumbingFindings: Finding[] = [];
+  plumbingPrechecks: PreCheckServerRun[] = [];
+  plumbingAudit: PlumbingAuditEvent[] = [];
   private eid = 100;
   private oid = 1100;
   private fid = 40;
@@ -169,6 +194,8 @@ export class VauxhallStore {
   private invSeq = 20;
   private iid = 10;
   private rid = 200;
+  private plumbingRid = 1;
+  private plumbingFid = 1;
   private labDelayMs: number;
   private traceLatencyMs: number;
   private labTimers = new Map<string, ReturnType<typeof setTimeout>>();
@@ -255,6 +282,20 @@ export class VauxhallStore {
     this.invSeq = 20;
     this.iid = 10;
     this.rid = 200;
+    this.plumbingRid = 1;
+    this.plumbingFid = 1;
+    this.plumbingSchedules = seedMonitorSchedules();
+    this.plumbingRuns = [];
+    this.plumbingFindings = [];
+    this.plumbingPrechecks = [];
+    this.plumbingAudit = appendAuditEvent([], {
+      id: "aud-plumb-0",
+      time: "14:20:00",
+      actor: "Felix",
+      action: "plumbing.boot",
+      target: "audit_events",
+      note: "Production chain stub. Tamper Test never writes here.",
+    });
     this.filter = { agent: null, type: null, allData: false };
     this.live = false;
     this.demoLive = false;
@@ -1952,6 +1993,161 @@ export class VauxhallStore {
       sub,
       audit: this.nextAudit(),
     });
+  }
+
+  listMonitorSchedules(): MonitorSchedule[] {
+    return this.plumbingSchedules.map((item) => ({ ...item }));
+  }
+
+  refreshMonitorSchedules(rows?: MonitorSchedule[]): MonitorSchedule[] {
+    this.plumbingSchedules = (rows && rows.length === 14 ? rows : seedMonitorSchedules()).map((item) => ({
+      ...item,
+      executionMode: "dry-run",
+      liveEnabled: false,
+    }));
+    this.plumbingAudit = appendAuditEvent(this.plumbingAudit, {
+      id: `aud-plumb-${this.plumbingAudit.length}`,
+      time: clockTime(),
+      actor: "Gary",
+      action: "schedule.refresh",
+      target: "monitor_schedules",
+      note: "Owner refreshed schedules. No probe fired.",
+    });
+    this.emit();
+    return this.listMonitorSchedules();
+  }
+
+  listPlumbingRuns(): MonitorRun[] {
+    return this.plumbingRuns.map((item) => ({ ...item }));
+  }
+
+  listPlumbingFindings(): Finding[] {
+    return this.plumbingFindings.map((item) => ({ ...item }));
+  }
+
+  listPlumbingPreChecks(): PreCheckServerRun[] {
+    return this.plumbingPrechecks.map((item) => ({ ...item, reasons: item.reasons.slice() }));
+  }
+
+  listPlumbingAudit(): PlumbingAuditEvent[] {
+    return this.plumbingAudit.map((item) => ({ ...item }));
+  }
+
+  listAutoActions(): AutoActionItem[] {
+    return AUTO_ACTION_ALLOWLIST.map((item) => ({ ...item }));
+  }
+
+  attemptAutoAction(id: AutoActionItem["id"]): { ok: false; executed: false; reason: string } {
+    return executeAutoAction(id);
+  }
+
+  weeklyAudit(): WeeklyAuditChecklist {
+    return {
+      ...VESPER_WEEKLY_AUDIT,
+      items: VESPER_WEEKLY_AUDIT.items.map((item) => ({ ...item })),
+    };
+  }
+
+  shipPrecondition(candidate: string): ShipPrecondition {
+    const pre = this.precheckFor(candidate);
+    const monitorsGreen = this.monitors.every((item) => item.state === "green");
+    const metrc = this.monitors.find((item) => item.id === "metrc-sync");
+    return evaluateShipPrecondition({
+      candidate,
+      preCheckGreen: pre?.verdict === "green",
+      monitorsGreen,
+      metrcSyncGreen: metrc?.state === "green" && this.traceSnap.sync.stale === false,
+    });
+  }
+
+  shipPreconditionText(): string {
+    return M_SHIP_PRECONDITION_TEXT;
+  }
+
+  runPlumbingDry(id: MonitorId, origin: "schedule" | "owner" = "owner"): MonitorRun {
+    const at = clockTime();
+    const record = runMonitorDry(id, origin, at, this.seedClock, this.plumbingSchedules);
+    this.plumbingRid += 1;
+    const run: MonitorRun = { id: `prun-${this.plumbingRid}`, ...record.run };
+    this.plumbingFid += 1;
+    const draft: Finding = { id: `pf-${this.plumbingFid}`, ...record.draft };
+    run.findingId = draft.id;
+    this.plumbingRuns = [run, ...this.plumbingRuns].slice(0, 48);
+    this.plumbingFindings = [draft, ...this.plumbingFindings].slice(0, 48);
+    this.plumbingAudit = appendAuditEvent(this.plumbingAudit, {
+      id: `aud-plumb-${this.plumbingAudit.length}`,
+      time: at,
+      actor: "Felix",
+      action: "monitor.dry_run",
+      target: id,
+      note: run.note,
+    });
+    this.emit();
+    return { ...run };
+  }
+
+  runAllPlumbingDry(): MonitorRun[] {
+    return this.monitors.map((mon) => this.runPlumbingDry(mon.id, "schedule"));
+  }
+
+  runPreCheckServerDry(candidate: string): PreCheckServerRun {
+    const result = runPreCheckServerDry({
+      candidate,
+      metrcStale: this.traceSnap.sync.stale,
+      claimsLintCleared: this.precheckFixApplied[candidate] === true,
+    });
+    const existing = this.plumbingPrechecks.find((item) => item.candidate === candidate);
+    if (existing) {
+      existing.verdict = result.verdict;
+      existing.reasons = result.reasons.slice();
+    } else {
+      this.plumbingPrechecks.push(result);
+    }
+    this.plumbingAudit = appendAuditEvent(this.plumbingAudit, {
+      id: `aud-plumb-${this.plumbingAudit.length}`,
+      time: clockTime(),
+      actor: "Vesper",
+      action: "precheck.server_dry_run",
+      target: candidate,
+      note: result.verdict === "green" ? "Server dry-run green. Trace mock only." : result.reasons[0] ?? "Blocked.",
+    });
+    this.emit();
+    return { ...result, reasons: result.reasons.slice() };
+  }
+
+  ingestScanPayload(payload: unknown): { items: ScannerItem[]; drafts: Finding[] } {
+    const ingested = ingestScanArtifact(payload, this.seedClock);
+    const items = ingested.items.map((item, index) => ({
+      ...item,
+      id: `scan-dry-${this.scanner.length + index + 1}`,
+    }));
+    const drafts = ingested.drafts.map((draft) => {
+      this.plumbingFid += 1;
+      return { id: `pf-${this.plumbingFid}`, ...draft };
+    });
+    this.scanner = [...items, ...this.scanner];
+    this.plumbingFindings = [...drafts, ...this.plumbingFindings].slice(0, 48);
+    this.plumbingAudit = appendAuditEvent(this.plumbingAudit, {
+      id: `aud-plumb-${this.plumbingAudit.length}`,
+      time: clockTime(),
+      actor: "Felix",
+      action: "scanner.ingest",
+      target: "dependency-secret",
+      note: "CI scan mapped into findings drafts. Merge block stays off.",
+    });
+    this.emit();
+    return { items, drafts };
+  }
+
+  verifyProductionAudit(): { ok: boolean; note: string } {
+    const local = scheduledVerifyJobStub(this.plumbingAudit);
+    const checkpoint = checkpointAuditOffsite();
+    return {
+      ok: local.result.ok,
+      note: local.result.ok
+        ? `Production chain verify green. ${checkpoint.note}`
+        : `Production chain failed at ${local.result.brokenAt ?? "unknown"}.`,
+    };
   }
 
   signOut(): void {

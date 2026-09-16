@@ -149,7 +149,7 @@ test("SOC 2 evidence pack is client-side JSON and lint page is constructed", () 
   assert.equal(MONITOR_CATALOG.length, 14);
 });
 
-test("new monitor strings stay dash-clean and Phase B stays parked", () => {
+test("new monitor strings stay dash-clean and live paging stays off", () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const files = ["monitors.ts", "store.ts", "../../components/vauxhall/security-views.tsx"].map((rel) =>
     readFileSync(join(here, rel), "utf8"),
@@ -164,4 +164,7 @@ test("new monitor strings stay dash-clean and Phase B stays parked", () => {
   }
   const social = readFileSync(join(here, "../../components/vauxhall/social-views.tsx"), "utf8");
   assert.match(social, /Prompt 2C stays parked/);
+  const access = readFileSync(join(here, "../access.ts"), "utf8");
+  assert.match(access, /\/Admin\.dc\.html/);
+  assert.equal(access.includes("/Haus.dc.html"), false);
 });

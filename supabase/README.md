@@ -12,6 +12,7 @@ The Next.js access shell uses the anon or publishable key only. Gary holds produ
 2. `20260915194500_phase1_access_shell.sql` (admins gate, append-only audit, lockout stub)
 3. `20260915195000_auth_attempt_check_outcome.sql` (lockout pre-check)
 4. `20260915210000_phase1_mfa_waiver_w_2026_09_15_p1_override.sql` (Gary waiver: drop AAL2 from `is_admin` and `admin_role`)
+5. `20260916010000_phase_b_monitor_plumbing.sql` (monitor_schedules, dry-run runs and findings drafts, audit_events hash chain, scanner ingest, Pre-Check server dry-run)
 
 These do not delete marketing data.
 
@@ -24,3 +25,5 @@ What Phase 1 changes:
 - `auth_attempts` is written only through `record_auth_attempt`.
 
 Seed an admin by inserting one `auth.users` row (no shared accounts), then one `public.admins` row for that `user_id`. Under W-2026-09-15-P1-OVERRIDE, password auth at `/haus` opens `/vauxhall` without MFA enroll.
+
+Phase B plumbing tables stay dry-run. `monitor_schedules.live_enabled` is false. `audit_events` is append only and never receives Tamper Test writes. `verify_audit_chain` and `checkpoint_audit_offsite` are stubs. No paging channel is wired.

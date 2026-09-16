@@ -15,6 +15,20 @@ M holds the licence to ship. Nothing reaches production without the three precon
 
 Missing any one item: no ship.
 
+## M ship precondition (Prompt 2E, advisory)
+
+Named for Phase B plumbing. Advisory until M enablement. Not a hard gate in this PR.
+
+At ship time the candidate should show:
+
+1. Pre-Check green
+2. Monitors green
+3. Metrc sync green (Trace mock / Phase A seam only)
+
+Hard gate waits for a later enablement PR after Felix + M PASS. Live paging and auto-actions stay off until that PR.
+
+Rollback named for this stream: `dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu` (PR14 Phase A tip).
+
 ## Candidate path
 
 1. Q places a candidate in /queue/release-candidates/ with a restore point named.
