@@ -180,8 +180,6 @@ function Sparkline({ values }: { values: number[] }) {
 function MonitorsView({ store }: { store: VauxhallStore }) {
   const monitors = store.listMonitors();
   const [openId, setOpenId] = useState<string | null>(null);
-  const selected = monitors.find((item) => item.id === openId);
-  const rule = selected ? store.listRules().find((item) => item.id === selected.ruleId) : undefined;
 
   return (
     <div>
@@ -190,49 +188,57 @@ function MonitorsView({ store }: { store: VauxhallStore }) {
         subtitle="Fourteen monitors. Cite. Remediate. Document. Felix owns the catalog."
       />
       <div className="vx-monitor-grid">
-        {monitors.map((mon) => (
-          <button
-            key={mon.id}
-            type="button"
-            className="card vx-ink-card"
-            style={{ ["--wing-ink" as string]: tokens.security, textAlign: "left", cursor: "pointer", fontFamily: "inherit", color: "inherit" }}
-            onClick={() => setOpenId((id) => (id === mon.id ? null : mon.id))}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-              <span style={{ color: "#E1DAD0", fontSize: 14 }}>{mon.name}</span>
-              <span className="vx-pill" style={{ cursor: "default" }}>
-                {mon.state}
-              </span>
-            </div>
-            <p style={{ margin: "10px 0 0", fontSize: 12, color: "#8E887C" }}>
-              {mon.cadence} . Last {mon.lastRun} . Next {mon.nextRun}
-            </p>
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "#B0A99A" }}>{mon.citation}</p>
-            <Sparkline values={mon.sparkline} />
-          </button>
-        ))}
+        {monitors.map((mon) => {
+          const open = openId === mon.id;
+          const openRule = open ? store.listRules().find((item) => item.id === mon.ruleId) : undefined;
+          return (
+            <button
+              key={mon.id}
+              type="button"
+              className="card vx-ink-card"
+              aria-expanded={open}
+              style={{ ["--wing-ink" as string]: tokens.security, textAlign: "left", cursor: "pointer", fontFamily: "inherit", color: "inherit" }}
+              onClick={() => setOpenId((id) => (id === mon.id ? null : mon.id))}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <span style={{ color: "#E1DAD0", fontSize: 14 }}>{mon.name}</span>
+                <span className="vx-pill" style={{ cursor: "default" }}>
+                  {mon.state}
+                </span>
+              </div>
+              <p style={{ margin: "10px 0 0", fontSize: 12, color: "#8E887C" }}>
+                {mon.cadence} . Last {mon.lastRun} . Next {mon.nextRun}
+              </p>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#B0A99A" }}>{mon.citation}</p>
+              <Sparkline values={mon.sparkline} />
+              {open ? (
+                <div style={{ marginTop: 12, borderTop: "1px solid #232323", paddingTop: 12 }}>
+                  <p className="lbl">Run history</p>
+                  <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8E887C" }}>
+                    Rule {openRule?.name ?? mon.ruleId} . {mon.citation}
+                  </p>
+                  {mon.history.length === 0 ? (
+                    <p style={{ margin: "10px 0 0", fontSize: 13, color: "#8E887C" }}>
+                      No ticks yet. Frozen until Demo Live or Trigger.
+                    </p>
+                  ) : (
+                    <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "#B0A99A", fontSize: 13 }}>
+                      {mon.history.map((run) => (
+                        <li key={run.id}>
+                          {run.at} . {run.state} . {run.note}
+                          {run.findingId ? ` . ${run.findingId}` : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : (
+                <p style={{ margin: "8px 0 0", fontSize: 11, color: "#6E685E" }}>Open run history and rule</p>
+              )}
+            </button>
+          );
+        })}
       </div>
-      {selected ? (
-        <article className="card vx-ink-card" style={{ ["--wing-ink" as string]: tokens.security, marginTop: 12 }}>
-          <p className="lbl">Run history</p>
-          <p style={{ margin: "8px 0 0", color: "#E1DAD0" }}>{selected.name}</p>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "#8E887C" }}>
-            Rule {rule?.name ?? selected.ruleId} . {selected.citation}
-          </p>
-          {selected.history.length === 0 ? (
-            <p style={{ margin: "10px 0 0", fontSize: 13, color: "#8E887C" }}>No ticks yet. Frozen until Demo Live or Trigger.</p>
-          ) : (
-            <ul style={{ margin: "10px 0 0", paddingLeft: 18, color: "#B0A99A", fontSize: 13 }}>
-              {selected.history.map((run) => (
-                <li key={run.id}>
-                  {run.at} . {run.state} . {run.note}
-                  {run.findingId ? ` . ${run.findingId}` : ""}
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-      ) : null}
     </div>
   );
 }

@@ -43,6 +43,8 @@ test("Demo Live ticks open the lint catch then the lockout burst", () => {
   store.tickMonitorEngine(2000);
   const lock = store.listFindings().find((item) => item.monitorId === "auth-watch" && item.severity === "P0");
   assert.ok(lock);
+  assert.equal(store.listMonitors().find((item) => item.id === "content-lint")?.state, "failing");
+  assert.equal(store.listMonitors().find((item) => item.id === "auth-watch")?.state, "failing");
   const incident = store.listIncidents().find((item) => item.findingId === lock?.id);
   assert.ok(incident);
   assert.equal((incident?.beats ?? []).length >= 5, true);

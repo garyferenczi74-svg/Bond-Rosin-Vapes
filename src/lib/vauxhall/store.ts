@@ -1686,12 +1686,17 @@ export class VauxhallStore {
       this.applyTriggeredFailure(mon);
       return;
     }
-    if (id === "content-lint" && !this.scriptedLintDone) {
+    if (id === "content-lint" && this.scriptedLintDone === false) {
       this.fireLintCatch(mon);
       return;
     }
-    if (id === "auth-watch" && this.scriptedLintDone && !this.scriptedLockoutDone) {
+    if (id === "auth-watch" && this.scriptedLintDone && this.scriptedLockoutDone === false) {
       this.fireLockoutBurst(mon);
+      return;
+    }
+    const openFinding = this.findings.find((item) => item.monitorId === id && item.state === "open");
+    if (openFinding && id !== "metrc-sync" && id !== "audit-integrity") {
+      this.markMonitor(mon, "failing", openFinding.cite);
       return;
     }
     if (id === "metrc-sync") {
