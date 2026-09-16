@@ -102,6 +102,7 @@ test("new wing UI keeps Bond voice and never uses WingStub", () => {
   assert.deepEqual(CLOAKED_STATIC_PATHS, [
     "/Admin.dc.html",
     "/Vauxhall.dc.html",
+    "/Haus.dc.html",
     "/HausAdmin.dc.html",
     "/Product.dc.html",
     "/Security.dc.html",

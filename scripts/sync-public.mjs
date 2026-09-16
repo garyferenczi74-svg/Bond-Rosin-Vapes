@@ -14,7 +14,6 @@ const files = [
   "Terms.dc.html",
   "Privacy.dc.html",
   "Finder.dc.html",
-  "Haus.dc.html",
   "404.html",
   "support.js",
   "video-policy.js",
@@ -27,6 +26,7 @@ const dirs = ["media"];
 const blocked = new Set([
   "Admin.dc.html",
   "Vauxhall.dc.html",
+  "Haus.dc.html",
   "HausAdmin.dc.html",
   "Product.dc.html",
   "Security.dc.html",
@@ -63,6 +63,13 @@ function copy(name) {
 
 for (const name of files) copy(name);
 for (const name of dirs) copy(name);
+
+for (const name of blocked) {
+  const leaked = join(publicDir, name);
+  if (existsSync(leaked)) {
+    rmSync(leaked, { force: true });
+  }
+}
 
 const indexTo = join(publicDir, "index.html");
 if (existsSync(indexTo)) {

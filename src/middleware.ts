@@ -22,6 +22,7 @@ export const config = {
     "/vauxhall/:path*",
     "/Admin.dc.html",
     "/Vauxhall.dc.html",
+    "/Haus.dc.html",
     "/HausAdmin.dc.html",
     "/Product.dc.html",
     "/Security.dc.html",
