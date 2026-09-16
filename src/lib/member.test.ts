@@ -86,6 +86,7 @@ test("shared door routes admin roles to Vauxhall and members to Salon", () => {
   assert.equal(actions.includes("/haus/admin"), false);
   assert.equal(actions.includes("owner@bond.test"), false);
   assert.match(actions, /function fail\(message = GENERIC_DOOR\)/);
+  assert.match(actions, /catch \(error\)/);
   assert.equal(GENERIC_DOOR, "That did not open the door.");
   assert.equal(PHASE1_MFA_WAIVED, true);
   assert.match(actions, /PHASE1_MFA_WAIVED/);
