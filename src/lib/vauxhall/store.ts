@@ -631,20 +631,9 @@ export class VauxhallStore {
       });
     }
     this.traceSnap = this.trace.hydrate();
-    const facility = existing ?? this.facilityForAccount({
-      id,
-      name: input.name.trim(),
-      license: input.license.trim(),
-      licenseMark: "mock/prototype",
-      facilityId: existing?.id ?? facilityId,
-      expiresOn: input.expiresOn,
-      contact: "",
-      terms: "",
-      region: "",
-      velocity: 0,
-      notes: "",
-      receivableDays: 0,
-    });
+    const facility = this.traceSnap.facilities.find(
+      (item) => item.licenseNumber === input.license.trim() || item.id === facilityId,
+    );
     const verification = facility
       ? `Mock verification: ${input.license.trim()} labeled mock/prototype. Facility ${facility.active && facility.licensed ? "active" : "inactive"}.`
       : "Mock verification: license labeled, no Metrc facility match.";
