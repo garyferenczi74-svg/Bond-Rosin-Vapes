@@ -23,3 +23,5 @@ Format: date | decision | reasoning | approved by
 - 2026-09-15 | Prompt 2B lock: Next /vauxhall only. Sign Out returns to live /haus. No mock MFA demo. Knowledge and product seeds stay prototype. Social stays placeholder. | Q/Felix | Q (build)
 - 2026-09-15 | Restyle Next.js /vauxhall to a Bond control room: sidebar plus top tabs, Prompt 2 tokens, Prompt 2B store kept | Gary ViaConnect refs plus Prompt 2 brand lock | Q (build)
 - 2026-09-15 | Product wing SKU Portfolio: three standing numbers from Prompt 1, store-seeded, hairline accents only | Gary directed Product build-out | Q (build)
+- 2026-09-16 | Prompt 2E Phase B plumbing only: monitor_schedules, dry-run MonitorRunner, audit_events hash chain, scanner ingest stub, Pre-Check server dry-run. Paging and auto-actions stay OFF. | RC 2026-09-15 plumbing-only. Extend PR14. | Q (build)
+- 2026-09-16 | Phase B branch carries PR15 Haus cloak (49b3e78). Rollback named dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9. | Felix Pre-Check required fix. | Felix

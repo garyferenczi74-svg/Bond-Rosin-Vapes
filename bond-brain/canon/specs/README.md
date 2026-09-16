@@ -13,6 +13,11 @@ Briefable:
 - specs/qc-checklist.md (Vesper standing lints; Framer acceptance still blocked)
 - specs/release-runbook.md (M)
 - specs/phase-1-precheck-rules.md (Felix: Phase 1 Access shell Pre-Check and Rules)
+- specs/prompt-2e-flags.md (Phase B live flags. All off)
+- specs/prompt-2e-phase-b-plumbing.md (Security plumbing dry-run)
+- specs/paging-plan.md (placeholder. No live channel)
+- specs/quiet-hours.md (placeholder. Not wired)
+- specs/vesper-weekly-monitor-audit.md (named weekly checklist stub)
 
 Unbriefable for marketing build:
 - Brand Guidelines

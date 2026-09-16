@@ -457,10 +457,27 @@ export function ReviewView({ store, onToast }: { store: VauxhallStore; onToast: 
 export function QueueView({ store }: { store: VauxhallStore }) {
   const queue = store.listQueue();
   const [openId, setOpenId] = useState<string | null>(null);
+  const weekly = store.weeklyAudit();
+  const ship117 = store.shipPrecondition("rc-117");
+  const ship118 = store.shipPrecondition("rc-118");
 
   return (
     <div>
       <ViewHeader title="Queue" subtitle="Release candidates and social drafts moving through their gates." />
+      <article className="card vx-ink-card" style={{ ["--wing-ink" as string]: "#A53A28", marginBottom: 14 }}>
+        <p className="lbl">M ship precondition</p>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "#8E887C" }}>{store.shipPreconditionText()}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "#B0A99A" }}>
+          rc-117 {ship117.ready ? "signals green" : `missing ${ship117.missing.join(", ")}`} . rc-118{" "}
+          {ship118.ready ? "signals green" : `missing ${ship118.missing.join(", ")}`}
+        </p>
+      </article>
+      <article className="card" style={{ marginBottom: 14 }}>
+        <p className="lbl">{weekly.title}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 13, color: "#8E887C" }}>
+          Queue item. {weekly.cadence}. Owner {weekly.owner}. {weekly.note}
+        </p>
+      </article>
       <div
         style={{
           display: "grid",

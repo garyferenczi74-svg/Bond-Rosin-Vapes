@@ -8,7 +8,7 @@
     "build": "node scripts/sync-public.mjs && next build",
     "start": "next start --port 3000",
     "lint": "node scripts/dash-lint.mjs",
-    "test": "node --experimental-strip-types --test src/lib/access.test.ts src/lib/vauxhall/store.test.ts src/lib/vauxhall/routes.test.ts src/lib/vauxhall/shell.test.ts src/lib/vauxhall/wings.test.ts src/lib/vauxhall/trace.test.ts src/lib/vauxhall/monitors.test.ts"
+    "test": "node --experimental-strip-types --test src/lib/access.test.ts src/lib/vauxhall/store.test.ts src/lib/vauxhall/routes.test.ts src/lib/vauxhall/shell.test.ts src/lib/vauxhall/wings.test.ts src/lib/vauxhall/trace.test.ts src/lib/vauxhall/monitors.test.ts src/lib/vauxhall/plumbing.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.7.0",

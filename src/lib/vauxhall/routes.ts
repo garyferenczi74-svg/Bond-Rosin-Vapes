@@ -44,6 +44,7 @@ export const SECURITY_CONSOLES: ConsoleItem[] = [
   { id: "scanner-bridge", title: "Scanner Bridge", href: "/vauxhall/security/scanner-bridge" },
   { id: "pre-check", title: "Pre-Check", href: "/vauxhall/security/pre-check" },
   { id: "soc-2-exporter", title: "SOC 2 Exporter", href: "/vauxhall/security/soc-2-exporter" },
+  { id: "weekly-audit", title: "Weekly Audit", href: "/vauxhall/security/weekly-audit" },
 ];
 
 export const SOCIAL_CONSOLES: ConsoleItem[] = [

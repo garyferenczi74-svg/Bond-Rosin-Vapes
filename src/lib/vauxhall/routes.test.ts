@@ -51,6 +51,7 @@ test("wing consoles parse and unknown slugs stay cloaked", () => {
   });
   assert.equal(parseVauxhallRoute(["security", "findings"])?.view, "findings");
   assert.equal(parseVauxhallRoute(["security", "pre-check"])?.view, "pre-check");
+  assert.equal(parseVauxhallRoute(["security", "weekly-audit"])?.view, "weekly-audit");
   assert.equal(parseVauxhallRoute(["social", "scheduler"])?.path, "/vauxhall/social/scheduler");
   assert.equal(parseVauxhallRoute(["admin"]), null);
   assert.equal(parseVauxhallRoute(["product", "missing"]), null);
