@@ -69,6 +69,13 @@ test("member rooms are the Prompt 3 floor and never /haus/admin", () => {
   assert.equal(isMemberFloorPath("/vauxhall"), false);
 });
 
+test("missing admin session cloaks Vauxhall as 404", () => {
+  const gate = read("./gate.ts");
+  assert.match(gate, /export async function requirePortalSession/);
+  assert.match(gate, /notFound\(\)/);
+  assert.match(gate, /catch/);
+});
+
 test("shared door routes admin roles to Vauxhall and members to Salon", () => {
   const actions = read("../app/haus/actions.ts");
   assert.match(actions, /isDemoMemberEmail/);

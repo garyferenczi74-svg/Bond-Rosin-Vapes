@@ -33,18 +33,22 @@ export async function readAdminRow() {
 }
 
 export async function requirePortalSession(): Promise<PortalSession> {
-  const { user, admin } = await readAdminRow();
-  if (!user || !admin) {
+  try {
+    const { user, admin } = await readAdminRow();
+    if (!user || !admin) {
+      notFound();
+    }
+
+    if (!adminPortalAllowed({ admin })) {
+      notFound();
+    }
+
+    return {
+      userId: user.id,
+      email: user.email ?? null,
+      role: admin.role,
+    };
+  } catch {
     notFound();
   }
-
-  if (!adminPortalAllowed({ admin })) {
-    notFound();
-  }
-
-  return {
-    userId: user.id,
-    email: user.email ?? null,
-    role: admin.role,
-  };
 }
