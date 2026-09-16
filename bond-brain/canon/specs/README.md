@@ -1,9 +1,9 @@
 # Spec library
-Version: 2026-09-15 (Prompt 2 ingest + Phase 1 Pre-Check)
+Version: 2026-09-15 (Prompt 4 Torrie copy locks ingested)
 
 Briefable:
 - brand-tokens.md (Prompt 1 public tokens + Prompt 2 Vauxhall admin language)
-- copy-bank.md (Prompt 1, 2026-07-22)
+- copy-bank.md (Prompt 1 triads/hero stand; Prompt 4 Torrie locks)
 - specs/prompt-2-vauxhall.md (admin portal design, Gary 2026-09-15)
 - specs/prompt-2b-wire-vauxhall.md (Prompt 2B unpark: Command Center wiring on Next /vauxhall)
 - specs/prompt-2-vauxhall-control-room.md (ViaConnect layout density on Bond tokens)
@@ -20,6 +20,8 @@ Briefable:
 - specs/vesper-weekly-monitor-audit.md (named weekly checklist stub)
 - specs/prompt-3-the-haus.md (Prompt 3 Phase A: Haus door and role router)
 - specs/prompt-3-flags.md (Prompt 3 phase flags. Later rooms off)
+- specs/prompt-4-site-copy-torrie.md (Prompt 4 ACTIVE copy canon; COPY ONLY)
+- specs/prompt-4-flags.md (Prompt 4 flags. C5 gold/design OUT)
 
 Unbriefable for marketing build:
 - Brand Guidelines
