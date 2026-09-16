@@ -7,6 +7,7 @@ Filed: 2026-09-16
 | Flag | Value | Note |
 | --- | --- | --- |
 | Shared `/haus` door | ON | Prompt 2A lock. Role router after password |
+| Haus-only membership word on `/haus` | ON | Prompt 6b residual. Invitation and reciprocal are Haus. Circle is not user-visible |
 | Demo member mock auth | ON | `member@bond.test` / any password. Member only |
 | Welcome interstitial | ON | Once per member ack cookie |
 | 21+ affirm | ON | Required once unless already affirmed |

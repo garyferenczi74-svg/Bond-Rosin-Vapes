@@ -1,5 +1,5 @@
 # Spec library
-Version: 2026-09-15 (Prompt 4 Torrie copy locks ingested)
+Version: 2026-09-16 (Prompt 6b residual Haus-only membership word ingested)
 
 Briefable:
 - brand-tokens.md (Prompt 1 public tokens + Prompt 2 Vauxhall admin language)
@@ -22,6 +22,8 @@ Briefable:
 - specs/prompt-3-flags.md (Prompt 3 phase flags. Later rooms off)
 - specs/prompt-4-site-copy-torrie.md (Prompt 4 ACTIVE copy canon; COPY ONLY)
 - specs/prompt-4-flags.md (Prompt 4 flags. C5 gold/design OUT)
+- specs/prompt-6b-residual-haus-only-membership.md (Prompt 6b residual: Haus-only door word + SKU footer retarget. Full 6-series stays PARTIAL)
+- specs/prompt-6b-flags.md (Prompt 6b residual flags. Dual controller and MFA out)
 
 Unbriefable for marketing build:
 - Brand Guidelines

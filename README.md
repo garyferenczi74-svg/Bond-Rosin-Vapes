@@ -72,7 +72,7 @@ Gary holds production and social publish keys. This repo does not store them. M 
 
 ## Access model
 
-1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`). Home hero, Circle persistent, signup success, and footer Bond Haus also enter at `/haus`.
+1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`). Home hero, Haus waitlist (hash alias `id=circle` for `/#circle`), signup success, and footer Bond Haus also enter at `/haus`. SKU footer Bond Haus on No1 / No2 / No3 also enters at `/haus`.
 2. Credentials that match an active `admins` row (role `admin`, `owner`, or `operator`) open `/vauxhall` after password auth. MFA enroll is not required under W-2026-09-15-P1-OVERRIDE.
 3. Demo member `member@bond.test` (any password) is mock member auth. It never opens `/vauxhall`. First visit shows the welcome interstitial and a 21+ affirm, then `/haus/salon` (frame and Sign Out only). The shelf seeds empty.
 4. Unknown email, wrong password, or a signed-in user who is not an admin and not the demo member receives the generic door line. Non-admin sessions never see portal chrome.
