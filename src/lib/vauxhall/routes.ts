@@ -25,8 +25,10 @@ export const PRODUCT_CONSOLES: ConsoleItem[] = [
   { id: "unit-economics", title: "Unit Economics", href: "/vauxhall/product/unit-economics" },
   { id: "alerts-and-risks", title: "Alerts and Risks", href: "/vauxhall/product/alerts-and-risks" },
   { id: "inventory", title: "Inventory", href: "/vauxhall/product/inventory" },
+  { id: "production", title: "Production", href: "/vauxhall/product/production" },
   { id: "orders", title: "Orders", href: "/vauxhall/product/orders" },
   { id: "accounts", title: "Accounts", href: "/vauxhall/product/accounts" },
+  { id: "trace", title: "Trace", href: "/vauxhall/product/trace" },
 ];
 
 export const SECURITY_CONSOLES: ConsoleItem[] = [

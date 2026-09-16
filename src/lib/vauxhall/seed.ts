@@ -28,6 +28,7 @@ import type {
   Waiver,
   WholesaleAccount,
   WholesaleOrder,
+  DiscrepancyInvestigation,
 } from "./types.ts";
 
 const PRODUCT_TRUTH =
@@ -175,6 +176,15 @@ export const SEED_EVENTS: AgentEvent[] = [
     summary: "Daily audit posted: 6 decisions, 0 anomalies, tomorrow plan set",
     sub: "Waiting in Review",
     audit: "A-40852",
+  },
+  {
+    id: "e00",
+    time: "14:36:02",
+    agent: "Felix",
+    type: "Alert",
+    summary: "Discrepancy beyond 2 percent on MOCK-LOT-P1",
+    sub: "ERP 22 versus Metrc 16. Felix finding opened. Mock Trace.",
+    audit: "A-40920",
   },
 ];
 
@@ -363,6 +373,8 @@ export const SEED_LOTS: InventoryLot[] = [
     id: "lot-d1",
     skuId: "no-1",
     batchLabel: "MOCK-LOT-D1",
+    metrcUid: "MOCK-UID-D1",
+    testStatus: "TestPassed",
     onHand: 180,
     reserved: 40,
     location: "Prototype vault A",
@@ -371,9 +383,24 @@ export const SEED_LOTS: InventoryLot[] = [
     coaNote: MOCK_COA_NOTE,
   },
   {
+    id: "lot-d-hold",
+    skuId: "no-1",
+    batchLabel: "MOCK-LOT-D-HOLD",
+    metrcUid: "MOCK-UID-D-HOLD",
+    testStatus: "TestingRequired",
+    onHand: 8,
+    reserved: 0,
+    location: "Prototype vault A",
+    packagedOn: "2026-09-14",
+    agingDays: 1,
+    coaNote: MOCK_COA_NOTE,
+  },
+  {
     id: "lot-u1",
     skuId: "no-2",
     batchLabel: "MOCK-LOT-U1",
+    metrcUid: "MOCK-UID-U1",
+    testStatus: "TestPassed",
     onHand: 90,
     reserved: 12,
     location: "Prototype vault A",
@@ -385,6 +412,8 @@ export const SEED_LOTS: InventoryLot[] = [
     id: "lot-p1",
     skuId: "no-3",
     batchLabel: "MOCK-LOT-P1",
+    metrcUid: "MOCK-UID-P1",
+    testStatus: "TestPassed",
     onHand: 22,
     reserved: 6,
     location: "Prototype vault B",
@@ -413,6 +442,15 @@ export const SEED_RUNS: ProductionRun[] = [
     late: true,
     note: "Mock late run. Held for owner review.",
   },
+  {
+    id: "run-03",
+    skuId: "no-2",
+    stage: "packaged",
+    expectedYield: 10,
+    expectedCompletion: "2026-09-16",
+    late: false,
+    note: "Mock fill run ready to complete.",
+  },
 ];
 
 export const SEED_ACCOUNTS: WholesaleAccount[] = [
@@ -421,6 +459,7 @@ export const SEED_ACCOUNTS: WholesaleAccount[] = [
     name: "Prototype Dispensary North",
     license: "MOCK-LIC-PROTO-NORTH",
     licenseMark: "mock/prototype",
+    facilityId: "fac-north",
     expiresOn: "2027-06-01",
     contact: "north.buyer@example.test",
     terms: "Net 15 mock",
@@ -434,6 +473,7 @@ export const SEED_ACCOUNTS: WholesaleAccount[] = [
     name: "Prototype Dispensary West",
     license: "MOCK-LIC-PROTO-WEST",
     licenseMark: "mock/prototype",
+    facilityId: "fac-west",
     expiresOn: "2026-10-20",
     contact: "west.buyer@example.test",
     terms: "Net 30 mock",
@@ -447,6 +487,7 @@ export const SEED_ACCOUNTS: WholesaleAccount[] = [
     name: "Prototype Dispensary Lapsed",
     license: "MOCK-LIC-PROTO-LAPSED",
     licenseMark: "mock/prototype",
+    facilityId: "fac-lapsed",
     expiresOn: "2026-08-01",
     contact: "lapsed.buyer@example.test",
     terms: "Hold",
@@ -454,6 +495,34 @@ export const SEED_ACCOUNTS: WholesaleAccount[] = [
     velocity: 0,
     notes: "Expired mock license. Orders blocked.",
     receivableDays: 8,
+  },
+  {
+    id: "acct-east",
+    name: "Prototype Dispensary East",
+    license: "MOCK-LIC-PROTO-EAST",
+    licenseMark: "mock/prototype",
+    facilityId: "fac-east",
+    expiresOn: "2027-03-01",
+    contact: "east.buyer@example.test",
+    terms: "Net 15 mock",
+    region: "East",
+    velocity: 27,
+    notes: "Standing mock account. License is fake.",
+    receivableDays: 11,
+  },
+  {
+    id: "acct-metro",
+    name: "Prototype Dispensary Metro",
+    license: "MOCK-LIC-PROTO-METRO",
+    licenseMark: "mock/prototype",
+    facilityId: "fac-metro",
+    expiresOn: "2027-08-01",
+    contact: "metro.buyer@example.test",
+    terms: "Net 15 mock",
+    region: "Metro",
+    velocity: 9,
+    notes: "Mock license current. Metrc facility inactive.",
+    receivableDays: 6,
   },
 ];
 
@@ -464,16 +533,22 @@ export const SEED_ORDERS: WholesaleOrder[] = [
     stage: "in fulfillment",
     promisedOn: "2026-09-17",
     late: false,
-    lines: [{ skuId: "no-1", format: "1g", qty: 24, batchLabel: "MOCK-LOT-D1" }],
+    manifestNumber: "",
+    lines: [
+      { skuId: "no-1", format: "1g", qty: 24, batchLabel: "MOCK-LOT-D1", lotId: "lot-d1", metrcUid: "MOCK-UID-D1" },
+    ],
     documents: "Mock pick ticket. No live BOL.",
   },
   {
     id: "ord-1002",
     accountId: "acct-west",
     stage: "confirmed",
-    promisedOn: "2026-09-19",
-    late: false,
-    lines: [{ skuId: "no-2", format: "0.5g", qty: 12, batchLabel: "MOCK-LOT-U1" }],
+    promisedOn: "2026-09-10",
+    late: true,
+    manifestNumber: "",
+    lines: [
+      { skuId: "no-2", format: "0.5g", qty: 12, batchLabel: "MOCK-LOT-U1", lotId: "lot-u1", metrcUid: "MOCK-UID-U1" },
+    ],
     documents: "Mock confirmation.",
   },
   {
@@ -482,7 +557,10 @@ export const SEED_ORDERS: WholesaleOrder[] = [
     stage: "shipped",
     promisedOn: "2026-09-14",
     late: false,
-    lines: [{ skuId: "no-3", format: "1g", qty: 6, batchLabel: "MOCK-LOT-P1" }],
+    manifestNumber: "MOCK-MANIFEST-1003",
+    lines: [
+      { skuId: "no-3", format: "1g", qty: 6, batchLabel: "MOCK-LOT-P1", lotId: "lot-p1", metrcUid: "MOCK-UID-P1" },
+    ],
     documents: "Mock shipment note.",
   },
   {
@@ -491,9 +569,10 @@ export const SEED_ORDERS: WholesaleOrder[] = [
     stage: "draft",
     promisedOn: "2026-09-22",
     late: false,
+    manifestNumber: "",
     lines: [
-      { skuId: "no-1", format: "0.5g", qty: 10, batchLabel: "MOCK-LOT-D1" },
-      { skuId: "no-2", format: "1g", qty: 8, batchLabel: "MOCK-LOT-U1" },
+      { skuId: "no-1", format: "0.5g", qty: 10, batchLabel: "MOCK-LOT-D1", lotId: "lot-d1", metrcUid: "MOCK-UID-D1" },
+      { skuId: "no-2", format: "1g", qty: 8, batchLabel: "MOCK-LOT-U1", lotId: "lot-u1", metrcUid: "MOCK-UID-U1" },
     ],
     documents: "Draft only.",
   },
@@ -529,7 +608,37 @@ export const SEED_ECONOMICS: SkuEconomics[] = [
   },
 ];
 
+export const SEED_INVESTIGATIONS: DiscrepancyInvestigation[] = [
+  {
+    id: "inv-p1",
+    lotId: "lot-p1",
+    uid: "MOCK-UID-P1",
+    batchLabel: "MOCK-LOT-P1",
+    erpQty: 22,
+    metrcQty: 16,
+    variancePct: 37.5,
+    findingId: "f-disc-p1",
+    state: "open",
+  },
+];
+
 export const SEED_FINDINGS: Finding[] = [
+  {
+    id: "f-disc-p1",
+    severity: "P1",
+    source: "Trace discrepancy",
+    surface: "Product Trace",
+    citation: "NY discrepancy threshold. Variance beyond 2 percent.",
+    owner: "Felix",
+    due: "2026-09-16",
+    cite: "ERP quantity and Metrc quantity disagree on MOCK-LOT-P1.",
+    remediate: "Investigate the gap. Metrc wins on paper. Do not hide the variance.",
+    document: "Mock investigation record attached. Not a live Metrc ticket.",
+    state: "open",
+    closedEvidence: "",
+    openedOn: "2026-09-15",
+    escape: false,
+  },
   {
     id: "f-p1-schedule",
     severity: "P1",

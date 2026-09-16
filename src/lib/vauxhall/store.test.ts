@@ -15,6 +15,7 @@ import {
   SEED_EVENTS,
   SEED_FINDINGS,
   SEED_INCIDENTS,
+  SEED_INVESTIGATIONS,
   SEED_LOTS,
   SEED_ORDERS,
   SEED_PRECHECK,
@@ -37,7 +38,7 @@ function assertNoDashes(value: string, label: string) {
 
 test("seed matches the approved Live Feed and side queues", () => {
   const store = new VauxhallStore();
-  assert.equal(store.listEvents().length, 10);
+  assert.equal(store.listEvents().length, 11);
   assert.equal(store.listEvents()[0]?.audit, "A-40912");
   assert.equal(store.listEvents()[9]?.summary.includes("Daily audit"), true);
   assert.equal(store.listReview().length, 3);
@@ -72,7 +73,8 @@ test("seed strings have zero em dashes or en dashes", () => {
       sku.batchNote,
       ...sku.formats,
     ]),
-    ...SEED_LOTS.flatMap((lot) => [lot.batchLabel, lot.location, lot.coaNote]),
+    ...SEED_LOTS.flatMap((lot) => [lot.batchLabel, lot.location, lot.coaNote, lot.metrcUid, lot.testStatus]),
+    ...SEED_INVESTIGATIONS.flatMap((item) => [item.id, item.uid, item.batchLabel, item.findingId, item.state]),
     ...SEED_RUNS.flatMap((run) => [run.note, run.stage]),
     ...SEED_ACCOUNTS.flatMap((account) => [
       account.name,
@@ -81,7 +83,7 @@ test("seed strings have zero em dashes or en dashes", () => {
       account.notes,
       account.contact,
     ]),
-    ...SEED_ORDERS.flatMap((order) => [order.id, order.documents, order.stage]),
+    ...SEED_ORDERS.flatMap((order) => [order.id, order.documents, order.stage, order.manifestNumber]),
     ...SEED_FINDINGS.flatMap((item) => [item.cite, item.remediate, item.document, item.citation]),
     ...SEED_INCIDENTS.flatMap((item) => [item.title, item.timeline, item.rootCause]),
     ...SEED_RULES.flatMap((item) => [item.name, item.citation, item.enforcement]),
@@ -125,13 +127,12 @@ test("agent and type filters compose", () => {
   store.toggleAgent("Felix");
   store.setType("Alert");
   const list = store.listEvents();
-  assert.equal(list.length, 1);
-  assert.equal(list[0]?.agent, "Felix");
-  assert.equal(list[0]?.type, "Alert");
+  assert.equal(list.length, 2);
+  assert.equal(list.every((event) => event.agent === "Felix" && event.type === "Alert"), true);
   store.toggleAgent("Felix");
   assert.equal(store.listEvents().every((event) => event.type === "Alert"), true);
   store.setType(null);
-  assert.equal(store.listEvents().length, 10);
+  assert.equal(store.listEvents().length, 11);
 });
 
 test("approving all three Review items drops the badge and writes AGENT DECISION events", () => {
@@ -201,6 +202,7 @@ test("adding a SKU propagates to inventory, orders, and reporting", () => {
   assert.ok(store.dashboardSnapshot().unitsOnHand.some((row) => row.skuId === "no-4" && row.onHand === 0));
   assert.ok(store.listEconomics().some((row) => row.skuId === "no-4" && row.mockCost === 0));
   assert.equal(store.unitsForSku("no-4").available, 0);
+  assert.ok(store.traceSnap.items.some((item) => item.skuId === "no-4" && item.name === "Prototype Four"));
 });
 
 test("expired license and reserved stock cannot be sold twice", () => {
@@ -267,12 +269,79 @@ test("mock licenses and lots stay obviously fake", () => {
   assert.equal(store.listAlerts().some((alert) => alert.kind === "late run"), true);
 });
 
+test("NY mock gates hold test, facility, manifest, and discrepancy", async () => {
+  const store = new VauxhallStore({ labDelayMs: 0, traceLatencyMs: 0 });
+  assert.ok(store.dashboardSnapshot().stamp.startsWith("Metrc as of"));
+  assert.match(store.listLots().find((lot) => lot.id === "lot-d-hold")?.testStatus ?? "", /TestingRequired/);
+  const testing = store.createOrder({
+    accountId: "acct-north",
+    lines: [{ skuId: "no-1", format: "1g", qty: 1, batchLabel: "MOCK-LOT-D-HOLD", lotId: "lot-d-hold" }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(testing.ok, false);
+  if (!testing.ok) assert.match(testing.reason, /Test gate/);
+  await store.applyLabFlip("MOCK-UID-D-HOLD", "TestPassed");
+  const afterFlip = store.createOrder({
+    accountId: "acct-north",
+    lines: [{ skuId: "no-1", format: "1g", qty: 1, batchLabel: "MOCK-LOT-D-HOLD", lotId: "lot-d-hold" }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(afterFlip.ok, true);
+  const facility = store.createOrder({
+    accountId: "acct-metro",
+    lines: [{ skuId: "no-1", format: "1g", qty: 1, batchLabel: "MOCK-LOT-D1", lotId: "lot-d1" }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(facility.ok, false);
+  if (!facility.ok) assert.match(facility.reason, /Facility gate/);
+  const blockedStage = store.advanceOrder("ord-1001");
+  assert.equal(blockedStage.ok, false);
+  if (!blockedStage.ok) assert.match(blockedStage.reason, /Manifest gate/);
+  store.setManifestNumber("ord-1001", "MOCK-MANIFEST-DEMO");
+  const moved = store.advanceOrder("ord-1001");
+  assert.equal(moved.ok, true);
+  if (moved.ok) assert.equal(moved.stage, "shipped");
+  const disc = store.listDiscrepancies().find((row) => row.lotId === "lot-p1");
+  assert.ok(disc);
+  assert.ok((disc?.variancePct ?? 0) > 2);
+  assert.equal(store.listInvestigations().some((item) => item.lotId === "lot-p1" && item.state === "open"), true);
+  assert.equal(store.listFindings().some((item) => item.id === "f-disc-p1" && item.state === "open"), true);
+  assert.equal(store.listEvents().some((event) => event.type === "Alert" && event.summary.includes("MOCK-LOT-P1")), true);
+  store.demoSeedStale();
+  assert.equal(store.traceSnap.sync.stale, true);
+  assert.match(store.stamp(), /stale/);
+  assert.ok(store.listLots().length > 0);
+});
+
+test("completing a run mints a TestingRequired lot then flips", async () => {
+  const store = new VauxhallStore({ labDelayMs: 0, traceLatencyMs: 0 });
+  const minted = await store.completeRun("run-03");
+  assert.equal(minted.ok, true);
+  if (!minted.ok) return;
+  const lot = store.listLots().find((item) => item.id === minted.lotId);
+  assert.equal(lot?.testStatus, "TestingRequired");
+  assert.match(lot?.metrcUid ?? "", /^MOCK-UID-/);
+  const blocked = store.createOrder({
+    accountId: "acct-north",
+    lines: [{ skuId: "no-2", format: "1g", qty: 1, batchLabel: lot?.batchLabel ?? "", lotId: minted.lotId }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(blocked.ok, false);
+  await store.applyLabFlip(minted.uid, "TestPassed");
+  const ok = store.createOrder({
+    accountId: "acct-north",
+    lines: [{ skuId: "no-2", format: "1g", qty: 1, batchLabel: lot?.batchLabel ?? "", lotId: minted.lotId }],
+    promisedOn: "2026-09-24",
+  });
+  assert.equal(ok.ok, true);
+});
+
 test("Carver surfaces its blocker and refresh reseeds mock data", () => {
   const store = new VauxhallStore();
   store.addEvent(store.genEvent(new Date("2026-09-15T15:00:00")));
-  assert.equal(store.listEvents().length, 11);
+  assert.equal(store.listEvents().length, 12);
   assert.equal(store.agentSummary("Carver").blocker, "Awaiting Felix originality check");
   store.seed();
-  assert.equal(store.listEvents().length, 10);
+  assert.equal(store.listEvents().length, 11);
   assert.equal(store.openReviewCount(), 3);
 });

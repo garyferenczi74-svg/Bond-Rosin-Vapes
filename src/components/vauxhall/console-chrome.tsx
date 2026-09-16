@@ -1,3 +1,7 @@
+export function StalenessStamp({ stamp, stale }: { stamp: string; stale?: boolean }) {
+  return <span className={`vx-stamp${stale ? " stale" : ""}`}>{stamp}</span>;
+}
+
 export function SeedBanner({ ink }: { ink?: string }) {
   return (
     <p className="vx-seed" style={{ ["--wing-ink" as string]: ink }}>

@@ -1,3 +1,5 @@
+import type { TraceTestStatus } from "./trace.ts";
+
 export const AGENTS = ["JB", "Q", "Moneypenny", "Vesper", "M", "Felix", "Carver"] as const;
 export type AgentName = (typeof AGENTS)[number];
 
@@ -158,6 +160,8 @@ export type InventoryLot = {
   id: string;
   skuId: string;
   batchLabel: string;
+  metrcUid: string;
+  testStatus: TraceTestStatus;
   onHand: number;
   reserved: number;
   location: string;
@@ -181,6 +185,7 @@ export type WholesaleAccount = {
   name: string;
   license: string;
   licenseMark: string;
+  facilityId: string;
   expiresOn: string;
   contact: string;
   terms: string;
@@ -195,6 +200,8 @@ export type OrderLine = {
   format: string;
   qty: number;
   batchLabel: string;
+  lotId?: string;
+  metrcUid?: string;
 };
 
 export type WholesaleOrder = {
@@ -203,6 +210,7 @@ export type WholesaleOrder = {
   stage: OrderStage;
   promisedOn: string;
   late: boolean;
+  manifestNumber: string;
   lines: OrderLine[];
   documents: string;
 };
@@ -224,6 +232,9 @@ export const ALERT_KINDS = [
   "license expiry",
   "receivables",
   "felix flag",
+  "low tags",
+  "discrepancy",
+  "late order",
 ] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
 
@@ -233,6 +244,30 @@ export type ProductAlert = {
   title: string;
   detail: string;
   severity: "watch" | "action";
+  href: string;
+};
+
+export type DiscrepancyRow = {
+  lotId: string;
+  uid: string;
+  batchLabel: string;
+  skuId: string;
+  erpQty: number;
+  metrcQty: number;
+  variancePct: number;
+  investigationId?: string;
+};
+
+export type DiscrepancyInvestigation = {
+  id: string;
+  lotId: string;
+  uid: string;
+  batchLabel: string;
+  erpQty: number;
+  metrcQty: number;
+  variancePct: number;
+  findingId: string;
+  state: "open" | "resolved";
 };
 
 export type DashboardSnapshot = {
@@ -244,6 +279,8 @@ export type DashboardSnapshot = {
   mtdUnits: number;
   planUnits: number;
   topAccounts: { id: string; name: string; velocity: number }[];
+  stamp: string;
+  syncStale: boolean;
 };
 
 export const FINDING_SEVERITIES = ["P0", "P1", "P2", "P3"] as const;
@@ -393,6 +430,14 @@ export type SocialMetric = {
 
 export type OrderAttempt =
   | { ok: true; id: string }
+  | { ok: false; reason: string };
+
+export type AccountAttempt =
+  | { ok: true; id: string; verification: string }
+  | { ok: false; reason: string };
+
+export type StageAttempt =
+  | { ok: true; stage: OrderStage }
   | { ok: false; reason: string };
 
 export type ScheduleAttempt =
