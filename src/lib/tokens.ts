@@ -20,7 +20,7 @@ export const tokens = {
 export const aptosStack =
   "Aptos, 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif";
 
-export type AdminRole = "owner" | "operator";
+export type AdminRole = "admin" | "owner" | "operator";
 
 export type WingId = "command" | "product" | "security" | "social";
 

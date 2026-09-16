@@ -5,10 +5,28 @@ import { GENERIC_DOOR, PHASE1_MFA_WAIVED, PHASE1_MFA_WAIVER_ID, isAdminRole } fr
 import { writeAudit } from "@/lib/audit";
 import { readAdminRow } from "@/lib/gate";
 import { recordAuthAttempt } from "@/lib/lockout";
+import {
+  isDemoMemberEmail,
+  memberDestination,
+  seedMemberSession,
+} from "@/lib/member";
+import {
+  clearMemberSession,
+  readMemberAck,
+  writeMemberAck,
+  writeMemberSession,
+  readMemberSession,
+} from "@/lib/member-session";
 import { readRequestMeta } from "@/lib/request-meta";
 
 function fail(message = GENERIC_DOOR) {
   return { ok: false as const, message, next: "credentials" as const };
+}
+
+async function openDemoMember(email: string) {
+  await writeMemberSession(seedMemberSession(email));
+  const ack = await readMemberAck();
+  redirect(memberDestination(ack, email));
 }
 
 export async function signInAction(formData: FormData) {
@@ -18,6 +36,21 @@ export async function signInAction(formData: FormData) {
 
   if (!email || !password) {
     return fail();
+  }
+
+  if (isDemoMemberEmail(email)) {
+    try {
+      const { supabase } = await readAdminRow();
+      const pre = await recordAuthAttempt(supabase, email, meta.ip, "check");
+      if (pre.locked) {
+        return fail();
+      }
+      await recordAuthAttempt(supabase, email, meta.ip, "success");
+      await supabase.auth.signOut();
+    } catch {
+      // Demo member mock auth does not depend on Supabase.
+    }
+    await openDemoMember(email);
   }
 
   const { supabase } = await readAdminRow();
@@ -34,6 +67,11 @@ export async function signInAction(formData: FormData) {
 
   await recordAuthAttempt(supabase, email, meta.ip, "success");
 
+  if (isDemoMemberEmail(data.user.email ?? email)) {
+    await supabase.auth.signOut();
+    await openDemoMember(data.user.email ?? email);
+  }
+
   const { data: adminRow } = await supabase
     .from("admins")
     .select("user_id, role, status, mfa_enrolled")
@@ -44,18 +82,21 @@ export async function signInAction(formData: FormData) {
     adminRow && isAdminRole(adminRow.role) && adminRow.status === "active" ? adminRow : null;
 
   if (!admin) {
-    return { ok: true as const, next: "member" as const };
+    await supabase.auth.signOut();
+    return fail();
   }
 
+  await clearMemberSession();
+
   if (PHASE1_MFA_WAIVED) {
-    const meta = await readRequestMeta("/haus");
+    const signedMeta = await readRequestMeta("/haus");
     await writeAudit(supabase, {
       actor: data.user.id,
       action: "admin.sign_in",
       target: "vauxhall",
       before: { aal: "aal1", waiver: PHASE1_MFA_WAIVER_ID },
       after: { aal: "aal1", role: admin.role, mfa: "waived" },
-      meta,
+      meta: signedMeta,
     });
     redirect("/vauxhall");
   }
@@ -158,8 +199,34 @@ export async function verifyMfaAction(formData: FormData) {
   redirect("/vauxhall");
 }
 
+export async function enterHausAction(formData: FormData) {
+  const session = await readMemberSession();
+  if (!session) {
+    redirect("/haus");
+  }
+
+  const ack = await readMemberAck();
+  const already = ack?.email === session.email && ack.age21;
+  const checked = String(formData.get("age21") ?? "") === "1";
+  if (!already && !checked) {
+    return { ok: false as const, message: "Please confirm you are 21 and over." };
+  }
+
+  await writeMemberAck({
+    email: session.email,
+    welcomeSeen: true,
+    age21: true,
+  });
+  redirect("/haus/salon");
+}
+
 export async function signOutAction() {
-  const { supabase } = await readAdminRow();
-  await supabase.auth.signOut();
+  await clearMemberSession();
+  try {
+    const { supabase } = await readAdminRow();
+    await supabase.auth.signOut();
+  } catch {
+    // Door still closes if Supabase is unavailable.
+  }
   redirect("/haus");
 }

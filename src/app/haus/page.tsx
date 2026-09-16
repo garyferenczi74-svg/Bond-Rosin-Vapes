@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { HausClient } from "@/app/haus/haus-client";
 import { adminPortalAllowed } from "@/lib/access";
-import { readAdminRow } from "@/lib/gate";
+import { floorPathForMember, readDoorContext } from "@/lib/haus-gate";
 
 export const dynamic = "force-dynamic";
 
@@ -11,11 +11,13 @@ export const metadata = {
 };
 
 export default async function HausPage() {
-  const { user, admin } = await readAdminRow();
+  const { user, admin, member, ack } = await readDoorContext();
   if (user && adminPortalAllowed({ admin })) {
     redirect("/vauxhall");
   }
-  const signedMember = Boolean(user) && !admin;
+  if (member) {
+    redirect(floorPathForMember(ack, member.email));
+  }
 
-  return <HausClient signedMember={signedMember} />;
+  return <HausClient />;
 }

@@ -26,3 +26,4 @@ Format: date | decision | reasoning | approved by
 - 2026-09-16 | Prompt 2E Phase B plumbing only: monitor_schedules, dry-run MonitorRunner, audit_events hash chain, scanner ingest stub, Pre-Check server dry-run. Paging and auto-actions stay OFF. | RC 2026-09-15 plumbing-only. Extend PR14. | Q (build)
 - 2026-09-16 | Phase B branch carries PR15 Haus cloak (49b3e78). Rollback named dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9. | Felix Pre-Check required fix. | Felix
 - 2026-09-16 | Prompt 2A Phase A: retarget Home Haus CTAs to Next /haus, add reciprocal Circle line, keep password-only door and Admin footer under W-2026-09-15-P1-OVERRIDE | PR15 cloaked Haus.dc.html left those CTAs 404 | Q (build)
+- 2026-09-16 | Prompt 3 Phase A: finish Next /haus door copy, shared role router, demo member@bond.test mock auth into /haus/salon stub. MFA and /haus/admin stay parked. | Adjusted brief 2026-09-15; JB Phase A only | Q (build)

@@ -73,13 +73,14 @@ Gary holds production and social publish keys. This repo does not store them. M 
 ## Access model
 
 1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`). Home hero, Circle persistent, signup success, and footer Bond Haus also enter at `/haus`.
-2. Credentials that match an active `admins` row (role `owner` or `operator`) open `/vauxhall` after password auth. MFA enroll is not required under W-2026-09-15-P1-OVERRIDE.
-3. Non-admin sessions stay on Haus. They never see portal chrome.
-4. Unauthenticated or non-admin requests to `/vauxhall` and nested routes return HTTP 404. Never 403.
-5. MFA is waived for Phase 1 by Gary override. Password alone opens Vauxhall for `public.admins`. Restore MFA by setting `PHASE1_MFA_WAIVED` false and putting AAL2 back on `is_admin()`.
-6. Roles are server-verified from `public.admins`. RLS uses `is_admin()`. Client flags are not a gate.
-7. Sessions idle out at 24 hours (`bond_idle_at` cookie, checked in middleware).
-8. Every portal action writes `audit_log`: who, what, before, after, when, from where (ip, user agent, path). The table is append-only.
+2. Credentials that match an active `admins` row (role `admin`, `owner`, or `operator`) open `/vauxhall` after password auth. MFA enroll is not required under W-2026-09-15-P1-OVERRIDE.
+3. Demo member `member@bond.test` (any password) is mock member auth. It never opens `/vauxhall`. First visit shows the welcome interstitial and a 21+ affirm, then `/haus/salon` (frame and Sign Out only). The shelf seeds empty.
+4. Unknown email, wrong password, or a signed-in user who is not an admin and not the demo member receives the generic door line. Non-admin sessions never see portal chrome.
+5. Unauthenticated member room deep links return to the `/haus` door. Unauthenticated or non-admin requests to `/vauxhall` and nested routes return HTTP 404. Never 403. `/Haus.dc.html` stays cloaked 404. There is no `/haus/admin`.
+6. MFA is waived for Phase 1 by Gary override. Password alone opens Vauxhall for `public.admins`. Restore MFA by setting `PHASE1_MFA_WAIVED` false and putting AAL2 back on `is_admin()`.
+7. Admin roles are server-verified from `public.admins`. RLS uses `is_admin()`. Member role for Phase A is the demo mock cookie. Client flags are not a gate.
+8. Sessions idle out at 24 hours (`bond_idle_at` cookie, checked in middleware). Member mock session uses the same day window.
+9. Every portal action writes `audit_log`: who, what, before, after, when, from where (ip, user agent, path). The table is append-only.
 
 ## Rate limit and lockout stub
 
