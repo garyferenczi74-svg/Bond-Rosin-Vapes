@@ -40,7 +40,7 @@ export function seedMonitorSchedules(nextDue = "14:20:00"): MonitorSchedule[] {
     citation: item.citation,
     failSeverity: item.failSeverity,
     executionMode: PHASE_B_EXECUTION_MODE,
-    liveEnabled: PHASE_B_LIVE_ENABLED,
+    liveEnabled: false as const,
     nextDue,
   }));
   if (rows.length !== MONITOR_IDS.length) {
