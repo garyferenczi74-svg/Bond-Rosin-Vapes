@@ -166,5 +166,5 @@ test("new monitor strings stay dash-clean and live paging stays off", () => {
   assert.match(social, /Prompt 2C stays parked/);
   const access = readFileSync(join(here, "../access.ts"), "utf8");
   assert.match(access, /\/Admin\.dc\.html/);
-  assert.equal(access.includes("/Haus.dc.html"), false);
+  assert.match(access, /\/Haus\.dc\.html/);
 });

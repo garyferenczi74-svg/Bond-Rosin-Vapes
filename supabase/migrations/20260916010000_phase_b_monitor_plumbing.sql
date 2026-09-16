@@ -1,6 +1,6 @@
 -- Phase B plumbing. Dry-run only. No live paging. No auto-actions.
 -- Project: ziruzhhkkndgmdouithb (Bond-Rosin-Vapes)
--- Rollback candidate for promote: dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu
+-- Rollback candidate for promote: dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9
 
 -- 1. Cadence as data for the fourteen-monitor catalog.
 CREATE TABLE IF NOT EXISTS public.monitor_schedules (

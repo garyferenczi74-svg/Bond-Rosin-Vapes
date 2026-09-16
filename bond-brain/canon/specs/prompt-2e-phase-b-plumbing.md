@@ -2,7 +2,7 @@
 
 Owner: Q
 Status: Plumbing dry-run only
-Depends on: PR14 Phase A (`dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu`)
+Depends on: PR14 Phase A plus PR15 Haus cloak (`dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9`)
 Filed: 2026-09-16
 
 ## What this PR adds
@@ -17,6 +17,7 @@ Filed: 2026-09-16
 - Auto-actions panel. Allowlist draft. Pending Felix counsel. All toggles disabled.
 - M ship precondition named on Queue and Pre-Check. Advisory until M enablement.
 - Vesper weekly monitor audit named as a Security route and a Queue item.
+- Carries PR15 Haus.dc.html cloak (SHA 49b3e78). Unauthenticated /Haus.dc.html stays 404.
 
 ## What this PR does not add
 
@@ -25,9 +26,8 @@ Filed: 2026-09-16
 - Two-region live probes against production
 - MetrcConnectAdapter
 - Social publish or Scheduler unpark
-- Haus.dc.html cloak (PR15 may land that separately)
 
 ## Promote note
 
 Felix PASS + Vesper PASS + M PASS required before promote.
-Production promote names rollback `dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu`.
+Production promote names rollback `dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9`.

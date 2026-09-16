@@ -16,4 +16,4 @@ Filed: 2026-09-16
 | MetrcConnectAdapter | OUT | Trace mock / Phase A seam only |
 | Social publish / Scheduler unpark | OUT | Prompt 2C stays parked |
 
-Rollback candidate for any production promote of this stream: `dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu` (PR14 Phase A tip).
+Rollback candidate for any production promote of this stream: `dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9` (PR15 live tip).

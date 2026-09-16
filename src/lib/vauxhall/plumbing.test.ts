@@ -9,7 +9,7 @@ import {
   AUTO_ACTION_ALLOWLIST,
   DRY_RUN_BADGE,
   LIVE_OFF_BADGE,
-  PHASE_A_ROLLBACK_DEPLOYMENT,
+  PHASE_B_ROLLBACK_DEPLOYMENT,
   PHASE_B_AUTO_ACTIONS_ENABLED,
   PHASE_B_EXECUTION_MODE,
   PHASE_B_LIVE_ENABLED,
@@ -99,7 +99,7 @@ test("production audit chain verifies and never uses Tamper Test", () => {
   assert.equal(job.result.ok, true);
   const checkpoint = checkpointAuditOffsite();
   assert.equal(checkpoint.enabled, false);
-  assert.equal(PHASE_A_ROLLBACK_DEPLOYMENT, "dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu");
+  assert.equal(PHASE_B_ROLLBACK_DEPLOYMENT, "dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9");
 });
 
 test("scanner ingest maps CI JSON into findings drafts and keeps merge block off", () => {

@@ -27,7 +27,7 @@ At ship time the candidate should show:
 
 Hard gate waits for a later enablement PR after Felix + M PASS. Live paging and auto-actions stay off until that PR.
 
-Rollback named for this stream: `dpl_9s3QefvHFNsTyePTSqAMNm9TEbUu` (PR14 Phase A tip).
+Rollback named for this stream: `dpl_DnCSsFcNmXDYLwD1mQJcBWckvbg9` (PR15 live tip).
 
 ## Candidate path
 
