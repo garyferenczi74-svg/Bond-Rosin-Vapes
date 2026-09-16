@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signInAction, signOutAction, verifyMfaAction } from "@/app/haus/actions";
+import { tokens } from "@/lib/tokens";
 
 type Step = "credentials" | "mfa-enroll" | "mfa-challenge" | "member";
 
@@ -128,23 +129,46 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
           />
 
           {step === "credentials" ? (
-            <form action={onSignIn} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
-              <p className="lbl" style={{ textAlign: "center", margin: "0 0 6px" }}>
-                Sign in to continue
+            <>
+              <form action={onSignIn} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
+                <p className="lbl" style={{ textAlign: "center", margin: "0 0 6px" }}>
+                  Sign in to continue
+                </p>
+                <input className="field" type="email" name="email" autoComplete="email" placeholder="Email" required />
+                <input
+                  className="field"
+                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  placeholder="Password"
+                  required
+                />
+                <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
+                  Enter
+                </button>
+              </form>
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.7,
+                  color: tokens.muted,
+                  margin: "22px 0 0",
+                  textAlign: "center",
+                }}
+              >
+                Not yet a member?{" "}
+                <a
+                  href="/#haus"
+                  style={{
+                    color: tokens.bone,
+                    borderBottom: `1px solid ${tokens.line}`,
+                    paddingBottom: 1,
+                  }}
+                >
+                  Join the Circle for first access.
+                </a>
               </p>
-              <input className="field" type="email" name="email" autoComplete="email" placeholder="Email" required />
-              <input
-                className="field"
-                type="password"
-                name="password"
-                autoComplete="current-password"
-                placeholder="Password"
-                required
-              />
-              <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
-                Enter
-              </button>
-            </form>
+            </>
           ) : null}
 
           {step === "mfa-enroll" ? (

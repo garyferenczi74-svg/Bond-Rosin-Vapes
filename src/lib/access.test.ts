@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import {
   adminPortalAllowed,
   CLOAKED_STATIC_PATHS,
+  GENERIC_DOOR,
   isAdminRole,
   isCloakedStaticPath,
   isIdleExpired,
@@ -77,4 +78,49 @@ test("Home public Admin links point at Next /haus", () => {
   assert.ok(adminHrefs.every((href) => href === "/haus"));
   assert.equal(home.includes('href="Admin.dc.html"'), false);
   assert.equal(home.includes("Haus.dc.html\">Admin"), false);
+  const footer = home.slice(home.indexOf("<footer"));
+  const caption = footer.match(/letter-spacing:0\.16em;text-transform:uppercase">([\s\S]*?)<\/div>/);
+  assert.ok(caption, "footer caption row must exist");
+  const footerCaptions = [...caption[1].matchAll(/<a href="([^"]+)"[^>]*>([^<]+)</g)].map((m) => [
+    m[1],
+    m[2].trim(),
+  ]);
+  assert.deepEqual(footerCaptions.at(-1), ["/haus", "Admin"]);
+  assert.equal(footer.includes("/haus/admin"), false);
+});
+
+test("Home public Haus entry CTAs point at Next /haus", () => {
+  const home = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../Home.dc.html"), "utf8");
+  assert.equal(home.includes("Haus.dc.html"), false);
+  assert.match(home, /href="\/haus" class="hero-btn hero-btn-secondary">ENTER THE BOND HAUS</);
+  assert.match(home, /href="\/haus"[^>]*>Already in the Haus\? Enter here\.</);
+  assert.match(home, /href="\/haus"[^>]*>Enter Bond Haus</);
+  const footer = home.slice(home.indexOf("<footer"));
+  assert.match(footer, /href="\/haus"[^>]*>Bond Haus</);
+  const navHaus = [...home.matchAll(/href="([^"]+)"[^>]*>Bond Haus</g)].map((m) => m[1]);
+  assert.ok(navHaus.includes("#haus"));
+  assert.equal(home.includes("/haus/admin"), false);
+});
+
+test("failed sign-in copy stays one generic line", () => {
+  assert.equal(GENERIC_DOOR, "That did not open the door.");
+  const actions = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../app/haus/actions.ts"), "utf8");
+  assert.match(actions, /function fail\(message = GENERIC_DOOR\)/);
+  assert.equal(actions.includes("Invalid login"), false);
+  assert.equal(actions.includes("Unknown email"), false);
+  assert.equal(actions.includes("Wrong password"), false);
+});
+
+test("Next /haus shows a reciprocal Circle invite to the Home band", () => {
+  const client = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../app/haus/haus-client.tsx"),
+    "utf8",
+  );
+  assert.match(client, /Not yet a member\?/);
+  assert.match(client, /Join the Circle for first access\./);
+  assert.match(client, /href="\/#haus"/);
+  assert.equal(client.includes("/haus/admin"), false);
+  assert.equal(client.includes("\u2013"), false);
+  assert.equal(client.includes("\u2014"), false);
+  assert.equal(PHASE1_MFA_WAIVED, true);
 });
