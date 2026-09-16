@@ -18,6 +18,8 @@ Briefable:
 - specs/paging-plan.md (placeholder. No live channel)
 - specs/quiet-hours.md (placeholder. Not wired)
 - specs/vesper-weekly-monitor-audit.md (named weekly checklist stub)
+- specs/prompt-3-the-haus.md (Prompt 3 Phase A: Haus door and role router)
+- specs/prompt-3-flags.md (Prompt 3 phase flags. Later rooms off)
 
 Unbriefable for marketing build:
 - Brand Guidelines

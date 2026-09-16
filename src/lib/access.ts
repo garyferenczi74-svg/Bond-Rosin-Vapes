@@ -11,7 +11,7 @@ export type AdminRow = {
 };
 
 export function isAdminRole(value: string | null | undefined): value is AdminRole {
-  return value === "owner" || value === "operator";
+  return value === "admin" || value === "owner" || value === "operator";
 }
 
 export function isIdleExpired(lastActiveMs: number, now = Date.now()): boolean {

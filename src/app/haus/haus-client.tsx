@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { signInAction, signOutAction, verifyMfaAction } from "@/app/haus/actions";
+import { signInAction, verifyMfaAction } from "@/app/haus/actions";
+import { ComplianceBand } from "@/components/compliance-band";
 import { tokens } from "@/lib/tokens";
 
-type Step = "credentials" | "mfa-enroll" | "mfa-challenge" | "member";
+type Step = "credentials" | "mfa-enroll" | "mfa-challenge";
 
-export function HausClient({ signedMember }: { signedMember: boolean }) {
-  const [step, setStep] = useState<Step>(signedMember ? "member" : "credentials");
+export function HausClient() {
+  const [step, setStep] = useState<Step>("credentials");
   const [message, setMessage] = useState("");
   const [factorId, setFactorId] = useState("");
   const [challengeId, setChallengeId] = useState("");
@@ -20,10 +21,6 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
       const result = await signInAction(formData);
       if (!result.ok) {
         setMessage(result.message);
-        return;
-      }
-      if (result.next === "member") {
-        setStep("member");
         return;
       }
       if (result.next === "mfa-enroll") {
@@ -54,7 +51,7 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "#1B1D1C",
+        background: tokens.matteBlack,
       }}
     >
       <header
@@ -84,8 +81,8 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
             fontSize: 12,
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color: "#8E887C",
-            border: "1px solid #3A3C3B",
+            color: tokens.muted,
+            border: `1px solid ${tokens.line}`,
             borderRadius: 2,
             padding: "8px 14px",
           }}
@@ -119,11 +116,24 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
           >
             BOND
           </p>
+          <p
+            className="didot"
+            style={{
+              fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
+              fontWeight: 400,
+              fontSize: "clamp(16px, 2vw, 22px)",
+              letterSpacing: "0.16em",
+              color: tokens.bone,
+              margin: "22px 0 0",
+            }}
+          >
+            The Haus is for members.
+          </p>
           <div
             style={{
               width: "min(320px, 80%)",
               height: 1,
-              background: "#E1DAD0",
+              background: tokens.bone,
               margin: "28px auto 0",
             }}
           />
@@ -131,9 +141,6 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
           {step === "credentials" ? (
             <>
               <form action={onSignIn} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
-                <p className="lbl" style={{ textAlign: "center", margin: "0 0 6px" }}>
-                  Sign in to continue
-                </p>
                 <input className="field" type="email" name="email" autoComplete="email" placeholder="Email" required />
                 <input
                   className="field"
@@ -147,6 +154,17 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
                   Enter
                 </button>
               </form>
+              <p
+                style={{
+                  fontSize: 11.5,
+                  letterSpacing: "0.04em",
+                  color: "#6E685E",
+                  margin: "14px 0 0",
+                  textAlign: "center",
+                }}
+              >
+                Membership is by invitation from the Circle.
+              </p>
               <p
                 style={{
                   fontSize: 13,
@@ -176,7 +194,7 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
               <p className="lbl" style={{ textAlign: "center", margin: "0 0 6px" }}>
                 Add an authenticator
               </p>
-              <p style={{ fontSize: 13, lineHeight: 1.6, color: "#8E887C", margin: 0, textAlign: "center" }}>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: tokens.muted, margin: 0, textAlign: "center" }}>
                 Access does not open without a verified authenticator.
               </p>
               {qr ? (
@@ -186,7 +204,7 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
                   dangerouslySetInnerHTML={{ __html: qr }}
                 />
               ) : (
-                <p style={{ fontSize: 13, color: "#8E887C", textAlign: "center" }}>
+                <p style={{ fontSize: 13, color: tokens.muted, textAlign: "center" }}>
                   Confirm the code from the authenticator already in progress.
                 </p>
               )}
@@ -231,20 +249,6 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
             </form>
           ) : null}
 
-          {step === "member" ? (
-            <div style={{ marginTop: 34 }}>
-              <p className="lbl">Bond Haus</p>
-              <p style={{ fontSize: 15, lineHeight: 1.7, color: "#E1DAD0", margin: "16px 0 0" }}>
-                You are in the Haus.
-              </p>
-              <form action={signOutAction} style={{ marginTop: 22 }}>
-                <button className="btn" type="submit">
-                  Sign out
-                </button>
-              </form>
-            </div>
-          ) : null}
-
           <p
             style={{
               fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
@@ -259,6 +263,7 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
           </p>
         </div>
       </section>
+      <ComplianceBand />
     </main>
   );
 }

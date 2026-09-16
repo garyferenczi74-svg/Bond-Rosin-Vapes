@@ -14,10 +14,10 @@ import {
   PHASE1_MFA_WAIVED,
 } from "./access.ts";
 
-test("owner and operator are the only admin roles", () => {
+test("admin, owner, and operator open Vauxhall", () => {
+  assert.equal(isAdminRole("admin"), true);
   assert.equal(isAdminRole("owner"), true);
   assert.equal(isAdminRole("operator"), true);
-  assert.equal(isAdminRole("admin"), false);
   assert.equal(isAdminRole("member"), false);
 });
 
@@ -116,10 +116,14 @@ test("Next /haus shows a reciprocal Circle invite to the Home band", () => {
     join(dirname(fileURLToPath(import.meta.url)), "../app/haus/haus-client.tsx"),
     "utf8",
   );
+  assert.match(client, /The Haus is for members\./);
+  assert.match(client, /Membership is by invitation from the Circle\./);
   assert.match(client, /Not yet a member\?/);
   assert.match(client, /Join the Circle for first access\./);
   assert.match(client, /href="\/#haus"/);
+  assert.match(client, /ComplianceBand/);
   assert.equal(client.includes("/haus/admin"), false);
+  assert.equal(client.includes("Sign in to continue"), false);
   assert.equal(client.includes("\u2013"), false);
   assert.equal(client.includes("\u2014"), false);
   assert.equal(PHASE1_MFA_WAIVED, true);
