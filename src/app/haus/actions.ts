@@ -5,6 +5,9 @@ import { GENERIC_DOOR, PHASE1_MFA_WAIVED, PHASE1_MFA_WAIVER_ID, isAdminRole } fr
 import { writeAudit } from "@/lib/audit";
 import { readAdminRow } from "@/lib/gate";
 import { recordAuthAttempt } from "@/lib/lockout";
+import { admitAtDoor } from "@/lib/haus/door";
+import { HausStore } from "@/lib/haus/store";
+import { readHausLedger, writeHausLedger } from "@/lib/haus-ledger";
 import {
   isDemoMemberEmail,
   memberDestination,
@@ -23,10 +26,20 @@ function fail(message = GENERIC_DOOR) {
   return { ok: false as const, message, next: "credentials" as const };
 }
 
-async function openDemoMember(email: string) {
+async function openMember(email: string): Promise<never> {
   await writeMemberSession(seedMemberSession(email));
   const ack = await readMemberAck();
   redirect(memberDestination(ack, email));
+}
+
+async function tryInviteDoor(email: string) {
+  const store = new HausStore(await readHausLedger());
+  const admitted = admitAtDoor(store, email);
+  if (admitted.ok === false) {
+    return fail();
+  }
+  await writeHausLedger(store.snapshot());
+  return openMember(email);
 }
 
 export async function signInAction(formData: FormData) {
@@ -50,10 +63,16 @@ export async function signInAction(formData: FormData) {
     } catch {
       // Demo member mock auth does not depend on Supabase.
     }
-    await openDemoMember(email);
+    await openMember(email);
   }
 
-  const { supabase } = await readAdminRow();
+  let supabase;
+  try {
+    ({ supabase } = await readAdminRow());
+  } catch {
+    return tryInviteDoor(email);
+  }
+
   const pre = await recordAuthAttempt(supabase, email, meta.ip, "check");
   if (pre.locked) {
     return fail();
@@ -62,14 +81,14 @@ export async function signInAction(formData: FormData) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.user) {
     await recordAuthAttempt(supabase, email, meta.ip, "fail");
-    return fail();
+    return tryInviteDoor(email);
   }
 
   await recordAuthAttempt(supabase, email, meta.ip, "success");
 
   if (isDemoMemberEmail(data.user.email ?? email)) {
     await supabase.auth.signOut();
-    await openDemoMember(data.user.email ?? email);
+    await openMember(data.user.email ?? email);
   }
 
   const { data: adminRow } = await supabase
@@ -83,7 +102,7 @@ export async function signInAction(formData: FormData) {
 
   if (!admin) {
     await supabase.auth.signOut();
-    return fail();
+    return tryInviteDoor(email);
   }
 
   await clearMemberSession();

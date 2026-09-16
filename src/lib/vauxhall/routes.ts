@@ -47,6 +47,17 @@ export const SECURITY_CONSOLES: ConsoleItem[] = [
   { id: "weekly-audit", title: "Weekly Audit", href: "/vauxhall/security/weekly-audit" },
 ];
 
+export const HAUS_CONSOLES: ConsoleItem[] = [
+  { id: "dashboard", title: "Dashboard", href: "/vauxhall/haus" },
+  { id: "content", title: "Content", href: "/vauxhall/haus/content" },
+  { id: "batches", title: "Batches", href: "/vauxhall/haus/batches" },
+  { id: "reserve", title: "Reserve", href: "/vauxhall/haus/reserve" },
+  { id: "events", title: "Events", href: "/vauxhall/haus/events" },
+  { id: "guide", title: "Guide", href: "/vauxhall/haus/guide" },
+  { id: "members", title: "Members", href: "/vauxhall/haus/members" },
+  { id: "settings", title: "Settings", href: "/vauxhall/haus/settings" },
+];
+
 export const SOCIAL_CONSOLES: ConsoleItem[] = [
   { id: "overview", title: "Overview", href: "/vauxhall/social" },
   { id: "content", title: "Content", href: "/vauxhall/social/content" },
@@ -64,6 +75,7 @@ export const WING_CONSOLES: Record<Exclude<WingId, "command">, ConsoleItem[]> = 
   product: PRODUCT_CONSOLES,
   security: SECURITY_CONSOLES,
   social: SOCIAL_CONSOLES,
+  haus: HAUS_CONSOLES,
 };
 
 export const COMMAND_SECTIONS: { id: CommandView; href: string; title: string }[] = [
@@ -83,11 +95,12 @@ export type VauxhallRoute =
   | { wing: Exclude<WingId, "command">; view: string; path: string };
 
 const COMMAND_SET = new Set<string>(COMMAND_VIEWS);
-const WING_SET = new Set(["product", "security", "social"]);
+const WING_SET = new Set(["product", "security", "social", "haus"]);
 
 function defaultConsole(wing: Exclude<WingId, "command">): string {
   if (wing === "product") return "sku-portfolio";
   if (wing === "security") return "monitors";
+  if (wing === "haus") return "dashboard";
   return WING_CONSOLES[wing][0]?.id ?? "dashboard";
 }
 

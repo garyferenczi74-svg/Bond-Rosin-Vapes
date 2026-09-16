@@ -22,7 +22,7 @@ export const aptosStack =
 
 export type AdminRole = "admin" | "owner" | "operator";
 
-export type WingId = "command" | "product" | "security" | "social";
+export type WingId = "command" | "product" | "security" | "social" | "haus";
 
 export const wings: {
   id: WingId;
@@ -58,5 +58,12 @@ export const wings: {
     title: "Social",
     hairline: tokens.social,
     summary: "Carver drafts. Felix clears. Scheduler stays parked.",
+  },
+  {
+    id: "haus",
+    href: "/vauxhall/haus",
+    title: "Haus",
+    hairline: tokens.bone,
+    summary: "Admins curate the house. The house does not read the guest book.",
   },
 ];

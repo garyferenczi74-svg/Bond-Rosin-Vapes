@@ -34,15 +34,18 @@ test("demo member email is member only", () => {
   assert.deepEqual(session.shelf, []);
 });
 
-test("member session cookie only accepts the demo member", () => {
+test("member session cookie accepts demo and invited member emails", () => {
   assert.equal(parseMemberSession(null), null);
-  assert.equal(parseMemberSession('{"email":"owner@bond.test","role":"member"}'), null);
+  assert.equal(parseMemberSession('{"email":"owner@bond.test","role":"admin"}'), null);
   assert.equal(parseMemberSession('{"email":"member@bond.test","role":"admin"}'), null);
   const ok = parseMemberSession('{"email":"Member@bond.test","role":"member","shelf":[]}');
   assert.ok(ok);
   assert.equal(ok.email, DEMO_MEMBER_EMAIL);
   assert.equal(ok.role, "member");
   assert.deepEqual(ok.shelf, []);
+  const invited = parseMemberSession('{"email":"haus-1@example.com","role":"member","shelf":[]}');
+  assert.ok(invited);
+  assert.equal(invited.email, "haus-1@example.com");
 });
 
 test("welcome interstitial is once per member until age is affirmed", () => {
@@ -69,6 +72,7 @@ test("member rooms are the Prompt 3 floor and never /haus/admin", () => {
 test("shared door routes admin roles to Vauxhall and members to Salon", () => {
   const actions = read("../app/haus/actions.ts");
   assert.match(actions, /isDemoMemberEmail/);
+  assert.match(actions, /tryInviteDoor/);
   assert.match(actions, /redirect\(memberDestination/);
   assert.match(actions, /redirect\("\/vauxhall"\)/);
   assert.match(actions, /redirect\("\/haus\/salon"\)/);

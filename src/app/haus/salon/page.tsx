@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { HausWritesStrip } from "@/components/haus-writes-strip";
 import { HausFrame } from "@/components/haus-frame";
 import { requireMemberSession } from "@/lib/haus-gate";
 import { memberNeedsWelcome } from "@/lib/member";
@@ -16,5 +17,9 @@ export default async function HausSalonPage() {
     redirect("/haus/welcome");
   }
 
-  return <HausFrame title="Salon" />;
+  return (
+    <HausFrame title="Salon">
+      <HausWritesStrip />
+    </HausFrame>
+  );
 }

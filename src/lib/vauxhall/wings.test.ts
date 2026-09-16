@@ -19,6 +19,7 @@ const FILES = [
   "components/vauxhall/social-views.tsx",
   "components/vauxhall/wing-mosaics.tsx",
   "components/vauxhall/console-chrome.tsx",
+  "components/vauxhall/haus-views.tsx",
   "components/portal-frame.tsx",
   "lib/tokens.ts",
 ];
@@ -63,6 +64,16 @@ test("critical navigation reaches a real console for every wing destination", ()
       "scheduler",
       "analyzer",
       "post-tracking",
+    ],
+    haus: [
+      "dashboard",
+      "content",
+      "batches",
+      "reserve",
+      "events",
+      "guide",
+      "members",
+      "settings",
     ],
   } as const;
 
