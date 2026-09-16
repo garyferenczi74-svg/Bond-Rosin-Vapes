@@ -73,93 +73,100 @@ export async function signInAction(formData: FormData) {
     return tryInviteDoor(email);
   }
 
-  const pre = await recordAuthAttempt(supabase, email, meta.ip, "check");
-  if (pre.locked) {
-    return fail();
-  }
+  try {
+    const pre = await recordAuthAttempt(supabase, email, meta.ip, "check");
+    if (pre.locked) {
+      return fail();
+    }
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error || !data.user) {
-    await recordAuthAttempt(supabase, email, meta.ip, "fail");
-    return tryInviteDoor(email);
-  }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error || !data.user) {
+      await recordAuthAttempt(supabase, email, meta.ip, "fail");
+      return tryInviteDoor(email);
+    }
 
-  await recordAuthAttempt(supabase, email, meta.ip, "success");
+    await recordAuthAttempt(supabase, email, meta.ip, "success");
 
-  if (isDemoMemberEmail(data.user.email ?? email)) {
-    await supabase.auth.signOut();
-    await openMember(data.user.email ?? email);
-  }
+    if (isDemoMemberEmail(data.user.email ?? email)) {
+      await supabase.auth.signOut();
+      await openMember(data.user.email ?? email);
+    }
 
-  const { data: adminRow } = await supabase
-    .from("admins")
-    .select("user_id, role, status, mfa_enrolled")
-    .eq("user_id", data.user.id)
-    .maybeSingle();
+    const { data: adminRow } = await supabase
+      .from("admins")
+      .select("user_id, role, status, mfa_enrolled")
+      .eq("user_id", data.user.id)
+      .maybeSingle();
 
-  const admin =
-    adminRow && isAdminRole(adminRow.role) && adminRow.status === "active" ? adminRow : null;
+    const admin =
+      adminRow && isAdminRole(adminRow.role) && adminRow.status === "active" ? adminRow : null;
 
-  if (!admin) {
-    await supabase.auth.signOut();
-    return tryInviteDoor(email);
-  }
+    if (!admin) {
+      await supabase.auth.signOut();
+      return tryInviteDoor(email);
+    }
 
-  await clearMemberSession();
+    await clearMemberSession();
 
-  if (PHASE1_MFA_WAIVED) {
-    const signedMeta = await readRequestMeta("/haus");
-    await writeAudit(supabase, {
-      actor: data.user.id,
-      action: "admin.sign_in",
-      target: "vauxhall",
-      before: { aal: "aal1", waiver: PHASE1_MFA_WAIVER_ID },
-      after: { aal: "aal1", role: admin.role, mfa: "waived" },
-      meta: signedMeta,
-    });
-    redirect("/vauxhall");
-  }
+    if (PHASE1_MFA_WAIVED) {
+      const signedMeta = await readRequestMeta("/haus");
+      await writeAudit(supabase, {
+        actor: data.user.id,
+        action: "admin.sign_in",
+        target: "vauxhall",
+        before: { aal: "aal1", waiver: PHASE1_MFA_WAIVER_ID },
+        after: { aal: "aal1", role: admin.role, mfa: "waived" },
+        meta: signedMeta,
+      });
+      redirect("/vauxhall");
+    }
 
-  const { data: factors } = await supabase.auth.mfa.listFactors();
-  const verified = (factors?.totp ?? []).filter((f) => f.status === "verified");
-  const unverified = (factors?.totp ?? []).filter((f) => f.status !== "verified");
+    const { data: factors } = await supabase.auth.mfa.listFactors();
+    const verified = (factors?.totp ?? []).filter((f) => f.status === "verified");
+    const unverified = (factors?.totp ?? []).filter((f) => f.status !== "verified");
 
-  if (verified.length === 0) {
-    if (unverified[0]) {
+    if (verified.length === 0) {
+      if (unverified[0]) {
+        return {
+          ok: true as const,
+          next: "mfa-enroll" as const,
+          factorId: unverified[0].id,
+          qr: null as string | null,
+        };
+      }
+      const enrolled = await supabase.auth.mfa.enroll({
+        factorType: "totp",
+        friendlyName: "Bond Haus",
+      });
+      if (enrolled.error || !enrolled.data) {
+        await supabase.auth.signOut();
+        return fail("Authenticator setup failed. Access stays closed.");
+      }
       return {
         ok: true as const,
         next: "mfa-enroll" as const,
-        factorId: unverified[0].id,
-        qr: null as string | null,
+        factorId: enrolled.data.id,
+        qr: enrolled.data.totp.qr_code,
       };
     }
-    const enrolled = await supabase.auth.mfa.enroll({
-      factorType: "totp",
-      friendlyName: "Bond Haus",
-    });
-    if (enrolled.error || !enrolled.data) {
-      await supabase.auth.signOut();
-      return fail("Authenticator setup failed. Access stays closed.");
+
+    const challenge = await supabase.auth.mfa.challenge({ factorId: verified[0].id });
+    if (challenge.error || !challenge.data) {
+      return fail();
     }
+
     return {
       ok: true as const,
-      next: "mfa-enroll" as const,
-      factorId: enrolled.data.id,
-      qr: enrolled.data.totp.qr_code,
+      next: "mfa-challenge" as const,
+      factorId: verified[0].id,
+      challengeId: challenge.data.id,
     };
-  }
-
-  const challenge = await supabase.auth.mfa.challenge({ factorId: verified[0].id });
-  if (challenge.error || !challenge.data) {
+  } catch (error) {
+    if (error && typeof error === "object" && "digest" in error) {
+      throw error;
+    }
     return fail();
   }
-
-  return {
-    ok: true as const,
-    next: "mfa-challenge" as const,
-    factorId: verified[0].id,
-    challengeId: challenge.data.id,
-  };
 }
 
 export async function verifyMfaAction(formData: FormData) {
