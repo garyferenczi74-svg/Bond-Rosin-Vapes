@@ -32,8 +32,10 @@ test("critical navigation reaches a real console for every wing destination", ()
       "unit-economics",
       "alerts-and-risks",
       "inventory",
+      "production",
       "orders",
       "accounts",
+      "trace",
     ],
     security: [
       "findings",

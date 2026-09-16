@@ -86,6 +86,10 @@ test("product economics stay mock labeled", () => {
   assert.match(PRODUCT, /Not investor figures/);
   assert.match(PRODUCT, /Mock seed/);
   assert.match(PRODUCT, /listSkus/);
+  assert.match(PRODUCT, /Trace/);
+  assert.match(PRODUCT, /Production/);
+  assert.match(PRODUCT, /Metrc as of|StalenessStamp/);
+  assert.equal(PRODUCT.includes("MetrcConnectAdapter"), false);
   assert.match(SECURITY, /Cite. Remediate. Document./);
   assert.match(SECURITY, /mGateAllows/);
   assert.equal(PRODUCT.includes("\u2013"), false);

@@ -470,6 +470,59 @@ select.field {
   box-shadow: inset 0 1px 0 var(--wing-ink, var(--bone));
 }
 
+.vx-stamp {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 6px 10px;
+  box-shadow: inset 0 1px 0 var(--product);
+}
+
+.vx-stamp.stale {
+  box-shadow: inset 0 1px 0 var(--muted);
+}
+
+.vx-lanes {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(108px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.vx-lane {
+  background: var(--deep-charcoal);
+  border: 1px solid #232323;
+  border-radius: 2px;
+  padding: 10px;
+  min-height: 120px;
+}
+
+.vx-lane-title {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.vx-lane-card {
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #B0A99A;
+}
+
+.vx-var-hot td {
+  color: var(--bone);
+}
+
 .vx-cite-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -740,7 +793,8 @@ select.field {
   .vx-form-grid,
   .vx-cite-grid,
   .vx-strip-stack,
-  .vx-social-metrics {
+  .vx-social-metrics,
+  .vx-lanes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -780,7 +834,8 @@ select.field {
   .vx-form-grid,
   .vx-cite-grid,
   .vx-strip-stack,
-  .vx-social-metrics {
+  .vx-social-metrics,
+  .vx-lanes {
     grid-template-columns: 1fr;
   }
 }
