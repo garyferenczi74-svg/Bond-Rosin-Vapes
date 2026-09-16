@@ -11,10 +11,9 @@ This is the rule for Vercel. Preview must prove it before anyone promotes produc
 | `/` and `/Home.dc.html` | Design Canvas file in `public/` | HTTP 200, homepage |
 | `/No1.dc.html`, `/No2.dc.html`, `/No3.dc.html` | Design Canvas | HTTP 200 |
 | `/FAQ.dc.html`, `/Terms.dc.html`, `/Privacy.dc.html` | Design Canvas | HTTP 200 |
-| `/Haus.dc.html` | Design Canvas members mock | HTTP 200 |
 | `/haus` | Next.js Bond Haus sign-in | HTTP 200. Do not rewrite `/Haus` to the mock; Next.js rewrite matching is case-insensitive and would steal this route. |
 | `/vauxhall` and nested wing routes | Next.js portal | Cloaked 404 unless an active `public.admins` session (waiver W-2026-09-15-P1-OVERRIDE: password only, MFA not required) |
-| `/Admin.dc.html`, `/Vauxhall.dc.html`, other admin HTML | Not copied into `public/` | Cloaked 404 |
+| `/Admin.dc.html`, `/Haus.dc.html`, `/Vauxhall.dc.html`, other admin HTML | Not copied into `public/` | Cloaked 404 |
 | `/bond-brain` | Blocked | Cloaked 404 |
 
 Marketing HTML is never rewritten. `scripts/sync-public.mjs` **copies** allowlisted root files into `public/` as real files (not symlinks) before `next build`. It also writes `public/index.html` from `Home.dc.html` so `/` has a static file if the dashboard still treats the project as Other. Admin HTML is not in that list. The script fails the build if a copy stays a symlink or if admin HTML appears under `public/`.
@@ -54,10 +53,11 @@ curl -sI http://127.0.0.1:3000/Home.dc.html | head
 curl -sI http://127.0.0.1:3000/haus | head
 curl -sI http://127.0.0.1:3000/vauxhall | head
 curl -sI http://127.0.0.1:3000/Admin.dc.html | head
+curl -sI http://127.0.0.1:3000/Haus.dc.html | head
 curl -sI http://127.0.0.1:3000/bond-brain | head
 ```
 
-`/` and `/Home.dc.html` must be 200. `/haus` must be 200. `/vauxhall`, `/Admin.dc.html`, and `/bond-brain` must be 404.
+`/` and `/Home.dc.html` must be 200. `/haus` must be 200. `/vauxhall`, `/Admin.dc.html`, `/Haus.dc.html`, and `/bond-brain` must be 404.
 
 ## Env vars
 

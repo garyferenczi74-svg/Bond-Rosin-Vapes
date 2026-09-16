@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   adminPortalAllowed,
+  CLOAKED_STATIC_PATHS,
   isAdminRole,
   isCloakedStaticPath,
   isIdleExpired,
@@ -54,7 +55,19 @@ test("idle expires after 24 hours", () => {
 test("static admin html paths are cloaked", () => {
   assert.equal(isCloakedStaticPath("/Admin.dc.html"), true);
   assert.equal(isCloakedStaticPath("/Vauxhall.dc.html"), true);
+  assert.equal(isCloakedStaticPath("/Haus.dc.html"), true);
+  assert.equal(isCloakedStaticPath("/Product.dc.html"), true);
   assert.equal(isCloakedStaticPath("/Home.dc.html"), false);
+});
+
+test("middleware matcher covers every cloaked static path", () => {
+  const middleware = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../middleware.ts"),
+    "utf8",
+  );
+  for (const path of CLOAKED_STATIC_PATHS) {
+    assert.ok(middleware.includes(`"${path}"`), path);
+  }
 });
 
 test("Home public Admin links point at Next /haus", () => {
