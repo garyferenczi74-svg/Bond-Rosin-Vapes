@@ -1,5 +1,5 @@
 # Copy bank
-Version: 2026-09-15 (Prompt 4 Torrie locks ingested; Prompt 1 triads/hero stand)
+Version: 2026-09-16 (Prompt 6b residual Haus door membership word; Prompt 4 Torrie locks stand)
 
 ## Hero
 BOND WITH YOUR HIGHEST SELF.
@@ -97,3 +97,19 @@ SKU strip tagline: Higher presence. Deepest expression.
 
 ### Preserved (untouched)
 Nav set (No. 1 Dialed, No. 2 Unwind, No. 3 Peak, From Plant to Bond, Find Your Bond, Bond Circle). Hero "Bond with your highest self". Five-zeros purity strip. Footer 21+ line.
+
+## Prompt 6b residual (Haus door membership word)
+Standing brief: /canon/specs/prompt-6b-residual-haus-only-membership.md
+Surface: Next `/haus` door plus No1 / No2 / No3 footer Bond Haus href. Home waitlist already Haus-named.
+This does not claim Prompt 6 / 6a / 6e / 6g / 6h DONE.
+
+| Slot | Locked string |
+| --- | --- |
+| Invitation caption | Membership is by invitation from the Haus. |
+| Reciprocal | Not yet a member? Join the Bond Haus for first access. |
+| Reciprocal href | `/#haus` |
+| Didot (unchanged) | The Haus is for members. |
+| Fail line (unchanged) | That did not open the door. |
+
+Haus is the only membership word on `/haus`. Circle is not user-visible on that door.
+`id=circle` and `bond_circle` stay as documented aliases. They are not membership words.

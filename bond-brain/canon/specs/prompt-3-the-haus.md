@@ -1,7 +1,7 @@
 # Prompt 3: The Haus
 
 Status: Phase A on Next `/haus`. Salon, Library, Guide, Reserve, Events, Ritual, and Account suites stay parked.
-Source: July 22 Bond Prompt 3 The Haus, adjusted 2026-09-15.
+Source: July 22 Bond Prompt 3 The Haus, adjusted 2026-09-15. Door membership word amended 2026-09-16 (Prompt 6b residual).
 Depends on: Prompt 2A shared door, W-2026-09-15-P1-OVERRIDE, Framer tokens, BV-05 / BV-06 / BV-08 (later phases).
 
 ## Phase A (this branch)
@@ -19,8 +19,9 @@ Shared door at `/haus`. After password:
 Door copy:
 
 - Didot: The Haus is for members.
-- Caption: Membership is by invitation from the Circle.
-- Reciprocal Circle: Not yet a member? Join the Circle for first access. (`/#haus`)
+- Caption: Membership is by invitation from the Haus.
+- Reciprocal: Not yet a member? Join the Bond Haus for first access. (`/#haus`)
+- Haus is the only membership word on this door. Circle is not user-visible on `/haus`.
 - Public compliance band.
 
 ## Parked

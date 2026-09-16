@@ -111,20 +111,65 @@ test("failed sign-in copy stays one generic line", () => {
   assert.equal(actions.includes("Wrong password"), false);
 });
 
-test("Next /haus shows a reciprocal Circle invite to the Home band", () => {
+function stripComments(source: string) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\{[\s]*\/\*[\s\S]*?\*\/[\s]*\}/g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
+test("Next /haus shows a reciprocal Haus invite to the Home band", () => {
   const client = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), "../app/haus/haus-client.tsx"),
     "utf8",
   );
   assert.match(client, /The Haus is for members\./);
-  assert.match(client, /Membership is by invitation from the Circle\./);
+  assert.match(client, /Membership is by invitation from the Haus\./);
   assert.match(client, /Not yet a member\?/);
-  assert.match(client, /Join the Circle for first access\./);
+  assert.match(client, /Join the Bond Haus for first access\./);
   assert.match(client, /href="\/#haus"/);
   assert.match(client, /ComplianceBand/);
+  const band = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../components/compliance-band.tsx"),
+    "utf8",
+  );
+  assert.match(band, /Health and Safety/);
   assert.equal(client.includes("/haus/admin"), false);
   assert.equal(client.includes("Sign in to continue"), false);
   assert.equal(client.includes("\u2013"), false);
   assert.equal(client.includes("\u2014"), false);
   assert.equal(PHASE1_MFA_WAIVED, true);
+  const visible = stripComments(client);
+  assert.equal(/circle/i.test(visible), false);
+});
+
+test("SKU footer Bond Haus points at Next /haus", () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
+  for (const name of ["No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
+    const html = readFileSync(join(root, name), "utf8");
+    const footer = html.slice(html.indexOf("<footer"));
+    assert.match(footer, /href="\/haus"[^>]*>Bond Haus</, name);
+    assert.equal(html.includes("Haus.dc.html"), false, name);
+  }
+  const no1 = readFileSync(join(root, "No1.dc.html"), "utf8");
+  const no2 = readFileSync(join(root, "No2.dc.html"), "utf8");
+  const no3 = readFileSync(join(root, "No3.dc.html"), "utf8");
+  assert.match(no1, /A focused expression from Bond's solventless live rosin collection\./);
+  assert.match(no1, /Clarity\. Momentum\./);
+  assert.match(no2, /A cooler, quieter number in Bond's 100% solventless live rosin collection\./);
+  assert.match(no3, /A reserve expression from Bond's solventless live rosin collection\./);
+});
+
+test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {
+  const home = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../Home.dc.html"), "utf8");
+  assert.match(home, /id="circle"/);
+  assert.match(home, /hash alias/);
+  assert.match(home, /localStorage\.getItem\('bond_circle'\)/);
+  assert.match(home, /localStorage\.setItem\('bond_circle'/);
+  assert.match(home, /Haus is the canonical membership name/);
+  assert.match(home, /FROM PLANT TO BOND/);
+  assert.match(
+    home,
+    /We start with exceptional cannabis, then use heat, pressure, and time to preserve what is real\. The result is 100% solventless live rosin, nothing added, nothing removed\./,
+  );
 });

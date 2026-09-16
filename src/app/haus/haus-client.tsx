@@ -154,6 +154,7 @@ export function HausClient() {
                   Enter
                 </button>
               </form>
+              {/* Haus is the only membership word on this door. */}
               <p
                 style={{
                   fontSize: 11.5,
@@ -163,7 +164,7 @@ export function HausClient() {
                   textAlign: "center",
                 }}
               >
-                Membership is by invitation from the Circle.
+                Membership is by invitation from the Haus.
               </p>
               <p
                 style={{
@@ -183,7 +184,7 @@ export function HausClient() {
                     paddingBottom: 1,
                   }}
                 >
-                  Join the Circle for first access.
+                  Join the Bond Haus for first access.
                 </a>
               </p>
             </>
