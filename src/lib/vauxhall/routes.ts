@@ -32,7 +32,8 @@ export const PRODUCT_CONSOLES: ConsoleItem[] = [
 ];
 
 export const SECURITY_CONSOLES: ConsoleItem[] = [
-  { id: "findings", title: "Findings", href: "/vauxhall/security" },
+  { id: "monitors", title: "Monitors", href: "/vauxhall/security" },
+  { id: "findings", title: "Findings", href: "/vauxhall/security/findings" },
   { id: "incidents", title: "Incidents", href: "/vauxhall/security/incidents" },
   { id: "rules", title: "Rules", href: "/vauxhall/security/rules" },
   { id: "waivers", title: "Waivers", href: "/vauxhall/security/waivers" },
@@ -85,6 +86,7 @@ const WING_SET = new Set(["product", "security", "social"]);
 
 function defaultConsole(wing: Exclude<WingId, "command">): string {
   if (wing === "product") return "sku-portfolio";
+  if (wing === "security") return "monitors";
   return WING_CONSOLES[wing][0]?.id ?? "dashboard";
 }
 

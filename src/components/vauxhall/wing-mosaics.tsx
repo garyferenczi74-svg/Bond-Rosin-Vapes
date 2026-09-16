@@ -15,6 +15,6 @@ export function WingMosaic({
   onToast: (msg: string) => void;
 }) {
   if (id === "product") return <ProductWing consoleId={consoleId} role={role} onToast={onToast} />;
-  if (id === "security") return <SecurityWing consoleId={consoleId} onToast={onToast} />;
+  if (id === "security") return <SecurityWing consoleId={consoleId} role={role} onToast={onToast} />;
   return <SocialWing consoleId={consoleId} onToast={onToast} />;
 }

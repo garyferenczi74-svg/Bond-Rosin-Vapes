@@ -44,6 +44,12 @@ test("wing consoles parse and unknown slugs stay cloaked", () => {
   assert.equal(parseVauxhallRoute(["product", "dashboard"])?.path, "/vauxhall/product/dashboard");
   assert.equal(parseVauxhallRoute(["product", "production"])?.view, "production");
   assert.equal(parseVauxhallRoute(["product", "trace"])?.path, "/vauxhall/product/trace");
+  assert.deepEqual(parseVauxhallRoute(["security"]), {
+    wing: "security",
+    view: "monitors",
+    path: "/vauxhall/security",
+  });
+  assert.equal(parseVauxhallRoute(["security", "findings"])?.view, "findings");
   assert.equal(parseVauxhallRoute(["security", "pre-check"])?.view, "pre-check");
   assert.equal(parseVauxhallRoute(["social", "scheduler"])?.path, "/vauxhall/social/scheduler");
   assert.equal(parseVauxhallRoute(["admin"]), null);
@@ -60,6 +66,8 @@ test("every sidebar console parses and unknown slugs stay cloaked", () => {
       assert.equal(parsed?.view, item.id);
     }
   }
+  assert.equal(SECURITY_CONSOLES[0]?.id, "monitors");
+  assert.equal(SECURITY_CONSOLES.some((item) => item.id === "findings"), true);
   assert.equal(SECURITY_CONSOLES.some((item) => item.id === "pre-check"), true);
   assert.equal(SOCIAL_CONSOLES.some((item) => item.id === "scheduler"), true);
   assert.equal(parseVauxhallRoute(["security", "unknown"]), null);

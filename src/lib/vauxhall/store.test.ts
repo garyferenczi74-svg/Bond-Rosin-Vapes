@@ -29,6 +29,7 @@ import {
   SEED_VENDORS,
   SEED_WAIVERS,
 } from "./seed.ts";
+import { MONITOR_CATALOG } from "./monitors.ts";
 import { VauxhallStore } from "./store.ts";
 
 function assertNoDashes(value: string, label: string) {
@@ -92,6 +93,7 @@ test("seed strings have zero em dashes or en dashes", () => {
     ...SEED_DSAR.flatMap((item) => [item.subject, item.note, item.clock]),
     ...SEED_VENDORS.flatMap((item) => [item.name, item.scope, item.dpa]),
     ...SEED_PRECHECK.flatMap((item) => item.reasons),
+    ...MONITOR_CATALOG.flatMap((item) => [item.name, item.cadence, item.citation]),
     ...SEED_SOCIAL_PIPELINE.flatMap((item) => [item.title, item.note, ...item.auditFlags]),
     ...SEED_RESEARCH.flatMap((item) => [item.hook, item.provenance, item.note]),
   ];
