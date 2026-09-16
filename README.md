@@ -72,7 +72,7 @@ Gary holds production and social publish keys. This repo does not store them. M 
 
 ## Access model
 
-1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`).
+1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`). Home hero, Circle persistent, signup success, and footer Bond Haus also enter at `/haus`.
 2. Credentials that match an active `admins` row (role `owner` or `operator`) open `/vauxhall` after password auth. MFA enroll is not required under W-2026-09-15-P1-OVERRIDE.
 3. Non-admin sessions stay on Haus. They never see portal chrome.
 4. Unauthenticated or non-admin requests to `/vauxhall` and nested routes return HTTP 404. Never 403.

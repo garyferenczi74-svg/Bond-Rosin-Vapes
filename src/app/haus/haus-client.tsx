@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { signInAction, signOutAction, verifyMfaAction } from "@/app/haus/actions";
+import { tokens } from "@/lib/tokens";
 
 type Step = "credentials" | "mfa-enroll" | "mfa-challenge" | "member";
 
@@ -145,6 +146,27 @@ export function HausClient({ signedMember }: { signedMember: boolean }) {
                 Enter
               </button>
             </form>
+            <p
+              style={{
+                fontSize: 13,
+                lineHeight: 1.7,
+                color: tokens.muted,
+                margin: "22px 0 0",
+                textAlign: "center",
+              }}
+            >
+              Not yet a member?{" "}
+              <a
+                href="/#haus"
+                style={{
+                  color: tokens.bone,
+                  borderBottom: `1px solid ${tokens.line}`,
+                  paddingBottom: 1,
+                }}
+              >
+                Join the Circle for first access.
+              </a>
+            </p>
           ) : null}
 
           {step === "mfa-enroll" ? (
