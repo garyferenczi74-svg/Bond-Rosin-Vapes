@@ -64,6 +64,13 @@ function copy(name) {
 for (const name of files) copy(name);
 for (const name of dirs) copy(name);
 
+for (const name of blocked) {
+  const leaked = join(publicDir, name);
+  if (existsSync(leaked)) {
+    rmSync(leaked, { force: true });
+  }
+}
+
 const indexTo = join(publicDir, "index.html");
 if (existsSync(indexTo)) {
   rmSync(indexTo, { force: true });
