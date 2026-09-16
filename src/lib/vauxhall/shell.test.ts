@@ -92,6 +92,8 @@ test("product economics stay mock labeled", () => {
   assert.equal(PRODUCT.includes("MetrcConnectAdapter"), false);
   assert.match(SECURITY, /Cite. Remediate. Document./);
   assert.match(SECURITY, /mGateAllows/);
+  assert.match(SECURITY, /Demo Live/);
+  assert.match(SECURITY, /Monitors/);
   assert.equal(PRODUCT.includes("\u2013"), false);
   assert.equal(PRODUCT.includes("\u2014"), false);
   assert.equal(PRODUCT.includes("!"), false);

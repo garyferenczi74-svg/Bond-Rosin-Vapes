@@ -303,6 +303,7 @@ export type Finding = {
   closedEvidence: string;
   openedOn: string;
   escape: boolean;
+  monitorId?: string;
 };
 
 export type SecurityScorecard = {
@@ -310,6 +311,14 @@ export type SecurityScorecard = {
   p1_30d: number;
   open: number;
   escapes_30d: number;
+};
+
+export type IncidentBeatKind = "detection" | "action" | "notification" | "resolution" | "root cause";
+
+export type IncidentBeat = {
+  at: string;
+  kind: IncidentBeatKind;
+  note: string;
 };
 
 export type Incident = {
@@ -320,7 +329,13 @@ export type Incident = {
   actions: string;
   rootCause: string;
   findingId: string;
+  beats?: IncidentBeat[];
+  linkedFindingIds?: string[];
+  rollbackStub?: string;
 };
+
+export const RULE_GROUPS = ["web security", "compliance", "platform", "agent conduct"] as const;
+export type RuleGroup = (typeof RULE_GROUPS)[number];
 
 export type SecurityRule = {
   id: string;
@@ -328,6 +343,9 @@ export type SecurityRule = {
   citation: string;
   enforcement: string;
   gate: "pre-check" | "runtime" | "both";
+  group?: RuleGroup;
+  monitorIds?: string[];
+  editable?: boolean;
 };
 
 export type Waiver = {
@@ -336,6 +354,9 @@ export type Waiver = {
   expiresOn: string;
   control: string;
   state: "active" | "expired";
+  ruleId?: string;
+  scope?: string;
+  ownerStamp?: string;
 };
 
 export type AuditRow = {
@@ -345,6 +366,8 @@ export type AuditRow = {
   action: string;
   target: string;
   note: string;
+  hash?: string;
+  prevHash?: string;
 };
 
 export type DsarRequest = {
@@ -368,6 +391,7 @@ export type ScannerItem = {
   source: string;
   note: string;
   findingId: string;
+  lastSweep?: string;
 };
 
 export type PreCheckResult = {
@@ -381,7 +405,68 @@ export type Soc2Control = {
   id: string;
   control: string;
   evidence: string;
+  family?: string;
+  coverage?: number;
+  sources?: string[];
 };
+
+export const MONITOR_IDS = [
+  "site-liveness",
+  "age-gate",
+  "compliance-band",
+  "robots-indexing",
+  "security-headers",
+  "tls-domain",
+  "dependency-secret",
+  "auth-watch",
+  "rls-probe",
+  "form-abuse",
+  "metrc-sync",
+  "content-lint",
+  "audit-integrity",
+  "agent-conduct",
+] as const;
+export type MonitorId = (typeof MONITOR_IDS)[number];
+
+export type MonitorState = "green" | "degraded" | "failing";
+
+export type MonitorRun = {
+  id: string;
+  monitorId: MonitorId;
+  at: string;
+  state: MonitorState;
+  note: string;
+  findingId?: string;
+  incidentId?: string;
+};
+
+export type Monitor = {
+  id: MonitorId;
+  name: string;
+  cadence: string;
+  demoCadenceMs: number;
+  lastRun: string;
+  nextRun: string;
+  nextDueMs: number;
+  state: MonitorState;
+  sparkline: number[];
+  ruleId: string;
+  citation: string;
+  history: MonitorRun[];
+};
+
+export type AuditVerify = {
+  ok: boolean;
+  brokenAt?: string;
+};
+
+export type CloseFindingAttempt =
+  | { ok: true; id: string }
+  | { ok: false; reason: string };
+
+export type RuleEditAttempt =
+  | { ok: true; id: string }
+  | { ok: false; reason: string };
 
 export const SOCIAL_STAGES = ["draft", "felix", "owner", "approved", "held"] as const;
 export type SocialStage = (typeof SOCIAL_STAGES)[number];

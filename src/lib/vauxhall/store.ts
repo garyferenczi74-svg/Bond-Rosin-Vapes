@@ -32,6 +32,16 @@ import {
   SEED_WAIVERS,
 } from "./seed.ts";
 import { MetrcMockAdapter } from "./metrc-mock.ts";
+import {
+  AUDIT_GENESIS,
+  failSeverityFor,
+  mockHash,
+  mockLintPageCopy,
+  MOCK_LINT_ELEMENT,
+  MOCK_LINT_PAGE,
+  pushSpark,
+  seedMonitors,
+} from "./monitors.ts";
 import type { TraceProvider, TraceSnapshot, TraceTestStatus } from "./trace.ts";
 import { DISCREPANCY_THRESHOLD_PCT, isAllocatableStatus, metrcStamp, variancePercent } from "./trace.ts";
 import type {
@@ -40,7 +50,9 @@ import type {
   AgentName,
   AgentSummary,
   AuditRow,
+  AuditVerify,
   CanonDoc,
+  CloseFindingAttempt,
   CollectionFrame,
   DashboardSnapshot,
   DiscrepancyInvestigation,
@@ -49,8 +61,13 @@ import type {
   EventType,
   Finding,
   Incident,
+  IncidentBeat,
   InventoryLot,
   LicenseState,
+  Monitor,
+  MonitorId,
+  MonitorRun,
+  MonitorState,
   OrderAttempt,
   OrderLine,
   OrderStage,
@@ -61,6 +78,7 @@ import type {
   ResearchRow,
   ReviewItem,
   ReviewState,
+  RuleEditAttempt,
   ScannerItem,
   ScheduleAttempt,
   ScriptVariation,
@@ -82,7 +100,7 @@ import type {
   WholesaleAccount,
   WholesaleOrder,
 } from "./types.ts";
-import { AGENTS, ORDER_STAGES, RUN_STAGES } from "./types.ts";
+import { AGENTS, ORDER_STAGES, RULE_GROUPS, RUN_STAGES } from "./types.ts";
 
 type Listener = () => void;
 
@@ -141,16 +159,27 @@ export class VauxhallStore {
   investigations: DiscrepancyInvestigation[] = [];
   trace: TraceProvider;
   traceSnap: TraceSnapshot;
+  demoLive = false;
+  monitors: Monitor[] = [];
   private eid = 100;
   private oid = 1100;
   private fid = 40;
   private lotSeq = 200;
   private runSeq = 10;
   private invSeq = 20;
+  private iid = 10;
+  private rid = 200;
   private labDelayMs: number;
   private traceLatencyMs: number;
   private labTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private listeners = new Set<Listener>();
+  private demoElapsed = 0;
+  private scriptedLintDone = false;
+  private scriptedLockoutDone = false;
+  private standingChecksDone = false;
+  private precheckFixApplied: Record<string, boolean> = {};
+  private auditBackup: AuditRow[] | null = null;
+  private auditTampered = false;
 
   constructor(opts?: { labDelayMs?: number; traceLatencyMs?: number }) {
     this.labDelayMs = opts?.labDelayMs ?? 1800;
@@ -224,8 +253,20 @@ export class VauxhallStore {
     this.lotSeq = 200;
     this.runSeq = 10;
     this.invSeq = 20;
+    this.iid = 10;
+    this.rid = 200;
     this.filter = { agent: null, type: null, allData: false };
     this.live = false;
+    this.demoLive = false;
+    this.demoElapsed = 0;
+    this.scriptedLintDone = false;
+    this.scriptedLockoutDone = false;
+    this.standingChecksDone = false;
+    this.precheckFixApplied = {};
+    this.auditBackup = null;
+    this.auditTampered = false;
+    this.monitors = seedMonitors();
+    this.sealAuditChain();
   }
 
   private clearLabTimers(): void {
@@ -1112,11 +1153,21 @@ export class VauxhallStore {
   }
 
   listIncidents(): Incident[] {
-    return this.incidents.map((item) => ({ ...item }));
+    return this.incidents.map((item) => ({
+      ...item,
+      beats: item.beats?.map((beat) => ({ ...beat })) ?? [],
+      linkedFindingIds: item.linkedFindingIds?.slice() ?? (item.findingId ? [item.findingId] : []),
+      rollbackStub: item.rollbackStub ?? "M rollback linkage stub. Phase A. No production rollback.",
+    }));
   }
 
   listRules(): SecurityRule[] {
-    return this.rules.map((item) => ({ ...item }));
+    return this.rules.map((item) => ({
+      ...item,
+      group: item.group ?? "platform",
+      monitorIds: item.monitorIds?.slice() ?? [],
+      editable: item.group === "agent conduct" ? false : item.editable !== false,
+    }));
   }
 
   listWaivers(): Waiver[] {
@@ -1272,8 +1323,640 @@ export class VauxhallStore {
     return { ok: true, note: "Scheduler parked. Prompt 2C stays parked for real Carver publish." };
   }
 
+  listMonitors(): Monitor[] {
+    return this.monitors.map((item) => ({
+      ...item,
+      sparkline: item.sparkline.slice(),
+      history: item.history.map((run) => ({ ...run })),
+    }));
+  }
+
+  listMonitorHistory(id: MonitorId): MonitorRun[] {
+    const mon = this.monitors.find((item) => item.id === id);
+    return mon ? mon.history.map((run) => ({ ...run })) : [];
+  }
+
+  setDemoLive(on: boolean): void {
+    this.demoLive = on;
+    if (!on) {
+      this.emit();
+      return;
+    }
+    this.ensureStandingSecurityChecks();
+    this.emit();
+  }
+
+  tickMonitorEngine(stepMs = 2000): void {
+    if (!this.demoLive) return;
+    this.ensureStandingSecurityChecks();
+    this.demoElapsed += stepMs;
+    for (const mon of this.monitors) {
+      if (this.demoElapsed >= mon.nextDueMs) {
+        this.runMonitor(mon.id, "schedule");
+        mon.nextDueMs = this.demoElapsed + mon.demoCadenceMs;
+      }
+    }
+    this.emit();
+  }
+
+  triggerMonitorFailure(id: MonitorId): void {
+    this.ensureStandingSecurityChecks();
+    this.runMonitor(id, "trigger");
+    this.emit();
+  }
+
+  ensureStandingSecurityChecks(): void {
+    if (this.standingChecksDone) return;
+    this.standingChecksDone = true;
+    this.applyExpiredWaivers();
+    this.flagVendorRenewals();
+  }
+
+  applyExpiredWaivers(): string[] {
+    const reopened: string[] = [];
+    for (const waiver of this.waivers) {
+      const expired = waiver.state === "expired" || dayDiff(waiver.expiresOn, this.seedClock) > 0;
+      if (!expired) continue;
+      waiver.state = "expired";
+      const finding = this.findings.find((item) => item.id === waiver.findingId);
+      if (!finding || finding.state !== "closed") continue;
+      finding.state = "open";
+      finding.closedEvidence = "";
+      finding.document = "Expired waiver reopened this finding. Mock seed.";
+      reopened.push(finding.id);
+      this.appendAudit({
+        actor: "Felix",
+        action: "waiver.expire",
+        target: waiver.id,
+        note: `Expired waiver ${waiver.id} reopened ${finding.id}.`,
+      });
+      this.pushMonitorEvent(
+        "Felix",
+        "Update",
+        `Expired waiver ${waiver.id} reopened ${finding.id}`,
+        "Automatic. Time box ended.",
+      );
+    }
+    return reopened;
+  }
+
+  flagVendorRenewals(): string[] {
+    const flagged: string[] = [];
+    for (const vendor of this.vendors) {
+      const days = dayDiff(this.seedClock, vendor.renewal);
+      if (days < 0 || days > 60) continue;
+      const existing = this.findings.find(
+        (item) => item.source === "Vendor register" && item.surface === vendor.name && item.state === "open",
+      );
+      if (existing) continue;
+      const id = this.raiseFindingSilent({
+        severity: "P2",
+        source: "Vendor register",
+        surface: vendor.name,
+        citation: "Vendor DPA renewal inside 60 days.",
+        owner: "Felix",
+        due: vendor.renewal,
+        cite: `${vendor.name} renews ${vendor.renewal}. Inside 60 days.`,
+        remediate: "Renew the mock DPA or replace the vendor.",
+        document: "Auto-flagged from the vendor register. Mock seed.",
+        state: "open",
+        closedEvidence: "",
+        openedOn: this.seedClock,
+        escape: false,
+      });
+      flagged.push(id);
+    }
+    return flagged;
+  }
+
+  closeFinding(id: string, evidence: string): CloseFindingAttempt {
+    const finding = this.findings.find((item) => item.id === id);
+    if (!finding) return { ok: false, reason: "Finding not found." };
+    if (finding.state === "closed") return { ok: false, reason: "Finding already closed." };
+    const text = evidence.trim();
+    if (!text) return { ok: false, reason: "Closure requires evidence text." };
+    finding.state = "closed";
+    finding.closedEvidence = text;
+    this.appendAudit({
+      actor: "Gary",
+      action: "finding.close",
+      target: id,
+      note: text,
+    });
+    this.pushMonitorEvent(
+      "Felix",
+      "Agent Decision",
+      `Finding ${id} closed with evidence`,
+      text,
+    );
+    this.emit();
+    return { ok: true, id };
+  }
+
+  editRule(id: string, patch: { citation?: string; enforcement?: string }): RuleEditAttempt {
+    const rule = this.rules.find((item) => item.id === id);
+    if (!rule) return { ok: false, reason: "Rule not found." };
+    if (rule.group === "agent conduct" || rule.editable === false) {
+      return {
+        ok: false,
+        reason: "Agent-conduct rules are read-only in Phase A. Changes route through Felix and counsel.",
+      };
+    }
+    if (patch.citation !== undefined) rule.citation = patch.citation.trim() || rule.citation;
+    if (patch.enforcement !== undefined) rule.enforcement = patch.enforcement.trim() || rule.enforcement;
+    this.appendAudit({
+      actor: "Gary",
+      action: "rule.edit",
+      target: id,
+      note: "Owner edited a rule. Confirmation recorded.",
+    });
+    this.pushMonitorEvent("Felix", "Update", `Rule edited: ${rule.name}`, "Owner action with confirmation.");
+    this.emit();
+    return { ok: true, id };
+  }
+
+  ruleGroups(): typeof RULE_GROUPS {
+    return RULE_GROUPS;
+  }
+
+  findingsForRule(ruleId: string): Finding[] {
+    const rule = this.rules.find((item) => item.id === ruleId);
+    return this.findings.filter((item) => {
+      if (item.monitorId && rule?.monitorIds?.includes(item.monitorId)) return true;
+      return item.citation === rule?.citation;
+    });
+  }
+
+  verifyAuditChain(): AuditVerify {
+    const chrono = [...this.auditRows].reverse();
+    let prev = AUDIT_GENESIS;
+    for (const row of chrono) {
+      const expected = mockHash(`${prev}|${row.time}|${row.actor}|${row.action}|${row.target}|${row.note}`);
+      if (row.prevHash !== prev || row.hash !== expected) {
+        return { ok: false, brokenAt: row.id };
+      }
+      prev = row.hash ?? expected;
+    }
+    return { ok: true };
+  }
+
+  tamperAudit(): AuditVerify {
+    if (this.auditTampered) return this.verifyAuditChain();
+    const target = this.auditRows.find((row) => row.id === "aud-02") ?? this.auditRows[1] ?? this.auditRows[0];
+    if (!target) return { ok: false, brokenAt: "missing" };
+    this.auditBackup = this.auditRows.map((row) => ({ ...row }));
+    this.auditTampered = true;
+    target.note = `${target.note} [tamper]`;
+    const verify = this.verifyAuditChain();
+    const existing = this.findings.find((item) => item.monitorId === "audit-integrity" && item.state === "open");
+    if (!existing) {
+      this.raiseFindingSilent({
+        severity: "P0",
+        source: "Audit log integrity",
+        surface: "Audit Log",
+        citation: "Append-only hash chain must verify.",
+        owner: "Felix",
+        due: this.seedClock,
+        cite: "Demo Tamper Test broke the mock hash chain.",
+        remediate: "Reset restores the mock chain. No real database write.",
+        document: "Phase A tamper is in-store only.",
+        state: "open",
+        closedEvidence: "",
+        openedOn: this.seedClock,
+        escape: false,
+        monitorId: "audit-integrity",
+      });
+    }
+    const mon = this.monitors.find((item) => item.id === "audit-integrity");
+    if (mon) this.markMonitor(mon, "failing", "Hash chain verify failed. Demo Tamper Test.");
+    this.pushMonitorEvent(
+      "Felix",
+      "Alert",
+      "ALERT. Audit hash chain failed Tamper Test",
+      "P0 banner in Security. Gary page simulated in-wing only. No phone call.",
+    );
+    this.emit();
+    return verify;
+  }
+
+  resetAuditChain(): AuditVerify {
+    if (this.auditBackup) {
+      this.auditRows = this.auditBackup.map((row) => ({ ...row }));
+      this.auditBackup = null;
+    } else {
+      this.sealAuditChain();
+    }
+    this.auditTampered = false;
+    const finding = this.findings.find((item) => item.monitorId === "audit-integrity" && item.state === "open");
+    if (finding) {
+      finding.state = "closed";
+      finding.closedEvidence = "Reset restored the mock chain.";
+    }
+    const mon = this.monitors.find((item) => item.id === "audit-integrity");
+    if (mon) this.markMonitor(mon, "green", "Hash chain verify green after reset.");
+    this.appendAudit({
+      actor: "Gary",
+      action: "audit.reset",
+      target: "chain",
+      note: "Demo Tamper Test reset. Mock chain restored.",
+    });
+    this.emit();
+    return this.verifyAuditChain();
+  }
+
+  p0Banner(): string {
+    const open = this.findings.filter((item) => item.severity === "P0" && item.state === "open");
+    if (!open.length) return "";
+    const first = open[0];
+    return `P0 . ${first?.cite ?? "Monitor escalation."} Gary page simulated in-wing only.`;
+  }
+
+  runPreCheck(candidate: string): PreCheckResult {
+    const reasons: string[] = [];
+    let verdict: PreCheckResult["verdict"] = "green";
+    if (this.traceSnap.sync.stale) {
+      verdict = "blocked";
+      reasons.push("Metrc sync stale beyond two cycles. Rule: Metrc sync health.");
+    }
+    if (candidate === "rc-118" && !this.precheckFixApplied["rc-118"]) {
+      verdict = "blocked";
+      reasons.push("Seeded violation: claims lint on prototype copy. Rule: Claims-language lint.");
+    }
+    if (verdict === "green") {
+      reasons.push("headers", "CSP", "age gate", "claims lint", "dash lint", "Metrc sync fresh");
+    }
+    let row = this.prechecks.find((item) => item.candidate === candidate);
+    if (!row) {
+      row = { id: `pc-${candidate}`, candidate, verdict, reasons };
+      this.prechecks.push(row);
+    } else {
+      row.verdict = verdict;
+      row.reasons = reasons.slice();
+    }
+    const rc = this.rcs.find((item) => item.id === candidate);
+    if (rc) {
+      rc.note =
+        verdict === "green"
+          ? "Pre-Check green. Cleared to M gate."
+          : `Pre-Check blocked. ${reasons[0] ?? "Rule cited."}`;
+    }
+    this.appendAudit({
+      actor: "Vesper",
+      action: "precheck.run",
+      target: candidate,
+      note: verdict === "green" ? "Green stamped clearance." : reasons.join(" "),
+    });
+    this.emit();
+    return { ...row, reasons: row.reasons.slice() };
+  }
+
+  applyPreCheckFix(candidate: string): void {
+    this.precheckFixApplied[candidate] = true;
+    this.appendAudit({
+      actor: "Gary",
+      action: "precheck.fix",
+      target: candidate,
+      note: "Fix Applied. Seeded claims lint cleared. Awaiting rerun.",
+    });
+    this.emit();
+  }
+
+  soc2EvidencePack(now = new Date()): { filename: string; json: string } {
+    const y = now.getFullYear();
+    const m = pad(now.getMonth() + 1);
+    const d = pad(now.getDate());
+    const filename = `soc2-evidence-${y}${m}${d}.json`;
+    const json = JSON.stringify(
+      {
+        mock: true,
+        note: "Mock evidence pack. Not a live attestation.",
+        exportedOn: `${y}-${m}-${d}`,
+        families: this.soc2.map((row) => ({
+          id: row.id,
+          control: row.control,
+          family: row.family ?? row.control,
+          coverage: row.coverage ?? 0,
+          evidence: row.evidence,
+          sources: row.sources ?? [],
+        })),
+      },
+      null,
+      2,
+    );
+    return { filename, json };
+  }
+
+  dashboardSecurityTrends(): {
+    opened90: number;
+    closed90: number;
+    mttr: { severity: string; days: number }[];
+    uptime: { id: string; name: string; pct: number }[];
+    escapes: number[];
+  } {
+    const opened90 = this.findings.filter((item) => dayDiff(item.openedOn, this.seedClock) <= 90).length;
+    const closed90 = this.findings.filter(
+      (item) => item.state === "closed" && dayDiff(item.openedOn, this.seedClock) <= 90,
+    ).length;
+    const mttr = (["P0", "P1", "P2", "P3"] as const).map((severity) => {
+      const closed = this.findings.filter((item) => item.severity === severity && item.state === "closed");
+      if (!closed.length) return { severity, days: 0 };
+      const days =
+        closed.reduce((sum, item) => sum + Math.max(0, dayDiff(item.openedOn, this.seedClock)), 0) / closed.length;
+      return { severity, days: Math.round(days * 10) / 10 };
+    });
+    const uptime = this.monitors.map((mon) => {
+      const runs = mon.history.length;
+      const green = mon.history.filter((run) => run.state === "green").length;
+      const pct = runs === 0 ? 100 : Math.round((green / runs) * 1000) / 10;
+      return { id: mon.id, name: mon.name, pct };
+    });
+    return {
+      opened90,
+      closed90,
+      mttr,
+      uptime,
+      escapes: Array.from({ length: 8 }, () => 0),
+    };
+  }
+
+  private runMonitor(id: MonitorId, origin: "schedule" | "trigger"): void {
+    const mon = this.monitors.find((item) => item.id === id);
+    if (!mon) return;
+    if (origin === "trigger") {
+      this.applyTriggeredFailure(mon);
+      return;
+    }
+    if (id === "content-lint" && !this.scriptedLintDone) {
+      this.fireLintCatch(mon);
+      return;
+    }
+    if (id === "auth-watch" && this.scriptedLintDone && !this.scriptedLockoutDone) {
+      this.fireLockoutBurst(mon);
+      return;
+    }
+    if (id === "metrc-sync") {
+      this.evaluateMetrc(mon);
+      return;
+    }
+    if (id === "audit-integrity") {
+      this.evaluateAudit(mon);
+      return;
+    }
+    this.markMonitor(mon, "green", `${mon.name} stayed green. Mock probe. No external call.`);
+  }
+
+  private fireLintCatch(mon: Monitor): void {
+    this.scriptedLintDone = true;
+    const copy = mockLintPageCopy();
+    const hit = copy.includes(String.fromCharCode(0x2014)) || copy.includes(String.fromCharCode(0x2013));
+    const findingId = this.raiseFindingSilent({
+      severity: "P2",
+      source: "Content lint sweep",
+      surface: `mock page ${MOCK_LINT_PAGE}`,
+      citation: "Dash lint. Zero em dash or en dash.",
+      owner: "Vesper",
+      due: this.seedClock,
+      cite: `Seeded dash character on mock page ${MOCK_LINT_PAGE} element ${MOCK_LINT_ELEMENT}.`,
+      remediate: "Replace the dash character with a period or comma.",
+      document: "Monitor opened this finding with evidence. Mock page only.",
+      state: "open",
+      closedEvidence: "",
+      openedOn: this.seedClock,
+      escape: false,
+      monitorId: mon.id,
+    });
+    this.recordRun(mon, "failing", `Lint catch on ${MOCK_LINT_PAGE} ${MOCK_LINT_ELEMENT}. Hit=${hit}.`, findingId);
+    this.pushMonitorEvent(
+      "Vesper",
+      "Report",
+      `Content lint sweep cited a dash on mock page ${MOCK_LINT_PAGE}`,
+      `P2 finding ${findingId} opened. Element ${MOCK_LINT_ELEMENT}. Monitor authority.`,
+    );
+  }
+
+  private fireLockoutBurst(mon: Monitor): void {
+    this.scriptedLockoutDone = true;
+    const findingId = this.raiseFindingSilent({
+      severity: "P0",
+      source: "Auth watch",
+      surface: "/haus",
+      citation: "Lockouts and bursts on /haus open an incident.",
+      owner: "Felix",
+      due: this.seedClock,
+      cite: "Auth watch registered a lockout burst on /haus.",
+      remediate: "Keep the door closed. Review the mock source. Do not revoke real credentials.",
+      document: "Monitor opened this finding and assembled the incident timeline.",
+      state: "open",
+      closedEvidence: "",
+      openedOn: this.seedClock,
+      escape: false,
+      monitorId: mon.id,
+    });
+    const now = clockTime();
+    const beats: IncidentBeat[] = [
+      { at: now, kind: "detection", note: "Auth watch saw five failed passwords in one window." },
+      { at: now, kind: "action", note: "Incident opened on monitor authority. No credential revoke in Phase A." },
+      { at: now, kind: "notification", note: "Gary page simulated in-wing only. No phone call." },
+      { at: now, kind: "resolution", note: "Door remained closed. Awaiting owner evidence." },
+      { at: now, kind: "root cause", note: "Seeded lockout burst for Demo Live." },
+    ];
+    this.iid += 1;
+    const incidentId = `inc-${this.iid}`;
+    this.incidents.unshift({
+      id: incidentId,
+      title: "Auth watch lockout burst on /haus",
+      timeline: beats.map((beat) => `${beat.kind}: ${beat.note}`).join(" "),
+      impact: "Admin door stayed closed. No credentials revoked.",
+      actions: "In-wing P0 banner. Live Feed ALERT. No phone page.",
+      rootCause: "Seeded burst of failed /haus passwords. Mock source only.",
+      findingId,
+      beats,
+      linkedFindingIds: [findingId],
+      rollbackStub: "M rollback linkage stub. Phase A. No production rollback.",
+    });
+    this.recordRun(mon, "failing", "Lockout burst. Incident assembled.", findingId, incidentId);
+    this.appendAudit({
+      actor: "Felix",
+      action: "incident.open",
+      target: incidentId,
+      note: "Auth watch lockout burst. Simulated page only.",
+    });
+    this.pushMonitorEvent(
+      "Felix",
+      "Alert",
+      "ALERT. Auth watch lockout burst on /haus",
+      "P0 banner in Security. Gary page simulated in-wing only. No phone call.",
+    );
+  }
+
+  private evaluateMetrc(mon: Monitor): void {
+    const stale = this.traceSnap.sync.stale;
+    const discs = this.listDiscrepancies().length;
+    if (stale) {
+      const existing = this.findings.find((item) => item.monitorId === "metrc-sync" && item.state === "open");
+      const findingId =
+        existing?.id ??
+        this.raiseFindingSilent({
+          severity: "P1",
+          source: "Metrc sync health",
+          surface: "Product Trace",
+          citation: "Trace staleness beyond two cycles blocks M gate.",
+          owner: "Felix",
+          due: this.seedClock,
+          cite: "Trace mock is stale beyond two cycles.",
+          remediate: "Refresh the Trace mock. Live Metrc adapter stays closed.",
+          document: "Monitor reads TraceProvider mock only.",
+          state: "open",
+          closedEvidence: "",
+          openedOn: this.seedClock,
+          escape: false,
+          monitorId: mon.id,
+        });
+      this.recordRun(mon, "failing", "Trace mock stale. M gate blocked by construction.", findingId);
+      return;
+    }
+    if (discs > 0) {
+      this.markMonitor(mon, "degraded", `Trace mock fresh. ${discs} open discrepancies already on Findings.`);
+      return;
+    }
+    this.markMonitor(mon, "green", "Trace mock fresh. Live Metrc adapter stays closed.");
+  }
+
+  private evaluateAudit(mon: Monitor): void {
+    const verify = this.verifyAuditChain();
+    if (!verify.ok) {
+      this.markMonitor(mon, "failing", `Hash chain broken at ${verify.brokenAt ?? "unknown"}.`);
+      return;
+    }
+    this.markMonitor(mon, "green", "Hash chain verify green.");
+  }
+
+  private applyTriggeredFailure(mon: Monitor): void {
+    if (mon.id === "audit-integrity") {
+      this.tamperAudit();
+      return;
+    }
+    if (mon.id === "auth-watch") {
+      if (!this.scriptedLockoutDone) this.fireLockoutBurst(mon);
+      else this.markMonitor(mon, "failing", "Auth watch already holding the lockout burst.");
+      return;
+    }
+    if (mon.id === "content-lint") {
+      if (!this.scriptedLintDone) this.fireLintCatch(mon);
+      else this.markMonitor(mon, "failing", "Content lint already holding the seeded dash catch.");
+      return;
+    }
+    const severity = failSeverityFor(mon.id);
+    const existing = this.findings.find((item) => item.monitorId === mon.id && item.state === "open");
+    const findingId =
+      existing?.id ??
+      this.raiseFindingSilent({
+        severity,
+        source: mon.name,
+        surface: mon.id === "metrc-sync" ? "Product Trace" : "Security Monitors",
+        citation: mon.citation,
+        owner: "Felix",
+        due: this.seedClock,
+        cite: `${mon.name} triggered to a failing state. Demo only.`,
+        remediate: "Owner Demo Trigger. No real external monitor call.",
+        document:
+          mon.id === "form-abuse"
+            ? "Auto-action throttle is Phase B. Simulated only."
+            : "Demo Trigger opened this finding. No production action.",
+        state: "open",
+        closedEvidence: "",
+        openedOn: this.seedClock,
+        escape: false,
+        monitorId: mon.id,
+      });
+    this.recordRun(mon, "failing", "Demo Trigger fired this monitor. No external call.", findingId);
+    this.pushMonitorEvent(
+      "Felix",
+      severity === "P0" ? "Alert" : "Report",
+      severity === "P0" ? `ALERT. ${mon.name} failing` : `${mon.name} failing`,
+      "Demo Trigger. No phone page. No credential revoke.",
+    );
+  }
+
+  private markMonitor(mon: Monitor, state: MonitorState, note: string): void {
+    this.recordRun(mon, state, note);
+  }
+
+  private recordRun(
+    mon: Monitor,
+    state: MonitorState,
+    note: string,
+    findingId?: string,
+    incidentId?: string,
+  ): void {
+    const at = clockTime();
+    this.rid += 1;
+    const run: MonitorRun = {
+      id: `run-${this.rid}`,
+      monitorId: mon.id,
+      at,
+      state,
+      note,
+      findingId,
+      incidentId,
+    };
+    mon.state = state;
+    mon.lastRun = at;
+    mon.nextRun = at;
+    mon.sparkline = pushSpark(mon.sparkline, state);
+    mon.history = [run, ...mon.history].slice(0, 24);
+  }
+
+  private raiseFindingSilent(input: Omit<Finding, "id">): string {
+    this.fid += 1;
+    const id = `f-${this.fid}`;
+    this.findings.unshift({ ...input, id });
+    return id;
+  }
+
+  private appendAudit(input: Omit<AuditRow, "id" | "time" | "hash" | "prevHash">): void {
+    const latest = this.auditRows[0];
+    const prev = latest?.hash ?? AUDIT_GENESIS;
+    const time = clockTime();
+    const body = `${prev}|${time}|${input.actor}|${input.action}|${input.target}|${input.note}`;
+    this.auditRows.unshift({
+      id: `aud-${400 + this.auditRows.length}`,
+      time,
+      actor: input.actor,
+      action: input.action,
+      target: input.target,
+      note: input.note,
+      prevHash: prev,
+      hash: mockHash(body),
+    });
+  }
+
+  private sealAuditChain(): void {
+    const chrono = [...this.auditRows].reverse();
+    let prev = AUDIT_GENESIS;
+    for (const row of chrono) {
+      row.prevHash = prev;
+      row.hash = mockHash(`${prev}|${row.time}|${row.actor}|${row.action}|${row.target}|${row.note}`);
+      prev = row.hash;
+    }
+    this.auditRows = chrono.reverse();
+  }
+
+  private pushMonitorEvent(agent: AgentName, type: EventType, summary: string, sub: string): void {
+    this.events.unshift({
+      id: this.nextId(),
+      time: clockTime(),
+      agent,
+      type,
+      summary,
+      sub,
+      audit: this.nextAudit(),
+    });
+  }
+
   signOut(): void {
     this.live = false;
+    this.demoLive = false;
     this.emit();
   }
 

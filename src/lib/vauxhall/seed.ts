@@ -698,6 +698,15 @@ export const SEED_INCIDENTS: Incident[] = [
     actions: "Alert routed to Security wing.",
     rootCause: "Five failed password attempts. Mock source 74.12.x.x.",
     findingId: "f-p2-dash",
+    beats: [
+      { at: "14:32:00", kind: "detection", note: "Five failed password attempts on /haus/admin." },
+      { at: "14:32:08", kind: "action", note: "Alert routed to the Security wing." },
+      { at: "14:32:08", kind: "notification", note: "Felix alert A-40912. No phone page." },
+      { at: "14:33:00", kind: "resolution", note: "Admin door stayed closed." },
+      { at: "14:33:10", kind: "root cause", note: "Mock source 74.12.x.x." },
+    ],
+    linkedFindingIds: ["f-p2-dash"],
+    rollbackStub: "M rollback linkage stub. Phase A. No production rollback.",
   },
 ];
 
@@ -708,6 +717,9 @@ export const SEED_RULES: SecurityRule[] = [
     citation: "OWASP headers. Bond CSP.",
     enforcement: "Pre-Check and runtime.",
     gate: "both",
+    group: "web security",
+    monitorIds: ["security-headers"],
+    editable: true,
   },
   {
     id: "rule-age",
@@ -715,6 +727,9 @@ export const SEED_RULES: SecurityRule[] = [
     citation: "Public age gate must not be bypassed.",
     enforcement: "Pre-Check tests.",
     gate: "pre-check",
+    group: "compliance",
+    monitorIds: ["age-gate"],
+    editable: true,
   },
   {
     id: "rule-claims",
@@ -722,6 +737,9 @@ export const SEED_RULES: SecurityRule[] = [
     citation: "Felix. No therapeutic claims.",
     enforcement: "Pre-Check blocks on hit.",
     gate: "pre-check",
+    group: "compliance",
+    monitorIds: ["compliance-band", "content-lint"],
+    editable: true,
   },
   {
     id: "rule-dash",
@@ -729,6 +747,9 @@ export const SEED_RULES: SecurityRule[] = [
     citation: "Zero em dash or en dash in portal copy.",
     enforcement: "Pre-Check and lint script.",
     gate: "both",
+    group: "compliance",
+    monitorIds: ["content-lint"],
+    editable: true,
   },
   {
     id: "rule-deps",
@@ -736,6 +757,9 @@ export const SEED_RULES: SecurityRule[] = [
     citation: "No secrets in client. Dependency drift blocks at high.",
     enforcement: "Pre-Check. M gate.",
     gate: "pre-check",
+    group: "platform",
+    monitorIds: ["dependency-secret"],
+    editable: true,
   },
   {
     id: "rule-agents",
@@ -743,6 +767,89 @@ export const SEED_RULES: SecurityRule[] = [
     citation: "Agents may never touch production, alter canon silently, publish social, or modify this ruleset.",
     enforcement: "Runtime plus owner.",
     gate: "runtime",
+    group: "agent conduct",
+    monitorIds: ["agent-conduct"],
+    editable: false,
+  },
+  {
+    id: "rule-liveness",
+    name: "Site liveness",
+    citation: "Public site answers from two regions.",
+    enforcement: "MonitorEngine. Runtime.",
+    gate: "runtime",
+    group: "platform",
+    monitorIds: ["site-liveness"],
+    editable: true,
+  },
+  {
+    id: "rule-robots",
+    name: "Robots and indexing",
+    citation: "Indexing flag matches the launch decision.",
+    enforcement: "MonitorEngine. Hourly.",
+    gate: "runtime",
+    group: "compliance",
+    monitorIds: ["robots-indexing"],
+    editable: true,
+  },
+  {
+    id: "rule-tls",
+    name: "TLS and domain",
+    citation: "Certificate validity and DNS integrity.",
+    enforcement: "MonitorEngine. Daily.",
+    gate: "runtime",
+    group: "web security",
+    monitorIds: ["tls-domain"],
+    editable: true,
+  },
+  {
+    id: "rule-auth",
+    name: "Auth watch",
+    citation: "Lockouts and bursts on /haus open an incident.",
+    enforcement: "MonitorEngine. Streaming.",
+    gate: "runtime",
+    group: "web security",
+    monitorIds: ["auth-watch"],
+    editable: true,
+  },
+  {
+    id: "rule-rls",
+    name: "RLS probe",
+    citation: "Anonymous reads on protected tables are P0.",
+    enforcement: "MonitorEngine. Hourly.",
+    gate: "runtime",
+    group: "platform",
+    monitorIds: ["rls-probe"],
+    editable: true,
+  },
+  {
+    id: "rule-forms",
+    name: "Form abuse",
+    citation: "Bond Circle signup velocity. Throttle is Phase B.",
+    enforcement: "MonitorEngine. Streaming.",
+    gate: "runtime",
+    group: "platform",
+    monitorIds: ["form-abuse"],
+    editable: true,
+  },
+  {
+    id: "rule-metrc",
+    name: "Metrc sync health",
+    citation: "Trace staleness beyond two cycles blocks M gate.",
+    enforcement: "MonitorEngine reads Trace mock.",
+    gate: "both",
+    group: "platform",
+    monitorIds: ["metrc-sync"],
+    editable: true,
+  },
+  {
+    id: "rule-audit",
+    name: "Audit log integrity",
+    citation: "Append-only hash chain must verify.",
+    enforcement: "MonitorEngine. Hourly.",
+    gate: "runtime",
+    group: "platform",
+    monitorIds: ["audit-integrity"],
+    editable: true,
   },
 ];
 
@@ -753,6 +860,9 @@ export const SEED_WAIVERS: Waiver[] = [
     expiresOn: "2026-09-08",
     control: "Mock compensating review on age-gate copy.",
     state: "expired",
+    ruleId: "rule-age",
+    scope: "Age gate copy on public routes.",
+    ownerStamp: "Gary. Expired for Demo.",
   },
   {
     id: "wav-02",
@@ -760,6 +870,9 @@ export const SEED_WAIVERS: Waiver[] = [
     expiresOn: "2026-09-30",
     control: "Owner-approved time box on prototype copy bank.",
     state: "active",
+    ruleId: "rule-dash",
+    scope: "Prototype copy bank only.",
+    ownerStamp: "Gary. Active.",
   },
 ];
 
@@ -798,6 +911,20 @@ export const SEED_DSAR: DsarRequest[] = [
     clock: "Day 2 of 30. Mock clock.",
     note: "Bond holds little personal data by design. Prototype request only.",
   },
+  {
+    id: "dsar-02",
+    subject: "access.demo@example.test",
+    state: "verify",
+    clock: "Day 12 of 45. Mock clock.",
+    note: "Open access request. Prototype only.",
+  },
+  {
+    id: "dsar-03",
+    subject: "delete.demo@example.test",
+    state: "closed",
+    clock: "Closed day 6. Mock clock.",
+    note: "Completed deletion. No residual mock profile.",
+  },
 ];
 
 export const SEED_VENDORS: Vendor[] = [
@@ -813,7 +940,7 @@ export const SEED_VENDORS: Vendor[] = [
     name: "Prototype Auth",
     scope: "Haus sign-in. No health data. No BAA regime.",
     dpa: "Mock DPA on file.",
-    renewal: "2026-12-01",
+    renewal: "2026-10-20",
   },
 ];
 
@@ -823,6 +950,7 @@ export const SEED_SCANNER: ScannerItem[] = [
     source: "dependency audit",
     note: "Mock scanner bridge. Flows into Findings.",
     findingId: "f-p2-dash",
+    lastSweep: "13:10:00",
   },
 ];
 
@@ -846,11 +974,17 @@ export const SEED_SOC2: Soc2Control[] = [
     id: "cc6",
     control: "CC6 logical access",
     evidence: "Mock export. Haus cloak, admin role, audit log.",
+    family: "Logical access",
+    coverage: 80,
+    sources: ["Haus cloak", "Audit log", "Auth watch"],
   },
   {
     id: "cc7",
     control: "CC7 monitoring",
     evidence: "Mock export. Findings, Pre-Check, scanner bridge.",
+    family: "Monitoring",
+    coverage: 70,
+    sources: ["MonitorEngine", "Findings", "Pre-Check", "Scanner Bridge"],
   },
 ];
 

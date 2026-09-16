@@ -20,7 +20,15 @@ export function csvFilename(now = new Date()): string {
 }
 
 export function downloadCsv(filename: string, csv: string): void {
-  const blob = new Blob([csv], { type: "text/csv" });
+  downloadBlob(filename, csv, "text/csv");
+}
+
+export function downloadJson(filename: string, json: string): void {
+  downloadBlob(filename, json, "application/json");
+}
+
+function downloadBlob(filename: string, body: string, type: string): void {
+  const blob = new Blob([body], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

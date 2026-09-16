@@ -56,6 +56,14 @@ export function CommandApp({
   }, [store, store.live]);
 
   useEffect(() => {
+    if (!store.demoLive) return;
+    const timer = window.setInterval(() => {
+      store.tickMonitorEngine(2000);
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [store, store.demoLive]);
+
+  useEffect(() => {
     function syncHash() {
       const raw = window.location.hash.replace(/^#\/?/, "");
       if (!raw) return;

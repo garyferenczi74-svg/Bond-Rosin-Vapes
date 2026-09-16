@@ -38,6 +38,7 @@ test("critical navigation reaches a real console for every wing destination", ()
       "trace",
     ],
     security: [
+      "monitors",
       "findings",
       "incidents",
       "rules",
