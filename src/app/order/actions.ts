@@ -1,11 +1,14 @@
 "use server";
 
 import { GENERIC_DOOR } from "@/lib/access";
-import { bindPartnerDoor } from "@/lib/order/door";
+import { ORDER_COPY } from "@/lib/order/copy";
+import { findPartnerAccount, isPartnerElevated, openPartnerDoor, registerPartnerDoor } from "@/lib/order/door";
 import { bundleFromStoreParts } from "@/lib/order/persist";
 import {
   clearPartnerSession,
+  readPartnerAccountBook,
   readPartnerSession,
+  writePartnerAccountBook,
   writePartnerDraftPersist,
   writePartnerSession,
 } from "@/lib/order/session";
@@ -15,13 +18,30 @@ function fail(message = GENERIC_DOOR) {
   return { ok: false as const, message };
 }
 
-export async function openPartnerDoorAction(formData: FormData) {
+export async function registerPartnerAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
-  const inviteCode = String(formData.get("inviteCode") ?? "");
   const license = String(formData.get("license") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
   const age21 = String(formData.get("age21") ?? "") === "1";
 
-  const bound = bindPartnerDoor({ email, inviteCode, license, age21 });
+  const rows = await readPartnerAccountBook();
+  const bound = registerPartnerDoor({ email, license, password, confirm, age21 }, rows);
+  if (!bound.ok) return fail(bound.message);
+
+  await writePartnerAccountBook(rows);
+  await writePartnerSession(bound.session);
+  return { ok: true as const };
+}
+
+export async function openPartnerDoorAction(formData: FormData) {
+  const email = String(formData.get("email") ?? "");
+  const license = String(formData.get("license") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const age21 = String(formData.get("age21") ?? "") === "1";
+
+  const rows = await readPartnerAccountBook();
+  const bound = openPartnerDoor({ email, license, password, age21 }, rows);
   if (!bound.ok) return fail(bound.message);
 
   await writePartnerSession(bound.session);
@@ -40,6 +60,13 @@ export async function submitPartnerRequestAction(input: {
 }) {
   const session = await readPartnerSession();
   if (!session) return fail();
+
+  const rows = await readPartnerAccountBook();
+  const account = findPartnerAccount({ email: session.email, license: session.license }, rows);
+  if (!account || account.accountId !== session.accountId) return fail();
+  if (!isPartnerElevated({ email: session.email, license: session.license }, rows)) {
+    return fail(ORDER_COPY.pendingBlock);
+  }
 
   const store = getVauxhallStore();
   const result = store.createOrderRequest({

@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { closePartnerDoorAction, openPartnerDoorAction, submitPartnerRequestAction } from "@/app/order/actions";
+import {
+  closePartnerDoorAction,
+  openPartnerDoorAction,
+  registerPartnerAction,
+  submitPartnerRequestAction,
+} from "@/app/order/actions";
 import { ComplianceBand } from "@/components/compliance-band";
 import { ORDER_COPY, PARTNER_SKU_LABELS } from "@/lib/order/copy";
 import { writeLocalPartnerDrafts } from "@/lib/order/persist";
@@ -13,6 +18,7 @@ type SessionView = {
   accountId: string;
   license: string;
   accountName: string;
+  elevated: boolean;
 };
 
 type GateView = { ok: true } | { ok: false; reason: string };
@@ -27,6 +33,7 @@ export function OrderClient({
   gate?: GateView;
 }) {
   const [message, setMessage] = useState("");
+  const [doorMode, setDoorMode] = useState<"create" | "return">("create");
   const [step, setStep] = useState<"compose" | "review" | "filed">("compose");
   const [filedId, setFiledId] = useState("");
   const [qty, setQty] = useState<Record<(typeof PARTNER_SKU_IDS)[number], number>>({
@@ -47,6 +54,18 @@ export function OrderClient({
       })),
     [qty],
   );
+
+  function onCreate(formData: FormData) {
+    start(async () => {
+      setMessage("");
+      const result = await registerPartnerAction(formData);
+      if (!result.ok) {
+        setMessage(result.message);
+        return;
+      }
+      window.location.reload();
+    });
+  }
 
   function onOpen(formData: FormData) {
     start(async () => {
@@ -103,7 +122,7 @@ export function OrderClient({
               lotId: "",
               metrcUid: "",
             })),
-            documents: "Partner request. Draft only. No Metrc write.",
+            documents: "Partner reservation. Draft only. No Metrc write.",
             notes,
             source: "partner",
           },
@@ -220,27 +239,90 @@ export function OrderClient({
                 margin: "28px auto 0",
               }}
             />
-            <form action={onOpen} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
-              <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
-              <input className="field" name="inviteCode" autoComplete="off" placeholder={ORDER_COPY.invite} required />
-              <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
-              <label
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  alignItems: "center",
-                  fontSize: 13,
-                  color: "#B0A99A",
-                  cursor: "pointer",
-                }}
-              >
-                <input type="checkbox" name="age21" value="1" />
-                {ORDER_COPY.age21}
-              </label>
-              <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
-                {ORDER_COPY.enter}
-              </button>
-            </form>
+            {doorMode === "create" ? (
+              <form action={onCreate} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
+                <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
+                <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
+                <input
+                  className="field"
+                  type="password"
+                  name="password"
+                  autoComplete="new-password"
+                  placeholder={ORDER_COPY.password}
+                  required
+                />
+                <input
+                  className="field"
+                  type="password"
+                  name="confirm"
+                  autoComplete="new-password"
+                  placeholder={ORDER_COPY.confirm}
+                  required
+                />
+                <label
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "center",
+                    fontSize: 13,
+                    color: "#B0A99A",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input type="checkbox" name="age21" value="1" />
+                  {ORDER_COPY.age21}
+                </label>
+                <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
+                  {ORDER_COPY.createAccess}
+                </button>
+              </form>
+            ) : (
+              <form action={onOpen} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
+                <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
+                <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
+                <input
+                  className="field"
+                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  placeholder={ORDER_COPY.returnPassword}
+                  required
+                />
+                <label
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "center",
+                    fontSize: 13,
+                    color: "#B0A99A",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input type="checkbox" name="age21" value="1" />
+                  {ORDER_COPY.age21}
+                </label>
+                <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
+                  {ORDER_COPY.enter}
+                </button>
+              </form>
+            )}
+            <button
+              type="button"
+              className="vx-act"
+              disabled={pending}
+              onClick={() => {
+                setMessage("");
+                setDoorMode((current) => (current === "create" ? "return" : "create"));
+              }}
+              style={{ marginTop: 18 }}
+            >
+              {doorMode === "create" ? ORDER_COPY.returnDoor : ORDER_COPY.createDoor}
+            </button>
+            <p style={{ margin: "16px 0 0" }}>
+              <a href="/Privacy.dc.html" style={{ fontSize: 12, letterSpacing: "0.08em", color: tokens.muted }}>
+                {ORDER_COPY.privacy}
+              </a>
+            </p>
             <p
               style={{
                 fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",

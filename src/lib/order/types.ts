@@ -2,24 +2,25 @@ export const PARTNER_SKU_IDS = ["no-1", "no-2", "no-3"] as const;
 export type PartnerSkuId = (typeof PARTNER_SKU_IDS)[number];
 
 export const PARTNER_SESSION_COOKIE = "bond_order_partner";
+export const PARTNER_ACCOUNT_COOKIE = "bond_order_accounts";
 export const PARTNER_DRAFT_COOKIE = "bond_order_drafts";
 export const PARTNER_DRAFT_STORAGE = "bond_order_drafts";
 
 export const PARTNER_ROLE = "partner" as const;
 
-export type PartnerInvite = {
+export type PartnerAccount = {
   email: string;
-  inviteCode: string;
   license: string;
   accountId: string;
   elevated: boolean;
+  passwordSalt: string;
+  passwordHash: string;
 };
 
 export type PartnerSession = {
   email: string;
   accountId: string;
   license: string;
-  inviteCode: string;
   age21: true;
   role: typeof PARTNER_ROLE;
 };
@@ -59,12 +60,13 @@ export function isPartnerSkuId(value: string): value is PartnerSkuId {
   return (PARTNER_SKU_IDS as readonly string[]).includes(value);
 }
 
-export function normalizeInviteCode(value: string): string {
+export function normalizeLicense(value: string): string {
   return value.trim().toUpperCase();
 }
 
-export function normalizeLicense(value: string): string {
-  return value.trim().toUpperCase();
+export function isLicenseString(value: string): boolean {
+  const license = normalizeLicense(value);
+  return license.length >= 4 && /^[A-Z0-9][A-Z0-9-]*$/.test(license);
 }
 
 export function parsePartnerSession(raw: string | null | undefined): PartnerSession | null {
@@ -73,18 +75,60 @@ export function parsePartnerSession(raw: string | null | undefined): PartnerSess
     const value = JSON.parse(raw) as Partial<PartnerSession>;
     if (!value || typeof value.email !== "string") return null;
     if (typeof value.accountId !== "string" || typeof value.license !== "string") return null;
-    if (typeof value.inviteCode !== "string") return null;
     if (value.role !== PARTNER_ROLE) return null;
     if (value.age21 !== true) return null;
     return {
       email: value.email.trim().toLowerCase(),
       accountId: value.accountId,
       license: value.license,
-      inviteCode: value.inviteCode,
       age21: true,
       role: PARTNER_ROLE,
     };
   } catch {
     return null;
   }
+}
+
+export function parsePartnerAccounts(raw: string | null | undefined): PartnerAccount[] {
+  if (!raw) return [];
+  try {
+    const value = JSON.parse(raw) as { accounts?: unknown };
+    const rows = Array.isArray(value.accounts) ? value.accounts : Array.isArray(value) ? value : [];
+    return rows
+      .filter((row): row is PartnerAccount => {
+        if (!row || typeof row !== "object") return false;
+        const item = row as Partial<PartnerAccount>;
+        return (
+          typeof item.email === "string" &&
+          typeof item.license === "string" &&
+          typeof item.accountId === "string" &&
+          typeof item.elevated === "boolean" &&
+          typeof item.passwordSalt === "string" &&
+          typeof item.passwordHash === "string"
+        );
+      })
+      .map((row) => ({
+        email: row.email.trim().toLowerCase(),
+        license: normalizeLicense(row.license),
+        accountId: row.accountId,
+        elevated: row.elevated === true,
+        passwordSalt: row.passwordSalt,
+        passwordHash: row.passwordHash,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export function serializePartnerAccounts(rows: PartnerAccount[]): string {
+  return JSON.stringify({
+    accounts: rows.slice(0, 48).map((row) => ({
+      email: row.email,
+      license: row.license,
+      accountId: row.accountId,
+      elevated: row.elevated,
+      passwordSalt: row.passwordSalt,
+      passwordHash: row.passwordHash,
+    })),
+  });
 }

@@ -97,8 +97,12 @@ test("Home public Haus entry CTAs point at Next /haus", () => {
   assert.match(home, /href="\/haus"[^>]*>Enter Bond Haus</);
   const footer = home.slice(home.indexOf("<footer"));
   assert.match(footer, /href="\/haus"[^>]*>Bond Haus</);
-  const navHaus = [...home.matchAll(/href="([^"]+)"[^>]*>Bond Haus</g)].map((m) => m[1]);
-  assert.ok(navHaus.includes("#haus"));
+  const header = home.slice(home.indexOf("<nav"), home.indexOf("</nav>"));
+  assert.equal(header.includes(">Bond Haus<"), false);
+  const navPlace = [...home.matchAll(/href="([^"]+)"[^>]*>Place Order</g)].map((m) => m[1]);
+  assert.ok(navPlace.length >= 2);
+  assert.ok(navPlace.every((href) => href === "/order"));
+  assert.equal(footer.includes("/order"), false);
   assert.equal(home.includes("/haus/admin"), false);
 });
 
@@ -160,10 +164,12 @@ test("SKU footer Bond Haus points at Next /haus", () => {
   assert.match(no3, /A reserve expression from Bond's solventless live rosin collection\./);
 });
 
-test("public marketing never exposes the partner order door", () => {
+test("public marketing exposes /order only as Home header Place Order", () => {
   const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
+  const home = readFileSync(join(root, "Home.dc.html"), "utf8");
+  assert.match(home, /href="\/order"[^>]*>Place Order</);
+  assert.equal(home.includes('href="/partner/order"'), false);
   const marketing = [
-    "Home.dc.html",
     "No1.dc.html",
     "No2.dc.html",
     "No3.dc.html",
@@ -185,6 +191,10 @@ test("public marketing never exposes the partner order door", () => {
   assert.match(robots, /\/order/);
   const middleware = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../middleware.ts"), "utf8");
   assert.equal(middleware.includes('"/order"'), false);
+  const privacy = readFileSync(join(root, "Privacy.dc.html"), "utf8");
+  assert.match(privacy, /Dispensary Login/);
+  assert.match(privacy, /hashed password/);
+  assert.match(privacy, /never sent to Metrc/);
 });
 
 test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {

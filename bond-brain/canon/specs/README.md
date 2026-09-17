@@ -26,6 +26,8 @@ Briefable:
 - specs/prompt-6b-flags.md (Prompt 6b residual flags. Dual controller and MFA out)
 - specs/prompt-6-dual-hero-controller-unify.md (Prompt 6 unify only. video-policy.js sole Home attach and endplate owner. Series stays PARTIAL)
 - specs/prompt-6-dual-hero-controller-unify-flags.md (Prompt 6 unify flags. 6c / 6d / 6f and Vesper matrices out)
+- specs/dispensary-login-header-place-order.md (Header Place Order and pending Dispensary Login. Invite retired.)
+- specs/dispensary-login-header-place-order-felix-precheck.md (Felix Pre-Check for the public header CTA)
 
 Unbriefable for marketing build:
 - Brand Guidelines
