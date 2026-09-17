@@ -48,6 +48,10 @@ test("password hashes and never equals plaintext", () => {
 
 function newSignup(overrides: Partial<Parameters<typeof registerPartnerDoor>[0]> = {}) {
   return {
+    dispensaryName: "Aurora Haus",
+    address: "12 State Street, Albany, NY 12207",
+    contactName: "Ada Buyer",
+    phone: "518-555-0199",
     email: "new.buyer@example.test",
     license: "OCM-AUR-0999",
     password: "Bond-New-Door-21",
@@ -68,7 +72,10 @@ test("register creates a pending account only and retires invite binding", () =>
   const stored = findPartnerAccount({ email: "new.buyer@example.test", license: "OCM-AUR-0999" }, rows);
   assert.ok(stored);
   assert.equal(stored.elevated, false);
-  assert.equal(stored.dispensaryName, "");
+  assert.equal(stored.dispensaryName, "Aurora Haus");
+  assert.equal(stored.address, "12 State Street, Albany, NY 12207");
+  assert.equal(stored.contactName, "Ada Buyer");
+  assert.equal(stored.phone, "518-555-0199");
   assert.notEqual(stored.passwordHash, "Bond-New-Door-21");
   assert.equal(verifyPassword("Bond-New-Door-21", stored), true);
 });
@@ -140,8 +147,20 @@ test("sign in is email and password only", () => {
   }
 });
 
-test("register rejects invite-shaped shortcuts and mismatched passwords", () => {
+test("register rejects thin profile, invite-shaped shortcuts, and mismatched passwords", () => {
   const rows = clonePartnerAccounts();
+  const nameless = registerPartnerDoor(newSignup({ dispensaryName: "A" }), rows);
+  assert.equal(nameless.ok, false);
+  if (!nameless.ok) assert.equal(nameless.message, ORDER_COPY.nameFail);
+  const noStreet = registerPartnerDoor(newSignup({ address: "NY" }), rows);
+  assert.equal(noStreet.ok, false);
+  if (!noStreet.ok) assert.equal(noStreet.message, ORDER_COPY.addressFail);
+  const noContact = registerPartnerDoor(newSignup({ contactName: "" }), rows);
+  assert.equal(noContact.ok, false);
+  if (!noContact.ok) assert.equal(noContact.message, ORDER_COPY.contactFail);
+  const noPhone = registerPartnerDoor(newSignup({ phone: "555" }), rows);
+  assert.equal(noPhone.ok, false);
+  if (!noPhone.ok) assert.equal(noPhone.message, ORDER_COPY.phoneFail);
   const young = registerPartnerDoor(newSignup({ age21: false }), rows);
   assert.equal(young.ok, false);
   if (!young.ok) assert.match(young.message, /21 and over/);
@@ -336,8 +355,12 @@ test("order surface copy stays neutral and off Metrc claims", () => {
   assert.equal(ORDER_COPY.signInTab, "Sign in");
   assert.equal(ORDER_COPY.signUp, "Continue");
   assert.equal(ORDER_COPY.signIn, "Sign in");
-  assert.equal(ORDER_COPY.email, "Email");
+  assert.equal(ORDER_COPY.dispensaryName, "Dispensary name");
+  assert.equal(ORDER_COPY.address, "Address");
+  assert.equal(ORDER_COPY.contactName, "Contact name");
+  assert.equal(ORDER_COPY.phone, "Phone");
   assert.equal(ORDER_COPY.license, "OCM license number");
+  assert.equal(ORDER_COPY.email, "Email");
   assert.equal(ORDER_COPY.password, "Create password");
   assert.equal(ORDER_COPY.confirm, "Confirm password");
   assert.equal(PARTNER_SKU_LABELS["no-1"], "No. 1 Dialed");
@@ -388,15 +411,15 @@ test("unauth order page renders Dispensary Login and never 403", () => {
   assert.match(client, /ORDER_COPY.signInTab/);
   assert.match(client, /ORDER_COPY\.signUp\}/);
   assert.match(client, /ORDER_COPY\.signIn\}/);
-  assert.equal(client.includes("ORDER_COPY.dispensaryName"), false);
-  assert.equal(client.includes("ORDER_COPY.address"), false);
-  assert.equal(client.includes("ORDER_COPY.contactName"), false);
-  assert.equal(client.includes('name="phone"'), false);
-  assert.equal(client.includes("Already registered"), false);
+  assert.match(client, /ORDER_COPY.dispensaryName/);
+  assert.match(client, /ORDER_COPY.address/);
+  assert.match(client, /ORDER_COPY.contactName/);
+  assert.match(client, /ORDER_COPY.phone/);
   assert.match(client, /ORDER_COPY.email/);
   assert.match(client, /ORDER_COPY.license/);
   assert.match(client, /ORDER_COPY.password/);
   assert.match(client, /ORDER_COPY.confirm/);
+  assert.equal(client.includes("Already registered"), false);
   assert.match(client, /age21/);
   assert.match(client, /ORDER_COPY.formTitle/);
   assert.match(client, /ORDER_COPY.pendingWait/);
@@ -404,8 +427,12 @@ test("unauth order page renders Dispensary Login and never 403", () => {
   assert.equal(client.includes("inviteCode"), false);
   assert.equal(client.includes("returnDoor"), false);
   const signupForm = client.slice(client.indexOf("action={onCreate}"), client.indexOf("action={onOpen}"));
-  assert.ok(signupForm.indexOf("ORDER_COPY.email") < signupForm.indexOf("ORDER_COPY.license"));
-  assert.ok(signupForm.indexOf("ORDER_COPY.license") < signupForm.indexOf("ORDER_COPY.password"));
+  assert.ok(signupForm.indexOf("ORDER_COPY.dispensaryName") < signupForm.indexOf("ORDER_COPY.address"));
+  assert.ok(signupForm.indexOf("ORDER_COPY.address") < signupForm.indexOf("ORDER_COPY.contactName"));
+  assert.ok(signupForm.indexOf("ORDER_COPY.contactName") < signupForm.indexOf("ORDER_COPY.phone"));
+  assert.ok(signupForm.indexOf("ORDER_COPY.phone") < signupForm.indexOf("ORDER_COPY.license"));
+  assert.ok(signupForm.indexOf("ORDER_COPY.license") < signupForm.indexOf("ORDER_COPY.email"));
+  assert.ok(signupForm.indexOf("ORDER_COPY.email") < signupForm.indexOf("ORDER_COPY.password"));
   assert.ok(signupForm.indexOf("ORDER_COPY.password") < signupForm.indexOf("ORDER_COPY.confirm"));
   const signInForm = client.slice(client.indexOf("action={onOpen}"));
   const signInOnly = signInForm.slice(0, signInForm.indexOf("ORDER_COPY.privacy"));

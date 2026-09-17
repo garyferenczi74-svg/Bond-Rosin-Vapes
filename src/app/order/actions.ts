@@ -19,6 +19,10 @@ function fail(message = GENERIC_DOOR) {
 }
 
 export async function registerPartnerAction(formData: FormData) {
+  const dispensaryName = String(formData.get("dispensaryName") ?? "");
+  const address = String(formData.get("address") ?? "");
+  const contactName = String(formData.get("contactName") ?? "");
+  const phone = String(formData.get("phone") ?? "");
   const email = String(formData.get("email") ?? "");
   const license = String(formData.get("license") ?? "");
   const password = String(formData.get("password") ?? "");
@@ -27,7 +31,7 @@ export async function registerPartnerAction(formData: FormData) {
 
   const rows = await readPartnerAccountBook();
   const bound = registerPartnerDoor(
-    { email, license, password, confirm, age21 },
+    { dispensaryName, address, contactName, phone, email, license, password, confirm, age21 },
     rows,
   );
   if (!bound.ok) return fail(bound.message);
