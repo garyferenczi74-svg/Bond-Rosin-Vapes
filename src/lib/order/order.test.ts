@@ -353,6 +353,8 @@ test("order surface copy stays neutral and off Metrc claims", () => {
   assert.equal(ORDER_COPY.formTitle, "Order reservation");
   assert.equal(ORDER_COPY.signUpTab, "Sign up");
   assert.equal(ORDER_COPY.signInTab, "Sign in");
+  assert.equal(ORDER_COPY.signUp, "Continue");
+  assert.equal(ORDER_COPY.signIn, "Sign in");
   assert.equal(ORDER_COPY.license, "OCM number");
   assert.equal(PARTNER_SKU_LABELS["no-1"], "No. 1 Dialed");
 });
@@ -398,6 +400,8 @@ test("unauth order page renders Dispensary Login and never 403", () => {
   assert.match(client, /registerPartnerAction/);
   assert.match(client, /ORDER_COPY.signUpTab/);
   assert.match(client, /ORDER_COPY.signInTab/);
+  assert.match(client, /ORDER_COPY\.signUp\}/);
+  assert.match(client, /ORDER_COPY\.signIn\}/);
   assert.match(client, /ORDER_COPY.dispensaryName/);
   assert.match(client, /ORDER_COPY.address/);
   assert.match(client, /ORDER_COPY.contactName/);
