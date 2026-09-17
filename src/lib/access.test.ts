@@ -191,13 +191,28 @@ test("public marketing exposes /order only as Home header Place Order", () => {
   assert.match(robots, /\/order/);
   const middleware = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../middleware.ts"), "utf8");
   assert.equal(middleware.includes('"/order"'), false);
-  const privacy = readFileSync(join(root, "Privacy.dc.html"), "utf8");
-  assert.match(privacy, /Dispensary Login/);
-  assert.match(privacy, /dispensary name/);
-  assert.match(privacy, /contact name/);
-  assert.match(privacy, /phone number/);
-  assert.match(privacy, /hashed password/);
-  assert.match(privacy, /never sent to Metrc/);
+});
+
+test("Privacy Dispensary Login collection lists only the five locked fields", () => {
+  const privacy = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "../../Privacy.dc.html"),
+    "utf8",
+  );
+  const match = privacy.match(/<li>Dispensary Login:[^<]+<\/li>/);
+  assert.ok(match, "Dispensary Login collection sentence must exist");
+  const sentence = match[0];
+  assert.match(sentence, /licensed partner email/);
+  assert.match(sentence, /New York OCM license number/);
+  assert.match(sentence, /hashed password/);
+  assert.match(sentence, /21\+ confirmation/);
+  assert.match(sentence, /elevation state/);
+  assert.equal(/dispensary name/i.test(sentence), false);
+  assert.equal(/\baddress\b/i.test(sentence), false);
+  assert.equal(/contact name/i.test(sentence), false);
+  assert.equal(/phone number/i.test(sentence), false);
+  assert.match(sentence, /never sent to Metrc/);
+  assert.match(privacy, /Bond Haus: your email address/);
+  assert.match(privacy, /we store a verification flag in a cookie/);
 });
 
 test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {
