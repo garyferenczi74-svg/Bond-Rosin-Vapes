@@ -12,6 +12,7 @@ This is the rule for Vercel. Preview must prove it before anyone promotes produc
 | `/No1.dc.html`, `/No2.dc.html`, `/No3.dc.html` | Design Canvas | HTTP 200 |
 | `/FAQ.dc.html`, `/Terms.dc.html`, `/Privacy.dc.html` | Design Canvas | HTTP 200 |
 | `/haus` | Next.js Bond Haus sign-in | HTTP 200. Do not rewrite `/Haus` to the mock; Next.js rewrite matching is case-insensitive and would steal this route. |
+| `/order` | Next.js Dispensary Login and order reservation | HTTP 200. Logged-out door only. Signed-in reservation only. noindex. Header Place Order is the public CTA. |
 | `/vauxhall` and nested wing routes | Next.js portal | Cloaked 404 unless an active `public.admins` session (waiver W-2026-09-15-P1-OVERRIDE: password only, MFA not required) |
 | `/Admin.dc.html`, `/Haus.dc.html`, `/Vauxhall.dc.html`, other admin HTML | Not copied into `public/` | Cloaked 404 |
 | `/bond-brain` | Blocked | Cloaked 404 |
@@ -77,7 +78,7 @@ Gary holds production and social publish keys. This repo does not store them. M 
 
 ## Access model
 
-1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`). Home hero, Haus waitlist (hash alias `id=circle` for `/#circle`), signup success, and footer Bond Haus also enter at `/haus`. SKU footer Bond Haus on No1 / No2 / No3 also enters at `/haus`.
+1. `/haus` is the public sign-in. Visitors see Bond Haus only. Home.dc.html footer and mobile menu expose a public Admin link to `/haus` (not `Admin.dc.html`, not `Haus.dc.html`). Home hero, Haus waitlist (hash alias `id=circle` for `/#circle`), signup success, and footer Bond Haus also enter at `/haus`. SKU footer Bond Haus on No1 / No2 / No3 also enters at `/haus`. Home header Place Order enters at `/order`. Hero ENTER THE BOND HAUS stays on `/haus`.
 2. Credentials that match an active `admins` row (role `admin`, `owner`, or `operator`) open `/vauxhall` after password auth. MFA enroll is not required under W-2026-09-15-P1-OVERRIDE.
 3. Demo member `member@bond.test` (any password) is mock member auth. It never opens `/vauxhall`. First visit shows the welcome interstitial and a 21+ affirm, then `/haus/salon` (frame and Sign Out only). The shelf seeds empty.
 4. Unknown email, wrong password, or a signed-in user who is not an admin and not the demo member receives the generic door line. Non-admin sessions never see portal chrome.
@@ -86,6 +87,7 @@ Gary holds production and social publish keys. This repo does not store them. M 
 7. Admin roles are server-verified from `public.admins`. RLS uses `is_admin()`. Member role for Phase A is the demo mock cookie. Client flags are not a gate.
 8. Sessions idle out at 24 hours (`bond_idle_at` cookie, checked in middleware). Member mock session uses the same day window.
 9. Every portal action writes `audit_log`: who, what, before, after, when, from where (ip, user agent, path). The table is append-only.
+10. `/order` logged-out is Dispensary Login: email, NY OCM license number, create password plus confirm, and 21+. Register creates a pending partner credential only. Ops must elevate before a reservation can be submitted. Invite codes are retired. Passwords are hashed, never logged in plaintext, and never sent to Metrc. Signed-in `/order` is the order reservation surface only. No unauthenticated order create. No Metrc write. No Metrc-verified claim. B4 HOLD. Haus stays out of commerce.
 
 ## Rate limit and lockout stub
 

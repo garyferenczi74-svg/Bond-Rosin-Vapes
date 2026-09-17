@@ -4,6 +4,8 @@
 **Author:** Felix
 **Status:** LOCKED for Phase A shape / verify / notes. Phase B Metrc write remains PARKED with Prompt 2D B.
 
+Amendment 2026-09-17: Header Place Order public CTA and password login are locked by `/canon/specs/dispensary-login-header-place-order.md`. Invite door is retired. Cloak-by-default is no longer absolute for the Home header only.
+
 ## Q architecture (accepted)
 
 Metrc order database = Bond Orders (commercial) + Metrc transfer/manifest on fulfill only. No parallel Metrc cart API.

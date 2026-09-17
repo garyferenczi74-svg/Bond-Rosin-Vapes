@@ -113,3 +113,17 @@ This does not claim Prompt 6 / 6a / 6e / 6g / 6h DONE.
 
 Haus is the only membership word on `/haus`. Circle is not user-visible on that door.
 `id=circle` and `bond_circle` stay as documented aliases. They are not membership words.
+
+## Dispensary Login / Header Place Order (2026-09-17)
+
+Standing brief: `/canon/specs/dispensary-login-header-place-order.md`
+
+| Slot | Locked string |
+| --- | --- |
+| Header tab | Place Order |
+| Header href | `/order` |
+| Hero membership CTA | ENTER THE BOND HAUS |
+| Hero href | `/haus` |
+| Logged-out title | Dispensary Login |
+| Logged-in title | Order reservation |
+| Age gate | For adults 21 and over. |
