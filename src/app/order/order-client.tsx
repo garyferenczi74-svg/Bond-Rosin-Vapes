@@ -25,6 +25,42 @@ type GateView = { ok: true } | { ok: false; reason: string };
 
 const DEFAULT_WEEK = "2026-09-22";
 
+function DoorTab({
+  label,
+  active,
+  disabled,
+  onSelect,
+}: {
+  label: string;
+  active: boolean;
+  disabled: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      disabled={disabled}
+      onClick={onSelect}
+      style={{
+        background: "transparent",
+        border: 0,
+        borderBottom: `1px solid ${active ? tokens.bone : "transparent"}`,
+        color: active ? tokens.bone : tokens.muted,
+        cursor: disabled ? "default" : "pointer",
+        fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
+        fontSize: 13,
+        letterSpacing: "0.16em",
+        padding: "10px 0",
+        textTransform: "uppercase",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 export function OrderClient({
   session,
   gate,
@@ -33,7 +69,7 @@ export function OrderClient({
   gate?: GateView;
 }) {
   const [message, setMessage] = useState("");
-  const [doorMode, setDoorMode] = useState<"create" | "return">("create");
+  const [doorMode, setDoorMode] = useState<"signup" | "signin">("signup");
   const [step, setStep] = useState<"compose" | "review" | "filed">("compose");
   const [filedId, setFiledId] = useState("");
   const [qty, setQty] = useState<Record<(typeof PARTNER_SKU_IDS)[number], number>>({
@@ -200,7 +236,7 @@ export function OrderClient({
         }}
       >
         {!session ? (
-          <div style={{ width: "min(420px, 100%)", textAlign: "center" }}>
+          <div style={{ width: "min(440px, 100%)", textAlign: "center" }}>
             <p
               className="didot"
               style={{
@@ -239,10 +275,44 @@ export function OrderClient({
                 margin: "28px auto 0",
               }}
             />
-            {doorMode === "create" ? (
-              <form action={onCreate} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
-                <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
+            <div
+              role="tablist"
+              aria-label={ORDER_COPY.doorTitle}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 16,
+                marginTop: 28,
+                borderBottom: `1px solid ${tokens.line}`,
+              }}
+            >
+              <DoorTab
+                label={ORDER_COPY.signUpTab}
+                active={doorMode === "signup"}
+                disabled={pending}
+                onSelect={() => {
+                  setMessage("");
+                  setDoorMode("signup");
+                }}
+              />
+              <DoorTab
+                label={ORDER_COPY.signInTab}
+                active={doorMode === "signin"}
+                disabled={pending}
+                onSelect={() => {
+                  setMessage("");
+                  setDoorMode("signin");
+                }}
+              />
+            </div>
+            {doorMode === "signup" ? (
+              <form action={onCreate} style={{ marginTop: 28, display: "grid", gap: 12, textAlign: "left" }}>
+                <input className="field" name="dispensaryName" autoComplete="organization" placeholder={ORDER_COPY.dispensaryName} required />
+                <input className="field" name="address" autoComplete="street-address" placeholder={ORDER_COPY.address} required />
+                <input className="field" name="contactName" autoComplete="name" placeholder={ORDER_COPY.contactName} required />
+                <input className="field" type="tel" name="phone" autoComplete="tel" placeholder={ORDER_COPY.phone} required />
                 <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
+                <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
                 <input
                   className="field"
                   type="password"
@@ -273,13 +343,12 @@ export function OrderClient({
                   {ORDER_COPY.age21}
                 </label>
                 <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
-                  {ORDER_COPY.createAccess}
+                  {ORDER_COPY.signUp}
                 </button>
               </form>
             ) : (
-              <form action={onOpen} style={{ marginTop: 34, display: "grid", gap: 14, textAlign: "left" }}>
+              <form action={onOpen} style={{ marginTop: 28, display: "grid", gap: 12, textAlign: "left" }}>
                 <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
-                <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
                 <input
                   className="field"
                   type="password"
@@ -288,36 +357,11 @@ export function OrderClient({
                   placeholder={ORDER_COPY.returnPassword}
                   required
                 />
-                <label
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    alignItems: "center",
-                    fontSize: 13,
-                    color: "#B0A99A",
-                    cursor: "pointer",
-                  }}
-                >
-                  <input type="checkbox" name="age21" value="1" />
-                  {ORDER_COPY.age21}
-                </label>
                 <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
-                  {ORDER_COPY.enter}
+                  {ORDER_COPY.signIn}
                 </button>
               </form>
             )}
-            <button
-              type="button"
-              className="vx-act"
-              disabled={pending}
-              onClick={() => {
-                setMessage("");
-                setDoorMode((current) => (current === "create" ? "return" : "create"));
-              }}
-              style={{ marginTop: 18 }}
-            >
-              {doorMode === "create" ? ORDER_COPY.returnDoor : ORDER_COPY.createDoor}
-            </button>
             <p style={{ margin: "16px 0 0" }}>
               <a href="/Privacy.dc.html" style={{ fontSize: 12, letterSpacing: "0.08em", color: tokens.muted }}>
                 {ORDER_COPY.privacy}
@@ -335,6 +379,36 @@ export function OrderClient({
             >
               {pending ? "" : message}
             </p>
+          </div>
+        ) : !session.elevated ? (
+          <div style={{ width: "min(520px, 100%)", textAlign: "center" }}>
+            <p className="lbl" style={{ margin: "0 0 8px" }}>
+              {ORDER_COPY.doorTitle}
+            </p>
+            <h1
+              className="didot"
+              style={{
+                fontFamily: "var(--font-didot), 'GFS Didot', Didot, serif",
+                fontWeight: 400,
+                fontSize: "clamp(28px, 4vw, 40px)",
+                margin: 0,
+              }}
+            >
+              {session.accountName}
+            </h1>
+            <p style={{ fontSize: 13, color: tokens.muted, margin: "10px 0 0" }}>
+              {session.license} . {session.email}
+            </p>
+            <p
+              className="card"
+              style={{ marginTop: 22, boxShadow: "inset 0 1px 0 var(--product)" }}
+              role="status"
+            >
+              {ORDER_COPY.pendingWait}
+            </p>
+            <button className="btn" type="button" onClick={onClose} disabled={pending} style={{ marginTop: 22, maxWidth: 220 }}>
+              {ORDER_COPY.close}
+            </button>
           </div>
         ) : (
           <div style={{ width: "min(720px, 100%)" }}>

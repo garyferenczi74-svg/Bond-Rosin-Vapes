@@ -2,18 +2,19 @@
 
 **Date:** 2026-09-17
 **Status:** JB FINAL
-**Tip baseline:** PR28 `33f502f`
+**Tip baseline:** PR29 `11c44cd`
 
 ## Locks
 
 1. Header Bond Haus becomes Place Order (Title Case). href `/order`. Part 129 applies.
 2. Hero ENTER THE BOND HAUS stays on `/haus`. Haus stays out of commerce.
-3. Logged-out `/order` is Dispensary Login: email, NY OCM license number, create password plus confirm, 21+. Creates a pending account only. Ops elevate before any reservation submit. Invite code field is retired.
-4. Signed-in `/order` is the order reservation surface only. No unauthenticated order create.
-5. No Metrc write. No Metrc-verified claim. B4 HOLD.
-6. Password hashed. Never log plaintext. Never send to Metrc.
-7. Destination age gate 21+. No youth appeal. Keep Bond compliance chrome and warnings.
-8. Media HARD LOCK untouched.
+3. Logged-out `/order` is Dispensary Login with two tabs: Sign up and Sign in. Invite code field is retired.
+4. Sign up collects dispensary name, address, contact name, phone number, OCM number (NY license), email, create password, confirm password, and 21+. Creates a pending account only. Ops elevate before reservation access.
+5. Sign in is email plus password only. Elevated session opens the reservation surface. Pending session shows a wait message and no reservation.
+6. No unauthenticated order create. No Metrc write. No Metrc-verified claim. B4 HOLD.
+7. Password hashed. Never log plaintext. Never send to Metrc.
+8. Destination age gate 21+ on Sign up. No youth appeal. Keep Bond compliance chrome and warnings.
+9. Media HARD LOCK untouched.
 
 ## Out
 

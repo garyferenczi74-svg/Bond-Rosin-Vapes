@@ -46,18 +46,24 @@ test("password hashes and never equals plaintext", () => {
   assert.equal(verifyPassword("wrong-pass", record), false);
 });
 
+function newSignup(overrides: Partial<Parameters<typeof registerPartnerDoor>[0]> = {}) {
+  return {
+    dispensaryName: "Aurora Haus",
+    address: "12 State Street, Albany, NY 12207",
+    contactName: "Ada Buyer",
+    phone: "518-555-0199",
+    email: "new.buyer@example.test",
+    license: "OCM-AUR-0999",
+    password: "Bond-New-Door-21",
+    confirm: "Bond-New-Door-21",
+    age21: true,
+    ...overrides,
+  };
+}
+
 test("register creates a pending account only and retires invite binding", () => {
   const rows = clonePartnerAccounts();
-  const created = registerPartnerDoor(
-    {
-      email: "new.buyer@example.test",
-      license: "OCM-AUR-0999",
-      password: "Bond-New-Door-21",
-      confirm: "Bond-New-Door-21",
-      age21: true,
-    },
-    rows,
-  );
+  const created = registerPartnerDoor(newSignup(), rows);
   assert.equal(created.ok, true);
   if (!created.ok) return;
   assert.equal(created.session.role, "partner");
@@ -66,6 +72,10 @@ test("register creates a pending account only and retires invite binding", () =>
   const stored = findPartnerAccount({ email: "new.buyer@example.test", license: "OCM-AUR-0999" }, rows);
   assert.ok(stored);
   assert.equal(stored.elevated, false);
+  assert.equal(stored.dispensaryName, "Aurora Haus");
+  assert.equal(stored.address, "12 State Street, Albany, NY 12207");
+  assert.equal(stored.contactName, "Ada Buyer");
+  assert.equal(stored.phone, "518-555-0199");
   assert.notEqual(stored.passwordHash, "Bond-New-Door-21");
   assert.equal(verifyPassword("Bond-New-Door-21", stored), true);
 });
@@ -73,13 +83,12 @@ test("register creates a pending account only and retires invite binding", () =>
 test("pending register cannot file a reservation until ops elevates", () => {
   const rows = clonePartnerAccounts();
   const created = registerPartnerDoor(
-    {
+    newSignup({
       email: "hold.buyer@example.test",
       license: "OCM-AUR-0888",
       password: "Bond-Hold-Door-21",
       confirm: "Bond-Hold-Door-21",
-      age21: true,
-    },
+    }),
     rows,
   );
   assert.equal(created.ok, true);
@@ -101,9 +110,7 @@ test("seed pending account stays closed for reservation until ops elevates", () 
   const closed = openPartnerDoor(
     {
       email: "pending.buyer@example.test",
-      license: "MOCK-LIC-PROTO-EAST",
       password: SEED_PARTNER_PASSWORD,
-      age21: true,
     },
     rows,
   );
@@ -114,9 +121,7 @@ test("seed pending account stays closed for reservation until ops elevates", () 
   const opened = openPartnerDoor(
     {
       email: "pending.buyer@example.test",
-      license: "MOCK-LIC-PROTO-EAST",
       password: SEED_PARTNER_PASSWORD,
-      age21: true,
     },
     rows,
   );
@@ -124,28 +129,16 @@ test("seed pending account stays closed for reservation until ops elevates", () 
   if (opened.ok) assert.equal(isPartnerElevated(opened.session, rows), true);
 });
 
-test("door requires matching email, license, password, and 21 plus", () => {
+test("sign in is email and password only", () => {
   const miss = openPartnerDoor({
     email: "north.buyer@example.test",
-    license: "MOCK-LIC-PROTO-NORTH",
     password: "wrong-password",
-    age21: true,
   });
   assert.equal(miss.ok, false);
   if (!miss.ok) assert.equal(miss.message, GENERIC_DOOR);
-  const young = openPartnerDoor({
-    email: "north.buyer@example.test",
-    license: "MOCK-LIC-PROTO-NORTH",
-    password: SEED_PARTNER_PASSWORD,
-    age21: false,
-  });
-  assert.equal(young.ok, false);
-  if (!young.ok) assert.match(young.message, /21 and over/);
   const ok = openPartnerDoor({
     email: "North.Buyer@example.test",
-    license: "mock-lic-proto-north",
     password: SEED_PARTNER_PASSWORD,
-    age21: true,
   });
   assert.equal(ok.ok, true);
   if (ok.ok) {
@@ -154,28 +147,41 @@ test("door requires matching email, license, password, and 21 plus", () => {
   }
 });
 
-test("register rejects invite-shaped shortcuts and mismatched passwords", () => {
+test("register rejects thin profile, invite-shaped shortcuts, and mismatched passwords", () => {
   const rows = clonePartnerAccounts();
+  const nameless = registerPartnerDoor(newSignup({ dispensaryName: "A" }), rows);
+  assert.equal(nameless.ok, false);
+  if (!nameless.ok) assert.equal(nameless.message, ORDER_COPY.nameFail);
+  const noStreet = registerPartnerDoor(newSignup({ address: "NY" }), rows);
+  assert.equal(noStreet.ok, false);
+  if (!noStreet.ok) assert.equal(noStreet.message, ORDER_COPY.addressFail);
+  const noContact = registerPartnerDoor(newSignup({ contactName: "" }), rows);
+  assert.equal(noContact.ok, false);
+  if (!noContact.ok) assert.equal(noContact.message, ORDER_COPY.contactFail);
+  const noPhone = registerPartnerDoor(newSignup({ phone: "555" }), rows);
+  assert.equal(noPhone.ok, false);
+  if (!noPhone.ok) assert.equal(noPhone.message, ORDER_COPY.phoneFail);
+  const young = registerPartnerDoor(newSignup({ age21: false }), rows);
+  assert.equal(young.ok, false);
+  if (!young.ok) assert.match(young.message, /21 and over/);
   const mismatch = registerPartnerDoor(
-    {
+    newSignup({
       email: "pair.buyer@example.test",
       license: "OCM-AUR-0777",
       password: "Bond-Pair-Door-21",
       confirm: "Bond-Pair-Other-21",
-      age21: true,
-    },
+    }),
     rows,
   );
   assert.equal(mismatch.ok, false);
   if (!mismatch.ok) assert.equal(mismatch.message, ORDER_COPY.matchFail);
   const taken = registerPartnerDoor(
-    {
+    newSignup({
       email: "north.buyer@example.test",
       license: "OCM-AUR-0666",
       password: "Bond-Taken-Door-21",
       confirm: "Bond-Taken-Door-21",
-      age21: true,
-    },
+    }),
     rows,
   );
   assert.equal(taken.ok, false);
@@ -207,6 +213,7 @@ test("persisted book keeps seed passwords and can mark elevation", () => {
   const pending = findPartnerAccount({ email: "pending.buyer@example.test", license: "MOCK-LIC-PROTO-EAST" }, merged);
   assert.ok(pending);
   assert.equal(pending.elevated, true);
+  assert.equal(pending.dispensaryName, "Prototype Dispensary East");
   assert.equal(verifyPassword(SEED_PARTNER_PASSWORD, pending), true);
 });
 
@@ -344,6 +351,9 @@ test("order surface copy stays neutral and off Metrc claims", () => {
   assert.equal(ORDER_COPY.formLine.includes("No Metrc write"), true);
   assert.equal(ORDER_COPY.doorTitle, "Dispensary Login");
   assert.equal(ORDER_COPY.formTitle, "Order reservation");
+  assert.equal(ORDER_COPY.signUpTab, "Sign up");
+  assert.equal(ORDER_COPY.signInTab, "Sign in");
+  assert.equal(ORDER_COPY.license, "OCM number");
   assert.equal(PARTNER_SKU_LABELS["no-1"], "No. 1 Dialed");
 });
 
@@ -386,7 +396,22 @@ test("unauth order page renders Dispensary Login and never 403", () => {
   assert.equal(client.includes("403"), false);
   assert.match(client, /ORDER_COPY.doorTitle/);
   assert.match(client, /registerPartnerAction/);
+  assert.match(client, /ORDER_COPY.signUpTab/);
+  assert.match(client, /ORDER_COPY.signInTab/);
+  assert.match(client, /ORDER_COPY.dispensaryName/);
+  assert.match(client, /ORDER_COPY.address/);
+  assert.match(client, /ORDER_COPY.contactName/);
+  assert.match(client, /ORDER_COPY.phone/);
   assert.match(client, /age21/);
   assert.match(client, /ORDER_COPY.formTitle/);
+  assert.match(client, /ORDER_COPY.pendingWait/);
+  assert.match(client, /session.elevated/);
   assert.equal(client.includes("inviteCode"), false);
+  assert.equal(client.includes("returnDoor"), false);
+  const signInForm = client.slice(client.indexOf("action={onOpen}"));
+  const signInOnly = signInForm.slice(0, signInForm.indexOf("ORDER_COPY.privacy"));
+  assert.equal(signInOnly.includes('name="license"'), false);
+  assert.equal(signInOnly.includes("age21"), false);
+  assert.match(signInOnly, /name="email"/);
+  assert.match(signInOnly, /name="password"/);
 });

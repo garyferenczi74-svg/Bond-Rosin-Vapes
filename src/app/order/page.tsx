@@ -1,5 +1,4 @@
 import { OrderClient } from "@/app/order/order-client";
-import { ORDER_COPY } from "@/lib/order/copy";
 import { findPartnerAccount, isPartnerElevated } from "@/lib/order/door";
 import { readPartnerAccountBook, readPartnerSession } from "@/lib/order/session";
 import { getVauxhallStore } from "@/lib/vauxhall/store";
@@ -24,23 +23,30 @@ export default async function OrderPage() {
   }
 
   const elevated = isPartnerElevated({ email: session.email, license: session.license }, book);
+  const sessionView = {
+    email: session.email,
+    accountId: session.accountId,
+    license: session.license,
+    accountName: account.dispensaryName || account.license,
+    elevated,
+  };
+
+  if (!elevated) {
+    return <OrderClient session={sessionView} />;
+  }
+
   const store = getVauxhallStore();
   const wholesale = store.accountById(session.accountId);
   const storeGate = store.orderGate(session.accountId);
-  const gate = !elevated
-    ? { ok: false as const, reason: ORDER_COPY.pendingBlock }
-    : storeGate.ok
-      ? { ok: true as const }
-      : { ok: false as const, reason: storeGate.reason };
+  const gate = storeGate.ok
+    ? { ok: true as const }
+    : { ok: false as const, reason: storeGate.reason };
 
   return (
     <OrderClient
       session={{
-        email: session.email,
-        accountId: session.accountId,
-        license: session.license,
-        accountName: wholesale?.name ?? account.license,
-        elevated,
+        ...sessionView,
+        accountName: wholesale?.name ?? sessionView.accountName,
       }}
       gate={gate}
     />
