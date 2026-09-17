@@ -4,7 +4,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MetrcConnectAdapter } from "./metrc-connect.ts";
-import { readMetrcSandboxConfig, resolveSandboxBaseUrl } from "./metrc-env.ts";
+import { metrcSandboxEnvFromLookup, readMetrcSandboxConfig, resolveSandboxBaseUrl } from "./metrc-env.ts";
 import { isMetrcConnectEnabled, readMetrcAdapterMode } from "./metrc-flags.ts";
 import { payloadHasForbiddenNotes, regulatoryTransferFields } from "./metrc-payload.ts";
 import { MetrcMockAdapter } from "./metrc-mock.ts";
@@ -47,6 +47,24 @@ test("METRC_ADAPTER flag stays mock on tip and production", () => {
   assert.equal(readMetrcAdapterMode({ METRC_ADAPTER: "connect", METRC_ENV: "production", VERCEL_ENV: "preview" }), "mock");
   assert.equal(readMetrcAdapterMode({ METRC_ADAPTER: "connect", VERCEL_ENV: "preview" }), "connect");
   assert.equal(isMetrcConnectEnabled({}), false);
+});
+
+test("process env is narrowed to sandbox keys only", () => {
+  const narrowed = metrcSandboxEnvFromLookup({
+    METRC_ADAPTER: "connect",
+    VERCEL_ENV: "preview",
+    METRC_SANDBOX_INTEGRATOR_VENDOR_KEY: "sandbox-vendor-test",
+    METRC_SANDBOX_LICENSEE_USER_KEY: "sandbox-user-test",
+    METRC_SANDBOX_FACILITY_LICENSE: "SANDBOX-LIC-BOND",
+    METRC_PRODUCTION_INTEGRATOR_VENDOR_KEY: "prod-vendor-must-not-copy",
+    METRC_PRODUCTION_LICENSEE_USER_KEY: "prod-user-must-not-copy",
+    PATH: "/usr/bin",
+  });
+  assert.equal(narrowed.METRC_ADAPTER, "connect");
+  assert.equal(narrowed.METRC_SANDBOX_FACILITY_LICENSE, "SANDBOX-LIC-BOND");
+  assert.equal("METRC_PRODUCTION_INTEGRATOR_VENDOR_KEY" in narrowed, false);
+  assert.equal("METRC_PRODUCTION_LICENSEE_USER_KEY" in narrowed, false);
+  assert.equal("PATH" in narrowed, false);
 });
 
 test("sandbox host allowlist blocks production Metrc", () => {

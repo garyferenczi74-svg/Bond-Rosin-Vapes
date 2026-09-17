@@ -1,4 +1,4 @@
-import { isMetrcConnectEnabled, type MetrcFlagEnv } from "./metrc-flags.ts";
+import { isMetrcConnectEnabled, pickEnvString, type MetrcEnvLookup, type MetrcFlagEnv } from "./metrc-flags.ts";
 
 export const METRC_SANDBOX_INTEGRATOR_VENDOR_KEY = "METRC_SANDBOX_INTEGRATOR_VENDOR_KEY";
 export const METRC_SANDBOX_LICENSEE_USER_KEY = "METRC_SANDBOX_LICENSEE_USER_KEY";
@@ -14,10 +14,20 @@ export type MetrcSandboxEnv = MetrcFlagEnv & {
   METRC_SANDBOX_LICENSEE_USER_KEY?: string;
   METRC_SANDBOX_FACILITY_LICENSE?: string;
   METRC_SANDBOX_BASE_URL?: string;
-  METRC_PRODUCTION_INTEGRATOR_VENDOR_KEY?: string;
-  METRC_PRODUCTION_LICENSEE_USER_KEY?: string;
-  METRC_PRODUCTION_FACILITY_LICENSE?: string;
 };
+
+export function metrcSandboxEnvFromLookup(source: MetrcEnvLookup = process.env): MetrcSandboxEnv {
+  return {
+    METRC_ADAPTER: pickEnvString(source, "METRC_ADAPTER"),
+    METRC_ENV: pickEnvString(source, "METRC_ENV"),
+    METRC_LIVE: pickEnvString(source, "METRC_LIVE"),
+    VERCEL_ENV: pickEnvString(source, "VERCEL_ENV"),
+    METRC_SANDBOX_INTEGRATOR_VENDOR_KEY: pickEnvString(source, "METRC_SANDBOX_INTEGRATOR_VENDOR_KEY"),
+    METRC_SANDBOX_LICENSEE_USER_KEY: pickEnvString(source, "METRC_SANDBOX_LICENSEE_USER_KEY"),
+    METRC_SANDBOX_FACILITY_LICENSE: pickEnvString(source, "METRC_SANDBOX_FACILITY_LICENSE"),
+    METRC_SANDBOX_BASE_URL: pickEnvString(source, "METRC_SANDBOX_BASE_URL"),
+  };
+}
 
 export type MetrcSandboxConfig =
   | {
@@ -55,21 +65,22 @@ export function resolveSandboxBaseUrl(raw?: string): { ok: true; baseUrl: string
   return { ok: true, baseUrl: `${parsed.origin}${parsed.pathname.replace(/\/$/, "")}` };
 }
 
-export function readMetrcSandboxConfig(env: MetrcSandboxEnv = process.env): MetrcSandboxConfig {
+export function readMetrcSandboxConfig(env: MetrcEnvLookup = process.env): MetrcSandboxConfig {
   assertMetrcServerOnly();
-  if (!isMetrcConnectEnabled(env)) {
+  const sandbox = metrcSandboxEnvFromLookup(env);
+  if (!isMetrcConnectEnabled(sandbox)) {
     return { ok: false, reason: "Connect adapter is off. METRC_ADAPTER=connect is preview only." };
   }
-  const vendorKey = (env.METRC_SANDBOX_INTEGRATOR_VENDOR_KEY ?? "").trim();
-  const userKey = (env.METRC_SANDBOX_LICENSEE_USER_KEY ?? "").trim();
-  const facilityLicense = (env.METRC_SANDBOX_FACILITY_LICENSE ?? "").trim();
+  const vendorKey = (sandbox.METRC_SANDBOX_INTEGRATOR_VENDOR_KEY ?? "").trim();
+  const userKey = (sandbox.METRC_SANDBOX_LICENSEE_USER_KEY ?? "").trim();
+  const facilityLicense = (sandbox.METRC_SANDBOX_FACILITY_LICENSE ?? "").trim();
   if (!vendorKey || !userKey || !facilityLicense) {
     return {
       ok: false,
       reason: "Sandbox integrator vendor key, licensee user key, and facility license are not configured.",
     };
   }
-  const base = resolveSandboxBaseUrl(env.METRC_SANDBOX_BASE_URL);
+  const base = resolveSandboxBaseUrl(sandbox.METRC_SANDBOX_BASE_URL);
   if (!base.ok) return base;
   return {
     ok: true,

@@ -1,9 +1,10 @@
 import {
   metrcBasicAuthHeader,
+  metrcSandboxEnvFromLookup,
   readMetrcSandboxConfig,
   type MetrcSandboxEnv,
 } from "./metrc-env.ts";
-import { isMetrcConnectEnabled } from "./metrc-flags.ts";
+import { isMetrcConnectEnabled, type MetrcEnvLookup } from "./metrc-flags.ts";
 import { payloadHasForbiddenNotes, regulatoryTransferFields } from "./metrc-payload.ts";
 import type {
   TraceFacility,
@@ -270,11 +271,11 @@ export class MetrcConnectAdapter implements TraceProvider {
   private readonly now: () => Date;
   private transferSeq = 2000;
 
-  constructor(opts?: { env?: MetrcSandboxEnv; fetchImpl?: FetchLike; now?: () => Date }) {
+  constructor(opts?: { env?: MetrcEnvLookup; fetchImpl?: FetchLike; now?: () => Date }) {
     if (typeof window !== "undefined") {
       throw new Error("MetrcConnectAdapter is server-only.");
     }
-    this.env = opts?.env ?? process.env;
+    this.env = metrcSandboxEnvFromLookup(opts?.env);
     this.fetchImpl = opts?.fetchImpl ?? fetch;
     this.now = opts?.now ?? (() => new Date());
   }

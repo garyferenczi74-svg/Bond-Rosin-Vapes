@@ -1069,7 +1069,7 @@ export class VauxhallStore {
         href: "/vauxhall/product/trace",
       });
     }
-    if (tags.retailQrIds < tags.retailQrThreshold) {
+    if (tags && tags.retailQrIds < tags.retailQrThreshold) {
       alerts.push({
         id: "al-tags-retail",
         kind: "low tags",
