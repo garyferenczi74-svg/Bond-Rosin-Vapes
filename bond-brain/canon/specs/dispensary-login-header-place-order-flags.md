@@ -4,11 +4,12 @@
 
 - Header Place Order to `/order`. Part 129 applies.
 - Hero ENTER THE BOND HAUS to `/haus`. Haus OUT of commerce.
-- Logged-out `/order` is pending register. Invite retired.
-- Signed-in `/order` is reservation only.
+- Logged-out `/order` is Sign up / Sign in. Invite retired.
+- Sign up profile plus password create stays pending until ops elevate.
+- Sign in is email plus password. Pending wait. Elevated reservation only.
 - No Metrc write. B4 HOLD.
 - Media HARD LOCK.
 
 ## FINAL 2026-09-17
 
-JB FINAL. Builder go. Do not merge.
+JB FINAL. Dual door plus Gary signup field delta. Builder go. Do not merge.

@@ -11,7 +11,7 @@ CONDITIONAL CLEAR. Part 129 tip pack required. Header Place Order may point at `
 
 ## B. Self-serve password
 
-CLEAR only as a pending account until ops elevate. Password create must not grant draft-submit rights. Invite door is retired.
+CLEAR only as a pending account until ops elevate. Password create must not grant draft-submit rights. Invite door is retired. Sign in may open a wait state without reservation chrome.
 
 ## C. OCM number and credentials
 

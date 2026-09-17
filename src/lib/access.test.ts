@@ -193,6 +193,9 @@ test("public marketing exposes /order only as Home header Place Order", () => {
   assert.equal(middleware.includes('"/order"'), false);
   const privacy = readFileSync(join(root, "Privacy.dc.html"), "utf8");
   assert.match(privacy, /Dispensary Login/);
+  assert.match(privacy, /dispensary name/);
+  assert.match(privacy, /contact name/);
+  assert.match(privacy, /phone number/);
   assert.match(privacy, /hashed password/);
   assert.match(privacy, /never sent to Metrc/);
 });

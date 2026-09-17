@@ -15,6 +15,10 @@ export type PartnerAccount = {
   elevated: boolean;
   passwordSalt: string;
   passwordHash: string;
+  dispensaryName: string;
+  address: string;
+  contactName: string;
+  phone: string;
 };
 
 export type PartnerSession = {
@@ -69,6 +73,29 @@ export function isLicenseString(value: string): boolean {
   return license.length >= 4 && /^[A-Z0-9][A-Z0-9-]*$/.test(license);
 }
 
+export function normalizeProfileText(value: string): string {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+export function isProfileName(value: string): boolean {
+  const name = normalizeProfileText(value);
+  return name.length >= 2 && name.length <= 80;
+}
+
+export function isAddressString(value: string): boolean {
+  const address = normalizeProfileText(value);
+  return address.length >= 8 && address.length <= 160;
+}
+
+export function normalizePhone(value: string): string {
+  return value.trim();
+}
+
+export function isPhoneString(value: string): boolean {
+  const digits = normalizePhone(value).replace(/\D/g, "");
+  return digits.length >= 10 && digits.length <= 15;
+}
+
 export function parsePartnerSession(raw: string | null | undefined): PartnerSession | null {
   if (!raw) return null;
   try {
@@ -104,7 +131,11 @@ export function parsePartnerAccounts(raw: string | null | undefined): PartnerAcc
           typeof item.accountId === "string" &&
           typeof item.elevated === "boolean" &&
           typeof item.passwordSalt === "string" &&
-          typeof item.passwordHash === "string"
+          typeof item.passwordHash === "string" &&
+          typeof item.dispensaryName === "string" &&
+          typeof item.address === "string" &&
+          typeof item.contactName === "string" &&
+          typeof item.phone === "string"
         );
       })
       .map((row) => ({
@@ -114,6 +145,10 @@ export function parsePartnerAccounts(raw: string | null | undefined): PartnerAcc
         elevated: row.elevated === true,
         passwordSalt: row.passwordSalt,
         passwordHash: row.passwordHash,
+        dispensaryName: normalizeProfileText(row.dispensaryName),
+        address: normalizeProfileText(row.address),
+        contactName: normalizeProfileText(row.contactName),
+        phone: normalizePhone(row.phone),
       }));
   } catch {
     return [];
@@ -129,6 +164,10 @@ export function serializePartnerAccounts(rows: PartnerAccount[]): string {
       elevated: row.elevated,
       passwordSalt: row.passwordSalt,
       passwordHash: row.passwordHash,
+      dispensaryName: row.dispensaryName,
+      address: row.address,
+      contactName: row.contactName,
+      phone: row.phone,
     })),
   });
 }

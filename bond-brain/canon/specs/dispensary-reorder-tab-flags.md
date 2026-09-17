@@ -5,7 +5,7 @@
 - Metrc = regulatory SoT. ERP Orders = commercial SoT
 - MetrcConnectAdapter / live keys = PARKED until 2D Phase B
 - Media HARD LOCK on hero assets
-- Surface A `/order`. Auth: email + NY OCM license + hashed password. Pending until ops elevate. Invite retired. Header Place Order is the public CTA.
+- Surface A `/order`. Auth: Sign up profile plus hashed password, or Sign in email plus password. Pending until ops elevate. Invite retired. Header Place Order is the public CTA.
 - Phase A verify: ops elevation + mock Trace gates
 - Phase B PARKED with 2D B
 - Haus OUT (Prompt 3 no commerce)

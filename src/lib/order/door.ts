@@ -4,8 +4,13 @@ import { ORDER_COPY } from "./copy.ts";
 import { assertPasswordShape, hashPassword, verifyPassword } from "./password.ts";
 import { clonePartnerAccounts, SEED_PARTNER_ACCOUNTS } from "./seed.ts";
 import {
+  isAddressString,
   isLicenseString,
+  isPhoneString,
+  isProfileName,
   normalizeLicense,
+  normalizePhone,
+  normalizeProfileText,
   type PartnerAccount,
   type PartnerSession,
 } from "./types.ts";
@@ -33,6 +38,10 @@ export function mergePartnerAccounts(
       ...current,
       elevated: current.elevated || row.elevated,
       accountId: current.accountId || row.accountId,
+      dispensaryName: row.dispensaryName || current.dispensaryName,
+      address: row.address || current.address,
+      contactName: row.contactName || current.contactName,
+      phone: row.phone || current.phone,
     });
   }
   return [...map.values()];
@@ -71,6 +80,14 @@ export function findPartnerAccount(
   return rows.find((row) => row.email === email && normalizeLicense(row.license) === license);
 }
 
+export function findPartnerAccountByEmail(
+  email: string,
+  rows: PartnerAccount[] = SEED_PARTNER_ACCOUNTS,
+): PartnerAccount | undefined {
+  const mark = normalizeEmail(email);
+  return rows.find((row) => row.email === mark);
+}
+
 function sessionFromAccount(account: PartnerAccount): PartnerSession {
   return {
     email: account.email,
@@ -87,6 +104,10 @@ function pendingAccountId(license: string): string {
 
 export function registerPartnerDoor(
   input: {
+    dispensaryName: string;
+    address: string;
+    contactName: string;
+    phone: string;
     email: string;
     license: string;
     password: string;
@@ -97,6 +118,18 @@ export function registerPartnerDoor(
 ): { ok: true; session: PartnerSession } | { ok: false; message: string } {
   if (!input.age21) {
     return { ok: false, message: "Please confirm you are 21 and over." };
+  }
+  if (!isProfileName(input.dispensaryName)) {
+    return { ok: false, message: ORDER_COPY.nameFail };
+  }
+  if (!isAddressString(input.address)) {
+    return { ok: false, message: ORDER_COPY.addressFail };
+  }
+  if (!isProfileName(input.contactName)) {
+    return { ok: false, message: ORDER_COPY.contactFail };
+  }
+  if (!isPhoneString(input.phone)) {
+    return { ok: false, message: ORDER_COPY.phoneFail };
   }
   if (!isMemberEmail(input.email) || !isLicenseString(input.license)) {
     return { ok: false, message: GENERIC_DOOR };
@@ -121,19 +154,23 @@ export function registerPartnerDoor(
     elevated: false,
     passwordSalt: creds.passwordSalt,
     passwordHash: creds.passwordHash,
+    dispensaryName: normalizeProfileText(input.dispensaryName),
+    address: normalizeProfileText(input.address),
+    contactName: normalizeProfileText(input.contactName),
+    phone: normalizePhone(input.phone),
   };
   rows.push(account);
   return { ok: true, session: sessionFromAccount(account) };
 }
 
 export function openPartnerDoor(
-  input: { email: string; license: string; password: string; age21: boolean },
+  input: { email: string; password: string },
   rows: PartnerAccount[] = SEED_PARTNER_ACCOUNTS,
 ): { ok: true; session: PartnerSession } | { ok: false; message: string } {
-  if (!input.age21) {
-    return { ok: false, message: "Please confirm you are 21 and over." };
+  if (!isMemberEmail(input.email)) {
+    return { ok: false, message: GENERIC_DOOR };
   }
-  const account = findPartnerAccount(input, rows);
+  const account = findPartnerAccountByEmail(input.email, rows);
   if (!account || !verifyPassword(input.password, account)) {
     return { ok: false, message: GENERIC_DOOR };
   }
