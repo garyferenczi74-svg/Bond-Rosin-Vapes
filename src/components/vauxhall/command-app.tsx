@@ -21,21 +21,30 @@ import {
   ReviewView,
   SteeringView,
 } from "./command-views";
+import { readLocalPartnerDrafts } from "@/lib/order/persist";
+import type { PartnerDraftBundle } from "@/lib/order/types";
 import { useVauxhallStore } from "./use-store";
 
 export function CommandApp({
   role,
   email,
   route,
+  partnerRequests,
 }: {
   role: AdminRole;
   email?: string | null;
   route: VauxhallRoute;
+  partnerRequests?: PartnerDraftBundle;
 }) {
   const store = useVauxhallStore();
   const router = useRouter();
   const [toast, setToast] = useState("");
   const toastTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (partnerRequests) store.ingestPartnerRequests(partnerRequests);
+    store.ingestPartnerRequests(readLocalPartnerDrafts());
+  }, [store, partnerRequests]);
 
   useEffect(() => {
     if (!store.live) return;

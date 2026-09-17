@@ -160,6 +160,33 @@ test("SKU footer Bond Haus points at Next /haus", () => {
   assert.match(no3, /A reserve expression from Bond's solventless live rosin collection\./);
 });
 
+test("public marketing never exposes the partner order door", () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
+  const marketing = [
+    "Home.dc.html",
+    "No1.dc.html",
+    "No2.dc.html",
+    "No3.dc.html",
+    "FAQ.dc.html",
+    "Terms.dc.html",
+    "Privacy.dc.html",
+    "Finder.dc.html",
+  ];
+  for (const name of marketing) {
+    const html = readFileSync(join(root, name), "utf8");
+    assert.equal(html.includes('href="/order"'), false, name);
+    assert.equal(html.includes('href="/partner/order"'), false, name);
+  }
+  const haus = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../app/haus/haus-client.tsx"), "utf8");
+  assert.equal(haus.includes("/order"), false);
+  const sitemap = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../app/sitemap.ts"), "utf8");
+  assert.equal(sitemap.includes("/order"), false);
+  const robots = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../app/robots.ts"), "utf8");
+  assert.match(robots, /\/order/);
+  const middleware = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../middleware.ts"), "utf8");
+  assert.equal(middleware.includes('"/order"'), false);
+});
+
 test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {
   const home = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../Home.dc.html"), "utf8");
   assert.match(home, /id="circle"/);

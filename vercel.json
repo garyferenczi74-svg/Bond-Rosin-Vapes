@@ -32,6 +32,18 @@
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
+    },
+    {
+      "source": "/order",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    },
+    {
+      "source": "/order/:path*",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
     }
   ],
   "rewrites": [

@@ -143,6 +143,11 @@ function cloneLines(lines: OrderLine[]): OrderLine[] {
   return lines.map((line) => ({ ...line }));
 }
 
+function sanitizeOrderNotes(value?: string): string {
+  const notes = (value ?? "").trim().slice(0, 500);
+  return notes;
+}
+
 export class VauxhallStore {
   revision = 0;
   live = false;
@@ -581,6 +586,96 @@ export class VauxhallStore {
 
   availableForSku(skuId: string): number {
     return this.unitsForSku(skuId).available;
+  }
+
+  createOrderRequest(input: {
+    accountId: string;
+    lines: Array<Pick<OrderLine, "skuId" | "format" | "qty">>;
+    promisedOn: string;
+    notes?: string;
+    actor?: string;
+  }): OrderAttempt {
+    const gate = this.orderGate(input.accountId);
+    if (!gate.ok) return gate;
+    const written: OrderLine[] = [];
+    for (const line of input.lines) {
+      if (!Number.isFinite(line.qty) || line.qty <= 0) {
+        return { ok: false, reason: "Quantity must be at least 1." };
+      }
+      if (line.skuId !== "no-1" && line.skuId !== "no-2" && line.skuId !== "no-3") {
+        return { ok: false, reason: "SKU is not on the partner book." };
+      }
+      written.push({
+        skuId: line.skuId,
+        format: line.format || "1g",
+        qty: line.qty,
+        batchLabel: "Unallocated request",
+        lotId: "",
+        metrcUid: "",
+      });
+    }
+    if (!written.length) {
+      return { ok: false, reason: "Add at least one line." };
+    }
+    const notes = sanitizeOrderNotes(input.notes);
+    const promisedOn = input.promisedOn || this.seedClock;
+    const late = dayDiff(promisedOn, this.seedClock) > 0;
+    this.oid += 1;
+    const id = `ord-${this.oid}`;
+    const account = this.accountById(input.accountId);
+    const order: WholesaleOrder = {
+      id,
+      accountId: input.accountId,
+      stage: "draft",
+      promisedOn,
+      late,
+      manifestNumber: "",
+      lines: cloneLines(written),
+      documents: "Partner request. Draft only. No Metrc write.",
+      notes,
+      source: "partner",
+    };
+    this.orders.unshift(order);
+    const event: AgentEvent = {
+      id: this.nextId(),
+      time: clockTime(),
+      agent: "Q",
+      type: "ORDER_REQUEST",
+      summary: "ORDER_REQUEST",
+      sub: `${id} . ${account?.name ?? input.accountId} . draft . no Metrc write`,
+      audit: this.nextAudit(),
+    };
+    this.events.unshift(event);
+    this.appendAudit({
+      actor: input.actor || input.accountId,
+      action: "order.request",
+      target: id,
+      note: "Partner request. Draft only. No Metrc write.",
+    });
+    this.emit();
+    return { ok: true, id };
+  }
+
+  ingestPartnerRequests(bundle: { orders: WholesaleOrder[]; events: AgentEvent[] }): void {
+    let changed = false;
+    for (const order of bundle.orders) {
+      if (this.orders.some((row) => row.id === order.id)) continue;
+      this.orders.unshift({
+        ...order,
+        stage: "draft",
+        source: "partner",
+        lines: cloneLines(order.lines),
+      });
+      const numeric = Number(String(order.id).replace(/^ord-/, ""));
+      if (Number.isFinite(numeric) && numeric > this.oid) this.oid = numeric;
+      changed = true;
+    }
+    for (const event of bundle.events) {
+      if (this.events.some((row) => row.id === event.id)) continue;
+      this.events.unshift({ ...event });
+      changed = true;
+    }
+    if (changed) this.emit();
   }
 
   createOrder(input: {
