@@ -90,6 +90,9 @@ export type TraceTransferDraftInput = {
   orderId: string;
   fromFacilityId: string;
   toFacilityId: string;
+  operatorConfirmed?: boolean;
+  destinationLicense?: string;
+  packages?: Array<{ label: string; quantity: number }>;
 };
 
 export type TraceTransferAttempt =

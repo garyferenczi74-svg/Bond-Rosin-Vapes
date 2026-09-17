@@ -62,6 +62,7 @@ import {
   type ShipPrecondition,
   type WeeklyAuditChecklist,
 } from "./plumbing/index.ts";
+import type { MetrcAdapterMode } from "./metrc-flags.ts";
 import type { TraceProvider, TraceSnapshot, TraceTestStatus } from "./trace.ts";
 import { DISCREPANCY_THRESHOLD_PCT, isAllocatableStatus, metrcStamp, variancePercent } from "./trace.ts";
 import type {
@@ -184,6 +185,8 @@ export class VauxhallStore {
   investigations: DiscrepancyInvestigation[] = [];
   trace: TraceProvider;
   traceSnap: TraceSnapshot;
+  connectSnap: TraceSnapshot | null = null;
+  adapterMode: MetrcAdapterMode = "mock";
   demoLive = false;
   monitors: Monitor[] = [];
   plumbingSchedules: MonitorSchedule[] = [];
@@ -213,12 +216,24 @@ export class VauxhallStore {
   private auditBackup: AuditRow[] | null = null;
   private auditTampered = false;
 
-  constructor(opts?: { labDelayMs?: number; traceLatencyMs?: number }) {
+  constructor(opts?: {
+    labDelayMs?: number;
+    traceLatencyMs?: number;
+    trace?: TraceProvider;
+    adapterMode?: MetrcAdapterMode;
+  }) {
     this.labDelayMs = opts?.labDelayMs ?? 1800;
     this.traceLatencyMs = opts?.traceLatencyMs ?? 40;
-    this.trace = new MetrcMockAdapter({ latencyMs: this.traceLatencyMs });
+    this.adapterMode = opts?.adapterMode ?? "mock";
+    this.trace = opts?.trace ?? new MetrcMockAdapter({ latencyMs: this.traceLatencyMs });
     this.traceSnap = this.trace.hydrate();
     this.seed();
+  }
+
+  setAdapterMode(mode: MetrcAdapterMode): void {
+    if (this.adapterMode === mode) return;
+    this.adapterMode = mode;
+    this.emit();
   }
 
   subscribe = (listener: Listener): (() => void) => {
@@ -277,6 +292,7 @@ export class VauxhallStore {
     this.clearLabTimers();
     this.trace.reset();
     this.traceSnap = this.trace.hydrate();
+    this.connectSnap = null;
     this.investigations = SEED_INVESTIGATIONS.map((item) => ({ ...item }));
     this.seedClock = SEED_CLOCK;
     this.eid = 100;
@@ -565,8 +581,76 @@ export class VauxhallStore {
     return this.orderGate(accountId).ok;
   }
 
+  private displaySync() {
+    if (this.adapterMode === "connect") {
+      return this.connectSnap?.sync ?? {
+        lastPull: {
+          packages: "",
+          transfers: "",
+          labResults: "",
+          tags: "",
+          facilities: "",
+          items: "",
+        },
+        nextScheduled: "",
+        stale: true,
+        asOf: "none",
+      };
+    }
+    return this.traceSnap.sync;
+  }
+
+  private displayPackages() {
+    return this.adapterMode === "connect" ? this.connectSnap?.packages ?? [] : this.traceSnap.packages;
+  }
+
+  private displayTags() {
+    return this.adapterMode === "connect" ? this.connectSnap?.tags ?? null : this.traceSnap.tags;
+  }
+
+  displayTraceSnap(): TraceSnapshot {
+    if (this.adapterMode === "connect") {
+      return (
+        this.connectSnap ?? {
+          packages: [],
+          transfers: [],
+          facilities: [],
+          items: [],
+          tags: {
+            packageTags: 0,
+            retailQrIds: 0,
+            packageTagThreshold: 0,
+            retailQrThreshold: 0,
+            packageUids: [],
+            retailIds: [],
+          },
+          labs: [],
+          sync: this.displaySync(),
+        }
+      );
+    }
+    return this.traceSnap;
+  }
+
+  applyConnectSnapshot(snap: TraceSnapshot): void {
+    this.connectSnap = {
+      packages: snap.packages.map((item) => ({ ...item })),
+      transfers: snap.transfers.map((item) => ({ ...item })),
+      facilities: snap.facilities.map((item) => ({ ...item })),
+      items: snap.items.map((item) => ({ ...item })),
+      tags: {
+        ...snap.tags,
+        packageUids: snap.tags.packageUids.slice(),
+        retailIds: snap.tags.retailIds.slice(),
+      },
+      labs: snap.labs.map((item) => ({ ...item })),
+      sync: { ...snap.sync, lastPull: { ...snap.sync.lastPull } },
+    };
+    this.emit();
+  }
+
   stamp(): string {
-    return metrcStamp(this.traceSnap.sync);
+    return metrcStamp(this.displaySync());
   }
 
   allocatableLots(skuId?: string): InventoryLot[] {
@@ -894,7 +978,7 @@ export class VauxhallStore {
         .slice(0, 5)
         .map((account) => ({ id: account.id, name: account.name, velocity: account.velocity })),
       stamp: this.stamp(),
-      syncStale: this.traceSnap.sync.stale,
+      syncStale: this.displaySync().stale,
     };
   }
 
@@ -974,8 +1058,8 @@ export class VauxhallStore {
         });
       }
     }
-    const tags = this.traceSnap.tags;
-    if (tags.packageTags < tags.packageTagThreshold) {
+    const tags = this.displayTags();
+    if (tags && tags.packageTags < tags.packageTagThreshold) {
       alerts.push({
         id: "al-tags-package",
         kind: "low tags",
@@ -985,7 +1069,7 @@ export class VauxhallStore {
         href: "/vauxhall/product/trace",
       });
     }
-    if (tags.retailQrIds < tags.retailQrThreshold) {
+    if (tags && tags.retailQrIds < tags.retailQrThreshold) {
       alerts.push({
         id: "al-tags-retail",
         kind: "low tags",
@@ -1019,7 +1103,7 @@ export class VauxhallStore {
   listDiscrepancies(): DiscrepancyRow[] {
     const rows: DiscrepancyRow[] = [];
     for (const lot of this.lots) {
-      const pack = this.traceSnap.packages.find((item) => item.uid === lot.metrcUid || item.lotId === lot.id);
+      const pack = this.displayPackages().find((item) => item.uid === lot.metrcUid || item.lotId === lot.id);
       if (!pack) continue;
       const pct = variancePercent(lot.onHand, pack.quantity);
       if (pct <= DISCREPANCY_THRESHOLD_PCT) continue;
@@ -1091,6 +1175,7 @@ export class VauxhallStore {
   }
 
   async refreshFromMetrc(): Promise<void> {
+    if (this.adapterMode === "connect") return;
     const [packages, transfers, facilities, items, tags, sync] = await Promise.all([
       this.trace.getPackages(),
       this.trace.getTransfers(),
@@ -1116,6 +1201,9 @@ export class VauxhallStore {
   }
 
   demoSeedDiscrepancy(): { ok: true; lotId: string } | { ok: false; reason: string } {
+    if (this.adapterMode === "connect") {
+      return { ok: false, reason: "Demo seed controls are closed in Connect mode." };
+    }
     const lot = this.lots.find((item) => item.id === "lot-u1") ?? this.lots.find((item) => item.id !== "lot-p1");
     if (!lot) return { ok: false, reason: "No mock lot available." };
     const metrcQty = Math.max(1, Math.round(lot.onHand * 0.7));
@@ -1127,6 +1215,7 @@ export class VauxhallStore {
   }
 
   demoSeedStale(): void {
+    if (this.adapterMode === "connect") return;
     this.trace.seedStaleSync();
     this.traceSnap = this.trace.hydrate();
     this.emit();
@@ -1230,17 +1319,27 @@ export class VauxhallStore {
     return { ok: true, stage: order.stage };
   }
 
-  async attachManifest(orderId: string): Promise<StageAttempt> {
+  async attachManifest(orderId: string, opts?: { operatorConfirmed?: boolean }): Promise<StageAttempt> {
     const order = this.orders.find((item) => item.id === orderId);
     if (!order) return { ok: false, reason: "Order not found." };
     const account = this.accountById(order.accountId);
     if (!account) return { ok: false, reason: "Account not found." };
     const dest = this.facilityForAccount(account);
     if (!dest) return { ok: false, reason: "Facility gate: no Metrc facility on the account." };
+    if (this.adapterMode === "connect") {
+      if (opts?.operatorConfirmed !== true) {
+        return { ok: false, reason: "Confirm required: operator must confirm this Metrc transfer draft." };
+      }
+      return {
+        ok: false,
+        reason: "Connect writes run on the server after operator confirm. This desk does not treat mock Metrc as live.",
+      };
+    }
     const result = await this.trace.createTransferDraft({
       orderId,
       fromFacilityId: "fac-bond",
       toFacilityId: dest.id,
+      operatorConfirmed: opts?.operatorConfirmed,
     });
     if (!result.ok) return result;
     order.manifestNumber = result.transfer.manifestNumber;
@@ -1249,11 +1348,12 @@ export class VauxhallStore {
     return { ok: true, stage: order.stage };
   }
 
-  setManifestNumber(orderId: string, manifestNumber: string): StageAttempt {
+  setManifestNumber(orderId: string, manifestNumber: string, opts?: { adapterMode?: MetrcAdapterMode }): StageAttempt {
     const order = this.orders.find((item) => item.id === orderId);
     if (!order) return { ok: false, reason: "Order not found." };
     const value = manifestNumber.trim();
-    if (value && !/mock/i.test(value)) {
+    const mode = opts?.adapterMode ?? this.adapterMode;
+    if (mode !== "connect" && value && !/mock/i.test(value)) {
       return { ok: false, reason: "Manifest number must be labeled mock." };
     }
     order.manifestNumber = value;

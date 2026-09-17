@@ -65,8 +65,13 @@ curl -sI http://127.0.0.1:3000/bond-brain | head
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Vercel + `.env.local` | `https://ziruzhhkkndgmdouithb.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + `.env.local` | Legacy anon or publishable key. Browser-safe. |
+| `METRC_ADAPTER` | Vercel Preview only | Empty or `mock` keeps MetrcMockAdapter. `connect` selects MetrcConnectAdapter. Production Vercel, `METRC_ENV=production`, and `METRC_LIVE=on` stay on mock. |
+| `METRC_SANDBOX_INTEGRATOR_VENDOR_KEY` | Vercel Preview secret store | Integrator vendor key. Server-only. Never `NEXT_PUBLIC_`. Rotate on personnel change. |
+| `METRC_SANDBOX_LICENSEE_USER_KEY` | Vercel Preview secret store | Licensee user API key. Server-only. Rotate on personnel change. |
+| `METRC_SANDBOX_FACILITY_LICENSE` | Vercel Preview secret store | Facility license scope for sandbox pulls. |
+| `METRC_SANDBOX_BASE_URL` | Vercel Preview | Optional. Defaults to `https://sandbox-api-ny.metrc.com`. Production Metrc hosts are blocked. |
 
-There is no service role key in this app. Phase 1 MFA is waived under W-2026-09-15-P1-OVERRIDE (Gary). That is an owner waiver, not a hidden env toggle.
+There is no service role key in this app. Production Metrc keys are not read in Phase B1. Do not set `METRC_LIVE=on`. Phase 1 MFA is waived under W-2026-09-15-P1-OVERRIDE (Gary). That is an owner waiver, not a hidden env toggle.
 
 Gary holds production and social publish keys. This repo does not store them. M releases to production only on Gary's go. Carver publishes social only on Gary's go.
 
