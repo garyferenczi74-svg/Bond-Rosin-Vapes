@@ -277,7 +277,11 @@ export function OrderClient({
               {ORDER_COPY.formLine} {ORDER_COPY.licenseCheck}
             </p>
             {gate && gate.ok === false ? (
-              <p className="vx-p0" style={{ marginTop: 18 }} role="status">
+              <p
+                className="card"
+                style={{ marginTop: 18, boxShadow: "inset 0 1px 0 var(--product)" }}
+                role="status"
+              >
                 {gate.reason}
               </p>
             ) : null}
