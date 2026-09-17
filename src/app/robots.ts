@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/bond-brain/"],
+      disallow: ["/bond-brain/", "/order", "/order/"],
     },
   };
 }

@@ -1,0 +1,30 @@
+export const ORDER_COPY = {
+  doorTitle: "Order",
+  doorLine: "Licensed account door.",
+  email: "Account email",
+  invite: "Invite code",
+  license: "License number",
+  age21: "For adults 21 and over.",
+  enter: "Enter",
+  close: "Close",
+  mainPage: "Main page",
+  formTitle: "Reorder request",
+  formLine: "Request files as a Bond Orders draft. No Metrc write.",
+  licenseCheck: "License check against Bond account record.",
+  qty: "Quantity",
+  shipWeek: "Requested ship week",
+  notes: "Notes",
+  notesHint: "Receiving or delivery notes. Do not include SSN, date of birth, payment cards, or government ID.",
+  review: "Review",
+  back: "Back",
+  submit: "Submit request",
+  filed: "Request filed as a Bond Orders draft.",
+  emptyLines: "Add a quantity for at least one SKU.",
+  blockedSubmit: "This account cannot file a request.",
+} as const;
+
+export const PARTNER_SKU_LABELS = {
+  "no-1": "No. 1 Dialed",
+  "no-2": "No. 2 Unwind",
+  "no-3": "No. 3 Peak",
+} as const;

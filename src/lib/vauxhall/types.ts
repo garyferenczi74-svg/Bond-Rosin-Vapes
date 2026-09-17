@@ -20,6 +20,7 @@ export const EVENT_TYPES = [
   "Error",
   "Escalation",
   "Research Task",
+  "ORDER_REQUEST",
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
@@ -213,6 +214,8 @@ export type WholesaleOrder = {
   manifestNumber: string;
   lines: OrderLine[];
   documents: string;
+  notes?: string;
+  source?: "ops" | "partner";
 };
 
 export type SkuEconomics = {

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { CommandApp } from "@/components/vauxhall/command-app";
 import { writeAudit } from "@/lib/audit";
 import { requirePortalSession } from "@/lib/gate";
+import { readPartnerDraftPersist } from "@/lib/order/session";
 import { readRequestMeta } from "@/lib/request-meta";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { parseVauxhallRoute } from "@/lib/vauxhall/routes";
@@ -26,5 +27,13 @@ export default async function VauxhallPage({
     meta: await readRequestMeta(route.path),
   });
 
-  return <CommandApp role={session.role} email={session.email} route={route} />;
+  const partnerRequests = await readPartnerDraftPersist();
+  return (
+    <CommandApp
+      role={session.role}
+      email={session.email}
+      route={route}
+      partnerRequests={partnerRequests}
+    />
+  );
 }

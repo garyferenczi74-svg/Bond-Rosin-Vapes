@@ -725,6 +725,8 @@ function OrdersView({
               <th>Promised</th>
               <th>Manifest</th>
               <th>Late</th>
+              <th>Source</th>
+              <th>Notes</th>
               <th>Documents</th>
             </tr>
           </thead>
@@ -741,6 +743,8 @@ function OrdersView({
                 <td>{order.promisedOn}</td>
                 <td>{order.manifestNumber || "None"}</td>
                 <td>{order.late ? "Late" : "On clock"}</td>
+                <td>{order.source === "partner" ? "partner" : "ops"}</td>
+                <td>{order.notes || "None"}</td>
                 <td>{order.documents}</td>
               </tr>
             ))}
@@ -759,6 +763,10 @@ function OrdersView({
             </p>
             <p style={{ margin: "0 0 12px", fontSize: 13, color: "#8E887C" }}>
               Manifest {order.manifestNumber || "none"} . {order.documents}
+            </p>
+            <p style={{ margin: "0 0 12px", fontSize: 13, color: "#8E887C" }}>
+              Source {order.source === "partner" ? "partner" : "ops"}
+              {order.notes ? ` . Notes ${order.notes}` : ""}
             </p>
             <table className="vx-data" style={{ marginBottom: 12 }}>
               <thead>
