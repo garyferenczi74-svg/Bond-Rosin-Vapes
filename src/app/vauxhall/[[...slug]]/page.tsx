@@ -5,6 +5,7 @@ import { requirePortalSession } from "@/lib/gate";
 import { readPartnerDraftPersist } from "@/lib/order/session";
 import { readRequestMeta } from "@/lib/request-meta";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { readMetrcAdapterMode } from "@/lib/vauxhall/metrc-flags";
 import { parseVauxhallRoute } from "@/lib/vauxhall/routes";
 
 export default async function VauxhallPage({
@@ -34,6 +35,7 @@ export default async function VauxhallPage({
       email={session.email}
       route={route}
       partnerRequests={partnerRequests}
+      metrcAdapterMode={readMetrcAdapterMode()}
     />
   );
 }

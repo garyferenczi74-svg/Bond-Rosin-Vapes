@@ -23,6 +23,7 @@ import {
 } from "./command-views";
 import { readLocalPartnerDrafts } from "@/lib/order/persist";
 import type { PartnerDraftBundle } from "@/lib/order/types";
+import type { MetrcAdapterMode } from "@/lib/vauxhall/metrc-flags";
 import { useVauxhallStore } from "./use-store";
 
 export function CommandApp({
@@ -30,16 +31,22 @@ export function CommandApp({
   email,
   route,
   partnerRequests,
+  metrcAdapterMode = "mock",
 }: {
   role: AdminRole;
   email?: string | null;
   route: VauxhallRoute;
   partnerRequests?: PartnerDraftBundle;
+  metrcAdapterMode?: MetrcAdapterMode;
 }) {
   const store = useVauxhallStore();
   const router = useRouter();
   const [toast, setToast] = useState("");
   const toastTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    store.setAdapterMode(metrcAdapterMode);
+  }, [store, metrcAdapterMode]);
 
   useEffect(() => {
     if (partnerRequests) store.ingestPartnerRequests(partnerRequests);

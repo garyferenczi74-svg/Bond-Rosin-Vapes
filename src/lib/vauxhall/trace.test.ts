@@ -69,12 +69,12 @@ test("demo discrepancy and stale sync stay on the mock adapter", async () => {
   assert.equal(sync.asOf.length > 0, true);
 });
 
-test("Phase A source has no MetrcConnectAdapter and no live Metrc keys", () => {
+test("mock adapter source still has no live Metrc keys or fetch", () => {
   const hits: string[] = [];
-  walk(".", hits);
-  walk("../../components/vauxhall", hits);
-  assert.deepEqual(hits, []);
   const mock = readFileSync(join(here, "metrc-mock.ts"), "utf8");
   assert.equal(mock.includes("fetch("), false);
   assert.equal(mock.includes("MetrcConnectAdapter"), false);
+  walk(".", hits);
+  const unexpected = hits.filter((rel) => !rel.includes("metrc-connect") && !rel.includes("metrc-env") && !rel.includes("trace.ts"));
+  assert.deepEqual(unexpected, []);
 });

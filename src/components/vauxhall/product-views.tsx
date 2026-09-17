@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { createTransferDraftAction, refreshTraceAction } from "@/app/vauxhall/trace-actions";
 import type { AdminRole } from "@/lib/tokens";
 import { tokens } from "@/lib/tokens";
 import type { VauxhallStore } from "@/lib/vauxhall/store";
@@ -383,6 +384,13 @@ function InventoryView({
   const [busy, setBusy] = useState(false);
   async function refresh() {
     setBusy(true);
+    if (store.adapterMode === "connect") {
+      const result = await refreshTraceAction();
+      if (result.ok) store.applyConnectSnapshot(result.snapshot);
+      setBusy(false);
+      onToast(result.ok ? "Sandbox Metrc refresh complete." : result.reason);
+      return;
+    }
     await store.refreshFromMetrc();
     setBusy(false);
     onToast("Mock Metrc refresh complete.");
@@ -395,7 +403,7 @@ function InventoryView({
         subtitle="On-hand by SKU and mock lot. Reserved cannot be double sold."
         right={
           <>
-            <StalenessStamp stamp={store.stamp()} stale={store.traceSnap.sync.stale} />
+            <StalenessStamp stamp={store.stamp()} stale={store.displayTraceSnap().sync.stale} />
             <button type="button" className="vx-act" onClick={() => void refresh()} disabled={busy}>
               {busy ? "Refreshing" : "Refresh mock Metrc"}
             </button>
@@ -490,7 +498,7 @@ function ProductionView({
       <ConsoleHeader
         title="Production"
         subtitle="Stock in process. Completing a run mints a mock Metrc UID."
-        right={<StalenessStamp stamp={store.stamp()} stale={store.traceSnap.sync.stale} />}
+        right={<StalenessStamp stamp={store.stamp()} stale={store.displayTraceSnap().sync.stale} />}
       />
       <div className="vx-toolbar">
         {RUN_STAGES.map((stage) => (
@@ -598,7 +606,7 @@ function OrdersView({
       <ConsoleHeader
         title="Orders"
         subtitle="Lifecycle from draft to paid. Test, facility, and manifest gates hold."
-        right={<StalenessStamp stamp={store.stamp()} stale={store.traceSnap.sync.stale} />}
+        right={<StalenessStamp stamp={store.stamp()} stale={store.displayTraceSnap().sync.stale} />}
       />
       <div className="vx-lanes" aria-label="Order stages">
         {ORDER_STAGES.map((stage: OrderStage) => (
@@ -814,12 +822,44 @@ function OrdersView({
                 type="button"
                 className="vx-act"
                 onClick={() => {
-                  void store.attachManifest(order.id).then((result) => {
+                  const confirmed =
+                    typeof window === "undefined"
+                      ? false
+                      : window.confirm(
+                          "Create a Metrc transfer draft for this order. This writes only after confirm. Continue.",
+                        );
+                  if (confirmed === false) {
+                    onToast("Transfer draft cancelled.");
+                    return;
+                  }
+                  if (store.adapterMode === "connect") {
+                    const account = store.accountById(order.accountId);
+                    const dest = account ? store.facilityForAccount(account) : undefined;
+                    void createTransferDraftAction({
+                      orderId: order.id,
+                      fromFacilityId: "fac-bond",
+                      toFacilityId: dest?.id ?? "",
+                      destinationLicense: dest?.licenseNumber ?? account?.license ?? "",
+                      operatorConfirmed: true,
+                      packages: order.lines
+                        .filter((line) => line.metrcUid)
+                        .map((line) => ({ label: line.metrcUid ?? "", quantity: line.qty })),
+                    }).then((result) => {
+                      if (result.ok === false) {
+                        onToast(result.reason);
+                        return;
+                      }
+                      store.setManifestNumber(order.id, result.transfer.manifestNumber);
+                      onToast("Sandbox transfer draft attached.");
+                    });
+                    return;
+                  }
+                  void store.attachManifest(order.id, { operatorConfirmed: true }).then((result) => {
                     onToast(result.ok ? "Mock transfer draft attached." : result.reason);
                   });
                 }}
               >
-                Draft mock transfer
+                {store.adapterMode === "connect" ? "Confirm transfer draft" : "Draft mock transfer"}
               </button>
               <button
                 type="button"
@@ -870,7 +910,7 @@ function AccountsView({
       <ConsoleHeader
         title="Accounts"
         subtitle="Wholesale book. Mock licenses only. Expired licenses cannot order."
-        right={<StalenessStamp stamp={store.stamp()} stale={store.traceSnap.sync.stale} />}
+        right={<StalenessStamp stamp={store.stamp()} stale={store.displayTraceSnap().sync.stale} />}
       />
       <div className="card" style={{ marginBottom: 16 }}>
         <p className="lbl" style={{ margin: "0 0 12px" }}>
@@ -960,20 +1000,34 @@ function TraceView({
   role: AdminRole;
   onToast: (msg: string) => void;
 }) {
-  const snap = store.traceSnap;
+  const snap = store.displayTraceSnap();
   const rows = store.listDiscrepancies();
   const investigations = store.listInvestigations();
   const owner = role === "owner";
+  const connect = store.adapterMode === "connect";
+  async function refreshConnect() {
+    const result = await refreshTraceAction();
+    if (result.ok) store.applyConnectSnapshot(result.snapshot);
+    onToast(result.ok ? "Sandbox Metrc refresh complete." : result.reason);
+  }
   return (
     <div>
       <SeedBanner ink={tokens.product} />
       <ConsoleHeader
         title="Trace"
-        subtitle="Mock Metrc room. Packages, transfers, tags, and the discrepancy console."
+        subtitle={
+          connect
+            ? "Sandbox Metrc room. Packages, transfers, tags, and the discrepancy console."
+            : "Mock Metrc room. Packages, transfers, tags, and the discrepancy console."
+        }
         right={<StalenessStamp stamp={store.stamp()} stale={snap.sync.stale} />}
       />
       <div className="vx-metrics">
-        <Metric label="As of" value={snap.sync.asOf} sub={snap.sync.stale ? "Stale mock pull" : "Last mock pull"} />
+        <Metric
+          label="As of"
+          value={snap.sync.asOf}
+          sub={snap.sync.stale ? (connect ? "Stale sandbox pull" : "Stale mock pull") : connect ? "Last sandbox pull" : "Last mock pull"}
+        />
         <Metric label="Next pull" value={snap.sync.nextScheduled} sub="Fifteen minute cadence" />
         <Metric label="Package tags" value={String(snap.tags.packageTags)} sub={`Threshold ${snap.tags.packageTagThreshold}`} />
         <Metric label="Retail QR" value={String(snap.tags.retailQrIds)} sub={`Threshold ${snap.tags.retailQrThreshold}`} />
@@ -1093,7 +1147,7 @@ function TraceView({
           </tbody>
         </table>
       </TableCard>
-      <TableCard title="Raw mock packages">
+      <TableCard title={connect ? "Raw sandbox packages" : "Raw mock packages"}>
         <table className="vx-data">
           <thead>
             <tr>
@@ -1117,7 +1171,7 @@ function TraceView({
           </tbody>
         </table>
       </TableCard>
-      <TableCard title="Raw mock transfers">
+      <TableCard title={connect ? "Raw sandbox transfers" : "Raw mock transfers"}>
         <table className="vx-data">
           <thead>
             <tr>
@@ -1139,7 +1193,19 @@ function TraceView({
           </tbody>
         </table>
       </TableCard>
-      {owner ? (
+      {connect ? (
+        <div className="card">
+          <p className="lbl" style={{ margin: "0 0 12px" }}>
+            Sandbox sync
+          </p>
+          <p style={{ margin: "0 0 12px", fontSize: 13, color: "#8E887C" }}>
+            On-demand refresh. Fail-open reads keep this desk visible. Demo seed controls are closed.
+          </p>
+          <button type="button" className="vx-act" onClick={() => void refreshConnect()}>
+            Refresh sandbox Metrc
+          </button>
+        </div>
+      ) : owner ? (
         <div className="card">
           <p className="lbl" style={{ margin: "0 0 12px" }}>
             Demo controls
