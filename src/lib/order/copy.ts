@@ -3,12 +3,8 @@ export const ORDER_COPY = {
   doorLine: "Licensed New York dispensary access. A new account stays pending until Bond operations elevates it.",
   signUpTab: "Sign up",
   signInTab: "Sign in",
-  dispensaryName: "Dispensary name",
-  address: "Address",
-  contactName: "Contact name",
-  phone: "Phone number",
-  license: "OCM number",
   email: "Email",
+  license: "OCM license number",
   password: "Create password",
   confirm: "Confirm password",
   returnPassword: "Password",
@@ -34,10 +30,6 @@ export const ORDER_COPY = {
   emptyLines: "Add a quantity for at least one SKU.",
   blockedSubmit: "This account cannot file a reservation.",
   matchFail: "Password and confirmation do not match.",
-  nameFail: "Name the dispensary.",
-  addressFail: "Add a street address.",
-  contactFail: "Name the contact.",
-  phoneFail: "Add a phone number.",
 } as const;
 
 export const PARTNER_SKU_LABELS = {

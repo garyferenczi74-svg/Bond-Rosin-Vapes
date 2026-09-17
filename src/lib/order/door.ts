@@ -3,17 +3,7 @@ import { isMemberEmail, normalizeEmail } from "../member.ts";
 import { ORDER_COPY } from "./copy.ts";
 import { assertPasswordShape, hashPassword, verifyPassword } from "./password.ts";
 import { clonePartnerAccounts, SEED_PARTNER_ACCOUNTS } from "./seed.ts";
-import {
-  isAddressString,
-  isLicenseString,
-  isPhoneString,
-  isProfileName,
-  normalizeLicense,
-  normalizePhone,
-  normalizeProfileText,
-  type PartnerAccount,
-  type PartnerSession,
-} from "./types.ts";
+import { isLicenseString, normalizeLicense, type PartnerAccount, type PartnerSession } from "./types.ts";
 
 export function listPartnerAccounts(rows: PartnerAccount[] = SEED_PARTNER_ACCOUNTS): PartnerAccount[] {
   return rows.map((row) => ({ ...row }));
@@ -104,10 +94,6 @@ function pendingAccountId(license: string): string {
 
 export function registerPartnerDoor(
   input: {
-    dispensaryName: string;
-    address: string;
-    contactName: string;
-    phone: string;
     email: string;
     license: string;
     password: string;
@@ -118,18 +104,6 @@ export function registerPartnerDoor(
 ): { ok: true; session: PartnerSession } | { ok: false; message: string } {
   if (!input.age21) {
     return { ok: false, message: "Please confirm you are 21 and over." };
-  }
-  if (!isProfileName(input.dispensaryName)) {
-    return { ok: false, message: ORDER_COPY.nameFail };
-  }
-  if (!isAddressString(input.address)) {
-    return { ok: false, message: ORDER_COPY.addressFail };
-  }
-  if (!isProfileName(input.contactName)) {
-    return { ok: false, message: ORDER_COPY.contactFail };
-  }
-  if (!isPhoneString(input.phone)) {
-    return { ok: false, message: ORDER_COPY.phoneFail };
   }
   if (!isMemberEmail(input.email) || !isLicenseString(input.license)) {
     return { ok: false, message: GENERIC_DOOR };
@@ -154,10 +128,10 @@ export function registerPartnerDoor(
     elevated: false,
     passwordSalt: creds.passwordSalt,
     passwordHash: creds.passwordHash,
-    dispensaryName: normalizeProfileText(input.dispensaryName),
-    address: normalizeProfileText(input.address),
-    contactName: normalizeProfileText(input.contactName),
-    phone: normalizePhone(input.phone),
+    dispensaryName: "",
+    address: "",
+    contactName: "",
+    phone: "",
   };
   rows.push(account);
   return { ok: true, session: sessionFromAccount(account) };

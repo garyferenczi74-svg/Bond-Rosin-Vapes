@@ -4,7 +4,7 @@
 **Author:** Q
 **Date:** 2026-09-17
 **Status:** FINAL. JB locks closed. Invite door retired. Part 129 tip pack cited.
-**Tip baseline:** PR29 `11c44cd`. B4 HOLD. Do not merge.
+**Tip baseline:** PR30 `0273c3e`. B4 HOLD. Do not merge.
 
 ## Intent
 
@@ -14,8 +14,8 @@ Replace the Home header Bond Haus tab with Place Order. Destination is Dispensar
 
 - Header Place Order (Title Case) to `/order` on desktop and mobile. Part 129 applies.
 - Hero ENTER THE BOND HAUS to `/haus` unchanged.
-- Logged-out `/order`: Sign up and Sign in tabs. Sign up is dispensary name, address, contact name, phone, OCM number, email, create password plus confirm, 21+. Pending account only.
-- Sign in: email plus password. Pending wait. No reservation until ops elevate.
+- Logged-out `/order` title is Dispensary Login. Sign up fields exactly: Email, OCM license number, Create password, Confirm password, plus standing 21+. Pending account only.
+- Sign in: email plus password. Pending wait. Reserve-order page only after auth and ops elevate.
 - Elevated `/order`: order reservation surface. Mock license and facility gates stay.
 - Invite code field retired.
 - Passwords hashed. Never logged in plaintext. Never sent to Metrc.
@@ -45,8 +45,8 @@ Replace the Home header Bond Haus tab with Place Order. Destination is Dispensar
 
 1. Header shows Place Order, not Bond Haus. Hero ENTER THE BOND HAUS unchanged.
 2. Place Order opens Dispensary Login at `/order`.
-3. Sign up collects dispensary name, address, contact name, phone, OCM number, email, password create plus confirm, and 21+. Account stays pending.
-4. Sign in is email plus password. Pending wait. Elevated reservation only. No unauth order create.
+3. Sign up fields exactly: Email, OCM license number, Create password, Confirm password, plus 21+. Account stays pending.
+4. Sign in is email plus password. Reserve-order page only after auth and ops elevate. No unauth order create.
 5. No Metrc write. No Metrc-verified copy. Haus out of commerce.
 6. Cloaks elsewhere unchanged. Tip media HARD LOCK untouched.
 7. Vesper PASS + Felix PASS + M VERIFY + Gary go before promote.
