@@ -126,7 +126,7 @@ Standing brief: `/canon/specs/dispensary-login-header-place-order.md`
 | Hero href | `/haus` |
 | Logged-out title | Dispensary Login |
 | Logged-out tabs | Sign up / Sign in |
-| Sign up fields | Dispensary name, Address, Contact name, Phone number, OCM number, Email, Create password, Confirm password, 21+ |
+| Sign up fields | Email, OCM license number, Create password, Confirm password, 21+ |
 | Sign in fields | Email, Password |
 | Pending wait | This account is pending. Bond operations must elevate it before reservation access opens. |
 | Logged-in title | Order reservation |

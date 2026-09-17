@@ -307,12 +307,8 @@ export function OrderClient({
             </div>
             {doorMode === "signup" ? (
               <form action={onCreate} style={{ marginTop: 28, display: "grid", gap: 12, textAlign: "left" }}>
-                <input className="field" name="dispensaryName" autoComplete="organization" placeholder={ORDER_COPY.dispensaryName} required />
-                <input className="field" name="address" autoComplete="street-address" placeholder={ORDER_COPY.address} required />
-                <input className="field" name="contactName" autoComplete="name" placeholder={ORDER_COPY.contactName} required />
-                <input className="field" type="tel" name="phone" autoComplete="tel" placeholder={ORDER_COPY.phone} required />
-                <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
                 <input className="field" type="email" name="email" autoComplete="email" placeholder={ORDER_COPY.email} required />
+                <input className="field" name="license" autoComplete="off" placeholder={ORDER_COPY.license} required />
                 <input
                   className="field"
                   type="password"
