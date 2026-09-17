@@ -353,7 +353,16 @@ test("order surface copy stays neutral and off Metrc claims", () => {
   assert.equal(ORDER_COPY.formTitle, "Order reservation");
   assert.equal(ORDER_COPY.signUpTab, "Sign up");
   assert.equal(ORDER_COPY.signInTab, "Sign in");
+  assert.equal(ORDER_COPY.signUp, "Continue");
+  assert.equal(ORDER_COPY.signIn, "Sign in");
+  assert.equal(ORDER_COPY.registered, "Already registered? Sign in");
+  assert.equal(ORDER_COPY.email, "Email");
+  assert.equal(ORDER_COPY.phone, "Phone");
   assert.equal(ORDER_COPY.license, "OCM number");
+  assert.equal(
+    ORDER_COPY.pendingWait,
+    "This account is pending. Bond operations must elevate it before a reservation can be filed.",
+  );
   assert.equal(PARTNER_SKU_LABELS["no-1"], "No. 1 Dialed");
 });
 
@@ -405,9 +414,24 @@ test("unauth order page renders Dispensary Login and never 403", () => {
   assert.match(client, /age21/);
   assert.match(client, /ORDER_COPY.formTitle/);
   assert.match(client, /ORDER_COPY.pendingWait/);
+  assert.match(client, /ORDER_COPY.registered/);
   assert.match(client, /session.elevated/);
   assert.equal(client.includes("inviteCode"), false);
   assert.equal(client.includes("returnDoor"), false);
+  const copy = read("./copy.ts");
+  const forbidden = [
+    "Create access",
+    "Return to this door",
+    "Create access instead",
+    "Account email",
+    "NY OCM license number",
+  ];
+  for (const phrase of forbidden) {
+    assert.equal(copy.includes(phrase), false, `copy still has ${phrase}`);
+    assert.equal(client.includes(phrase), false, `client still has ${phrase}`);
+  }
+  assert.equal(copy.includes('signUp: "Enter"'), false);
+  assert.equal(copy.includes('enter: "Enter"'), false);
   const signInForm = client.slice(client.indexOf("action={onOpen}"));
   const signInOnly = signInForm.slice(0, signInForm.indexOf("ORDER_COPY.privacy"));
   assert.equal(signInOnly.includes('name="license"'), false);

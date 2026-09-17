@@ -345,6 +345,27 @@ export function OrderClient({
                 <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
                   {ORDER_COPY.signUp}
                 </button>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    setMessage("");
+                    setDoorMode("signin");
+                  }}
+                  style={{
+                    background: "transparent",
+                    border: 0,
+                    color: tokens.muted,
+                    cursor: pending ? "default" : "pointer",
+                    fontSize: 13,
+                    letterSpacing: "0.04em",
+                    marginTop: 4,
+                    padding: 0,
+                    textAlign: "left",
+                  }}
+                >
+                  {ORDER_COPY.registered}
+                </button>
               </form>
             ) : (
               <form action={onOpen} style={{ marginTop: 28, display: "grid", gap: 12, textAlign: "left" }}>

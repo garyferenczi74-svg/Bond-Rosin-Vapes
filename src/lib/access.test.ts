@@ -194,10 +194,14 @@ test("public marketing exposes /order only as Home header Place Order", () => {
   const privacy = readFileSync(join(root, "Privacy.dc.html"), "utf8");
   assert.match(privacy, /Dispensary Login/);
   assert.match(privacy, /dispensary name/);
+  assert.match(privacy, /address/);
   assert.match(privacy, /contact name/);
-  assert.match(privacy, /phone number/);
+  assert.match(privacy, /phone/);
+  assert.match(privacy, /OCM number/);
+  assert.match(privacy, /email/);
   assert.match(privacy, /hashed password/);
   assert.match(privacy, /never sent to Metrc/);
+  assert.equal(privacy.includes("Creating access"), false);
 });
 
 test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {

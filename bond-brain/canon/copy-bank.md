@@ -126,8 +126,12 @@ Standing brief: `/canon/specs/dispensary-login-header-place-order.md`
 | Hero href | `/haus` |
 | Logged-out title | Dispensary Login |
 | Logged-out tabs | Sign up / Sign in |
-| Sign up fields | Dispensary name, Address, Contact name, Phone number, OCM number, Email, Create password, Confirm password, 21+ |
+| Sign up fields | Dispensary name, Address, Contact name, Phone, OCM number, Email, Create password, Confirm password, 21+ |
+| Sign up primary | Continue |
+| Sign up secondary | Already registered? Sign in |
 | Sign in fields | Email, Password |
-| Pending wait | This account is pending. Bond operations must elevate it before reservation access opens. |
+| Sign in primary | Sign in |
+| Pending wait | This account is pending. Bond operations must elevate it before a reservation can be filed. |
+| Fail | That did not open the door. |
 | Logged-in title | Order reservation |
 | Age gate | For adults 21 and over. |
