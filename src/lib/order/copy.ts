@@ -13,7 +13,7 @@ export const ORDER_COPY = {
   confirm: "Confirm password",
   returnPassword: "Password",
   age21: "For adults 21 and over.",
-  signUp: "Sign up",
+  signUp: "Continue",
   signIn: "Sign in",
   close: "Close",
   mainPage: "Main page",
