@@ -193,7 +193,7 @@ test("public marketing exposes /order only as Home header Place Order", () => {
   assert.equal(middleware.includes('"/order"'), false);
 });
 
-test("Privacy Dispensary Login collection lists only the five locked fields", () => {
+test("Privacy Dispensary Login collection lists every field the door collects", () => {
   const privacy = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), "../../Privacy.dc.html"),
     "utf8",
@@ -201,16 +201,18 @@ test("Privacy Dispensary Login collection lists only the five locked fields", ()
   const match = privacy.match(/<li>Dispensary Login:[^<]+<\/li>/);
   assert.ok(match, "Dispensary Login collection sentence must exist");
   const sentence = match[0];
+  assert.match(sentence, /dispensary name/);
+  assert.match(sentence, /\baddress\b/);
+  assert.match(sentence, /contact name/);
+  assert.match(sentence, /phone number/);
   assert.match(sentence, /licensed partner email/);
   assert.match(sentence, /New York OCM license number/);
   assert.match(sentence, /hashed password/);
   assert.match(sentence, /21\+ confirmation/);
   assert.match(sentence, /elevation state/);
-  assert.equal(/dispensary name/i.test(sentence), false);
-  assert.equal(/\baddress\b/i.test(sentence), false);
-  assert.equal(/contact name/i.test(sentence), false);
-  assert.equal(/phone number/i.test(sentence), false);
   assert.match(sentence, /never sent to Metrc/);
+  assert.match(sentence, /never logged in plaintext/);
+  assert.match(sentence, /does not grant order rights until Bond operations elevates the account/);
   assert.match(privacy, /Bond Haus: your email address/);
   assert.match(privacy, /we store a verification flag in a cookie/);
 });
