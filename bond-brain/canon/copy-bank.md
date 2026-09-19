@@ -120,7 +120,7 @@ Standing brief: `/canon/specs/dispensary-login-header-place-order.md`
 
 | Slot | Locked string |
 | --- | --- |
-| Header tab | Place Order |
+| Header tab | Order |
 | Header href | `/order` |
 | Hero membership CTA | ENTER THE BOND HAUS |
 | Hero href | `/haus` |

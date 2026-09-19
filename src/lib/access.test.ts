@@ -99,9 +99,10 @@ test("Home public Haus entry CTAs point at Next /haus", () => {
   assert.match(footer, /href="\/haus"[^>]*>Bond Haus</);
   const header = home.slice(home.indexOf("<nav"), home.indexOf("</nav>"));
   assert.equal(header.includes(">Bond Haus<"), false);
-  const navPlace = [...home.matchAll(/href="([^"]+)"[^>]*>Place Order</g)].map((m) => m[1]);
-  assert.ok(navPlace.length >= 2);
-  assert.ok(navPlace.every((href) => href === "/order"));
+  const navOrder = [...home.matchAll(/href="([^"]+)"[^>]*>Order</g)].map((m) => m[1]);
+  assert.ok(navOrder.length >= 2);
+  assert.ok(navOrder.every((href) => href === "/order"));
+  assert.equal(header.includes(">Place Order<"), false);
   assert.equal(footer.includes("/order"), false);
   assert.equal(home.includes("/haus/admin"), false);
 });
@@ -164,10 +165,11 @@ test("SKU footer Bond Haus points at Next /haus", () => {
   assert.match(no3, /A reserve expression from Bond's solventless live rosin collection\./);
 });
 
-test("public marketing exposes /order only as Home header Place Order", () => {
+test("public marketing exposes /order only as Home header Order", () => {
   const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
   const home = readFileSync(join(root, "Home.dc.html"), "utf8");
-  assert.match(home, /href="\/order"[^>]*>Place Order</);
+  assert.match(home, /href="\/order"[^>]*>Order</);
+  assert.equal(home.includes(">Place Order<"), false);
   assert.equal(home.includes('href="/partner/order"'), false);
   const marketing = [
     "No1.dc.html",
