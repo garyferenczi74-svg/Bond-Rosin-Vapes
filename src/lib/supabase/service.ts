@@ -6,6 +6,7 @@ export const SUPABASE_SERVICE_ROLE_KEY = "SUPABASE_SERVICE_ROLE_KEY";
 export type ServiceRoleEnvLookup = {
   NEXT_PUBLIC_SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  [key: string]: string | undefined;
 };
 
 export type ServiceRoleConfig =
