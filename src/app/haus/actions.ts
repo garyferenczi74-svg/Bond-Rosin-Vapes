@@ -52,13 +52,13 @@ export async function signInAction(formData: FormData) {
   }
 
   if (isDemoMemberEmail(email)) {
+    const pre = await recordAuthAttempt(email, meta.ip, "check");
+    if (pre.locked) {
+      return fail();
+    }
+    await recordAuthAttempt(email, meta.ip, "success");
     try {
       const { supabase } = await readAdminRow();
-      const pre = await recordAuthAttempt(supabase, email, meta.ip, "check");
-      if (pre.locked) {
-        return fail();
-      }
-      await recordAuthAttempt(supabase, email, meta.ip, "success");
       await supabase.auth.signOut();
     } catch {
       // Demo member mock auth does not depend on Supabase.
@@ -74,18 +74,18 @@ export async function signInAction(formData: FormData) {
   }
 
   try {
-    const pre = await recordAuthAttempt(supabase, email, meta.ip, "check");
+    const pre = await recordAuthAttempt(email, meta.ip, "check");
     if (pre.locked) {
       return fail();
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error || !data.user) {
-      await recordAuthAttempt(supabase, email, meta.ip, "fail");
+      await recordAuthAttempt(email, meta.ip, "fail");
       return tryInviteDoor(email);
     }
 
-    await recordAuthAttempt(supabase, email, meta.ip, "success");
+    await recordAuthAttempt(email, meta.ip, "success");
 
     if (isDemoMemberEmail(data.user.email ?? email)) {
       await supabase.auth.signOut();

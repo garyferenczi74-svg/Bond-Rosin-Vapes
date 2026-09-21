@@ -38,7 +38,7 @@ This branch copies real files (including `index.html`), pins Next.js, and adds e
 
 ```
 cp .env.example .env.local
-# set NEXT_PUBLIC_SUPABASE_ANON_KEY
+# set NEXT_PUBLIC_SUPABASE_ANON_KEY and server-only SUPABASE_SERVICE_ROLE_KEY
 npm install
 npm test
 npm run lint
@@ -66,13 +66,14 @@ curl -sI http://127.0.0.1:3000/bond-brain | head
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Vercel + `.env.local` | `https://ziruzhhkkndgmdouithb.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Vercel + `.env.local` | Legacy anon or publishable key. Browser-safe. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Vercel + `.env.local` server-only | Lockout writes to `record_auth_attempt`. Never `NEXT_PUBLIC_`. Never log. Required in the same window as M apply of `2026-09-21-supabase-harden-rls-rpc-migration.sql`. |
 | `METRC_ADAPTER` | Vercel Preview only | Empty or `mock` keeps MetrcMockAdapter. `connect` selects MetrcConnectAdapter. Production Vercel, `METRC_ENV=production`, and `METRC_LIVE=on` stay on mock. |
 | `METRC_SANDBOX_INTEGRATOR_VENDOR_KEY` | Vercel Preview secret store | Integrator vendor key. Server-only. Never `NEXT_PUBLIC_`. Rotate on personnel change. |
 | `METRC_SANDBOX_LICENSEE_USER_KEY` | Vercel Preview secret store | Licensee user API key. Server-only. Rotate on personnel change. |
 | `METRC_SANDBOX_FACILITY_LICENSE` | Vercel Preview secret store | Facility license scope for sandbox pulls. |
 | `METRC_SANDBOX_BASE_URL` | Vercel Preview | Optional. Defaults to `https://sandbox-api-ny.metrc.com`. Production Metrc hosts are blocked. |
 
-There is no service role key in this app. Production Metrc keys are not read in Phase B1. Do not set `METRC_LIVE=on`. Phase 1 MFA is waived under W-2026-09-15-P1-OVERRIDE (Gary). That is an owner waiver, not a hidden env toggle.
+Lockout writes use `SUPABASE_SERVICE_ROLE_KEY` on the server only. Never expose it to the browser. Production Metrc keys are not read in Phase B1. Do not set `METRC_LIVE=on`. Phase 1 MFA is waived under W-2026-09-15-P1-OVERRIDE (Gary). That is an owner waiver, not a hidden env toggle.
 
 Gary holds production and social publish keys. This repo does not store them. M releases to production only on Gary's go. Carver publishes social only on Gary's go.
 
@@ -91,7 +92,7 @@ Gary holds production and social publish keys. This repo does not store them. M 
 
 ## Rate limit and lockout stub
 
-`public.record_auth_attempt` hashes the email and records outcomes.
+`public.record_auth_attempt` hashes the email and records outcomes. The `/haus` door calls it through a server-only service_role client (`src/lib/supabase/service.ts`). After M applies `2026-09-21-supabase-harden-rls-rpc-migration.sql`, EXECUTE is postgres + service_role only. `is_admin`, `admin_role`, and `mark_admin_mfa_enrolled` stay on the authenticated user session path.
 
 - 5 failures in 15 minutes issue a `lockout` row
 - Lockout holds 30 minutes
@@ -113,6 +114,6 @@ Anon `EXECUTE` on `is_admin()` and `rls_auto_enable()` is revoked. `is_admin()` 
 
 ## Deploy
 
-Vercel project `bond-rosin-vapes`. `vercel.json` sets framework to Next.js and the build command above. Set the two `NEXT_PUBLIC_SUPABASE_*` env vars on the project. Keep existing marketing files at the repo root.
+Vercel project `bond-rosin-vapes`. `vercel.json` sets framework to Next.js and the build command above. Set the two `NEXT_PUBLIC_SUPABASE_*` env vars and the server-only `SUPABASE_SERVICE_ROLE_KEY` on the project. Keep existing marketing files at the repo root.
 
 No production ship without Vesper PASS, Felix clearance, and Gary go through JB.

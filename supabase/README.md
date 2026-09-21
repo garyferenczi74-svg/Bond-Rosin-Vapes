@@ -4,7 +4,7 @@ Project: Bond-Rosin-Vapes
 Ref: ziruzhhkkndgmdouithb
 URL: https://ziruzhhkkndgmdouithb.supabase.co
 
-The Next.js access shell uses the anon or publishable key only. Gary holds production and social publish keys elsewhere.
+The Next.js access shell uses the anon or publishable key for user sessions. `/haus` lockout writes call `record_auth_attempt` with a server-only service_role client. Gary holds production and social publish keys elsewhere.
 
 ## Migrations
 
@@ -22,7 +22,7 @@ What Phase 1 changes:
 - Anon cannot `EXECUTE` `is_admin` or `rls_auto_enable`.
 - `authenticated` can `EXECUTE` `is_admin` so RLS policies can run.
 - `audit_log` is insert plus select for authenticated admins. Update and delete are blocked by trigger.
-- `auth_attempts` is written only through `record_auth_attempt`.
+- `auth_attempts` is written only through `record_auth_attempt` (service_role server client after the 2026-09-21 harden revoke).
 
 Seed an admin by inserting one `auth.users` row (no shared accounts), then one `public.admins` row for that `user_id`. Under W-2026-09-15-P1-OVERRIDE, password auth at `/haus` opens `/vauxhall` without MFA enroll.
 
