@@ -239,23 +239,13 @@
     var pic = platePic(el);
     if (!pic) return;
     var img = pic.querySelector('img');
-    if (pic.getAttribute('data-armed') === '1' && img && img.getAttribute('src')) return;
+    if (!img) return;
+    if (pic.getAttribute('data-armed') === '1') return;
+    pic.setAttribute('data-armed', '1');
     var wide = wideOf(el);
     var av = wide ? pic.getAttribute('data-desk-avif') : pic.getAttribute('data-mob-avif');
     var wp = wide ? pic.getAttribute('data-desk-webp') : pic.getAttribute('data-mob-webp');
     var jp = wide ? pic.getAttribute('data-desk-jpg') : pic.getAttribute('data-mob-jpg');
-    var jpg = jp ? jp.split(' ')[0] : '';
-    if (!jpg) return;
-    var built = false;
-    if (!img) {
-      img = document.createElement('img');
-      img.className = 'hero-endplate-img';
-      img.alt = '';
-      img.decoding = 'async';
-      pic.appendChild(img);
-      built = true;
-    }
-    pic.setAttribute('data-armed', '1');
     function addSrc(type, set) {
       if (!set) return;
       var s = document.createElement('source');
@@ -264,11 +254,9 @@
       s.setAttribute('sizes', '100vw');
       pic.insertBefore(s, img);
     }
-    if (!pic.querySelector('source')) {
-      addSrc('image/avif', av);
-      addSrc('image/webp', wp);
-    }
-    if (built) img.setAttribute('src', jpg);
+    addSrc('image/avif', av);
+    addSrc('image/webp', wp);
+    if (jp) img.setAttribute('src', jp.split(' ')[0]);
   }
 
   function showPlate(el) {
@@ -360,7 +348,7 @@
         return;
       }
       var nowWide = wideOf(el);
-      if (gateOpen && el._bondVisible) fillSources(el);
+      if (gateOpen && (el.getAttribute('data-hero') === '1' || el._bondVisible)) fillSources(el);
       el._bondWide = nowWide;
       watchVisible(el);
       tryStart(el);
@@ -410,6 +398,7 @@
     }
 
     el._bondWide = wideOf(el);
+    if (el.getAttribute('data-hero') === '1') fillSources(el);
     watchVisible(el);
   }
 
@@ -419,7 +408,7 @@
       var el = attached[i];
       if (reduced || saveData) continue;
       hygiene(el);
-      if (!el.currentSrc && el._bondVisible) fillSources(el);
+      if (!el.currentSrc && (el.getAttribute('data-hero') === '1' || el._bondVisible)) fillSources(el);
       watchVisible(el);
       tryStart(el);
     }
@@ -461,7 +450,7 @@
   });
   window.addEventListener('resize', function () {
     for (var i = 0; i < attached.length; i++) {
-      if (!reduced && !saveData && gateOpen && attached[i]._bondVisible) fillSources(attached[i]);
+      if (!reduced && !saveData && gateOpen && (attached[i].getAttribute('data-hero') === '1' || attached[i]._bondVisible)) fillSources(attached[i]);
     }
   });
 
