@@ -677,7 +677,7 @@ function renderAccount(){
     + '<div><div style="font-size:11px;color:#6E685E">Name</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.name)+'</div></div>'
     + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div>'
     + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefHaus"'+(m.circle?' checked':'')+'> Haus correspondence</label></div></div>'
-    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises. Erasing the account does not remove your password from the account service or the records of door attempts.</p>'
+    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser.</p>'
     + '<button id="dlRecord" class="htab on" style="padding:0 22px;height:40px">Download my record</button>'
     + '<div style="margin-top:18px">'+eraseRow('notes','Tasting notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
   chrome('account', inner);
@@ -718,7 +718,7 @@ document.addEventListener('click', function(ev){
   if (t.id==='batchAdd'){ var v=(document.getElementById('batchIn')||{}).value||''; var e=HausStore.registerBatch(v); var note=document.getElementById('batchNote'); if (e && e.batch){ libSel=e.batch; toast('Shelved. '+e.cultivar+' is on your shelf.'); renderLibrary(); } else if (e && e.retired){ if (note) note.textContent='That batch is no longer in the house records.'; } else if (note){ note.textContent='That batch is not in the house records. Check the card and try again.'; } return; }
   var lib = t.closest('[data-lib]'); if (lib){ libSel = lib.getAttribute('data-lib'); renderLibrary(); return; }
   var sn = t.closest('[data-savenote]'); if (sn){ var b=HausStore.member.shelf.filter(function(x){return x.batch===sn.getAttribute('data-savenote');})[0]; var ta=document.getElementById('noteIn'); if (b&&ta){ b.notes=ta.value; toast('Your note is kept privately.'); renderLibrary(); } return; }
-  var en = t.closest('[data-erasenote]'); if (en){ var b2=HausStore.member.shelf.filter(function(x){return x.batch===en.getAttribute('data-erasenote');})[0]; if (b2){ b2.notes=''; toast('Erased. The house keeps no copy.'); renderLibrary(); } return; }
+  var en = t.closest('[data-erasenote]'); if (en){ var b2=HausStore.member.shelf.filter(function(x){return x.batch===en.getAttribute('data-erasenote');})[0]; if (b2){ b2.notes=''; toast('Erased.'); renderLibrary(); } return; }
 
   // guide
   if (t.id==='gPrev'){ if (HausStore.member.guidePlace>0){ HausStore.member.guidePlace--; renderGuide(); } return; }
@@ -772,8 +772,8 @@ function doErase(key){
   if (key==='notes'){ HausStore.eraseNotes(); }
   else if (key==='reflections'){ HausStore.eraseReflections(); }
   else if (key==='history'){ HausStore.eraseHistory(); }
-  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. The house keeps no copy. Erasing the account does not remove your password from the account service or the records of door attempts.'); route(); return; }
-  toast('Erased. The house keeps no copy.');
+  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser.'); route(); return; }
+  toast('Erased.');
   renderAccount();
 }
 

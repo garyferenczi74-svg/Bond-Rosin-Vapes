@@ -453,6 +453,15 @@ test("Ritual is a product-free quiet timer", () => {
   assert.equal(haus.includes("cleanest"), false);
   assert.equal(haus.includes("how it landed"), false);
   assert.match(haus, /placeholder="A note for yourself\."/);
+  assert.match(
+    haus,
+    /toast\('Erased\. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser\.'\)/,
+  );
+  assert.match(
+    haus,
+    /exactly as the Privacy Policy promises\. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser\./,
+  );
+  assert.equal(haus.includes("keeps no copy"), false);
   assert.equal(haus.includes("Begin a ritual with "), false);
   assert.match(haus, /var INTENTIONS = \['Aroma','Flavor','Craft','Season','Evening'\];/);
   assert.match(haus, /Set an intention, and begin when ready\./);
