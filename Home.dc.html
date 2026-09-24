@@ -690,11 +690,12 @@ class Component extends DCLogic {
     '--hero-media-min-height',
     '--hero-media-object-fit'
   ];
-  var started = false, reduced = false;
+  var started = false, reduced = false, allowReveal = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   var layoutRaf = 0;
 
   function reveal(instant) {
+    if (allowReveal !== true) return;
     var s = document.getElementById(STACK);
     if (s === null) return;
     if (instant === true) s.classList.add('hero-instant');
@@ -906,16 +907,24 @@ class Component extends DCLogic {
     var media = document.querySelector('.hero-media');
     var poster = isWideNow() ? 'media/posters/bond_hero_d.v6.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
-    requestLayout();
-    if (reduced === true) {
+    var go = function () {
+      allowReveal = true;
       requestLayout();
-      return;
-    }
-    if (v === null) { requestLayout(); return; }
-    v._bondFail = function () { requestLayout(); };
-    v.addEventListener('playing', requestLayout);
-    v.addEventListener('loadedmetadata', requestLayout);
-    requestLayout();
+      if (reduced === true || v === null) return;
+      v._bondFail = function () { requestLayout(); };
+      v.addEventListener('playing', requestLayout);
+      v.addEventListener('loadedmetadata', requestLayout);
+    };
+    if (document.fonts && document.fonts.status !== 'loaded') {
+      var fired = false;
+      var timer = setTimeout(function () { if (fired) return; fired = true; go(); }, 600);
+      document.fonts.ready.then(function () {
+        if (fired) { requestLayout(); return; }
+        fired = true;
+        clearTimeout(timer);
+        go();
+      });
+    } else go();
   }
   function released() {
     var t = document.getElementById(STAGE);
@@ -926,7 +935,6 @@ class Component extends DCLogic {
   window.addEventListener('resize', requestLayout);
   window.addEventListener('orientationchange', requestLayout);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', requestLayout);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(requestLayout);
   var tries = 0;
   var iv = setInterval(function () {
     tries += 1;
