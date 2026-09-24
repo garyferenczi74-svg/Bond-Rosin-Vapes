@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/gfsdidot/v18/Jqzh5TybZ9vZMWFssvwSEO3HNyOWAQ.woff2">
+<noscript><style>#hero-textstack .hero-row{opacity:1 !important;transform:none !important}</style></noscript>
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap">
@@ -146,6 +148,7 @@ input::placeholder { color: #B0A99A; }
 @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
 #top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
 </style>
+<noscript><style>#hero-textstack .hero-row{opacity:1 !important;transform:none !important}</style></noscript>
 </helmet>
 <div style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;background:#1B1D1C;color:#E1DAD0">
 
@@ -203,7 +206,7 @@ input::placeholder { color: #B0A99A; }
         data-mob-jpg="media/endplates/hero_endplate_9x16.1080.v1.jpg">
       </picture>
     </div>
-    <div id="hero-textstack" class="hero-text hero-in">
+    <div id="hero-textstack" class="hero-text">
       <div class="hero-row hero-tagline">
         <span class="hero-rule hero-rule-l"></span>
         <h1>WITH YOUR HIGHER SELF</h1>
@@ -720,6 +723,7 @@ class Component extends DCLogic {
       media.style.removeProperty('background-position');
       media.style.removeProperty('background-repeat');
     }
+    reveal(true);
   }
 
   function readNum(cs, name, fallback) {
@@ -771,6 +775,7 @@ class Component extends DCLogic {
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
+    reveal(true);
   }
 
   function layoutCopy() {
@@ -878,6 +883,7 @@ class Component extends DCLogic {
       }
       t.classList.remove('hero-copy-flow');
       s.style.setProperty('--hero-copy-top', copyTop + 'px');
+      reveal(true);
     } catch (err) {
       flowFallback();
     }
@@ -901,10 +907,8 @@ class Component extends DCLogic {
     var poster = isWideNow() ? 'media/posters/bond_hero_d.v6.webp' : 'media/posters/bond_hero_m.webp';
     if (media) media.style.backgroundImage = 'url("' + poster + '")';
     requestLayout();
-    reveal(false);
     if (reduced === true) {
       requestLayout();
-      reveal(true);
       return;
     }
     if (v === null) { requestLayout(); return; }
