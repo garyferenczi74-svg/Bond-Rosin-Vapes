@@ -184,10 +184,28 @@ const NIGHTFALL = {
 };
 
 const WAITLIST_CONFIRM =
-  "Join the waitlist. We'll let you know when a licensed dispensary near you carries Bond. Nothing is reserved yet.";
+  "No licensed dispensary near you carries Bond yet. Nothing can be reserved right now. Check back here.";
 
-function assertNoHoldLanguage(html: string) {
-  assert.equal(/\b(held|hold|collect|pickup|ready|reservation)\b/i.test(html), false, html);
+const ZERO_CARRIER_CARD = "The next numbered run. Details to come.";
+
+const AFFIRMATIVE_RESERVE = [
+  /\bheld\b/i,
+  /\bhold\b/i,
+  /\bcollect\b/i,
+  /your reservation/i,
+  /reserved for you/i,
+  /will notify/i,
+  /let you know/i,
+  /yours to claim/i,
+  /\bclaim\b/i,
+  /cleanest/i,
+  /how it landed/i,
+];
+
+function assertNoAffirmativeReserve(html: string) {
+  for (const pattern of AFFIRMATIVE_RESERVE) {
+    assert.equal(pattern.test(html), false, `${pattern} in ${html}`);
+  }
 }
 
 test("zero carriers render a waitlist and do not promise a hold", () => {
@@ -200,22 +218,24 @@ test("zero carriers render a waitlist and do not promise a hold", () => {
   const open = api.waitlistRunHtml(NIGHTFALL, "#C08457", true, false);
   const joined = api.waitlistRunHtml(NIGHTFALL, "#C08457", true, true);
   for (const html of [closed, open, joined]) {
-    assert.equal(html.includes("The next numbered run"), true);
-    assert.equal(html.includes("No. 4 Nightfall"), true);
-    assert.equal(html.includes(NIGHTFALL.line), true);
-    assert.equal(html.includes("250 numbered . opening soon"), true);
-    assertNoHoldLanguage(html);
+    assert.equal(html.includes(ZERO_CARRIER_CARD), true);
+    assert.equal(html.includes("No. 4 Nightfall"), false);
+    assert.equal(html.includes(NIGHTFALL.line), false);
+    assert.equal(html.includes("250 numbered . opening soon"), false);
+    assertNoAffirmativeReserve(html);
     assert.equal(html.includes("Reserve your place"), false);
     assert.equal(html.includes("The house will notify you"), false);
     assert.equal(html.includes("Circle"), false);
   }
-  assert.equal(closed.includes(">Join the waitlist</button>"), true);
+  assert.equal(closed.includes(">Understood</button>"), true);
+  assert.equal(closed.includes(">Join the waitlist</button>"), false);
   assert.equal(closed.includes("No shops carrying Bond yet"), false);
   assert.equal(open.includes("No shops carrying Bond yet"), true);
-  assert.equal(open.includes(">Join the waitlist</button>"), true);
+  assert.equal(open.includes(">Understood</button>"), true);
   assert.equal(open.includes(">Not now</button>"), true);
   assert.equal(open.includes("Your city"), false);
   assert.equal(joined.includes(WAITLIST_CONFIRM), true);
+  assert.equal(joined.includes(">Understood</button>"), false);
   assert.equal(joined.includes(">Join the waitlist</button>"), false);
   assert.equal(joined.includes("No shops carrying Bond yet"), false);
 
@@ -223,22 +243,68 @@ test("zero carriers render a waitlist and do not promise a hold", () => {
   assert.equal(api.isWaitlisted("run-nf"), true);
   const joinedLive = api.waitlistRunHtml(NIGHTFALL, "#C08457", false, api.isWaitlisted("run-nf"));
   assert.equal(joinedLive.includes(WAITLIST_CONFIRM), true);
-  assertNoHoldLanguage(joinedLive);
+  assertNoAffirmativeReserve(joinedLive);
 
   assert.match(haus, /if \(!carriersOn\)\{\s*out \+= waitlistRunHtml\(/);
   assert.match(haus, /bondCarriers\(\)\.length \? holdsSection\(m\) : ''/);
   assert.match(haus, /if \(hp\)\{ if \(!bondCarriers\(\)\.length\) return;/);
   assert.match(haus, /data-holdplace=/);
-  assert.match(haus, /Hold my place/);
+  assert.match(haus, /Reservations not open yet/);
   assert.match(haus, /Find pickup/);
-  assert.match(haus, /Your place is held\. The house will notify you\./);
+  assert.match(haus, /Nothing is reserved yet\./);
+  assert.equal(haus.includes("Hold my place"), false);
+  assert.equal(haus.includes("Join the waitlist"), false);
   const joinAt = haus.indexOf("var jw = t.closest('[data-joinwaitlist]')");
   const joinEnd = haus.indexOf("data-waitlistcancel", joinAt);
   const joinHandler = haus.slice(joinAt, joinEnd);
   assert.equal(joinHandler.includes("reserveHold"), false);
   assert.equal(joinHandler.includes("localStorage"), false);
   assert.equal(joinHandler.includes("toast("), false);
-  assert.equal(haus.includes("let you know when a licensed dispensary near you carries Bond. Nothing is reserved yet."), true);
+  assert.equal(haus.includes("let you know when a licensed dispensary near you carries Bond. Nothing is reserved yet."), false);
+});
+
+test("interim zero-carrier copy is locked exactly", () => {
+  const api = loadCarriers({});
+  assert.equal(api.WAITLIST_CONFIRM, WAITLIST_CONFIRM);
+  assert.equal(api.CARRIER_EMPTY, "No shops carrying Bond yet");
+
+  const closed = api.waitlistRunHtml(NIGHTFALL, "#C08457", false, false);
+  const open = api.waitlistRunHtml(NIGHTFALL, "#C08457", true, false);
+  const joined = api.waitlistRunHtml(NIGHTFALL, "#C08457", false, true);
+  assert.equal(closed.includes(ZERO_CARRIER_CARD), true);
+  assert.equal(open.includes(ZERO_CARRIER_CARD), true);
+  assert.equal(joined.includes(ZERO_CARRIER_CARD), true);
+  assert.equal(joined.includes(WAITLIST_CONFIRM), true);
+  assert.match(joined, /\breserved\b/i);
+  assert.equal(closed.includes(">Understood</button>"), true);
+  assert.equal(open.includes(">Understood</button>"), true);
+  assert.equal(joined.includes(">Understood</button>"), false);
+
+  const near = api.carrierListHtml("Albany", 0, "<button>Sample</button>");
+  assert.equal(near, '<p style="font-size:12.5px;color:#C08457;margin-top:14px">No shops carrying Bond yet</p>');
+
+  api.readVerifiedCarriers = () => [
+    {
+      lic: "VERIFIED-1",
+      name: "Verified Shop",
+      city: "Albany",
+      lat: 42.65,
+      lng: -73.75,
+      bond: true,
+      verified: true,
+    },
+  ];
+  const noneNear = api.carrierListHtml("Albany", 0, "");
+  assert.equal(
+    noneNear,
+    '<p style="font-size:12.5px;color:#C08457;margin-top:14px">No licensed dispensary near Albany carries Bond yet. Nothing can be reserved right now.</p>',
+  );
+  const listed = api.carrierListHtml("Albany", 1, "<button>Verified Shop</button>");
+  assert.equal(listed.includes("Licensed dispensaries carrying Bond, nearest first"), true);
+  assert.equal(listed.includes("Held for you at, nearest first"), false);
+  for (const html of [closed, open, joined, noneNear]) {
+    assertNoAffirmativeReserve(html);
+  }
 });
 
 test("Haus accepts only a future verified carrier", () => {
@@ -295,7 +361,8 @@ test("Haus accepts only a future verified carrier", () => {
   assert.equal(api.joinWaitlist("run-nf"), false);
   assert.equal(api.isWaitlisted("run-nf"), false);
   const verifiedList = api.carrierListHtml("Albany", 1, picks);
-  assert.equal(verifiedList.includes("Held for you at, nearest first"), true);
+  assert.equal(verifiedList.includes("Licensed dispensaries carrying Bond, nearest first"), true);
+  assert.equal(verifiedList.includes("Held for you at, nearest first"), false);
   const missing = api.pickupForHold("OCM-AUR-0101", "Buffalo");
   assert.equal(missing.lic, "");
   assert.equal(missing.name, "");
@@ -354,4 +421,80 @@ test("shipped pages have no OCM-AUR outside tests and no bond true flags", () =>
   assert.deepEqual(aur, []);
   assert.deepEqual(retail, []);
   assert.deepEqual(bondTrue, []);
+});
+
+type SessionFields = {
+  date: string;
+  intention: string;
+  duration: number;
+  reflection: string;
+  comp?: string;
+};
+
+function loadSessionFields(): (row: unknown) => SessionFields {
+  const html = read("Haus.dc.html");
+  const start = html.indexOf("// RITUAL_FIELDS_START");
+  const end = html.indexOf("// RITUAL_FIELDS_END");
+  assert.ok(start !== -1 && end > start, "ritual field markers");
+  const sandbox = vm.createContext({});
+  vm.runInContext(html.slice(start, end), sandbox);
+  return (sandbox as { sessionFields: (row: unknown) => SessionFields }).sessionFields;
+}
+
+test("Ritual is a product-free quiet timer", () => {
+  const haus = read("Haus.dc.html");
+  assert.equal(haus.includes("data-rcomp"), false);
+  assert.equal(haus.includes("Choose a composition"), false);
+  assert.equal(haus.includes(">Composition</div>"), false);
+  assert.equal(haus.includes("logSession: function(compId"), false);
+  assert.equal(/sessions\.unshift\(\{[^}]*\bcomp:/.test(haus), false);
+  assert.equal(haus.includes("ritualsN+' kept'"), false);
+  assert.equal(haus.includes("Rituals kept"), false);
+  assert.equal(haus.includes("cleanest"), false);
+  assert.equal(haus.includes("how it landed"), false);
+  assert.match(haus, /placeholder="A note for yourself\."/);
+  assert.match(
+    haus,
+    /toast\('Erased\. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser\.'\)/,
+  );
+  assert.match(
+    haus,
+    /exactly as the Privacy Policy promises\. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser\./,
+  );
+  assert.equal(haus.includes("keeps no copy"), false);
+  assert.equal(haus.includes("Begin a ritual with "), false);
+  assert.match(haus, /var INTENTIONS = \['Aroma','Flavor','Craft','Season','Evening'\];/);
+  assert.match(haus, /Set an intention, and begin when ready\./);
+  assert.match(haus, /\['Prepare','Clear the space\. Remove distractions\.','prepare'\],\['Pause','Be still\. Set your intention\.','pause'\],\['Close','Return when ready\.','elevate'\]/);
+  assert.equal(haus.includes("Breathe. Set your intention."), false);
+  assert.equal(haus.includes("Return elevated."), false);
+  assert.match(haus, /logSession: function\(intention, duration\)/);
+  assert.match(haus, /HausStore\.logSession\(ritual\.freeText\|\|ritual\.intention, ritual\.duration\)/);
+  assert.match(haus, /duration:20/);
+
+  const sessionFields = loadSessionFields();
+  const stale = sessionFields({
+    comp: "no1",
+    date: "2026-09-01",
+    intention: "Aroma",
+    duration: 20,
+    reflection: "quiet",
+  });
+  assert.equal(
+    JSON.stringify(stale),
+    JSON.stringify({ date: "2026-09-01", intention: "Aroma", duration: 20, reflection: "quiet" }),
+  );
+  assert.equal(Object.prototype.hasOwnProperty.call(stale, "comp"), false);
+  assert.equal(
+    JSON.stringify(sessionFields(null)),
+    JSON.stringify({ date: "", intention: "", duration: 0, reflection: "" }),
+  );
+  assert.equal(
+    JSON.stringify(sessionFields({ comp: "no3" })),
+    JSON.stringify({ date: "", intention: "", duration: 0, reflection: "" }),
+  );
+  assert.equal(
+    JSON.stringify(sessionFields(undefined)),
+    JSON.stringify({ date: "", intention: "", duration: 0, reflection: "" }),
+  );
 });
