@@ -225,6 +225,13 @@ test("Finder sample heading and Product sample directory stay fictional", () => 
   const finder = read("Finder.dc.html");
   assert.equal(finder.includes(">Sample listings (not real stores)</div>"), true);
   assert.equal(finder.includes("Other licensed dispensaries within fifty miles"), false);
+  assert.equal(finder.includes("licensed dispensaries"), false);
+  assert.equal(finder.includes("licensed shops"), false);
+  assert.equal(finder.includes("Also show other sample listings nearby"), true);
+  assert.equal(finder.includes("Enter your city to see sample listings within fifty miles. These are not real stores."), true);
+  assert.equal(finder.includes("No other sample listings within fifty miles. These are not real stores."), true);
+  assert.equal(finder.includes("sample listings within fifty miles of "), true);
+  assert.equal(finder.includes("These are not real stores. Distances are approximate, measured from the center of each city."), true);
 
   const product = read("Product.dc.html");
   assert.equal(product.includes("OCM-AUR"), false);
