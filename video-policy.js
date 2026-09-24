@@ -34,7 +34,7 @@
     el.removeAttribute('src');
     var nodes = el.querySelectorAll('source');
     for (var i = 0; i < nodes.length; i++) nodes[i].parentNode.removeChild(nodes[i]);
-    try { el.load(); } catch (e) {}
+    // load() with no source asks the browser for an empty URL.
     el.style.opacity = '0';
   }
 
@@ -97,12 +97,15 @@
     for (var j = existing.length - 1; j >= 0; j--) existing[j].parentNode.removeChild(existing[j]);
     el.removeAttribute('src');
     for (var k = 0; k < wanted.length; k++) {
+      if (!wanted[k].src) continue;
       var s = document.createElement('source');
       s.setAttribute('src', wanted[k].src);
       s.setAttribute('type', wanted[k].type);
       el.appendChild(s);
     }
-    try { el.load(); } catch (e) {}
+    if (el.querySelector('source')) {
+      try { el.load(); } catch (e) {}
+    }
     silence(el);
     return true;
   }
@@ -121,7 +124,8 @@
       el.loop = false;
     }
     var hero = el.getAttribute('data-hero') === '1';
-    el.preload = hero ? 'auto' : 'metadata';
+    // Poster is the early paint. The ladder file waits until playback.
+    el.preload = hero ? 'metadata' : 'none';
     el.setAttribute('preload', el.preload);
     var wide = wideOf(el);
     var poster = wide ? el.getAttribute('data-desktop-poster') : el.getAttribute('data-mobile-poster');
@@ -236,13 +240,21 @@
     var pic = platePic(el);
     if (!pic) return;
     var img = pic.querySelector('img');
-    if (!img) return;
-    if (pic.getAttribute('data-armed') === '1') return;
-    pic.setAttribute('data-armed', '1');
+    if (pic.getAttribute('data-armed') === '1' && img && img.getAttribute('src')) return;
     var wide = wideOf(el);
     var av = wide ? pic.getAttribute('data-desk-avif') : pic.getAttribute('data-mob-avif');
     var wp = wide ? pic.getAttribute('data-desk-webp') : pic.getAttribute('data-mob-webp');
     var jp = wide ? pic.getAttribute('data-desk-jpg') : pic.getAttribute('data-mob-jpg');
+    var jpg = jp ? jp.split(' ')[0] : '';
+    if (!jpg) return;
+    if (!img) {
+      img = document.createElement('img');
+      img.className = 'hero-endplate-img';
+      img.alt = '';
+      img.decoding = 'async';
+      pic.appendChild(img);
+    }
+    pic.setAttribute('data-armed', '1');
     function addSrc(type, set) {
       if (!set) return;
       var s = document.createElement('source');
@@ -251,9 +263,11 @@
       s.setAttribute('sizes', '100vw');
       pic.insertBefore(s, img);
     }
-    addSrc('image/avif', av);
-    addSrc('image/webp', wp);
-    if (jp) img.setAttribute('src', jp.split(' ')[0]);
+    if (!pic.querySelector('source')) {
+      addSrc('image/avif', av);
+      addSrc('image/webp', wp);
+    }
+    if (img.getAttribute('src') !== jpg) img.setAttribute('src', jpg);
   }
 
   function showPlate(el) {
@@ -345,7 +359,7 @@
         return;
       }
       var nowWide = wideOf(el);
-      if (gateOpen) fillSources(el);
+      if (gateOpen && el._bondVisible) fillSources(el);
       el._bondWide = nowWide;
       watchVisible(el);
       tryStart(el);
@@ -395,7 +409,6 @@
     }
 
     el._bondWide = wideOf(el);
-    fillSources(el);
     watchVisible(el);
   }
 
@@ -405,7 +418,7 @@
       var el = attached[i];
       if (reduced || saveData) continue;
       hygiene(el);
-      if (!el.currentSrc) fillSources(el);
+      if (!el.currentSrc && el._bondVisible) fillSources(el);
       watchVisible(el);
       tryStart(el);
     }
@@ -447,7 +460,7 @@
   });
   window.addEventListener('resize', function () {
     for (var i = 0; i < attached.length; i++) {
-      if (!reduced && !saveData && gateOpen) fillSources(attached[i]);
+      if (!reduced && !saveData && gateOpen && attached[i]._bondVisible) fillSources(attached[i]);
     }
   });
 
