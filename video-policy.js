@@ -34,7 +34,7 @@
     el.removeAttribute('src');
     var nodes = el.querySelectorAll('source');
     for (var i = 0; i < nodes.length; i++) nodes[i].parentNode.removeChild(nodes[i]);
-    try { el.load(); } catch (e) {}
+    // load() with no source asks the browser for an empty URL.
     el.style.opacity = '0';
   }
 
@@ -97,12 +97,15 @@
     for (var j = existing.length - 1; j >= 0; j--) existing[j].parentNode.removeChild(existing[j]);
     el.removeAttribute('src');
     for (var k = 0; k < wanted.length; k++) {
+      if (!wanted[k].src) continue;
       var s = document.createElement('source');
       s.setAttribute('src', wanted[k].src);
       s.setAttribute('type', wanted[k].type);
       el.appendChild(s);
     }
-    try { el.load(); } catch (e) {}
+    if (el.querySelector('source')) {
+      try { el.load(); } catch (e) {}
+    }
     silence(el);
     return true;
   }
@@ -121,7 +124,7 @@
       el.loop = false;
     }
     var hero = el.getAttribute('data-hero') === '1';
-    el.preload = hero ? 'auto' : 'metadata';
+    el.preload = hero ? 'auto' : 'none';
     el.setAttribute('preload', el.preload);
     var wide = wideOf(el);
     var poster = wide ? el.getAttribute('data-desktop-poster') : el.getAttribute('data-mobile-poster');
@@ -345,7 +348,7 @@
         return;
       }
       var nowWide = wideOf(el);
-      if (gateOpen) fillSources(el);
+      if (gateOpen && (el.getAttribute('data-hero') === '1' || el._bondVisible)) fillSources(el);
       el._bondWide = nowWide;
       watchVisible(el);
       tryStart(el);
@@ -395,7 +398,7 @@
     }
 
     el._bondWide = wideOf(el);
-    fillSources(el);
+    if (el.getAttribute('data-hero') === '1') fillSources(el);
     watchVisible(el);
   }
 
@@ -405,7 +408,7 @@
       var el = attached[i];
       if (reduced || saveData) continue;
       hygiene(el);
-      if (!el.currentSrc) fillSources(el);
+      if (!el.currentSrc && (el.getAttribute('data-hero') === '1' || el._bondVisible)) fillSources(el);
       watchVisible(el);
       tryStart(el);
     }
@@ -447,7 +450,7 @@
   });
   window.addEventListener('resize', function () {
     for (var i = 0; i < attached.length; i++) {
-      if (!reduced && !saveData && gateOpen) fillSources(attached[i]);
+      if (!reduced && !saveData && gateOpen && (attached[i].getAttribute('data-hero') === '1' || attached[i]._bondVisible)) fillSources(attached[i]);
     }
   });
 

@@ -359,6 +359,12 @@
     '.ctl:popover-open{position:fixed;inset:auto;transform:translateX(-100%)}' +
     ':host([data-filled][data-editable]:hover) .ctl,:host([data-reframe]) .ctl' +
     '  {opacity:1;pointer-events:auto}' +
+    // Production pages have no omelette writer. Keep Replace/Edit, the dashed
+    // ring, and the empty-state caption out of the visitor tree.
+    ':host(:not([data-editable])) .ctl{display:none !important}' +
+    ':host(:not([data-editable])) .empty,:host(:not([data-editable])) .ring{display:none !important}' +
+    ':host(:not([data-editable]):not([data-filled])) .frame{background:transparent}' +
+    ':host([data-visitor-empty]){visibility:hidden}' +
     '.ctl button{appearance:none;border:0;border-radius:6px;padding:5px 10px;cursor:pointer;' +
     '  background:rgba(0,0,0,.65);color:#fff;font:11px/1 system-ui,-apple-system,sans-serif;' +
     '  backdrop-filter:blur(6px)}' +
@@ -725,7 +731,10 @@
       // frame's clamp range.
       this._ro = new ResizeObserver(() => this._render());
       this._ro.observe(this);
-      load();
+      // Visitors do not need the sidecar on the LCP path. Authors still load now.
+      if (window.omelette && window.omelette.writeFile) load();
+      else if (typeof requestIdleCallback === 'function') requestIdleCallback(() => load(), { timeout: 1200 });
+      else setTimeout(() => load(), 1);
       this._render();
     }
 
@@ -1071,6 +1080,11 @@
       const editable = !!(window.omelette && window.omelette.writeFile);
       this.toggleAttribute('data-editable', editable);
       this._sub.style.display = editable ? '' : 'none';
+      if (this._ctl) {
+        this._ctl.hidden = !editable;
+        const btns = this._ctl.querySelectorAll('button');
+        for (let bi = 0; bi < btns.length; bi++) btns[bi].tabIndex = editable ? 0 : -1;
+      }
 
       // Content. The sidecar is also writable by the agent's write_file
       // tool, so its value isn't guaranteed canvas-originated — only accept
@@ -1150,9 +1164,11 @@
         this._ghost.removeAttribute('src');
         // The error tile owns the blocked-photo state; .empty stays for
         // the genuinely-empty slot.
-        this._empty.style.display = attrError ? 'none' : 'flex';
+        this._empty.style.display = attrError || !editable ? 'none' : 'flex';
         this.removeAttribute('data-filled');
       }
+      if (!editable && !(url && !attrError)) this.setAttribute('data-visitor-empty', '');
+      else this.removeAttribute('data-visitor-empty');
 
       // Credit belongs to the author src, so a user drop hides it.
       // textContent + the http(s)-only funnel keep external strings inert.

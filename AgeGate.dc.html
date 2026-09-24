@@ -1,8 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<title>Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
+<link rel="preload" as="script" crossorigin href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap">
 <script src="./support.js"></script>
 </head>
 <body>
@@ -21,29 +27,29 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 <sc-if value="{{ visible }}" hint-placeholder-val="{{ false }}">
 <div style="position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;align-items:center;justify-content:center;animation:gateIn .6s cubic-bezier(0.22,1,0.36,1) both">
   <div style="position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 38%, rgba(194,154,69,0.07), transparent 70%),radial-gradient(1200px 700px at 50% 100%, rgba(13,15,14,0.9), transparent 80%)"></div>
-  <div style="position:absolute;inset:0;opacity:0.45;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIj48ZmlsdGVyIGlkPSJsIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSI0IiBzZWVkPSI3Ii8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIyNDAiIGhlaWdodD0iMjQwIiBmaWx0ZXI9InVybCgjbCkiLz48L3N2Zz4=')"></div>
+  <div style="position:absolute;inset:0;opacity:0.45;mix-blend-mode:overlay"></div>
   <sc-if value="{{ declined }}" hint-placeholder-val="{{ false }}">
-    <div style="position:relative;text-align:center;padding:32px;max-width:520px;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
+    <div style="position:relative;text-align:center;padding:32px;max-width:520px;width:100%;box-sizing:border-box;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(44px,6vw,64px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;transform-origin:center;animation:bondBreathe 6.5s ease-in-out infinite,breatheScale 3.6s ease-in-out infinite">BOND</div>
       <p style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(22px,3vw,30px);color:#E1DAD0;line-height:1.5;margin:48px 0 16px">Not yet</p>
-      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;color:#8E887C;line-height:1.7;margin:0 0 40px">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
+      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:16px;color:#B0A99A;line-height:1.7;margin:0 0 40px">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
       <div style="width:48px;height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:0 auto"></div>
     </div>
   </sc-if>
   <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
-    <div style="position:relative;text-align:center;padding:32px;max-width:560px;width:100%;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
+    <div style="position:relative;text-align:center;padding:32px;max-width:560px;width:100%;box-sizing:border-box;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(52px,8vw,84px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;transform-origin:center;animation:bondBreathe 6.5s ease-in-out infinite,breatheScale 3.6s ease-in-out infinite">BOND</div>
       <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(18px,2.6vw,28px);letter-spacing:0.03em;color:#E1DAD0;margin:24px 0 0">Intentional elevation is for adults.</p>
       <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>
-      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:13px;line-height:1.7;color:#B0A99A;max-width:440px;margin:26px auto 26px">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
-      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:32px">
-        <select value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:150px;outline:none;cursor:pointer">
+      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:16px;line-height:1.7;color:#B0A99A;max-width:440px;margin:26px auto 26px">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px;max-width:100%">
+        <select value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(160px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
           <option value="" style="color:#1B1D1C">Birth month</option>
           <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
             <option value="{{ $index }}" style="color:#1B1D1C">{{ m }}</option>
           </sc-for>
         </select>
-        <select value="{{ year }}" onChange="{{ setYear }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:120px;outline:none;cursor:pointer">
+        <select value="{{ year }}" onChange="{{ setYear }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(140px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
           <option value="" style="color:#1B1D1C">Birth year</option>
           <sc-for list="{{ years }}" as="y" hint-placeholder-count="0">
             <option value="{{ y }}" style="color:#1B1D1C">{{ y }}</option>
@@ -52,8 +58,8 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
       </div>
       <button onClick="{{ enter }}" style="background:{{ enterBg }};color:{{ enterColor }};border:1px solid {{ enterBorder }};border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 56px;cursor:pointer;transition:background .4s,color .4s,border-color .4s,box-shadow .4s;box-shadow:{{ enterShadow }}">Enter</button>
       <div style="border-top:1px solid rgba(194,154,69,0.15);padding:28px 8px 0;margin:36px auto 0;max-width:520px;text-align:center">
-        <div style="font-size:10px;letter-spacing:0.32em;text-transform:uppercase;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block;margin:0 0 12px">Health and Safety</div>
-        <p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0;letter-spacing:0.01em">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
+        <div style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin:0 0 12px">Health and Safety</div>
+        <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0;letter-spacing:0.01em">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
       </div>
     </div>
   </sc-if>
