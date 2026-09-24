@@ -60,7 +60,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   min-height: var(--hero-media-min-height, 0);
   object-fit: var(--hero-media-object-fit, cover);
 }
-.hero-video { display: block; opacity: 1; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
+.hero-video { display: block; opacity: 0; transition: opacity .6s cubic-bezier(0.44,0,0.56,1); }
 .hero-video.hero-vis { opacity: 1; }
 .hero-endplate { display: block; pointer-events: none; opacity: 0; transition: opacity .4s cubic-bezier(0.44,0,0.56,1); }
 .hero-endplate img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -145,7 +145,11 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
 @media (max-width: 767px) { #process, #process > div { height: 60vh !important; min-height: 440px !important; } }
-@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+  .hero-text .hero-row,
+  .hero-text.hero-in .hero-row { transform: none; transition-property: opacity; }
+}
 #top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
 </style>
 <noscript><style>#hero-textstack .hero-row{opacity:1 !important;transform:none !important}</style></noscript>
@@ -188,7 +192,7 @@ input::placeholder { color: #B0A99A; }
 
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
     <div class="hero-media">
-      <video id="hero-video" class="hero-video" muted playsinline preload="metadata" disablepictureinpicture
+      <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
         data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px)"
         data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v6.webm"
         data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v6.mp4"
@@ -204,6 +208,7 @@ input::placeholder { color: #B0A99A; }
         data-mob-avif="media/endplates/hero_endplate_9x16.1080.v1.avif 1080w, media/endplates/hero_endplate_9x16.1440.v1.avif 1440w, media/endplates/hero_endplate_9x16.2160.v1.avif 2160w"
         data-mob-webp="media/endplates/hero_endplate_9x16.1080.v1.webp 1080w, media/endplates/hero_endplate_9x16.1440.v1.webp 1440w, media/endplates/hero_endplate_9x16.2160.v1.webp 2160w"
         data-mob-jpg="media/endplates/hero_endplate_9x16.1080.v1.jpg">
+        <img class="hero-endplate-img" alt="" decoding="async">
       </picture>
     </div>
     <div id="hero-textstack" class="hero-text">

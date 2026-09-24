@@ -124,8 +124,7 @@
       el.loop = false;
     }
     var hero = el.getAttribute('data-hero') === '1';
-    // Poster is the early paint. The ladder file waits until playback.
-    el.preload = hero ? 'metadata' : 'none';
+    el.preload = hero ? 'auto' : 'none';
     el.setAttribute('preload', el.preload);
     var wide = wideOf(el);
     var poster = wide ? el.getAttribute('data-desktop-poster') : el.getAttribute('data-mobile-poster');
@@ -247,12 +246,14 @@
     var jp = wide ? pic.getAttribute('data-desk-jpg') : pic.getAttribute('data-mob-jpg');
     var jpg = jp ? jp.split(' ')[0] : '';
     if (!jpg) return;
+    var built = false;
     if (!img) {
       img = document.createElement('img');
       img.className = 'hero-endplate-img';
       img.alt = '';
       img.decoding = 'async';
       pic.appendChild(img);
+      built = true;
     }
     pic.setAttribute('data-armed', '1');
     function addSrc(type, set) {
@@ -267,7 +268,7 @@
       addSrc('image/avif', av);
       addSrc('image/webp', wp);
     }
-    if (img.getAttribute('src') !== jpg) img.setAttribute('src', jpg);
+    if (built) img.setAttribute('src', jpg);
   }
 
   function showPlate(el) {
