@@ -91,7 +91,7 @@ function sharedBatch(num){ if (!HAUS_SHARED || !HAUS_SHARED.batches) return null
 // the Find Your Bond result from the public site, read fresh so a retake updates the recommendation
 function findResult(){ try { var r = localStorage.getItem('bondFindResult'); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
 
-// ---- Reserve Room pickup ----
+// ---- Shops that carry Bond ----
 // City lookup still reads the finder city table. Shops that carry Bond do not.
 // bondDispensaryDir and bondBondCarriers are sample listings or a stale
 // snapshot from before those samples. They are never offered as carriers,
@@ -103,6 +103,8 @@ var FALLBACK_CITIES = { 'New York':[40.7128,-74.0060],'Brooklyn':[40.6782,-73.94
 // Seam for a future verified licensed source. Return shops from that source
 // only. Do not read the finder directory or any localStorage snapshot here.
 var CARRIER_EMPTY = 'No shops carrying Bond yet';
+var WAITLIST_CONFIRM = 'Join the waitlist. We\'ll let you know when a licensed dispensary near you carries Bond. Nothing is reserved yet.';
+var waitlistJoined = {};
 function readVerifiedCarriers(){
   return [];
 }
@@ -161,11 +163,37 @@ function carrierListHtml(cityEsc, nearestCount, picksHtml){
   }
   return '<div class="lbl" style="margin-top:16px">Held for you at, nearest first</div>'+picksHtml;
 }
+function joinWaitlist(runId){
+  if (bondCarriers().length) return false;
+  waitlistJoined[runId] = true;
+  return true;
+}
+function isWaitlisted(runId){
+  return waitlistJoined[runId] === true;
+}
+function waitlistRunHtml(run, accent, open, joined){
+  var html = '<div class="card" style="margin-bottom:16px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+accent+'"></div>'
+    + '<div class="lbl">The next numbered run</div>'
+    + '<div class="didot" style="font-size:22px;color:#E1DAD0;margin-top:12px">'+esc(run.name)+'</div>'
+    + '<div style="font-size:13px;color:#8E887C;margin-top:6px;line-height:1.7">'+esc(run.line)+'</div>'
+    + '<div style="font-size:12px;color:'+accent+';margin-top:8px">'+run.size+' numbered . opening soon</div>';
+  if (joined){
+    html += '<p style="font-size:12.5px;color:#8E887C;line-height:1.8;margin:16px 0 0">'+esc(WAITLIST_CONFIRM)+'</p>';
+  } else if (open){
+    html += '<div style="margin-top:18px;border-top:1px solid #2A2C29;padding-top:18px">'
+      + carrierListHtml('', 0, '')
+      + '<div style="display:flex;gap:10px;margin-top:18px"><button class="htab on" data-joinwaitlist="'+esc(run.id)+'" style="padding:0 24px;height:42px">Join the waitlist</button><button class="htab" data-waitlistcancel="1" style="padding:0 20px;height:42px">Not now</button></div></div>';
+  } else {
+    html += '<button class="htab on" data-waitlistopen="'+esc(run.id)+'" style="margin-top:16px;padding:0 24px;height:42px">Join the waitlist</button>';
+  }
+  return html + '</div>';
+}
 // CARRIERS_END
 function nyCity(name){ var c = readJSON('bondNyCities') || FALLBACK_CITIES; var keys=Object.keys(c); var k = keys.filter(function(x){ return x.toLowerCase()===String(name).toLowerCase(); })[0] || keys.filter(function(x){ return x.toLowerCase().indexOf(String(name).toLowerCase())===0; })[0]; return k ? { key:k, coord:[c[k][0],c[k][1]] } : null; }
 function cityKeys(){ var c = readJSON('bondNyCities') || FALLBACK_CITIES; return Object.keys(c).sort(); }
 function nearestCarriers(coord, n){ return bondCarriers().map(function(d){ return { d:d, miles:havMiles(coord,[d.lat,d.lng]) }; }).sort(function(a,b){ return a.miles-b.miles; }).slice(0, n||3); }
-// upcoming short runs a member can reserve a place on
+// Upcoming short runs. Verified carriers keep the existing hold flow.
+// With no verified carriers the card is a waitlist and writes nothing.
 var UPCOMING_RESERVE = [
   { id:'run-nf', name:'No. 4 Nightfall', comp:'no3', line:'A single source midnight press, cold cured slow. Two hundred and fifty numbered.', size:250 }
 ];
@@ -484,14 +512,20 @@ function renderReserve(){
   var claimable = m.shelf.filter(function(b){ return b.run && !m.claims.filter(function(c){ return c.batch===b.batch; }).length; });
   var claimBox = claimable.length ? '<div class="card" style="margin-bottom:16px"><div class="lbl">Claim a number</div>'+claimable.map(function(b){ return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span style="font-size:13.5px;color:#B0A99A">'+esc(b.cultivar)+' . '+esc(b.batch)+'</span><button class="htab" data-claim="'+esc(b.batch)+'">Claim your run number</button></div>'; }).join('')+'</div>' : (m.claims.length ? '' : '<div class="card" style="margin-bottom:16px"><p style="font-size:13px;color:#8E887C;margin:0;line-height:1.7">Register a Reserve batch in the Library and its run number becomes yours to claim here.</p></div>');
   var runs = '<div class="card"><div class="lbl">Runs the house has pressed</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:14px">'+HausStore.reserveRuns.map(function(r){ var c=comp(r.comp); return '<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid #2A2C29"><div style="width:3px;height:44px;background:'+c.accent+';border-radius:2px"></div><div style="flex:1"><div class="didot" style="font-size:17px;color:#E1DAD0">'+esc(r.cultivar)+'</div><div style="font-size:12px;color:#8E887C;margin-top:3px">'+esc(c.name)+' . pressed '+esc(r.pressing)+' . run of '+r.size+'</div>'+(r.status==='closed'?'<div style="font-size:12px;color:#6E685E;margin-top:6px">This run has ended.</div>':'<div style="font-size:12px;color:'+c.accent+';margin-top:6px">Current run</div>')+'</div></div>'; }).join('')+'</div><p style="font-size:11.5px;color:#6E685E;margin:16px 0 0;line-height:1.7">The Reserve Room is a registry of what has been pressed. It is a record, not a room for acquiring.</p></div>';
-  chrome('reserve', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Reserve Room</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">For No. 3 and every numbered run after it.</p>'+reserveNext(m)+holdsSection(m)+claims+claimBox+runs);
+  chrome('reserve', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Reserve Room</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">For No. 3 and every numbered run after it.</p>'+reserveNext(m)+(bondCarriers().length ? holdsSection(m) : '')+claims+claimBox+runs);
 }
-// be first to the next short run: reserve a place, held at your nearest Bond dispensary
+// Verified carriers: reserve a place, held at the nearest Bond dispensary.
+// No verified carriers: waitlistRunHtml, which does not hold or reserve.
 function reserveNext(m){
   var out = '';
+  var carriersOn = bondCarriers().length > 0;
   UPCOMING_RESERVE.forEach(function(run){
-    var held = m.reserveHolds.filter(function(h){ return h.runId===run.id; })[0];
     var c = comp(run.comp) || comp('no3');
+    if (!carriersOn){
+      out += waitlistRunHtml(run, c.accent, reserveFlow.runId===run.id, isWaitlisted(run.id));
+      return;
+    }
+    var held = m.reserveHolds.filter(function(h){ return h.runId===run.id; })[0];
     if (held) return; // shown in holds section
     out += '<div class="card" style="margin-bottom:16px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+c.accent+'"></div>'
       + '<div class="lbl">Be first to the next Reserve run</div>'
@@ -689,11 +723,14 @@ document.addEventListener('click', function(ev){
 
   // reserve
   var cl = t.closest('[data-claim]'); if (cl){ if (HausStore.claimRun(cl.getAttribute('data-claim'))){ toast('Your run number is yours.'); renderReserve(); } return; }
-  // reserve the next short run, held at the nearest Bond dispensary
-  var rrun = t.closest('[data-reserverun]'); if (rrun){ reserveFlow = { runId:rrun.getAttribute('data-reserverun'), city:HausStore.member.city||'', lic:null }; renderReserve(); return; }
-  var fp = t.closest('[data-findpickup]'); if (fp){ var v=(document.getElementById('rvCity')||{}).value||''; var nc=nyCity(v); if (!nc){ toast('We could not find that New York city or town.'); return; } reserveFlow.city=nc.key; HausStore.member.city=nc.key; var near=nearestCarriers(nc.coord,3); reserveFlow.lic = near.length ? near[0].d.lic : null; renderReserve(); return; }
-  var pc = t.closest('[data-pickcarrier]'); if (pc){ reserveFlow.lic = pc.getAttribute('data-pickcarrier'); renderReserve(); return; }
-  var hp = t.closest('[data-holdplace]'); if (hp){ var run=UPCOMING_RESERVE.filter(function(r){ return r.id===hp.getAttribute('data-holdplace'); })[0]; if (!run) return; var disp = pickupForHold(reserveFlow.lic, reserveFlow.city); HausStore.reserveHold(run.id, run.name, disp); reserveFlow={ runId:null, city:'', lic:null }; toast('Your place is held. The house will notify you.'); renderReserve(); return; }
+  // Verified carriers only: hold the next short run at the nearest Bond dispensary.
+  var rrun = t.closest('[data-reserverun]'); if (rrun){ if (!bondCarriers().length) return; reserveFlow = { runId:rrun.getAttribute('data-reserverun'), city:HausStore.member.city||'', lic:null }; renderReserve(); return; }
+  var wlo = t.closest('[data-waitlistopen]'); if (wlo){ if (bondCarriers().length) return; reserveFlow = { runId:wlo.getAttribute('data-waitlistopen'), city:'', lic:null }; renderReserve(); return; }
+  var jw = t.closest('[data-joinwaitlist]'); if (jw){ if (!joinWaitlist(jw.getAttribute('data-joinwaitlist'))) return; reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
+  if (t.closest('[data-waitlistcancel]')){ reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
+  var fp = t.closest('[data-findpickup]'); if (fp){ if (!bondCarriers().length) return; var v=(document.getElementById('rvCity')||{}).value||''; var nc=nyCity(v); if (!nc){ toast('We could not find that New York city or town.'); return; } reserveFlow.city=nc.key; HausStore.member.city=nc.key; var near=nearestCarriers(nc.coord,3); reserveFlow.lic = near.length ? near[0].d.lic : null; renderReserve(); return; }
+  var pc = t.closest('[data-pickcarrier]'); if (pc){ if (!bondCarriers().length) return; reserveFlow.lic = pc.getAttribute('data-pickcarrier'); renderReserve(); return; }
+  var hp = t.closest('[data-holdplace]'); if (hp){ if (!bondCarriers().length) return; var run=UPCOMING_RESERVE.filter(function(r){ return r.id===hp.getAttribute('data-holdplace'); })[0]; if (!run) return; var disp = pickupForHold(reserveFlow.lic, reserveFlow.city); HausStore.reserveHold(run.id, run.name, disp); reserveFlow={ runId:null, city:'', lic:null }; toast('Your place is held. The house will notify you.'); renderReserve(); return; }
   if (t.closest('[data-reservecancel]')){ reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
   var rh = t.closest('[data-releasehold]'); if (rh){ HausStore.releaseHold(rh.getAttribute('data-releasehold')); toast('Your place is released.'); renderReserve(); return; }
 

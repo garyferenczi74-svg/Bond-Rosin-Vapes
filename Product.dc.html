@@ -192,15 +192,15 @@ var ProductStore = {
 
     // facilities and accounts (Metrc facility status + license expiry)
     var fac = [
-      { id:'ac1', name:'Verdant', city:'Albany', license:'OCM-RETAIL-0192', expiry:'2027-03-01', mfac:'active', terms:'Net 30', credit:20000, balance:6240, velocity:310, status:'active' },
-      { id:'ac2', name:'Highline', city:'Brooklyn', license:'OCM-RETAIL-0074', expiry:'2027-01-15', mfac:'active', terms:'Net 30', credit:30000, balance:8640, velocity:380, status:'active' },
-      { id:'ac3', name:'Northstar', city:'Buffalo', license:'OCM-RETAIL-0231', expiry:'2026-12-20', mfac:'active', terms:'Net 15', credit:15000, balance:4320, velocity:190, status:'active' },
-      { id:'ac4', name:'Solace', city:'Ithaca', license:'OCM-RETAIL-0308', expiry:'2027-05-01', mfac:'active', terms:'COD', credit:8000, balance:0, velocity:120, status:'active' },
-      { id:'ac5', name:'Meridian', city:'Rochester', license:'OCM-RETAIL-0141', expiry:'2026-09-08', mfac:'active', terms:'Net 30', credit:18000, balance:9200, velocity:260, status:'active' },
-      { id:'ac6', name:'Halcyon', city:'Kingston', license:'OCM-RETAIL-0355', expiry:'2027-06-01', mfac:'inactive', terms:'COD', credit:6000, balance:0, velocity:0, status:'prospect' }
+      { id:'ac1', name:'Sample Account 01', city:'Albany', license:'', expiry:'2027-03-01', mfac:'active', terms:'Net 30', credit:20000, balance:6240, velocity:310, status:'active' },
+      { id:'ac2', name:'Sample Account 02', city:'Brooklyn', license:'', expiry:'2027-01-15', mfac:'active', terms:'Net 30', credit:30000, balance:8640, velocity:380, status:'active' },
+      { id:'ac3', name:'Sample Account 03', city:'Buffalo', license:'', expiry:'2026-12-20', mfac:'active', terms:'Net 15', credit:15000, balance:4320, velocity:190, status:'active' },
+      { id:'ac4', name:'Sample Account 04', city:'Ithaca', license:'', expiry:'2027-05-01', mfac:'active', terms:'COD', credit:8000, balance:0, velocity:120, status:'active' },
+      { id:'ac5', name:'Sample Account 05', city:'Rochester', license:'', expiry:'2026-09-08', mfac:'active', terms:'Net 30', credit:18000, balance:9200, velocity:260, status:'active' },
+      { id:'ac6', name:'Sample Account 06', city:'Kingston', license:'', expiry:'2027-06-01', mfac:'inactive', terms:'COD', credit:6000, balance:0, velocity:0, status:'prospect' }
     ];
     this.accounts = fac.map(function(a){ return { id:a.id, name:a.name, city:a.city, license:a.license, licenseExpiry:a.expiry, terms:a.terms, credit:a.credit, balance:a.balance, velocity:a.velocity, status:a.status }; });
-    fac.forEach(function(a){ Trace.seedFacility({ license:a.license, name:a.name, city:a.city, status:a.mfac, licenseExpiry:a.expiry }); });
+    fac.forEach(function(a){ Trace.seedFacility({ license:a.id, name:a.name, city:a.city, status:a.mfac, licenseExpiry:a.expiry }); });
 
     // orders; open ones carry lot allocations
     this.orders = [];
@@ -221,8 +221,8 @@ var ProductStore = {
     ];
     this.salesHistory = [ { month:'Mar', revenue:58200 }, { month:'Apr', revenue:66400 }, { month:'May', revenue:71900 }, { month:'Jun', revenue:79600 } ];
 
-    Trace.seedTransfer({ manifest:'0000012-NY', destination:'OCM-RETAIL-0192', packages:2, status:'accepted', created:'07-22' });
-    Trace.seedTransfer({ manifest:'0000013-NY', destination:'OCM-RETAIL-0074', packages:1, status:'in transit', created:'07-24' });
+    Trace.seedTransfer({ manifest:'0000012-NY', destination:'Sample Account 01', packages:2, status:'accepted', created:'07-22' });
+    Trace.seedTransfer({ manifest:'0000013-NY', destination:'Sample Account 02', packages:1, status:'in transit', created:'07-24' });
 
     // detect seeded discrepancies and auto raise investigations
     this.scanDiscrepancies();
@@ -282,8 +282,8 @@ var ProductStore = {
   accountGate: function(accountId){
     var a = this.account(accountId); if (!a) return { ok:false, reason:'Account not found' };
     if (dlt(a.licenseExpiry, TODAY)) return { ok:false, reason:'License expired ('+a.licenseExpiry+')' };
-    var f = Trace.getFacility(a.license);
-    if (!f || f.status!=='active') return { ok:false, reason:'Metrc facility not active for '+a.license };
+    var f = Trace.getFacility(a.license || a.id);
+    if (!f || f.status!=='active') return { ok:false, reason:'Metrc facility not active for '+(a.license || a.name) };
     return { ok:true, reason:'' };
   },
   reserveLot: function(uid, qty){
@@ -315,7 +315,7 @@ var ProductStore = {
     return { ok:true, msg:'Advanced to ' + STAGE_LABEL[to] };
   },
   cancelOrder: function(id){ var o = this.order(id); if (!o) return false; if (['shipped','delivered','paid'].indexOf(o.stage)!==-1) return false; this.releaseAllocations(o); o.stage='cancelled'; return true; },
-  drawManifest: function(id){ var o = this.order(id); if (!o) return null; var a = this.account(o.accountId); var res = Trace.createTransferDraft(o, a.license); o.manifest = res.manifest; return res.manifest; },
+  drawManifest: function(id){ var o = this.order(id); if (!o) return null; var a = this.account(o.accountId); var res = Trace.createTransferDraft(o, a.license || a.name); o.manifest = res.manifest; return res.manifest; },
 
   // ---- creation ----
   createOrder: function(accountId, lines, promised){
@@ -323,9 +323,9 @@ var ProductStore = {
     var o = this.pushOrder(accountId, lines, promised, 'draft', '', ''); return { ok:true, order:o };
   },
   addAccount: function(name, city, license, terms, credit){
-    var a = { id:'ac'+(++this._aid), name:name, city:city, license:license||'OCM-RETAIL-PENDING', licenseExpiry:'2027-12-31', terms:terms||'COD', credit:+credit||6000, balance:0, velocity:0, status:'prospect' };
+    var a = { id:'ac'+(++this._aid), name:name, city:city, license:license||'', licenseExpiry:'2027-12-31', terms:terms||'COD', credit:+credit||6000, balance:0, velocity:0, status:'prospect' };
     this.accounts.push(a);
-    Trace.seedFacility({ license:a.license, name:name, city:city, status:'pending', licenseExpiry:a.licenseExpiry });
+    Trace.seedFacility({ license:a.license || a.id, name:name, city:city, status:'pending', licenseExpiry:a.licenseExpiry });
     return a;
   },
   addSku: function(name, tier, price, cogs){
@@ -584,7 +584,7 @@ function renderProduction(){
 function renderAccounts(){
   var head = headerBar('Accounts', 'Licensed NY dispensaries with Metrc facility status. Wholesale only.', pv());
   var table = '<div class="card" style="padding:0"><table class="data"><thead><tr><th>Account</th><th>City</th><th>License</th><th>Expiry</th><th>Metrc facility</th><th>Terms</th><th>Balance</th><th>Velocity</th></tr></thead><tbody>'
-    + ProductStore.accounts.map(function(a){ var f=Trace.getFacility(a.license); var d=daysUntil(a.licenseExpiry); var fc=(f&&f.status==='active')?'#7CBF4E':f&&f.status==='pending'?'#E3C270':'#D4664C'; var ec=(d<=60)?'#C08457':'#8E887C';
+    + ProductStore.accounts.map(function(a){ var f=Trace.getFacility(a.license || a.id); var d=daysUntil(a.licenseExpiry); var fc=(f&&f.status==='active')?'#7CBF4E':f&&f.status==='pending'?'#E3C270':'#D4664C'; var ec=(d<=60)?'#C08457':'#8E887C';
       return '<tr class="acctRow" data-aid="'+a.id+'" style="cursor:pointer"><td style="color:#E1DAD0">'+esc(a.name)+'</td><td>'+esc(a.city)+'</td><td class="mono">'+esc(a.license)+'</td><td class="mono" style="color:'+ec+'">'+esc(a.licenseExpiry)+(d<=60&&d>=0?' ('+d+'d)':'')+'</td><td><span class="badge" style="border-color:'+fc+'55;color:'+fc+'">'+esc(f?f.status:'unknown')+'</span></td><td>'+esc(a.terms)+'</td><td class="mono">'+money(a.balance)+'</td><td class="mono">'+a.velocity+' u/mo</td></tr>'; }).join('') + '</tbody></table></div>';
   var detail = '';
   if (acctSel){ var a=ProductStore.account(acctSel); if (a){ var g=ProductStore.accountGate(a.id); var orders=ProductStore.orders.filter(function(o){ return o.accountId===a.id; });
