@@ -57,13 +57,15 @@
     <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
     <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">Cannabis may cause impairment and may be habit forming. Sold only at dispensaries licensed by New York State. This site does not sell cannabis and no one can lawfully ship these products to you.</p>
     <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0">Sample directory pending live OCM sync. Verify any license with the New York State Office of Cannabis Management Dispensary Verification Tool.</p>
+    <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
   </div></div>
 </div>
 
 <script>
-// Bond dispensary finder, New York State only. A representative OCM style
-// directory: real cities, counties, regions, and coordinates so the fifty mile
-// radius is real; sample shop names and placeholder license numbers. The
+// Bond dispensary finder, New York State only. City, county, region, and
+// coordinates stay so the fifty mile radius still works. Each directory row is
+// a fictional placeholder: Sample Dispensary 01 through 32, a sample area, no
+// license number, and bond false so nothing is flagged as carrying Bond. The
 // production build syncs the live OCM registry. Admins mark which dispensaries
 // carry Bond from the Vauxhall Product wing; that selection is read here through
 // the shared bondBondCarriers key. No em dashes or en dashes anywhere.
@@ -112,40 +114,40 @@ var NY_CITIES = {
   'Plattsburgh':[44.6995,-73.4529,'Clinton','North Country']
 };
 
-// Representative OCM directory. bond: true marks a default Bond carrier.
+// Fictional placeholder directory. bond is false on every row.
 var DISPENSARIES = [
-  { lic:'OCM-AUR-0101', name:'Empire Botanical Co', city:'New York', addr:'120 Broadway', bond:true },
-  { lic:'OCM-AUR-0102', name:'Gotham Green Room', city:'New York', addr:'44 Bleecker Street', bond:false },
-  { lic:'OCM-AUR-0103', name:'Union Square Reserve', city:'New York', addr:'18 East 17th Street', bond:true },
-  { lic:'OCM-AUR-0110', name:'Kings County Cannabis', city:'Brooklyn', addr:'260 Bedford Avenue', bond:true },
-  { lic:'OCM-AUR-0111', name:'Prospect Leaf', city:'Brooklyn', addr:'615 Vanderbilt Avenue', bond:false },
-  { lic:'OCM-AUR-0120', name:'Flushing Fields', city:'Queens', addr:'136 Roosevelt Avenue', bond:true },
-  { lic:'OCM-AUR-0121', name:'LIC Collective', city:'Long Island City', addr:'21 Jackson Avenue', bond:false },
-  { lic:'OCM-AUR-0130', name:'Grand Concourse Cannabis', city:'Bronx', addr:'2380 Grand Concourse', bond:false },
-  { lic:'OCM-AUR-0140', name:'Harbor Botanicals', city:'Staten Island', addr:'900 Bay Street', bond:false },
-  { lic:'OCM-AUR-0201', name:'Hudson Green', city:'Yonkers', addr:'12 Main Street', bond:true },
-  { lic:'OCM-AUR-0202', name:'Westchester Reserve', city:'White Plains', addr:'55 Mamaroneck Avenue', bond:false },
-  { lic:'OCM-AUR-0203', name:'River Bend Dispensary', city:'Nyack', addr:'80 Main Street', bond:false },
-  { lic:'OCM-AUR-0204', name:'Mid Hudson Cannabis', city:'Poughkeepsie', addr:'30 Market Street', bond:true },
-  { lic:'OCM-AUR-0205', name:'Rondout Botanicals', city:'Kingston', addr:'22 Broadway', bond:true },
-  { lic:'OCM-AUR-0206', name:'Orange County Leaf', city:'Newburgh', addr:'140 Water Street', bond:false },
-  { lic:'OCM-AUR-0301', name:'South Shore Cannabis', city:'Hempstead', addr:'200 Fulton Avenue', bond:true },
-  { lic:'OCM-AUR-0302', name:'North Shore Reserve', city:'Huntington', addr:'320 New York Avenue', bond:false },
-  { lic:'OCM-AUR-0303', name:'East End Botanicals', city:'Riverhead', addr:'110 East Main Street', bond:false },
-  { lic:'OCM-AUR-0401', name:'Capital Cannabis Co', city:'Albany', addr:'90 State Street', bond:true },
-  { lic:'OCM-AUR-0402', name:'Collar City Leaf', city:'Troy', addr:'250 River Street', bond:false },
-  { lic:'OCM-AUR-0403', name:'Electric City Dispensary', city:'Schenectady', addr:'420 State Street', bond:false },
-  { lic:'OCM-AUR-0404', name:'Spa City Reserve', city:'Saratoga Springs', addr:'380 Broadway', bond:true },
-  { lic:'OCM-AUR-0501', name:'Salt City Cannabis', city:'Syracuse', addr:'210 Walton Street', bond:true },
-  { lic:'OCM-AUR-0502', name:'Mohawk Valley Leaf', city:'Utica', addr:'15 Genesee Street', bond:false },
-  { lic:'OCM-AUR-0503', name:'Cayuga Botanicals', city:'Ithaca', addr:'120 The Commons', bond:true },
-  { lic:'OCM-AUR-0504', name:'Southern Tier Reserve', city:'Binghamton', addr:'55 Court Street', bond:false },
-  { lic:'OCM-AUR-0601', name:'Flower City Cannabis', city:'Rochester', addr:'274 Park Avenue', bond:true },
-  { lic:'OCM-AUR-0602', name:'Finger Lakes Leaf', city:'Geneva', addr:'70 Seneca Street', bond:false },
-  { lic:'OCM-AUR-0701', name:'Queen City Cannabis', city:'Buffalo', addr:'500 Elmwood Avenue', bond:true },
-  { lic:'OCM-AUR-0702', name:'Cataract Botanicals', city:'Niagara Falls', addr:'340 Third Street', bond:false },
-  { lic:'OCM-AUR-0801', name:'North Country Reserve', city:'Plattsburgh', addr:'12 Margaret Street', bond:false },
-  { lic:'OCM-AUR-0802', name:'Watertown Cannabis Co', city:'Watertown', addr:'160 Court Street', bond:false }
+  { name:'Sample Dispensary 01', city:'New York', addr:'Sample area 01', bond:false },
+  { name:'Sample Dispensary 02', city:'New York', addr:'Sample area 02', bond:false },
+  { name:'Sample Dispensary 03', city:'New York', addr:'Sample area 03', bond:false },
+  { name:'Sample Dispensary 04', city:'Brooklyn', addr:'Sample area 04', bond:false },
+  { name:'Sample Dispensary 05', city:'Brooklyn', addr:'Sample area 05', bond:false },
+  { name:'Sample Dispensary 06', city:'Queens', addr:'Sample area 06', bond:false },
+  { name:'Sample Dispensary 07', city:'Long Island City', addr:'Sample area 07', bond:false },
+  { name:'Sample Dispensary 08', city:'Bronx', addr:'Sample area 08', bond:false },
+  { name:'Sample Dispensary 09', city:'Staten Island', addr:'Sample area 09', bond:false },
+  { name:'Sample Dispensary 10', city:'Yonkers', addr:'Sample area 10', bond:false },
+  { name:'Sample Dispensary 11', city:'White Plains', addr:'Sample area 11', bond:false },
+  { name:'Sample Dispensary 12', city:'Nyack', addr:'Sample area 12', bond:false },
+  { name:'Sample Dispensary 13', city:'Poughkeepsie', addr:'Sample area 13', bond:false },
+  { name:'Sample Dispensary 14', city:'Kingston', addr:'Sample area 14', bond:false },
+  { name:'Sample Dispensary 15', city:'Newburgh', addr:'Sample area 15', bond:false },
+  { name:'Sample Dispensary 16', city:'Hempstead', addr:'Sample area 16', bond:false },
+  { name:'Sample Dispensary 17', city:'Huntington', addr:'Sample area 17', bond:false },
+  { name:'Sample Dispensary 18', city:'Riverhead', addr:'Sample area 18', bond:false },
+  { name:'Sample Dispensary 19', city:'Albany', addr:'Sample area 19', bond:false },
+  { name:'Sample Dispensary 20', city:'Troy', addr:'Sample area 20', bond:false },
+  { name:'Sample Dispensary 21', city:'Schenectady', addr:'Sample area 21', bond:false },
+  { name:'Sample Dispensary 22', city:'Saratoga Springs', addr:'Sample area 22', bond:false },
+  { name:'Sample Dispensary 23', city:'Syracuse', addr:'Sample area 23', bond:false },
+  { name:'Sample Dispensary 24', city:'Utica', addr:'Sample area 24', bond:false },
+  { name:'Sample Dispensary 25', city:'Ithaca', addr:'Sample area 25', bond:false },
+  { name:'Sample Dispensary 26', city:'Binghamton', addr:'Sample area 26', bond:false },
+  { name:'Sample Dispensary 27', city:'Rochester', addr:'Sample area 27', bond:false },
+  { name:'Sample Dispensary 28', city:'Geneva', addr:'Sample area 28', bond:false },
+  { name:'Sample Dispensary 29', city:'Buffalo', addr:'Sample area 29', bond:false },
+  { name:'Sample Dispensary 30', city:'Niagara Falls', addr:'Sample area 30', bond:false },
+  { name:'Sample Dispensary 31', city:'Plattsburgh', addr:'Sample area 31', bond:false },
+  { name:'Sample Dispensary 32', city:'Watertown', addr:'Sample area 32', bond:false }
 ];
 var RADIUS_MILES = 50;
 
@@ -167,7 +169,13 @@ function render(){
   var input = document.getElementById('cityIn').value.trim();
   var showAll = document.getElementById('allToggle').checked;
   var out = document.getElementById('results');
-  if (!input){ out.innerHTML = '<div class="card" style="color:#8E887C">Enter your city to see licensed dispensaries within fifty miles.</div>'; return; }
+  if (!input){
+    var samples = DISPENSARIES.map(function(d){
+      return '<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start"><div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="didot" style="font-size:17px;color:#E1DAD0">'+esc(d.name)+'</span></div><div style="font-size:12.5px;color:#8E887C;margin-top:5px">'+esc(d.addr)+'</div></div></div>';
+    }).join('');
+    out.innerHTML = '<div class="card" style="color:#8E887C">Enter your city to see licensed dispensaries within fifty miles.</div><div style="margin-top:12px">'+samples+'</div>';
+    return;
+  }
   // match a New York place
   var keys = Object.keys(NY_CITIES);
   var exact = keys.filter(function(k){ return k.toLowerCase() === input.toLowerCase(); })[0];
@@ -178,7 +186,7 @@ function render(){
   var near = DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]; return { d:d, miles: c ? haversine(origin, c) : 9999 }; }).filter(function(x){ return x.miles <= RADIUS_MILES; }).sort(function(a,b){ return a.miles - b.miles; });
   var carriers = near.filter(function(x){ return carries(x.d.lic); });
   var others = near.filter(function(x){ return !carries(x.d.lic); });
-  function row(x, isBond){ var d=x.d; var c=NY_CITIES[d.city]; return '<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start'+(isBond?';border-color:#5A4A2A':'')+'"><div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="didot" style="font-size:17px;color:#E1DAD0">'+esc(d.name)+'</span>'+(isBond?'<span class="bondbadge">Carries Bond</span>':'')+'</div><div style="font-size:12.5px;color:#8E887C;margin-top:5px">'+esc(d.addr)+' . '+esc(d.city)+', NY . '+esc(c[2])+' County</div><div class="mono" style="font-size:12px;color:#B0A99A;margin-top:5px">'+esc(d.lic)+'</div></div><div style="text-align:right"><div class="didot" style="font-size:20px;color:#E1DAD0">'+Math.round(x.miles)+'</div><div class="lbl">miles</div></div></div>'; }
+  function row(x, isBond){ var d=x.d; var c=NY_CITIES[d.city]; return '<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start'+(isBond?';border-color:#5A4A2A':'')+'"><div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="didot" style="font-size:17px;color:#E1DAD0">'+esc(d.name)+'</span>'+(isBond?'<span class="bondbadge">Carries Bond</span>':'')+'</div><div style="font-size:12.5px;color:#8E887C;margin-top:5px">'+esc(d.addr)+' . '+esc(d.city)+', NY . '+esc(c[2])+' County</div>'+(d.lic ? '<div class="mono" style="font-size:12px;color:#B0A99A;margin-top:5px">'+esc(d.lic)+'</div>' : '')+'</div><div style="text-align:right"><div class="didot" style="font-size:20px;color:#E1DAD0">'+Math.round(x.miles)+'</div><div class="lbl">miles</div></div></div>'; }
   var html = '<div class="lbl">Carrying Bond within fifty miles of '+esc(key)+'</div>';
   if (carriers.length) html += '<div style="margin-top:12px">'+carriers.map(function(x){ return row(x, true); }).join('')+'</div>';
   else html += '<div class="card" style="margin-top:12px;color:#8E887C">No shops carrying Bond within fifty miles of '+esc(key)+' yet. <a href="Home.dc.html#haus" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B">Join the Haus</a> to hear when Bond arrives near you.</div>';

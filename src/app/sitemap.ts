@@ -9,6 +9,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "https://bond-rosin-vapes.vercel.app/FAQ.dc.html" },
     { url: "https://bond-rosin-vapes.vercel.app/Terms.dc.html" },
     { url: "https://bond-rosin-vapes.vercel.app/Privacy.dc.html" },
-    { url: "https://bond-rosin-vapes.vercel.app/Finder.dc.html" },
   ];
 }
