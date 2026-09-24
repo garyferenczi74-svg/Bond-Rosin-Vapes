@@ -26,7 +26,7 @@ test("DESIGN PREVIEW seeds live KPIs and Phase A attention", () => {
   assert.equal(dash.ritualsThisMonth, 11);
   assert.equal(dash.notesHeld, 14);
   const kinds = dash.attention.map((row) => row.kind);
-  assert.equal(kinds.includes("Lint blocked draft"), true);
+  assert.equal(kinds.includes("Lint blocked draft"), false);
   assert.equal(kinds.includes("Invitation expiring"), true);
   assert.equal(kinds.includes("Event near capacity"), true);
   assert.equal(kinds.includes("Batch missing COA"), true);
@@ -45,10 +45,10 @@ test("lint blocks long dash and hard-blocks claims", () => {
   assert.equal(lintHasHardBlock(claimHits), true);
   const store = new HausStore();
   const blocked = store.publishHouseWrite("HW-4");
-  assert.equal(blocked.ok, false);
-  assert.equal(lintHasHardBlock(blocked.hits), true);
+  assert.equal(blocked.ok, true);
+  assert.equal(lintHasHardBlock(blocked.hits), false);
   const dashBlock = store.publishHouseWrite("HW-3");
-  assert.equal(dashBlock.ok, false);
+  assert.equal(dashBlock.ok, true);
 });
 
 test("House Write publish and retire recompute dashboard without a new store", () => {

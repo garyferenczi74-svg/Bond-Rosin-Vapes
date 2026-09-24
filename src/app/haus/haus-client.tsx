@@ -184,7 +184,7 @@ export function HausClient() {
                     paddingBottom: 1,
                   }}
                 >
-                  Join the Bond Haus for first access.
+                  Join the Bond Haus.
                 </a>
               </p>
             </>

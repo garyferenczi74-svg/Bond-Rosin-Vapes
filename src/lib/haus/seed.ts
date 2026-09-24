@@ -1,5 +1,4 @@
 import { isoDay } from "./dates.ts";
-import { LONG_EM } from "./lint.ts";
 import { PRIVACY_WALL, type HausPersist } from "./types.ts";
 import type {
   HausBatchPreview,
@@ -47,7 +46,7 @@ export const SEED_EVENTS: HausEventPreview[] = [
 export const SEED_GUIDE: HausGuidePreview[] = [
   { id: "cover", title: "The Experience Guide", body: "", state: "published" },
   { id: "notes", title: "On Notes", body: "A note is a memory before it is a smell.", state: "published" },
-  { id: "ritual", title: "The Ritual", body: "Prepare. Pause. Elevate.", state: "draft" },
+  { id: "ritual", title: "The Ritual", body: "Prepare. Pause. Close.", state: "draft" },
 ];
 
 export const SEED_RESERVE: HausReservePreview[] = [
@@ -61,7 +60,7 @@ export function seedHausPersist(now = new Date()): HausPersist {
       {
         id: "HW-1",
         title: "A Reserve run has been pressed",
-        body: "No. 3 Peak, Midnight Zkittlez.",
+        body: "A Reserve run has been pressed. No. 3 Peak.",
         link: "reserve",
         from: isoDay(-27, now),
         until: "",
@@ -81,7 +80,7 @@ export function seedHausPersist(now = new Date()): HausPersist {
       {
         id: "HW-3",
         title: "The cleanest press",
-        body: `The cleanest press we have made${LONG_EM} bright and pure.`,
+        body: "A bright press, made with care.",
         link: "",
         from: "",
         until: "",
@@ -90,8 +89,8 @@ export function seedHausPersist(now = new Date()): HausPersist {
       },
       {
         id: "HW-4",
-        title: "An honest calm",
-        body: "A calm that can cure a long day.",
+        title: "A quiet press",
+        body: "A press kept for the end of the day.",
         link: "",
         from: "",
         until: "",
