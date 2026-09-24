@@ -198,6 +198,8 @@ const AFFIRMATIVE_RESERVE = [
   /let you know/i,
   /yours to claim/i,
   /\bclaim\b/i,
+  /cleanest/i,
+  /how it landed/i,
 ];
 
 function assertNoAffirmativeReserve(html: string) {
@@ -447,6 +449,10 @@ test("Ritual is a product-free quiet timer", () => {
   assert.equal(haus.includes("logSession: function(compId"), false);
   assert.equal(/sessions\.unshift\(\{[^}]*\bcomp:/.test(haus), false);
   assert.equal(haus.includes("ritualsN+' kept'"), false);
+  assert.equal(haus.includes("Rituals kept"), false);
+  assert.equal(haus.includes("cleanest"), false);
+  assert.equal(haus.includes("how it landed"), false);
+  assert.match(haus, /placeholder="A note for yourself\."/);
   assert.equal(haus.includes("Begin a ritual with "), false);
   assert.match(haus, /var INTENTIONS = \['Aroma','Flavor','Craft','Season','Evening'\];/);
   assert.match(haus, /Set an intention, and begin when ready\./);

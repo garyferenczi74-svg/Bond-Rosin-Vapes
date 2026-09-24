@@ -65,7 +65,7 @@ var COMPS = [
 var BATCH_RECORDS = {
   'BND-1-0518': { comp:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', batch:'BND-1-0518', run:null },
   'BND-2-0731': { comp:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', batch:'BND-2-0731', run:null },
-  'BND-3-0214': { comp:'no3', cultivar:'Midnight Zkittlez', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
+  'BND-3-0214': { comp:'no3', cultivar:'', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
 };
 var GUIDE = [
   { id:'cover', title:'The Experience Guide', kind:'cover' },
@@ -210,7 +210,7 @@ var HausStore = {
       sessions: []
     };
     this.reserveRuns = [
-      { id:'run-mz', comp:'no3', cultivar:'Midnight Zkittlez', pressing:'2026-03-30', size:1000, status:'current' },
+      { id:'run-mz', comp:'no3', cultivar:'', pressing:'2026-03-30', size:1000, status:'current' },
       { id:'run-ag', comp:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, status:'closed' }
     ];
     this.houseWrites = [
@@ -384,7 +384,7 @@ function renderDashboard(){
   var shelfN = m.shelf.length, claimsN = m.claims.length, ritualsN = (m.sessions && m.sessions.length) || 0;
   var evReq = m.events.filter(function(e){ return e.rsvp==='requested' || e.rsvp==='confirmed'; }).length;
   function stat(n, label){ return '<div class="card" style="text-align:center"><div class="didot" style="font-size:34px;color:#E1DAD0">'+n+'</div><div class="lbl" style="margin-top:8px">'+esc(label)+'</div></div>'; }
-  var stats = '<div class="grid3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">'+stat(shelfN,'On the shelf')+stat(claimsN,'Reserve numbers')+stat(ritualsN,'Rituals kept')+stat(evReq,'Evenings')+'</div>';
+  var stats = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">'+stat(shelfN,'On the shelf')+stat(claimsN,'Reserve numbers')+stat(evReq,'Evenings')+'</div>';
 
   // shelf
   var shelfBody = shelfN
@@ -621,7 +621,7 @@ function renderRitual(){
   if (ritual.phase==='reflect'){
     inner = '<div style="text-align:center;max-width:520px;margin:20px auto"><div class="didot" style="font-size:34px;color:#E1DAD0">Return when ready.</div>'
       + '<p style="font-size:13.5px;color:#8E887C;margin:14px 0 0">One optional line, kept privately with the same erase rights as your notes.</p>'
-      + '<textarea id="rReflect" class="field" rows="3" style="margin-top:18px;resize:vertical;text-align:left" placeholder="A word on how it landed"></textarea>'
+      + '<textarea id="rReflect" class="field" rows="3" style="margin-top:18px;resize:vertical;text-align:left" placeholder="A note for yourself."></textarea>'
       + '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px"><button id="rSaveReflect" class="htab on" style="padding:0 24px;height:40px">Save and close</button><button id="rSkip" class="htab" style="padding:0 24px;height:40px">Close without a note</button></div></div>';
   }
   chrome('ritual', '<div class="didot" style="font-size:clamp(22px,3vw,30px);color:#E1DAD0">The Ritual</div><p style="font-size:13px;color:#8E887C;margin:8px 0 22px">Your ritual is running. Let the rest of the room fall away.</p>'+inner);
@@ -677,7 +677,7 @@ function renderAccount(){
     + '<div><div style="font-size:11px;color:#6E685E">Name</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.name)+'</div></div>'
     + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div>'
     + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefHaus"'+(m.circle?' checked':'')+'> Haus correspondence</label></div></div>'
-    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises.</p>'
+    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises. Erasing the account does not remove your password from the account service or the records of door attempts.</p>'
     + '<button id="dlRecord" class="htab on" style="padding:0 22px;height:40px">Download my record</button>'
     + '<div style="margin-top:18px">'+eraseRow('notes','Tasting notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
   chrome('account', inner);
@@ -772,7 +772,7 @@ function doErase(key){
   if (key==='notes'){ HausStore.eraseNotes(); }
   else if (key==='reflections'){ HausStore.eraseReflections(); }
   else if (key==='history'){ HausStore.eraseHistory(); }
-  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. The house keeps no copy.'); route(); return; }
+  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. The house keeps no copy. Erasing the account does not remove your password from the account service or the records of door attempts.'); route(); return; }
   toast('Erased. The house keeps no copy.');
   renderAccount();
 }

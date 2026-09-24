@@ -79,7 +79,7 @@ export function seedHausPersist(now = new Date()): HausPersist {
       },
       {
         id: "HW-3",
-        title: "The cleanest press",
+        title: "A bright press.",
         body: "A bright press, made with care.",
         link: "",
         from: "",

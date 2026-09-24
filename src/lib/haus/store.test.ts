@@ -54,11 +54,11 @@ test("lint blocks long dash and hard-blocks claims", () => {
 test("House Write publish and retire recompute dashboard without a new store", () => {
   const store = new HausStore();
   const before = store.dashboard().houseWritesLive;
-  store.updateHouseWrite("HW-3", { title: "The cleanest press", body: "Bright and pure." });
+  store.updateHouseWrite("HW-3", { title: "A bright press.", body: "Bright and pure." });
   const published = store.publishHouseWrite("HW-3");
   assert.equal(published.ok, true);
   assert.equal(store.dashboard().houseWritesLive, before + 1);
-  const leftover = store.attention().filter((row) => row.text === "The cleanest press");
+  const leftover = store.attention().filter((row) => row.text === "A bright press.");
   assert.equal(leftover.length, 0);
   store.retireHouseWrite("HW-1");
   assert.equal(store.publishedWrites().some((row) => row.id === "HW-1"), false);
