@@ -91,36 +91,79 @@ function sharedBatch(num){ if (!HAUS_SHARED || !HAUS_SHARED.batches) return null
 // the Find Your Bond result from the public site, read fresh so a retake updates the recommendation
 function findResult(){ try { var r = localStorage.getItem('bondFindResult'); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
 
-// ---- Reserve Room pickup: nearest Bond carrying dispensary ----
-// Reads the shared directory the public finder publishes; falls back to a built
-// in set so the room works even if the finder has not been opened this session.
+// ---- Reserve Room pickup ----
+// City lookup still reads the finder city table. Shops that carry Bond do not.
+// bondDispensaryDir and bondBondCarriers are sample listings or a stale
+// snapshot from before those samples. They are never offered as carriers,
+// including when localStorage still holds the older realistic rows.
 function readJSON(k){ try { var r=localStorage.getItem(k); return r?JSON.parse(r):null; } catch(e){ return null; } }
 function havMiles(a, b){ var R=3959; function r(d){ return d*Math.PI/180; } var dLat=r(b[0]-a[0]), dLng=r(b[1]-a[1]); var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLng/2)*Math.sin(dLng/2); return 2*R*Math.asin(Math.min(1,Math.sqrt(x))); }
 var FALLBACK_CITIES = { 'New York':[40.7128,-74.0060],'Brooklyn':[40.6782,-73.9442],'Queens':[40.7282,-73.7949],'Bronx':[40.8448,-73.8648],'Staten Island':[40.5795,-74.1502],'Yonkers':[40.9312,-73.8988],'White Plains':[41.0340,-73.7629],'Poughkeepsie':[41.7004,-73.9210],'Kingston':[41.9270,-73.9974],'Newburgh':[41.5034,-74.0104],'Hempstead':[40.7062,-73.6187],'Huntington':[40.8681,-73.4257],'Albany':[42.6526,-73.7562],'Troy':[42.7284,-73.6918],'Saratoga Springs':[43.0831,-73.7846],'Syracuse':[43.0481,-76.1474],'Utica':[43.1009,-75.2327],'Ithaca':[42.4440,-76.5019],'Rochester':[43.1566,-77.6088],'Buffalo':[42.8864,-78.8784],'Binghamton':[42.0987,-75.9180],'Watertown':[43.9748,-75.9108],'Plattsburgh':[44.6995,-73.4529] };
-var FALLBACK_CARRIERS = [
-  { lic:'OCM-AUR-0101', name:'Empire Botanical Co', city:'New York', lat:40.7128, lng:-74.0060, bond:true },
-  { lic:'OCM-AUR-0110', name:'Kings County Cannabis', city:'Brooklyn', lat:40.6782, lng:-73.9442, bond:true },
-  { lic:'OCM-AUR-0120', name:'Flushing Fields', city:'Queens', lat:40.7282, lng:-73.7949, bond:true },
-  { lic:'OCM-AUR-0201', name:'Hudson Green', city:'Yonkers', lat:40.9312, lng:-73.8988, bond:true },
-  { lic:'OCM-AUR-0204', name:'Mid Hudson Cannabis', city:'Poughkeepsie', lat:41.7004, lng:-73.9210, bond:true },
-  { lic:'OCM-AUR-0205', name:'Rondout Botanicals', city:'Kingston', lat:41.9270, lng:-73.9974, bond:true },
-  { lic:'OCM-AUR-0301', name:'South Shore Cannabis', city:'Hempstead', lat:40.7062, lng:-73.6187, bond:true },
-  { lic:'OCM-AUR-0401', name:'Capital Cannabis Co', city:'Albany', lat:42.6526, lng:-73.7562, bond:true },
-  { lic:'OCM-AUR-0404', name:'Spa City Reserve', city:'Saratoga Springs', lat:43.0831, lng:-73.7846, bond:true },
-  { lic:'OCM-AUR-0501', name:'Salt City Cannabis', city:'Syracuse', lat:43.0481, lng:-76.1474, bond:true },
-  { lic:'OCM-AUR-0503', name:'Cayuga Botanicals', city:'Ithaca', lat:42.4440, lng:-76.5019, bond:true },
-  { lic:'OCM-AUR-0601', name:'Flower City Cannabis', city:'Rochester', lat:43.1566, lng:-77.6088, bond:true },
-  { lic:'OCM-AUR-0701', name:'Queen City Cannabis', city:'Buffalo', lat:42.8864, lng:-78.8784, bond:true }
-];
+// CARRIERS_START
+// Seam for a future verified licensed source. Return shops from that source
+// only. Do not read the finder directory or any localStorage snapshot here.
+var CARRIER_EMPTY = 'No shops carrying Bond yet';
+function readVerifiedCarriers(){
+  return [];
+}
+function isSampleListing(d){
+  if (!d || typeof d !== 'object') return false;
+  var name = String(d.name || '');
+  var area = String(d.addr || d.region || '');
+  if (name.indexOf('Sample Dispensary') === 0) return true;
+  if (area.indexOf('Sample area') === 0) return true;
+  return false;
+}
+function isVerifiedCarrier(d){
+  if (!d || typeof d !== 'object') return false;
+  if (isSampleListing(d)) return false;
+  if (d.verified !== true) return false;
+  if (d.bond !== true) return false;
+  if (typeof d.lic !== 'string' || !d.lic) return false;
+  if (typeof d.name !== 'string' || !d.name) return false;
+  if (typeof d.lat !== 'number' || typeof d.lng !== 'number') return false;
+  return true;
+}
+function bondCarriers(){
+  var source = readVerifiedCarriers();
+  if (!source || !source.length) return [];
+  var seen = {};
+  var out = [];
+  var i;
+  for (i = 0; i < source.length; i++){
+    var row = source[i];
+    if (!isVerifiedCarrier(row)) continue;
+    if (seen[row.lic]) continue;
+    seen[row.lic] = true;
+    out.push(row);
+  }
+  return out;
+}
+function pickupForHold(lic, city){
+  var match = null;
+  if (lic){
+    var rows = bondCarriers();
+    var j;
+    for (j = 0; j < rows.length; j++){
+      if (rows[j].lic === lic){ match = rows[j]; break; }
+    }
+  }
+  if (match) return match;
+  return { lic:'', name:'', city: city || '' };
+}
+function carrierListHtml(cityEsc, nearestCount, picksHtml){
+  if (!bondCarriers().length){
+    return '<p style="font-size:12.5px;color:#C08457;margin-top:14px">'+CARRIER_EMPTY+'</p>';
+  }
+  if (!cityEsc) return '';
+  if (!nearestCount){
+    return '<p style="font-size:12.5px;color:#C08457;margin-top:14px">No Bond dispensary is within reach of '+cityEsc+' yet. The house will hold your place and let you know when one carries Bond near you.</p>';
+  }
+  return '<div class="lbl" style="margin-top:16px">Held for you at, nearest first</div>'+picksHtml;
+}
+// CARRIERS_END
 function nyCity(name){ var c = readJSON('bondNyCities') || FALLBACK_CITIES; var keys=Object.keys(c); var k = keys.filter(function(x){ return x.toLowerCase()===String(name).toLowerCase(); })[0] || keys.filter(function(x){ return x.toLowerCase().indexOf(String(name).toLowerCase())===0; })[0]; return k ? { key:k, coord:[c[k][0],c[k][1]] } : null; }
 function cityKeys(){ var c = readJSON('bondNyCities') || FALLBACK_CITIES; return Object.keys(c).sort(); }
-function bondCarriers(){
-  var dir = readJSON('bondDispensaryDir'); var carrierLics = readJSON('bondBondCarriers');
-  function isCarrier(d){ return carrierLics ? carrierLics.indexOf(d.lic) !== -1 : d.bond; }
-  var fromDir = (dir && dir.length) ? dir.filter(function(d){ return isCarrier(d) && d.lat != null && d.lng != null; }) : [];
-  if (fromDir.length) return fromDir;
-  return FALLBACK_CARRIERS.filter(isCarrier);
-}
 function nearestCarriers(coord, n){ return bondCarriers().map(function(d){ return { d:d, miles:havMiles(coord,[d.lat,d.lng]) }; }).sort(function(a,b){ return a.miles-b.miles; }).slice(0, n||3); }
 // upcoming short runs a member can reserve a place on
 var UPCOMING_RESERVE = [
@@ -462,13 +505,14 @@ function reserveNext(m){
   return out;
 }
 function reservePanel(m, run, c){
-  var nearest = reserveFlow.city ? nearestCarriers(nyCity(reserveFlow.city).coord, 3) : [];
+  var located = reserveFlow.city ? nyCity(reserveFlow.city) : null;
+  var nearest = located ? nearestCarriers(located.coord, 3) : [];
   var picks = nearest.map(function(x){ var on=reserveFlow.lic===x.d.lic; return '<button class="htab'+(on?' on':'')+'" data-pickcarrier="'+esc(x.d.lic)+'" style="display:flex;justify-content:space-between;gap:14px;width:100%;text-align:left;margin-top:8px;border-color:'+(on?c.accent:'#3A3C3B')+'"><span>'+esc(x.d.name)+' . '+esc(x.d.city)+'</span><span style="color:#8E887C">'+Math.round(x.miles)+' mi</span></button>'; }).join('');
   return '<div style="margin-top:18px;border-top:1px solid #2A2C29;padding-top:18px">'
     + '<p style="font-size:12.5px;color:#8E887C;line-height:1.8">This holds your place on the run. It is a reservation only, never a transaction on this site. When it presses, the house holds it for you at a licensed dispensary carrying Bond nearest to you, to collect in person, 21 and over. Everything is completed at the dispensary, not here.</p>'
     + '<div class="lbl" style="margin-top:16px">Your city or town in New York</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><input id="rvCity" class="field" list="rvCityList" style="flex:1;min-width:200px" placeholder="Your city" value="'+esc(reserveFlow.city)+'"><datalist id="rvCityList">'+cityKeys().map(function(k){ return '<option value="'+esc(k)+'"></option>'; }).join('')+'</datalist><button class="htab" data-findpickup="'+run.id+'" style="padding:0 20px">Find pickup</button></div>'
-    + (reserveFlow.city ? (nearest.length ? '<div class="lbl" style="margin-top:16px">Held for you at, nearest first</div>'+picks : '<p style="font-size:12.5px;color:#C08457;margin-top:14px">No Bond dispensary is within reach of '+esc(reserveFlow.city)+' yet. The house will hold your place and let you know when one carries Bond near you.</p>') : '')
+    + carrierListHtml(reserveFlow.city ? esc(reserveFlow.city) : '', nearest.length, picks)
     + '<div style="display:flex;gap:10px;margin-top:18px"><button class="htab on" data-holdplace="'+run.id+'" style="padding:0 24px;height:42px"'+((reserveFlow.city && (nearest.length===0 || reserveFlow.lic))?'':' disabled')+'>Hold my place</button><button class="htab" data-reservecancel="1" style="padding:0 20px;height:42px">Not now</button></div></div>';
 }
 function holdsSection(m){
@@ -649,7 +693,7 @@ document.addEventListener('click', function(ev){
   var rrun = t.closest('[data-reserverun]'); if (rrun){ reserveFlow = { runId:rrun.getAttribute('data-reserverun'), city:HausStore.member.city||'', lic:null }; renderReserve(); return; }
   var fp = t.closest('[data-findpickup]'); if (fp){ var v=(document.getElementById('rvCity')||{}).value||''; var nc=nyCity(v); if (!nc){ toast('We could not find that New York city or town.'); return; } reserveFlow.city=nc.key; HausStore.member.city=nc.key; var near=nearestCarriers(nc.coord,3); reserveFlow.lic = near.length ? near[0].d.lic : null; renderReserve(); return; }
   var pc = t.closest('[data-pickcarrier]'); if (pc){ reserveFlow.lic = pc.getAttribute('data-pickcarrier'); renderReserve(); return; }
-  var hp = t.closest('[data-holdplace]'); if (hp){ var run=UPCOMING_RESERVE.filter(function(r){ return r.id===hp.getAttribute('data-holdplace'); })[0]; var disp = reserveFlow.lic ? bondCarriers().filter(function(d){ return d.lic===reserveFlow.lic; })[0] : { lic:'', name:'', city:reserveFlow.city }; HausStore.reserveHold(run.id, run.name, disp); reserveFlow={ runId:null, city:'', lic:null }; toast('Your place is held. The house will notify you.'); renderReserve(); return; }
+  var hp = t.closest('[data-holdplace]'); if (hp){ var run=UPCOMING_RESERVE.filter(function(r){ return r.id===hp.getAttribute('data-holdplace'); })[0]; if (!run) return; var disp = pickupForHold(reserveFlow.lic, reserveFlow.city); HausStore.reserveHold(run.id, run.name, disp); reserveFlow={ runId:null, city:'', lic:null }; toast('Your place is held. The house will notify you.'); renderReserve(); return; }
   if (t.closest('[data-reservecancel]')){ reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
   var rh = t.closest('[data-releasehold]'); if (rh){ HausStore.releaseHold(rh.getAttribute('data-releasehold')); toast('Your place is released.'); renderReserve(); return; }
 
