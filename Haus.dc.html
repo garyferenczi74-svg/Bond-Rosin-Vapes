@@ -58,14 +58,14 @@ var GOLD = 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62
 var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 var COMPS = [
-  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Bright','Clear','Social'], top:['Citrus peel','Green anise'], heart:['Pine','Black pepper'], base:['Cedar','Warm earth'] },
-  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Calm','Round','Quiet'], top:['Lavender','Bergamot'], heart:['Chamomile','Clove'], base:['Sandalwood','Musk'] },
-  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Deep','Full','Rare'], top:['Ripe mango','Blood orange'], heart:['Gardenia','Fennel'], base:['Amber','Loam'] }
+  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Bright','Crisp','Zesty'], top:['Citrus peel','Green anise'], heart:['Pine','Black pepper'], base:['Cedar','Warm earth'] },
+  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Soft','Round','Floral'], top:['Lavender','Bergamot'], heart:['Chamomile','Clove'], base:['Sandalwood','Musk'] },
+  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Deep','Full','Rich'], top:['Ripe mango','Blood orange'], heart:['Gardenia','Fennel'], base:['Amber','Loam'] }
 ];
 var BATCH_RECORDS = {
   'BND-1-0518': { comp:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', batch:'BND-1-0518', run:null },
   'BND-2-0731': { comp:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', batch:'BND-2-0731', run:null },
-  'BND-3-0214': { comp:'no3', cultivar:'Midnight Zkittlez', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
+  'BND-3-0214': { comp:'no3', cultivar:'', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
 };
 var GUIDE = [
   { id:'cover', title:'The Experience Guide', kind:'cover' },
@@ -75,7 +75,7 @@ var GUIDE = [
   { id:'no3', title:'No. 3 Peak', kind:'comp', comp:'no3' },
   { id:'ritual', title:'The Ritual', kind:'ritual' }
 ];
-var INTENTIONS = ['Clarity','Rest','Presence','Creativity','Connection'];
+var INTENTIONS = ['Aroma','Flavor','Craft','Season','Evening'];
 var NAV = [['dashboard','Dashboard'],['salon','Salon'],['library','Library'],['guide','Guide'],['reserve','Reserve'],['events','Events'],['ritual','Ritual'],['account','Account']];
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -91,40 +91,108 @@ function sharedBatch(num){ if (!HAUS_SHARED || !HAUS_SHARED.batches) return null
 // the Find Your Bond result from the public site, read fresh so a retake updates the recommendation
 function findResult(){ try { var r = localStorage.getItem('bondFindResult'); return r ? JSON.parse(r) : null; } catch(e){ return null; } }
 
-// ---- Reserve Room pickup: nearest Bond carrying dispensary ----
-// Reads the shared directory the public finder publishes; falls back to a built
-// in set so the room works even if the finder has not been opened this session.
+// ---- Shops that carry Bond ----
+// City lookup still reads the finder city table. Shops that carry Bond do not.
+// bondDispensaryDir and bondBondCarriers are sample listings or a stale
+// snapshot from before those samples. They are never offered as carriers,
+// including when localStorage still holds the older realistic rows.
 function readJSON(k){ try { var r=localStorage.getItem(k); return r?JSON.parse(r):null; } catch(e){ return null; } }
 function havMiles(a, b){ var R=3959; function r(d){ return d*Math.PI/180; } var dLat=r(b[0]-a[0]), dLng=r(b[1]-a[1]); var x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLng/2)*Math.sin(dLng/2); return 2*R*Math.asin(Math.min(1,Math.sqrt(x))); }
 var FALLBACK_CITIES = { 'New York':[40.7128,-74.0060],'Brooklyn':[40.6782,-73.9442],'Queens':[40.7282,-73.7949],'Bronx':[40.8448,-73.8648],'Staten Island':[40.5795,-74.1502],'Yonkers':[40.9312,-73.8988],'White Plains':[41.0340,-73.7629],'Poughkeepsie':[41.7004,-73.9210],'Kingston':[41.9270,-73.9974],'Newburgh':[41.5034,-74.0104],'Hempstead':[40.7062,-73.6187],'Huntington':[40.8681,-73.4257],'Albany':[42.6526,-73.7562],'Troy':[42.7284,-73.6918],'Saratoga Springs':[43.0831,-73.7846],'Syracuse':[43.0481,-76.1474],'Utica':[43.1009,-75.2327],'Ithaca':[42.4440,-76.5019],'Rochester':[43.1566,-77.6088],'Buffalo':[42.8864,-78.8784],'Binghamton':[42.0987,-75.9180],'Watertown':[43.9748,-75.9108],'Plattsburgh':[44.6995,-73.4529] };
-var FALLBACK_CARRIERS = [
-  { lic:'OCM-AUR-0101', name:'Empire Botanical Co', city:'New York', lat:40.7128, lng:-74.0060, bond:true },
-  { lic:'OCM-AUR-0110', name:'Kings County Cannabis', city:'Brooklyn', lat:40.6782, lng:-73.9442, bond:true },
-  { lic:'OCM-AUR-0120', name:'Flushing Fields', city:'Queens', lat:40.7282, lng:-73.7949, bond:true },
-  { lic:'OCM-AUR-0201', name:'Hudson Green', city:'Yonkers', lat:40.9312, lng:-73.8988, bond:true },
-  { lic:'OCM-AUR-0204', name:'Mid Hudson Cannabis', city:'Poughkeepsie', lat:41.7004, lng:-73.9210, bond:true },
-  { lic:'OCM-AUR-0205', name:'Rondout Botanicals', city:'Kingston', lat:41.9270, lng:-73.9974, bond:true },
-  { lic:'OCM-AUR-0301', name:'South Shore Cannabis', city:'Hempstead', lat:40.7062, lng:-73.6187, bond:true },
-  { lic:'OCM-AUR-0401', name:'Capital Cannabis Co', city:'Albany', lat:42.6526, lng:-73.7562, bond:true },
-  { lic:'OCM-AUR-0404', name:'Spa City Reserve', city:'Saratoga Springs', lat:43.0831, lng:-73.7846, bond:true },
-  { lic:'OCM-AUR-0501', name:'Salt City Cannabis', city:'Syracuse', lat:43.0481, lng:-76.1474, bond:true },
-  { lic:'OCM-AUR-0503', name:'Cayuga Botanicals', city:'Ithaca', lat:42.4440, lng:-76.5019, bond:true },
-  { lic:'OCM-AUR-0601', name:'Flower City Cannabis', city:'Rochester', lat:43.1566, lng:-77.6088, bond:true },
-  { lic:'OCM-AUR-0701', name:'Queen City Cannabis', city:'Buffalo', lat:42.8864, lng:-78.8784, bond:true }
-];
+// CARRIERS_START
+// Seam for a future verified licensed source. Return shops from that source
+// only. Do not read the finder directory or any localStorage snapshot here.
+var CARRIER_EMPTY = 'No shops carrying Bond yet';
+var WAITLIST_CONFIRM = 'No licensed dispensary near you carries Bond yet. Nothing can be reserved right now. Check back here.';
+var waitlistJoined = {};
+function readVerifiedCarriers(){
+  return [];
+}
+function isSampleListing(d){
+  if (!d || typeof d !== 'object') return false;
+  var name = String(d.name || '');
+  var area = String(d.addr || d.region || '');
+  if (name.indexOf('Sample Dispensary') === 0) return true;
+  if (area.indexOf('Sample area') === 0) return true;
+  return false;
+}
+function isVerifiedCarrier(d){
+  if (!d || typeof d !== 'object') return false;
+  if (isSampleListing(d)) return false;
+  if (d.verified !== true) return false;
+  if (d.bond !== true) return false;
+  if (typeof d.lic !== 'string' || !d.lic) return false;
+  if (typeof d.name !== 'string' || !d.name) return false;
+  if (typeof d.lat !== 'number' || typeof d.lng !== 'number') return false;
+  return true;
+}
+function bondCarriers(){
+  var source = readVerifiedCarriers();
+  if (!source || !source.length) return [];
+  var seen = {};
+  var out = [];
+  var i;
+  for (i = 0; i < source.length; i++){
+    var row = source[i];
+    if (!isVerifiedCarrier(row)) continue;
+    if (seen[row.lic]) continue;
+    seen[row.lic] = true;
+    out.push(row);
+  }
+  return out;
+}
+function pickupForHold(lic, city){
+  var match = null;
+  if (lic){
+    var rows = bondCarriers();
+    var j;
+    for (j = 0; j < rows.length; j++){
+      if (rows[j].lic === lic){ match = rows[j]; break; }
+    }
+  }
+  if (match) return match;
+  return { lic:'', name:'', city: city || '' };
+}
+function carrierListHtml(cityEsc, nearestCount, picksHtml){
+  if (!bondCarriers().length){
+    return '<p style="font-size:12.5px;color:#C08457;margin-top:14px">'+CARRIER_EMPTY+'</p>';
+  }
+  if (!cityEsc) return '';
+  if (!nearestCount){
+    return '<p style="font-size:12.5px;color:#C08457;margin-top:14px">No licensed dispensary near '+cityEsc+' carries Bond yet. Nothing can be reserved right now.</p>';
+  }
+  return '<div class="lbl" style="margin-top:16px">Licensed dispensaries carrying Bond, nearest first</div>'+picksHtml;
+}
+function joinWaitlist(runId){
+  if (bondCarriers().length) return false;
+  waitlistJoined[runId] = true;
+  return true;
+}
+function isWaitlisted(runId){
+  return waitlistJoined[runId] === true;
+}
+function waitlistRunHtml(run, accent, open, joined){
+  var html = '<div class="card" style="margin-bottom:16px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+accent+'"></div>'
+    + '<div class="didot" style="font-size:22px;color:#E1DAD0;margin-top:12px">The next numbered run. Details to come.</div>';
+  if (joined){
+    html += '<p style="font-size:12.5px;color:#8E887C;line-height:1.8;margin:16px 0 0">'+esc(WAITLIST_CONFIRM)+'</p>';
+  } else if (open){
+    html += '<div style="margin-top:18px;border-top:1px solid #2A2C29;padding-top:18px">'
+      + carrierListHtml('', 0, '')
+      + '<div style="display:flex;gap:10px;margin-top:18px"><button class="htab on" data-joinwaitlist="'+esc(run.id)+'" style="padding:0 24px;height:42px">Understood</button><button class="htab" data-waitlistcancel="1" style="padding:0 20px;height:42px">Not now</button></div></div>';
+  } else {
+    html += '<button class="htab on" data-waitlistopen="'+esc(run.id)+'" style="margin-top:16px;padding:0 24px;height:42px">Understood</button>';
+  }
+  return html + '</div>';
+}
+// CARRIERS_END
 function nyCity(name){ var c = readJSON('bondNyCities') || FALLBACK_CITIES; var keys=Object.keys(c); var k = keys.filter(function(x){ return x.toLowerCase()===String(name).toLowerCase(); })[0] || keys.filter(function(x){ return x.toLowerCase().indexOf(String(name).toLowerCase())===0; })[0]; return k ? { key:k, coord:[c[k][0],c[k][1]] } : null; }
 function cityKeys(){ var c = readJSON('bondNyCities') || FALLBACK_CITIES; return Object.keys(c).sort(); }
-function bondCarriers(){
-  var dir = readJSON('bondDispensaryDir'); var carrierLics = readJSON('bondBondCarriers');
-  function isCarrier(d){ return carrierLics ? carrierLics.indexOf(d.lic) !== -1 : d.bond; }
-  var fromDir = (dir && dir.length) ? dir.filter(function(d){ return isCarrier(d) && d.lat != null && d.lng != null; }) : [];
-  if (fromDir.length) return fromDir;
-  return FALLBACK_CARRIERS.filter(isCarrier);
-}
 function nearestCarriers(coord, n){ return bondCarriers().map(function(d){ return { d:d, miles:havMiles(coord,[d.lat,d.lng]) }; }).sort(function(a,b){ return a.miles-b.miles; }).slice(0, n||3); }
-// upcoming short runs a member can reserve a place on
+// Upcoming short runs. Verified carriers keep the existing hold flow.
+// With no verified carriers the card is a waitlist and writes nothing.
 var UPCOMING_RESERVE = [
-  { id:'run-nf', name:'No. 4 Nightfall', comp:'no3', line:'A single source midnight press, cold cured slow. Two hundred and fifty numbered.', size:250 }
+  { id:'run-nf', comp:'no3' }
 ];
 var reserveFlow = { runId:null, city:'', lic:null };
 
@@ -142,11 +210,11 @@ var HausStore = {
       sessions: []
     };
     this.reserveRuns = [
-      { id:'run-mz', comp:'no3', cultivar:'Midnight Zkittlez', pressing:'2026-03-30', size:1000, status:'current' },
+      { id:'run-mz', comp:'no3', cultivar:'', pressing:'2026-03-30', size:1000, status:'current' },
       { id:'run-ag', comp:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, status:'closed' }
     ];
     this.houseWrites = [
-      { text:'A Reserve run has been pressed. No. 3 Peak, Midnight Zkittlez.', view:'reserve' },
+      { text:'A Reserve run has been pressed. No. 3 Peak.', view:'reserve' },
       { text:'The Experience Guide, chapter On Notes, is open.', view:'guide' }
     ];
     // published admin content overrides the defaults
@@ -178,9 +246,9 @@ var HausStore = {
     this.member.claims.push({ batch:batch, comp:b.comp, cultivar:b.cultivar, number:b.run.number, size:b.run.size });
     return true;
   },
-  logSession: function(compId, intention, duration){ this.member.sessions.unshift({ date:new Date().toISOString().slice(0,10), comp:compId, intention:intention, duration:duration, reflection:'' }); return this.member.sessions[0]; },
+  logSession: function(intention, duration){ this.member.sessions.unshift({ date:new Date().toISOString().slice(0,10), intention:intention, duration:duration, reflection:'' }); return this.member.sessions[0]; },
   eraseNotes: function(){ this.member.shelf.forEach(function(b){ b.notes=''; }); },
-  eraseReflections: function(){ this.member.sessions.forEach(function(s){ s.reflection=''; }); },
+  eraseReflections: function(){ this.member.sessions.forEach(function(s){ if (s && typeof s === 'object') s.reflection=''; }); },
   eraseHistory: function(){ this.member.sessions = []; },
   reserveHold: function(runId, runName, disp){
     var rec = { id:'RVH-'+(this.member.reserveHolds.length+1), runId:runId, runName:runName, lic:disp.lic, dispName:disp.name, dispCity:disp.city, when:new Date().toISOString().slice(0,10) };
@@ -190,7 +258,7 @@ var HausStore = {
     return rec;
   },
   releaseHold: function(id){ this.member.reserveHolds = this.member.reserveHolds.filter(function(h){ return h.id !== id; }); },
-  record: function(){ var m=this.member; return { name:m.name, email:m.email, circleCorrespondence:m.circle, shelf:m.shelf, reserveClaims:m.claims, reserveHolds:m.reserveHolds, ritualHistory:m.sessions, guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; } // circleCorrespondence: Haus email pref key. Do not rename without a data migration.
+  record: function(){ var m=this.member; return { name:m.name, email:m.email, circleCorrespondence:m.circle, shelf:m.shelf, reserveClaims:m.claims, reserveHolds:m.reserveHolds, ritualHistory:(m.sessions||[]).map(sessionFields), guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; } // circleCorrespondence: Haus email pref key. Do not rename without a data migration.
 };
 
 // ================= chrome =================
@@ -238,7 +306,7 @@ function renderDoor(fail){
         + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Create your account</button></form>'
         + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px"></p>'
         + '<p style="font-size:13px;line-height:1.7;color:#8E887C;margin:26px 0 0">Already have a key? <a id="toSignin" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B;padding-bottom:2px;cursor:pointer">Sign in.</a></p>'
-        + '<p style="font-size:11.5px;line-height:1.7;letter-spacing:0.02em;color:#6E685E;margin:14px 0 0">Your invitation comes from the Haus. <a href="Home.dc.html#haus" style="color:#8E887C;border-bottom:1px solid #2A2C29;padding-bottom:1px">Join the Haus for first access.</a></p>')
+        + '<p style="font-size:11.5px;line-height:1.7;letter-spacing:0.02em;color:#6E685E;margin:14px 0 0">Your invitation comes from the Haus. <a href="Home.dc.html#haus" style="color:#8E887C;border-bottom:1px solid #2A2C29;padding-bottom:1px">Join the Haus.</a></p>')
       : ('<form id="doorForm" style="margin:34px 0 0;display:flex;flex-direction:column;gap:14px;text-align:left"><input class="field" type="email" name="email" placeholder="Email" autocomplete="email"><input class="field" type="password" name="password" placeholder="Password" autocomplete="current-password">'
         + '<button type="submit" class="didot" style="margin-top:6px;background:'+GOLD+';color:#141109;border:1px solid rgba(227,194,112,0.7);border-radius:2px;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:16px;cursor:pointer;box-shadow:0 6px 26px rgba(194,154,69,0.28), inset 0 1px 0 rgba(255,240,200,0.55)">Enter the Haus</button></form>'
         + '<p id="doorNote" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:18px 0 0;min-height:20px">'+(fail?'That did not open the door.':'')+'</p>'
@@ -285,11 +353,9 @@ function renderWelcome(){
 // ================= 1. Salon =================
 function renderSalon(){
   var m = HausStore.member;
-  var lastComp = m.sessions.length ? comp(m.sessions[0].comp) : comp('no1');
-  var tonight = '<div class="card"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+lastComp.accent+'"></div><div class="lbl">Tonight\'s ritual</div>'
-    + '<div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:12px">'+esc(lastComp.name)+'</div>'
-    + '<div style="font-size:12px;color:#8E887C;margin-top:4px">'+lastComp.triad.join(' . ')+'</div>'
-    + '<a href="#/haus/ritual" style="display:inline-block;margin-top:16px;font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid '+lastComp.accent+';padding-bottom:2px">Begin when ready</a></div>';
+  var tonight = '<div class="card"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:#B8946A"></div><div class="lbl">Tonight\'s ritual</div>'
+    + '<div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:12px">The Ritual</div>'
+    + '<a href="#/haus/ritual" style="display:inline-block;margin-top:16px;font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid #B8946A;padding-bottom:2px">Begin when ready</a></div>';
   var shelf;
   if (m.shelf.length){
     shelf = m.shelf.slice(0,4).map(function(b){ var c=comp(b.comp); return '<div class="spine" data-shelf="'+esc(b.batch)+'"><div style="width:3px;height:34px;background:'+c.accent+';border-radius:2px"></div><div><div style="color:#E1DAD0;font-size:13.5px">'+esc(b.cultivar)+'</div><div style="font-size:11px;color:#6E685E" class="didot">'+esc(c.name)+'</div></div></div>'; }).join('');
@@ -305,7 +371,7 @@ function renderSalon(){
   var recBand = rc ? '<div class="card" style="margin:22px 0 0;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+rc.accent+'"></div>'
     + '<div class="lbl">Your number . from Find Your Bond</div>'
     + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:baseline;margin-top:12px"><div class="didot" style="font-size:24px;color:#E1DAD0">'+esc(rc.name)+'</div><span style="font-size:12px;color:'+rc.accent+'" class="didot">'+rc.triad.join(' . ')+'</span></div>'
-    + '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px"><a href="#/haus/ritual" style="font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid '+rc.accent+';padding-bottom:2px">Begin a ritual with '+esc(rc.name)+'</a><a href="#/haus/guide" style="font-size:12.5px;letter-spacing:0.06em;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Read it in the Guide</a></div></div>' : '';
+    + '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:16px"><a href="#/haus/ritual" style="font-size:12.5px;letter-spacing:0.06em;color:#E1DAD0;border-bottom:1px solid '+rc.accent+';padding-bottom:2px">Begin a ritual</a><a href="#/haus/guide" style="font-size:12.5px;letter-spacing:0.06em;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:2px">Read it in the Guide</a></div></div>' : '';
   var inner = '<div class="didot" style="font-size:clamp(26px,4vw,38px);letter-spacing:0.03em;color:#E1DAD0">'+greeting()+', '+esc(m.first)+'.</div>'
     + recBand
     + '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">'+tonight+onShelf+writes+'</div>'+evCard;
@@ -315,10 +381,10 @@ function renderSalon(){
 // ================= 1b. Dashboard =================
 function renderDashboard(){
   var m = HausStore.member;
-  var shelfN = m.shelf.length, claimsN = m.claims.length, ritualsN = m.sessions.length;
+  var shelfN = m.shelf.length, claimsN = m.claims.length, ritualsN = (m.sessions && m.sessions.length) || 0;
   var evReq = m.events.filter(function(e){ return e.rsvp==='requested' || e.rsvp==='confirmed'; }).length;
   function stat(n, label){ return '<div class="card" style="text-align:center"><div class="didot" style="font-size:34px;color:#E1DAD0">'+n+'</div><div class="lbl" style="margin-top:8px">'+esc(label)+'</div></div>'; }
-  var stats = '<div class="grid3" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">'+stat(shelfN,'On the shelf')+stat(claimsN,'Reserve numbers')+stat(ritualsN,'Rituals kept')+stat(evReq,'Evenings')+'</div>';
+  var stats = '<div class="grid3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">'+stat(shelfN,'On the shelf')+stat(claimsN,'Reserve numbers')+stat(evReq,'Evenings')+'</div>';
 
   // shelf
   var shelfBody = shelfN
@@ -329,7 +395,7 @@ function renderDashboard(){
   // reserve
   var resBody = claimsN
     ? m.claims.map(function(cl){ var c=comp(cl.comp); return '<div style="margin-top:12px"><div class="didot" style="font-size:22px;color:#E1DAD0;letter-spacing:0.02em">No. '+cl.number+' of '+cl.size+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:3px">'+esc(cl.cultivar)+' . '+esc(c.name)+'</div></div>'; }).join('')
-    : '<p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">No Reserve numbers yet. Register a Reserve batch to claim one.</p>';
+    : '<p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">No Reserve numbers yet. Register a Reserve batch to add one to your record.</p>';
   var resCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Reserve numbers</span><a href="#/haus/reserve" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Room</a></div>'+resBody+'</div>';
 
   // evenings
@@ -341,7 +407,7 @@ function renderDashboard(){
 
   // rituals
   var ritBody = ritualsN
-    ? (function(){ var s=m.sessions[0]; var c=comp(s.comp); return '<div style="margin-top:12px"><div style="font-size:13px;color:#B0A99A">'+ritualsN+' kept</div><div style="font-size:11.5px;color:#8E887C;margin-top:8px"><span class="didot">'+esc(s.date)+'</span> . <span style="color:'+c.accent+'">'+esc(c.name)+'</span> . '+esc(s.intention)+' . '+s.duration+' min</div></div>'; })()
+    ? (function(){ var row=sessionFields(m.sessions[0]); return '<div style="margin-top:12px"><div style="font-size:11.5px;color:#8E887C"><span class="didot">'+esc(row.date)+'</span> . '+esc(row.intention)+' . '+row.duration+' min</div></div>'; })()
     : '<p style="font-size:13px;color:#8E887C;margin-top:12px;line-height:1.7">No sessions yet. Begin a ritual when ready.</p>';
   var ritCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Rituals</span><a href="#/haus/ritual" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Begin</a></div>'+ritBody+'</div>';
 
@@ -400,7 +466,7 @@ function batchEntry(b){
     + '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:baseline"><div class="didot" style="font-size:24px;color:#E1DAD0">'+esc(b.cultivar)+'</div><span style="font-size:12px;color:'+c.accent+'" class="didot">'+esc(c.name)+'</span></div>'
     + '<div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:#8E887C"><span>Harvest '+esc(b.harvest)+'</span><span>Pressed '+esc(b.pressing)+'</span><span style="font-family:ui-monospace,Menlo,monospace">'+esc(b.batch)+'</span><a style="color:#B0A99A;border-bottom:1px solid #3A3C3B">Certificate of analysis</a></div>'
     + batchPyramid(b, c)
-    + (b.run?'<a href="#/haus/reserve" style="display:inline-block;margin-top:14px;font-size:12.5px;color:#E1DAD0;border-bottom:1px solid '+c.accent+';padding-bottom:2px">Claim your Reserve number in the Reserve Room</a>':'')
+    + (b.run?'<a href="#/haus/reserve" style="display:inline-block;margin-top:14px;font-size:12.5px;color:#E1DAD0;border-bottom:1px solid '+c.accent+';padding-bottom:2px">See this run number in the Reserve Room</a>':'')
     + '<div style="margin-top:20px"><div class="lbl">Your notes. Private, optional, and yours to erase.</div>'
     + '<textarea id="noteIn" class="field" data-batch="'+esc(b.batch)+'" rows="3" style="margin-top:10px;resize:vertical" placeholder="What did it bring to mind">'+esc(b.notes)+'</textarea>'
     + '<div style="display:flex;gap:10px;margin-top:10px"><button class="htab" data-savenote="'+esc(b.batch)+'">Save note</button>'+(b.notes?'<button class="htab" data-erasenote="'+esc(b.batch)+'">Erase note</button>':'')+'</div></div>'
@@ -425,7 +491,7 @@ function renderGuide(){
       + '<div style="height:1px;background:'+c.accent+';width:60px;margin:20px 0"></div>'
       + '<div style="font-size:14px;line-height:1.9;color:#4A463E"><strong style="color:#2A2620">Top notes.</strong> '+c.top.join(', ')+'. <strong style="color:#2A2620">Heart.</strong> '+c.heart.join(', ')+'. <strong style="color:#2A2620">Base.</strong> '+c.base.join(', ')+'.</div></div></div>';
   } else {
-    page = paperSpread('The Ritual', '<div style="display:flex;flex-direction:column;gap:0">'+[['Prepare','Clear the space. Remove distractions.'],['Pause','Breathe. Set your intention.'],['Elevate','Return elevated.']].map(function(s,i,a){ return '<div style="display:flex;gap:16px;align-items:flex-start"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:#C08457"></span>'+(i<a.length-1?'<span style="width:1px;height:42px;background:#C0845766"></span>':'')+'</div><div style="padding-bottom:26px"><div class="didot" style="font-size:19px;color:#2A2620">'+s[0]+'</div><div style="font-size:14px;color:#4A463E;margin-top:4px">'+s[1]+'</div></div></div>'; }).join('')+'</div>');
+    page = paperSpread('The Ritual', '<div style="display:flex;flex-direction:column;gap:0">'+[['Prepare','Clear the space. Remove distractions.'],['Pause','Be still. Set your intention.'],['Close','Return when ready.']].map(function(s,i,a){ return '<div style="display:flex;gap:16px;align-items:flex-start"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:#C08457"></span>'+(i<a.length-1?'<span style="width:1px;height:42px;background:#C0845766"></span>':'')+'</div><div style="padding-bottom:26px"><div class="didot" style="font-size:19px;color:#2A2620">'+s[0]+'</div><div style="font-size:14px;color:#4A463E;margin-top:4px">'+s[1]+'</div></div></div>'; }).join('')+'</div>');
   }
   var ribbon = '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><button class="htab" id="gPrev"'+(idx===0?' disabled':'')+'>Previous</button><span style="font-size:12px;color:#6E685E">Chapter '+(idx+1)+' of '+GUIDE.length+' . '+esc(ch.title)+'</span><button class="htab" id="gNext"'+(idx===GUIDE.length-1?' disabled':'')+'>Next</button></div>';
   chrome('guide', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Experience Guide</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">A reading ribbon keeps your place.</p><div class="soft">'+page+'</div>'+ribbon);
@@ -439,44 +505,52 @@ function renderReserve(){
   var m = HausStore.member;
   var claims = m.claims.length ? m.claims.map(function(cl){ var c=comp(cl.comp); return '<div class="card" style="text-align:center;margin-bottom:16px"><div style="position:absolute;left:0;right:0;bottom:0;height:2px;background:'+c.accent+'"></div><div class="lbl">Your Reserve number</div><div class="didot" style="font-size:clamp(34px,6vw,56px);color:#E1DAD0;margin-top:12px;letter-spacing:0.02em">No. '+cl.number+' of '+cl.size+'</div><div style="font-size:13px;color:#8E887C;margin-top:8px" class="didot">'+esc(cl.cultivar)+' . '+esc(c.name)+'</div></div>'; }).join('') : '';
   var claimable = m.shelf.filter(function(b){ return b.run && !m.claims.filter(function(c){ return c.batch===b.batch; }).length; });
-  var claimBox = claimable.length ? '<div class="card" style="margin-bottom:16px"><div class="lbl">Claim a number</div>'+claimable.map(function(b){ return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span style="font-size:13.5px;color:#B0A99A">'+esc(b.cultivar)+' . '+esc(b.batch)+'</span><button class="htab" data-claim="'+esc(b.batch)+'">Claim your run number</button></div>'; }).join('')+'</div>' : (m.claims.length ? '' : '<div class="card" style="margin-bottom:16px"><p style="font-size:13px;color:#8E887C;margin:0;line-height:1.7">Register a Reserve batch in the Library and its run number becomes yours to claim here.</p></div>');
+  var claimBox = claimable.length ? '<div class="card" style="margin-bottom:16px"><div class="lbl">Your run numbers</div>'+claimable.map(function(b){ return '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span style="font-size:13.5px;color:#B0A99A">'+esc(b.cultivar)+' . '+esc(b.batch)+'</span><button class="htab" data-claim="'+esc(b.batch)+'">Add to your record</button></div>'; }).join('')+'</div>' : (m.claims.length ? '' : '<div class="card" style="margin-bottom:16px"><p style="font-size:13px;color:#8E887C;margin:0;line-height:1.7">Register a Reserve batch in the Library and its run number is added to your record here.</p></div>');
   var runs = '<div class="card"><div class="lbl">Runs the house has pressed</div><div style="margin-top:14px;display:flex;flex-direction:column;gap:14px">'+HausStore.reserveRuns.map(function(r){ var c=comp(r.comp); return '<div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid #2A2C29"><div style="width:3px;height:44px;background:'+c.accent+';border-radius:2px"></div><div style="flex:1"><div class="didot" style="font-size:17px;color:#E1DAD0">'+esc(r.cultivar)+'</div><div style="font-size:12px;color:#8E887C;margin-top:3px">'+esc(c.name)+' . pressed '+esc(r.pressing)+' . run of '+r.size+'</div>'+(r.status==='closed'?'<div style="font-size:12px;color:#6E685E;margin-top:6px">This run has ended.</div>':'<div style="font-size:12px;color:'+c.accent+';margin-top:6px">Current run</div>')+'</div></div>'; }).join('')+'</div><p style="font-size:11.5px;color:#6E685E;margin:16px 0 0;line-height:1.7">The Reserve Room is a registry of what has been pressed. It is a record, not a room for acquiring.</p></div>';
-  chrome('reserve', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Reserve Room</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">For No. 3 and every numbered run after it.</p>'+reserveNext(m)+holdsSection(m)+claims+claimBox+runs);
+  chrome('reserve', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Reserve Room</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">For No. 3 and every numbered run after it.</p>'+reserveNext(m)+(bondCarriers().length ? holdsSection(m) : '')+claims+claimBox+runs);
 }
-// be first to the next short run: reserve a place, held at your nearest Bond dispensary
+// Verified carriers: reserve a place, held at the nearest Bond dispensary.
+// No verified carriers: waitlistRunHtml, which does not hold or reserve.
 function reserveNext(m){
   var out = '';
+  var carriersOn = bondCarriers().length > 0;
   UPCOMING_RESERVE.forEach(function(run){
-    var held = m.reserveHolds.filter(function(h){ return h.runId===run.id; })[0];
     var c = comp(run.comp) || comp('no3');
+    if (!carriersOn){
+      out += waitlistRunHtml(run, c.accent, reserveFlow.runId===run.id, isWaitlisted(run.id));
+      return;
+    }
+    var held = m.reserveHolds.filter(function(h){ return h.runId===run.id; })[0];
     if (held) return; // shown in holds section
     out += '<div class="card" style="margin-bottom:16px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:2px;background:'+c.accent+'"></div>'
-      + '<div class="lbl">Be first to the next Reserve run</div>'
-      + '<div class="didot" style="font-size:22px;color:#E1DAD0;margin-top:12px">'+esc(run.name)+'</div>'
-      + '<div style="font-size:13px;color:#8E887C;margin-top:6px;line-height:1.7">'+esc(run.line)+'</div>'
-      + '<div style="font-size:12px;color:'+c.accent+';margin-top:8px">'+run.size+' numbered . opening soon</div>';
+      + '<div class="lbl">The next Reserve run</div>'
+      + '<div class="didot" style="font-size:22px;color:#E1DAD0;margin-top:12px">The next numbered run. Details to come.</div>';
     if (reserveFlow.runId===run.id){ out += reservePanel(m, run, c); }
-    else { out += '<button class="htab on" data-reserverun="'+run.id+'" style="margin-top:16px;padding:0 24px;height:42px">Reserve your place</button>'; }
+    else { out += '<button class="htab on" data-reserverun="'+run.id+'" style="margin-top:16px;padding:0 24px;height:42px">Reservations are not open yet</button>'; }
     out += '</div>';
   });
   return out;
 }
 function reservePanel(m, run, c){
-  var nearest = reserveFlow.city ? nearestCarriers(nyCity(reserveFlow.city).coord, 3) : [];
+  var located = reserveFlow.city ? nyCity(reserveFlow.city) : null;
+  var nearest = located ? nearestCarriers(located.coord, 3) : [];
   var picks = nearest.map(function(x){ var on=reserveFlow.lic===x.d.lic; return '<button class="htab'+(on?' on':'')+'" data-pickcarrier="'+esc(x.d.lic)+'" style="display:flex;justify-content:space-between;gap:14px;width:100%;text-align:left;margin-top:8px;border-color:'+(on?c.accent:'#3A3C3B')+'"><span>'+esc(x.d.name)+' . '+esc(x.d.city)+'</span><span style="color:#8E887C">'+Math.round(x.miles)+' mi</span></button>'; }).join('');
   return '<div style="margin-top:18px;border-top:1px solid #2A2C29;padding-top:18px">'
-    + '<p style="font-size:12.5px;color:#8E887C;line-height:1.8">This holds your place on the run. It is a reservation only, never a transaction on this site. When it presses, the house holds it for you at a licensed dispensary carrying Bond nearest to you, to collect in person, 21 and over. Everything is completed at the dispensary, not here.</p>'
+    + '<p style="font-size:12.5px;color:#8E887C;line-height:1.8">Nothing can be reserved right now. Reservations open once a licensed dispensary near you carries Bond.</p>'
     + '<div class="lbl" style="margin-top:16px">Your city or town in New York</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><input id="rvCity" class="field" list="rvCityList" style="flex:1;min-width:200px" placeholder="Your city" value="'+esc(reserveFlow.city)+'"><datalist id="rvCityList">'+cityKeys().map(function(k){ return '<option value="'+esc(k)+'"></option>'; }).join('')+'</datalist><button class="htab" data-findpickup="'+run.id+'" style="padding:0 20px">Find pickup</button></div>'
-    + (reserveFlow.city ? (nearest.length ? '<div class="lbl" style="margin-top:16px">Held for you at, nearest first</div>'+picks : '<p style="font-size:12.5px;color:#C08457;margin-top:14px">No Bond dispensary is within reach of '+esc(reserveFlow.city)+' yet. The house will hold your place and let you know when one carries Bond near you.</p>') : '')
-    + '<div style="display:flex;gap:10px;margin-top:18px"><button class="htab on" data-holdplace="'+run.id+'" style="padding:0 24px;height:42px"'+((reserveFlow.city && (nearest.length===0 || reserveFlow.lic))?'':' disabled')+'>Hold my place</button><button class="htab" data-reservecancel="1" style="padding:0 20px;height:42px">Not now</button></div></div>';
+    + carrierListHtml(reserveFlow.city ? esc(reserveFlow.city) : '', nearest.length, picks)
+    + '<div style="display:flex;gap:10px;margin-top:18px"><button class="htab on" data-holdplace="'+run.id+'" style="padding:0 24px;height:42px"'+((reserveFlow.city && (nearest.length===0 || reserveFlow.lic))?'':' disabled')+'>Reservations not open yet</button><button class="htab" data-reservecancel="1" style="padding:0 20px;height:42px">Not now</button></div></div>';
 }
 function holdsSection(m){
   if (!m.reserveHolds.length) return '';
-  return m.reserveHolds.map(function(h){ return '<div class="card" style="margin-bottom:16px;border-color:#4A4029"><div class="lbl">Your place is held</div>'
-    + '<div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:10px">'+esc(h.runName)+'</div>'
-    + '<div style="font-size:13px;color:#B0A99A;margin-top:8px;line-height:1.8">'+(h.dispName ? ('Held for you at '+esc(h.dispName)+', '+esc(h.dispCity)+', NY. ') : 'The house will hold it near you. ')+'We will notify you at '+esc(m.email)+' when '+esc(h.runName)+' is ready to collect in person, 21 and over. This is a reservation to hold product at a licensed dispensary. It is not a transaction, and nothing is exchanged on this site.</div>'
-    + '<div style="display:flex;gap:10px;margin-top:14px"><button class="htab" data-releasehold="'+esc(h.id)+'">Release my place</button></div></div>'; }).join('');
+  return m.reserveHolds.map(function(h){
+    var title = (h && h.runName && h.runName !== 'No. 4 Nightfall') ? h.runName : 'The next numbered run. Details to come.';
+    return '<div class="card" style="margin-bottom:16px;border-color:#4A4029"><div class="lbl">Nothing is reserved yet</div>'
+    + '<div class="didot" style="font-size:20px;color:#E1DAD0;margin-top:10px">'+esc(title)+'</div>'
+    + '<div style="font-size:13px;color:#B0A99A;margin-top:8px;line-height:1.8">Nothing is reserved yet. Reservations open once a licensed dispensary near you carries Bond.</div>'
+    + '<div style="display:flex;gap:10px;margin-top:14px"><button class="htab" data-releasehold="'+esc(h && h.id)+'">Close</button></div></div>';
+  }).join('');
 }
 
 // ================= 5. Events =================
@@ -499,48 +573,55 @@ function renderEvents(){
 }
 
 // ================= 6. Ritual companion =================
-var ritual = { phase:'setup', comp:'no1', intention:INTENTIONS[0], freeText:'', duration:20, remaining:0, total:0 };
-// default the ritual composition to the Find Your Bond recommendation, if one exists
-(function(){ var fr = findResult(); if (fr && comp(fr.comp)) ritual.comp = fr.comp; })();
+// Product-free quiet timer. Older sessions may still carry a product id. Ignore it.
+// RITUAL_FIELDS_START
+function sessionFields(s){
+  var row = (s && typeof s === 'object') ? s : {};
+  return {
+    date: typeof row.date === 'string' ? row.date : '',
+    intention: typeof row.intention === 'string' ? row.intention : '',
+    duration: typeof row.duration === 'number' ? row.duration : 0,
+    reflection: typeof row.reflection === 'string' ? row.reflection : ''
+  };
+}
+// RITUAL_FIELDS_END
+var ritual = { phase:'setup', intention:INTENTIONS[0], freeText:'', duration:20, remaining:0, total:0 };
 var ritualTimer = null;
+var RITUAL_ACCENT = '#B8946A';
 function clearRitualTimer(){ if (ritualTimer){ clearInterval(ritualTimer); ritualTimer=null; } }
 function renderRitual(){
   var m = HausStore.member;
   if (ritual.phase==='setup'){
-    var shelfComps = m.shelf.map(function(b){ return b.comp; });
-    var ordered = COMPS.slice().sort(function(a,b){ var ai=shelfComps.indexOf(a.id), bi=shelfComps.indexOf(b.id); return (bi>-1?1:0)-(ai>-1?1:0); });
-    var compPick = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+ordered.map(function(c){ var onShelf=shelfComps.indexOf(c.id)>-1; return '<button class="htab'+(ritual.comp===c.id?' on':'')+'" data-rcomp="'+c.id+'" style="border-color:'+(ritual.comp===c.id?c.accent:'#3A3C3B')+'">'+esc(c.name)+(onShelf?' . yours':'')+'</button>'; }).join('')+'</div>';
     var intent = '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">'+INTENTIONS.map(function(i){ return '<button class="htab'+(ritual.intention===i&&!ritual.freeText?' on':'')+'" data-rintent="'+esc(i)+'">'+esc(i)+'</button>'; }).join('')+'</div><input id="rFree" class="field" placeholder="Or set your own intention" value="'+esc(ritual.freeText)+'" style="margin-top:12px">';
     var dur = '<div style="display:flex;gap:10px;margin-top:12px">'+[10,20,30].map(function(d){ return '<button class="htab'+(ritual.duration===d?' on':'')+'" data-rdur="'+d+'">'+d+' minutes</button>'; }).join('')+'</div>';
-    var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Ritual</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Choose a composition, set an intention, and begin when ready.</p>'
-      + '<div class="card"><div class="lbl">Composition</div>'+compPick+'<div class="lbl" style="margin-top:22px">Intention</div>'+intent+'<div class="lbl" style="margin-top:22px">Duration</div>'+dur
+    var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Ritual</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Set an intention, and begin when ready.</p>'
+      + '<div class="card"><div class="lbl">Intention</div>'+intent+'<div class="lbl" style="margin-top:22px">Duration</div>'+dur
       + '<button id="rBegin" class="didot" style="margin-top:24px;background:transparent;color:#E1DAD0;border:1px solid #C29A45;border-radius:2px;font-size:13px;letter-spacing:0.2em;text-transform:uppercase;padding:14px 40px;cursor:pointer">Begin</button></div>'
       + historyCard();
     chrome('ritual', inner);
     return;
   }
-  // running phases
-  var c = comp(ritual.comp);
-  var steps = [['Prepare','Clear the space. Remove distractions.','prepare'],['Pause','Breathe. Set your intention.','pause'],['Elevate','Return elevated.','elevate']];
+  // running phases. The timer is not tied to a composition.
+  var accent = RITUAL_ACCENT;
+  var steps = [['Prepare','Clear the space. Remove distractions.','prepare'],['Pause','Be still. Set your intention.','pause'],['Close','Return when ready.','elevate']];
   var stepIdx = { prepare:0, pause:1, elevate:2 }[ritual.phase];
-  var stepper = '<div style="display:flex;flex-direction:column;gap:0;margin-top:8px">'+steps.map(function(s,i,a){ var state = i<stepIdx?'done':i===stepIdx?'now':'next'; var col = state==='now'?c.accent:state==='done'?'#7FA87A':'#3A3C3B'; var op = REDUCED&&state !== 'now'?0.4:1; return '<div style="display:flex;gap:16px;align-items:flex-start;opacity:'+op+'"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:'+col+';'+(state==='now'?'box-shadow:0 0 10px '+c.accent:'')+'"></span>'+(i<a.length-1?'<span style="width:1px;height:38px;background:#2A2C29"></span>':'')+'</div><div style="padding-bottom:22px"><div class="didot" style="font-size:18px;color:'+(state==='next'?'#6E685E':'#E1DAD0')+'">'+s[0]+'</div><div style="font-size:13px;color:#8E887C;margin-top:3px">'+s[1]+'</div></div></div>'; }).join('')+'</div>';
+  var stepper = '<div style="display:flex;flex-direction:column;gap:0;margin-top:8px">'+steps.map(function(s,i,a){ var state = i<stepIdx?'done':i===stepIdx?'now':'next'; var col = state==='now'?accent:state==='done'?'#7FA87A':'#3A3C3B'; var op = REDUCED&&state !== 'now'?0.4:1; return '<div style="display:flex;gap:16px;align-items:flex-start;opacity:'+op+'"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:12px;height:12px;border-radius:50%;background:'+col+';'+(state==='now'?'box-shadow:0 0 10px '+accent:'')+'"></span>'+(i<a.length-1?'<span style="width:1px;height:38px;background:#2A2C29"></span>':'')+'</div><div style="padding-bottom:22px"><div class="didot" style="font-size:18px;color:'+(state==='next'?'#6E685E':'#E1DAD0')+'">'+s[0]+'</div><div style="font-size:13px;color:#8E887C;margin-top:3px">'+s[1]+'</div></div></div>'; }).join('')+'</div>';
   var center;
   if (ritual.phase==='elevate'){
-    center = REDUCED ? '<div id="ritualClock" class="didot" style="font-size:64px;color:#E1DAD0;letter-spacing:0.02em">'+fmt(ritual.remaining)+'</div>' : ringSvg(c);
+    center = REDUCED ? '<div id="ritualClock" class="didot" style="font-size:64px;color:#E1DAD0;letter-spacing:0.02em">'+fmt(ritual.remaining)+'</div>' : ringSvg({ accent:accent });
   } else {
-    center = '<div class="didot" style="font-size:44px;color:'+c.accent+'">'+(ritual.phase==='prepare'?'Prepare':'Pause')+'</div>';
+    center = '<div class="didot" style="font-size:44px;color:'+accent+'">'+(ritual.phase==='prepare'?'Prepare':'Pause')+'</div>';
   }
   var controls;
   if (ritual.phase==='elevate') controls = '<button id="rEnd" class="htab" style="margin-top:8px">End ritual</button>';
-  else controls = '<button id="rNext" class="didot" style="background:transparent;color:#E1DAD0;border:1px solid '+c.accent+';border-radius:2px;font-size:12.5px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 34px;cursor:pointer">Continue</button>';
+  else controls = '<button id="rNext" class="didot" style="background:transparent;color:#E1DAD0;border:1px solid '+accent+';border-radius:2px;font-size:12.5px;letter-spacing:0.2em;text-transform:uppercase;padding:12px 34px;cursor:pointer">Continue</button>';
   var inner = '<div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;margin-top:10px">'
     + '<div>'+stepper+'</div>'
-    + '<div style="text-align:center">'+center+'<div style="font-size:12.5px;color:#8E887C;margin-top:20px" class="didot">'+esc(c.name)+' . '+esc(ritual.freeText||ritual.intention)+'</div><div style="margin-top:16px">'+controls+'</div></div></div>';
+    + '<div style="text-align:center">'+center+'<div style="font-size:12.5px;color:#8E887C;margin-top:20px" class="didot">'+esc(ritual.freeText||ritual.intention)+'</div><div style="margin-top:16px">'+controls+'</div></div></div>';
   if (ritual.phase==='reflect'){
-    var s0 = HausStore.member.sessions[0];
-    inner = '<div style="text-align:center;max-width:520px;margin:20px auto"><div class="didot" style="font-size:34px;color:#E1DAD0">Return elevated.</div>'
+    inner = '<div style="text-align:center;max-width:520px;margin:20px auto"><div class="didot" style="font-size:34px;color:#E1DAD0">Return when ready.</div>'
       + '<p style="font-size:13.5px;color:#8E887C;margin:14px 0 0">One optional line, kept privately with the same erase rights as your notes.</p>'
-      + '<textarea id="rReflect" class="field" rows="3" style="margin-top:18px;resize:vertical;text-align:left" placeholder="A word on how it landed"></textarea>'
+      + '<textarea id="rReflect" class="field" rows="3" style="margin-top:18px;resize:vertical;text-align:left" placeholder="A note for yourself."></textarea>'
       + '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px"><button id="rSaveReflect" class="htab on" style="padding:0 24px;height:40px">Save and close</button><button id="rSkip" class="htab" style="padding:0 24px;height:40px">Close without a note</button></div></div>';
   }
   chrome('ritual', '<div class="didot" style="font-size:clamp(22px,3vw,30px);color:#E1DAD0">The Ritual</div><p style="font-size:13px;color:#8E887C;margin:8px 0 22px">Your ritual is running. Let the rest of the room fall away.</p>'+inner);
@@ -565,8 +646,8 @@ function updateRing(){
 }
 function historyCard(){
   var m = HausStore.member;
-  if (!m.sessions.length) return '<div class="card" style="margin-top:16px"><div class="lbl">Your sessions</div><p style="font-size:13px;color:#8E887C;margin-top:12px">No sessions yet. Your history stays here, date and intention only, and you can erase all of it from Account.</p></div>';
-  return '<div class="card" style="margin-top:16px"><div class="lbl">Your sessions</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">'+m.sessions.map(function(s){ var c=comp(s.comp); return '<div style="display:flex;gap:14px;font-size:12.5px;color:#8E887C;padding-bottom:8px;border-bottom:1px solid #2A2C29"><span style="min-width:82px" class="didot">'+esc(s.date)+'</span><span style="color:'+c.accent+'">'+esc(c.name)+'</span><span>'+esc(s.intention)+'</span><span style="margin-left:auto">'+s.duration+' min</span></div>'; }).join('')+'</div><a href="#/haus/account" style="display:inline-block;margin-top:14px;font-size:12px;color:#8E887C;border-bottom:1px solid #3A3C3B">Erase all in Account</a></div>';
+  if (!m.sessions || !m.sessions.length) return '<div class="card" style="margin-top:16px"><div class="lbl">Your sessions</div><p style="font-size:13px;color:#8E887C;margin-top:12px">No sessions yet. Your history stays here, date and intention only, and you can erase all of it from Account.</p></div>';
+  return '<div class="card" style="margin-top:16px"><div class="lbl">Your sessions</div><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">'+m.sessions.map(function(s){ var row=sessionFields(s); return '<div style="display:flex;gap:14px;font-size:12.5px;color:#8E887C;padding-bottom:8px;border-bottom:1px solid #2A2C29"><span style="min-width:82px" class="didot">'+esc(row.date)+'</span><span>'+esc(row.intention)+'</span><span style="margin-left:auto">'+row.duration+' min</span></div>'; }).join('')+'</div><a href="#/haus/account" style="display:inline-block;margin-top:14px;font-size:12px;color:#8E887C;border-bottom:1px solid #3A3C3B">Erase all in Account</a></div>';
 }
 function beginRitual(){
   ritual.total = ritual.duration*60; ritual.remaining = ritual.total; ritual.phase='prepare'; renderRitual();
@@ -582,7 +663,7 @@ function startElevate(){
 function completeRitual(){
   clearRitualTimer();
   var elapsed = Math.round((ritual.total - Math.max(0,ritual.remaining))/60) || ritual.duration;
-  HausStore.logSession(ritual.comp, ritual.freeText||ritual.intention, ritual.duration);
+  HausStore.logSession(ritual.freeText||ritual.intention, ritual.duration);
   ritual.phase='reflect'; renderRitual();
 }
 
@@ -596,7 +677,7 @@ function renderAccount(){
     + '<div><div style="font-size:11px;color:#6E685E">Name</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.name)+'</div></div>'
     + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div>'
     + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefHaus"'+(m.circle?' checked':'')+'> Haus correspondence</label></div></div>'
-    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises.</p>'
+    + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser.</p>'
     + '<button id="dlRecord" class="htab on" style="padding:0 22px;height:40px">Download my record</button>'
     + '<div style="margin-top:18px">'+eraseRow('notes','Tasting notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
   chrome('account', inner);
@@ -637,27 +718,29 @@ document.addEventListener('click', function(ev){
   if (t.id==='batchAdd'){ var v=(document.getElementById('batchIn')||{}).value||''; var e=HausStore.registerBatch(v); var note=document.getElementById('batchNote'); if (e && e.batch){ libSel=e.batch; toast('Shelved. '+e.cultivar+' is on your shelf.'); renderLibrary(); } else if (e && e.retired){ if (note) note.textContent='That batch is no longer in the house records.'; } else if (note){ note.textContent='That batch is not in the house records. Check the card and try again.'; } return; }
   var lib = t.closest('[data-lib]'); if (lib){ libSel = lib.getAttribute('data-lib'); renderLibrary(); return; }
   var sn = t.closest('[data-savenote]'); if (sn){ var b=HausStore.member.shelf.filter(function(x){return x.batch===sn.getAttribute('data-savenote');})[0]; var ta=document.getElementById('noteIn'); if (b&&ta){ b.notes=ta.value; toast('Your note is kept privately.'); renderLibrary(); } return; }
-  var en = t.closest('[data-erasenote]'); if (en){ var b2=HausStore.member.shelf.filter(function(x){return x.batch===en.getAttribute('data-erasenote');})[0]; if (b2){ b2.notes=''; toast('Erased. The house keeps no copy.'); renderLibrary(); } return; }
+  var en = t.closest('[data-erasenote]'); if (en){ var b2=HausStore.member.shelf.filter(function(x){return x.batch===en.getAttribute('data-erasenote');})[0]; if (b2){ b2.notes=''; toast('Erased.'); renderLibrary(); } return; }
 
   // guide
   if (t.id==='gPrev'){ if (HausStore.member.guidePlace>0){ HausStore.member.guidePlace--; renderGuide(); } return; }
   if (t.id==='gNext'){ if (HausStore.member.guidePlace<GUIDE.length-1){ HausStore.member.guidePlace++; renderGuide(); } return; }
 
   // reserve
-  var cl = t.closest('[data-claim]'); if (cl){ if (HausStore.claimRun(cl.getAttribute('data-claim'))){ toast('Your run number is yours.'); renderReserve(); } return; }
-  // reserve the next short run, held at the nearest Bond dispensary
-  var rrun = t.closest('[data-reserverun]'); if (rrun){ reserveFlow = { runId:rrun.getAttribute('data-reserverun'), city:HausStore.member.city||'', lic:null }; renderReserve(); return; }
-  var fp = t.closest('[data-findpickup]'); if (fp){ var v=(document.getElementById('rvCity')||{}).value||''; var nc=nyCity(v); if (!nc){ toast('We could not find that New York city or town.'); return; } reserveFlow.city=nc.key; HausStore.member.city=nc.key; var near=nearestCarriers(nc.coord,3); reserveFlow.lic = near.length ? near[0].d.lic : null; renderReserve(); return; }
-  var pc = t.closest('[data-pickcarrier]'); if (pc){ reserveFlow.lic = pc.getAttribute('data-pickcarrier'); renderReserve(); return; }
-  var hp = t.closest('[data-holdplace]'); if (hp){ var run=UPCOMING_RESERVE.filter(function(r){ return r.id===hp.getAttribute('data-holdplace'); })[0]; var disp = reserveFlow.lic ? bondCarriers().filter(function(d){ return d.lic===reserveFlow.lic; })[0] : { lic:'', name:'', city:reserveFlow.city }; HausStore.reserveHold(run.id, run.name, disp); reserveFlow={ runId:null, city:'', lic:null }; toast('Your place is held. The house will notify you.'); renderReserve(); return; }
+  var cl = t.closest('[data-claim]'); if (cl){ if (HausStore.claimRun(cl.getAttribute('data-claim'))){ toast('Your run number is on your record.'); renderReserve(); } return; }
+  // Verified carriers only: hold the next short run at the nearest Bond dispensary.
+  var rrun = t.closest('[data-reserverun]'); if (rrun){ if (!bondCarriers().length) return; reserveFlow = { runId:rrun.getAttribute('data-reserverun'), city:HausStore.member.city||'', lic:null }; renderReserve(); return; }
+  var wlo = t.closest('[data-waitlistopen]'); if (wlo){ if (bondCarriers().length) return; reserveFlow = { runId:wlo.getAttribute('data-waitlistopen'), city:'', lic:null }; renderReserve(); return; }
+  var jw = t.closest('[data-joinwaitlist]'); if (jw){ if (!joinWaitlist(jw.getAttribute('data-joinwaitlist'))) return; reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
+  if (t.closest('[data-waitlistcancel]')){ reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
+  var fp = t.closest('[data-findpickup]'); if (fp){ if (!bondCarriers().length) return; var v=(document.getElementById('rvCity')||{}).value||''; var nc=nyCity(v); if (!nc){ toast('We could not find that New York city or town.'); return; } reserveFlow.city=nc.key; HausStore.member.city=nc.key; var near=nearestCarriers(nc.coord,3); reserveFlow.lic = near.length ? near[0].d.lic : null; renderReserve(); return; }
+  var pc = t.closest('[data-pickcarrier]'); if (pc){ if (!bondCarriers().length) return; reserveFlow.lic = pc.getAttribute('data-pickcarrier'); renderReserve(); return; }
+  var hp = t.closest('[data-holdplace]'); if (hp){ if (!bondCarriers().length) return; var run=UPCOMING_RESERVE.filter(function(r){ return r.id===hp.getAttribute('data-holdplace'); })[0]; if (!run) return; var disp = pickupForHold(reserveFlow.lic, reserveFlow.city); HausStore.reserveHold(run.id, 'The next numbered run. Details to come.', disp); reserveFlow={ runId:null, city:'', lic:null }; toast('Nothing is reserved yet.'); renderReserve(); return; }
   if (t.closest('[data-reservecancel]')){ reserveFlow={ runId:null, city:'', lic:null }; renderReserve(); return; }
-  var rh = t.closest('[data-releasehold]'); if (rh){ HausStore.releaseHold(rh.getAttribute('data-releasehold')); toast('Your place is released.'); renderReserve(); return; }
+  var rh = t.closest('[data-releasehold]'); if (rh){ HausStore.releaseHold(rh.getAttribute('data-releasehold')); toast('Closed.'); renderReserve(); return; }
 
   // events
   var rs = t.closest('[data-rsvp]'); if (rs){ var e2=HausStore.member.events.filter(function(x){return x.id===rs.getAttribute('data-rsvp');})[0]; if (e2){ e2.rsvp = e2.rsvp==='none'?'requested':e2.rsvp==='requested'?'confirmed':'requested'; toast(e2.rsvp==='requested'?'Your request is with the house.':'Your place is confirmed.'); renderEvents(); } return; }
 
   // ritual
-  var rc = t.closest('[data-rcomp]'); if (rc){ ritual.comp=rc.getAttribute('data-rcomp'); renderRitual(); return; }
   var ri = t.closest('[data-rintent]'); if (ri){ ritual.intention=ri.getAttribute('data-rintent'); ritual.freeText=''; renderRitual(); return; }
   var rd = t.closest('[data-rdur]'); if (rd){ ritual.duration=+rd.getAttribute('data-rdur'); renderRitual(); return; }
   if (t.id==='rBegin'){ var f=document.getElementById('rFree'); if (f&&f.value.trim()) ritual.freeText=f.value.trim(); beginRitual(); return; }
@@ -689,8 +772,8 @@ function doErase(key){
   if (key==='notes'){ HausStore.eraseNotes(); }
   else if (key==='reflections'){ HausStore.eraseReflections(); }
   else if (key==='history'){ HausStore.eraseHistory(); }
-  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. The house keeps no copy.'); route(); return; }
-  toast('Erased. The house keeps no copy.');
+  else if (key==='account'){ HausStore.seed(); location.hash='#/haus'; toast('Erased. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser.'); route(); return; }
+  toast('Erased.');
   renderAccount();
 }
 
