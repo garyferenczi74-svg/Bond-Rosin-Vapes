@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <title>No. 1 Dialed . Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style id="bond-gate-cover-css">
+:root{--matte-black:#1B1D1C}
+html,body{background:var(--matte-black,#1B1D1C);margin:0}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:var(--matte-black,#1B1D1C);pointer-events:auto}
+html[data-bond-age="ok"] #bond-gate-cover{display:none}
+@media (prefers-reduced-motion: reduce){#bond-gate-cover{transition:none}}
+</style>
+<script id="bond-gate-boot">
+(function(){try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/gfs-didot-latin-400.woff2">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
@@ -19,7 +29,8 @@
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
-<x-dc>
+<div id="bond-gate-cover" aria-hidden="true"></div>
+<x-dc inert>
 <helmet>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <script src="./image-slot.js"></script>
@@ -183,6 +194,77 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   <dc-import name="AgeGate" hint-size="0px,0px" warn="Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis."></dc-import>
 </div>
 </x-dc>
+<script id="bond-gate-hold">
+(function () {
+  var cover = document.getElementById("bond-gate-cover");
+  var passed = false;
+  try { passed = Boolean(sessionStorage.getItem("bond_age_ok")); } catch (e) {}
+  function findGate() {
+    return document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
+  }
+  function hold() {
+    var gate = findGate();
+    var nav = document.querySelector("nav");
+    var root = nav ? nav.parentElement : document.querySelector("x-dc > div");
+    if (root == null) return;
+    var kids = root.children;
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      var keep = gate && el.contains(gate);
+      if (keep) {
+        el.inert = false;
+        el.removeAttribute("data-bond-hold");
+      } else {
+        el.inert = true;
+        el.setAttribute("data-bond-hold", "");
+      }
+    }
+    var node = gate;
+    while (node) {
+      if (node == document.documentElement) break;
+      if (node.inert) node.inert = false;
+      node = node.parentElement;
+    }
+  }
+  var watch = null;
+  function release() {
+    if (watch) watch.disconnect();
+    watch = null;
+    var held = document.querySelectorAll("[data-bond-hold]");
+    for (var i = 0; i < held.length; i++) {
+      held[i].inert = false;
+      held[i].removeAttribute("data-bond-hold");
+    }
+    if (cover == null || cover.parentNode == null) return;
+    var reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (reduce) {
+      cover.remove();
+      return;
+    }
+    cover.style.transition = "opacity 160ms linear";
+    cover.style.opacity = "0";
+    var removed = false;
+    function drop() {
+      if (removed) return;
+      removed = true;
+      if (cover.parentNode) cover.remove();
+    }
+    cover.addEventListener("transitionend", drop);
+    setTimeout(drop, 220);
+  }
+  if (passed) {
+    var locked = document.querySelectorAll("[inert]");
+    for (var j = 0; j < locked.length; j++) locked[j].inert = false;
+    if (cover && cover.parentNode) cover.remove();
+    return;
+  }
+  hold();
+  watch = new MutationObserver(function () { hold(); });
+  watch.observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener("bond-entered", release);
+})();
+</script>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { narrow: false, menu: false };

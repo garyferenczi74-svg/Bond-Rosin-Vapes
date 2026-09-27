@@ -17,10 +17,15 @@ const banned = [
   "no fillers",
   "no additives",
   "nothing added",
+  "nothing removed",
   "five zeros",
   "pure",
   "purity",
   "cleaner high",
+  "fillers",
+  "additives",
+  "added terpenes",
+  "exactly as it made it",
 ];
 
 const heroLock =
@@ -73,9 +78,38 @@ function routeFiles() {
     route: row.route,
     files: row.file ? [row.file] : reactFiles(row.route),
   }));
-  rows.push({ route: "/no-1", files: ["No1.dc.html"] });
-  rows.push({ route: "/No1.dc.html", files: ["No1.dc.html"] });
+  const aliases = [
+    ["/no-1", "No1.dc.html"],
+    ["/No1.dc.html", "No1.dc.html"],
+    ["/no-2", "No2.dc.html"],
+    ["/No2.dc.html", "No2.dc.html"],
+    ["/no-3", "No3.dc.html"],
+    ["/No3.dc.html", "No3.dc.html"],
+    ["/Home.dc.html", "Home.dc.html"],
+    ["/FAQ.dc.html", "FAQ.dc.html"],
+    ["/Privacy.dc.html", "Privacy.dc.html"],
+    ["/Terms.dc.html", "Terms.dc.html"],
+    ["/Finder.dc.html", "Finder.dc.html"],
+  ] as const;
+  for (const pair of aliases) rows.push({ route: pair[0], files: [pair[1]] });
   return rows;
+}
+
+const coverPages = ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"];
+
+function assertCoverFirst(name: string, html: string) {
+  const head = html.slice(0, html.indexOf("</head>"));
+  const bodyAt = html.indexOf("<body");
+  const body = html.slice(bodyAt);
+  const openEnd = body.indexOf(">");
+  const after = body.slice(openEnd + 1).trimStart();
+  assert.match(after, /^<div id="bond-gate-cover"/, name);
+  assert.match(head, /id="bond-gate-boot"/, name);
+  assert.match(head, /sessionStorage\.getItem\("bond_age_ok"\)/, name);
+  assert.match(head, /#bond-gate-cover\{[^}]*var\(--matte-black,#1B1D1C\)/, name);
+  assert.match(head, /pointer-events:auto/, name);
+  assert.match(html, /id="bond-gate-hold"/, name);
+  assert.match(html, /<x-dc inert>/, name);
 }
 
 function servedText(files: string[]) {
@@ -98,6 +132,29 @@ test("served routes reject unfinished purity claims", () => {
     for (const phrase of banned) {
       assert.equal(text.includes(phrase), false, `${row.route} ${phrase}`);
     }
+  }
+});
+
+test("every Home section is scanned and the product pages open on the cover", () => {
+  const home = read("Home.dc.html");
+  const sections = home.match(/<section\b[\s\S]*?<\/section>/g) ?? [];
+  assert.ok(sections.length >= 5);
+  assert.ok(sections.some((section) => section.includes('id="top"')));
+  assert.ok(sections.some((section) => section.includes('id="process"')));
+  for (const section of sections) {
+    let text = section;
+    if (section.includes('id="top"')) text = text.replace(heroLock, " ");
+    text = normalize(text);
+    for (const phrase of banned) {
+      assert.equal(text.includes(phrase), false, phrase);
+    }
+  }
+  for (const name of coverPages) assertCoverFirst(name, read(name));
+  for (const name of ["FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html", "Finder.dc.html"]) {
+    const html = read(name);
+    assert.match(html, /class="bond-floor" inert/, name);
+    assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-floor \{ visibility: hidden; \}/, name);
+    assert.ok(html.indexOf('id="bond-age-gate"') < html.indexOf('class="bond-floor"'), name);
   }
 });
 

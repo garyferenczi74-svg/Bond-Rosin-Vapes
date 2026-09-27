@@ -39,7 +39,7 @@ html[data-bond-age="ok"] #bond-gate-cover{display:none}
 </head>
 <body>
 <div id="bond-gate-cover" aria-hidden="true"></div>
-<x-dc>
+<x-dc inert>
 <helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0D0F0E"></rect><text x="50" y="57" font-family="Didot,serif" font-size="16" letter-spacing="5" fill="#C29A45" text-anchor="middle">BOND</text></svg></template>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -331,8 +331,6 @@ input::placeholder { color: #B0A99A; }
         <div style="position:absolute;left:24px;right:24px;bottom:calc(50% + 48px);display:flex;gap:clamp(20px,4vw,56px);flex-wrap:wrap;justify-content:center">
           <div ref="{{ z0Ref }}" style="opacity:0;transform:translateY(12px);transition:opacity .9s cubic-bezier(0.22,1,0.36,1),transform .9s cubic-bezier(0.22,1,0.36,1)"><div style="font-family:'GFS Didot',Didot,serif;font-size:clamp(40px,4.6vw,64px);line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Solvents<br>&nbsp;</div></div>
           <div ref="{{ z2Ref }}" style="opacity:0;transform:translateY(12px);transition:opacity .9s cubic-bezier(0.22,1,0.36,1),transform .9s cubic-bezier(0.22,1,0.36,1)"><div style="font-family:'GFS Didot',Didot,serif;font-size:clamp(40px,4.6vw,64px);line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Distillate<br>&nbsp;</div></div>
-          <div ref="{{ z3Ref }}" style="opacity:0;transform:translateY(12px);transition:opacity .9s cubic-bezier(0.22,1,0.36,1),transform .9s cubic-bezier(0.22,1,0.36,1)"><div style="font-family:'GFS Didot',Didot,serif;font-size:clamp(40px,4.6vw,64px);line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Fillers<br>&nbsp;</div></div>
-          <div ref="{{ z4Ref }}" style="opacity:0;transform:translateY(12px);transition:opacity .9s cubic-bezier(0.22,1,0.36,1),transform .9s cubic-bezier(0.22,1,0.36,1)"><div style="font-family:'GFS Didot',Didot,serif;font-size:clamp(40px,4.6vw,64px);line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Additives<br>&nbsp;</div></div>
         </div>
         <p ref="{{ closerRef }}" style="position:absolute;left:24px;right:24px;top:calc(50% + 48px);font-size:16px;color:#E1DAD0;letter-spacing:0.04em;text-align:center;margin:0;opacity:0;transform:translateY(12px);transition:opacity 1.05s cubic-bezier(0.22,1,0.36,1),transform 1.05s cubic-bezier(0.22,1,0.36,1)">Solventless live rosin.<br><span style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:44px;letter-spacing:0.2em;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin-top:18px;padding-left:0.2em;transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">BOND</span></p>
       </div>
@@ -350,8 +348,6 @@ input::placeholder { color: #B0A99A; }
     <div style="font-family:'GFS Didot',Didot,serif;display:flex;gap:clamp(20px,4vw,56px);flex-wrap:wrap;justify-content:center">
       <div><div style="font-family:'GFS Didot',Didot,serif;font-size:52px;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Solvents</div></div>
       <div><div style="font-family:'GFS Didot',Didot,serif;font-size:52px;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Distillate</div></div>
-      <div><div style="font-family:'GFS Didot',Didot,serif;font-size:52px;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Fillers</div></div>
-      <div><div style="font-family:'GFS Didot',Didot,serif;font-size:52px;line-height:1;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;filter:drop-shadow(1px 2px 2px rgba(0,0,0,0.55));transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">0</div><div style="font-size:12px;letter-spacing:0.3em;text-transform:uppercase;color:#B0A99A;margin-top:14px">Additives</div></div>
     </div>
     <p style="font-size:16px;color:#E1DAD0;text-align:center;margin:48px 0 0">Solventless live rosin.<br><span style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:44px;letter-spacing:0.2em;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin-top:18px;padding-left:0.2em;transform-origin:center;animation:breatheScale 3.6s ease-in-out infinite">BOND</span></p>
   </section>
@@ -551,6 +547,8 @@ input::placeholder { color: #B0A99A; }
     setTimeout(drop, 220);
   }
   if (passed) {
+    var locked = document.querySelectorAll("[inert]");
+    for (var j = 0; j < locked.length; j++) locked[j].inert = false;
     if (cover && cover.parentNode) cover.remove();
     return;
   }
@@ -568,7 +566,7 @@ class Component extends DCLogic {
   heroCtaRef = React.createRef();
   plateTopRef = React.createRef(); plateBottomRef = React.createRef(); pressLineRef = React.createRef();
   b1Ref = React.createRef(); b2Ref = React.createRef(); b3Ref = React.createRef();
-  z0Ref = React.createRef(); z2Ref = React.createRef(); z3Ref = React.createRef(); z4Ref = React.createRef();
+  z0Ref = React.createRef(); z2Ref = React.createRef();
   closerRef = React.createRef(); progRef = React.createRef(); fadeRef = React.createRef();
 
   componentDidMount() {
@@ -630,7 +628,7 @@ class Component extends DCLogic {
     set(this.b1Ref, { opacity: String(b1), transform: `translateY(${12 * (1 - b1)}px)` });
     set(this.b2Ref, { opacity: String(b2), transform: `translateY(${12 * (1 - b2)}px)` });
     set(this.b3Ref, { opacity: p > 0.8 ? '1' : '0' });
-    [this.z0Ref, this.z2Ref, this.z3Ref, this.z4Ref].forEach((z, i) => {
+    [this.z0Ref, this.z2Ref].forEach((z, i) => {
       const on = p > 0.8 + i * 0.026;
       set(z, { opacity: on ? '1' : '0', transform: on ? 'translateY(0)' : 'translateY(12px)' });
     });
@@ -726,7 +724,7 @@ class Component extends DCLogic {
       heroCtaRef: this.heroCtaRef,
       plateTopRef: this.plateTopRef, plateBottomRef: this.plateBottomRef, pressLineRef: this.pressLineRef,
       b1Ref: this.b1Ref, b2Ref: this.b2Ref, b3Ref: this.b3Ref,
-      z0Ref: this.z0Ref, z2Ref: this.z2Ref, z3Ref: this.z3Ref, z4Ref: this.z4Ref,
+      z0Ref: this.z0Ref, z2Ref: this.z2Ref,
       closerRef: this.closerRef, progRef: this.progRef, fadeRef: this.fadeRef,
       goNo1: this.navTo('No1.dc.html'), goNo2: this.navTo('No2.dc.html'), goNo3: this.navTo('No3.dc.html'),
       gateBypass: this.props.gateBypass ?? false,
