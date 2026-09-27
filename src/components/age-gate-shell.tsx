@@ -7,6 +7,7 @@ export function AgeGateShell({ route, children }: { route: WarningRoute; childre
     <>
       <script dangerouslySetInnerHTML={{ __html: HAUS_AGE_BOOT }} />
       <style dangerouslySetInnerHTML={{ __html: AGE_GATE_CRITICAL }} />
+      <div id="bond-gate-cover" aria-hidden="true" />
       <BondAgeGate route={route}>{children}</BondAgeGate>
     </>
   );

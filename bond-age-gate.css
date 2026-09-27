@@ -102,7 +102,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 .bond-age-body {
-  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, "Inter Fallback", sans-serif;
   font-size: 16px;
   color: var(--age-copy);
   line-height: 1.7;
@@ -141,7 +141,7 @@ html[data-bond-age="ok"] .bond-age-gate {
   border: 1px solid var(--line);
   border-radius: 2px;
   color: var(--bone);
-  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, "Inter Fallback", sans-serif;
   font-size: 15px;
   padding: 14px 20px;
   min-width: 0;

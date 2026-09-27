@@ -57,5 +57,23 @@ export function routeShowsAgeGate(pathname: string, stored: string | null): bool
 
 export const HAUS_AGE_BOOT = `(function(){var stored=null;try{stored=sessionStorage.getItem(${JSON.stringify(BOND_AGE_KEY)});}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();`;
 
-export const AGE_GATE_CRITICAL = `html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
-html[data-bond-age="ok"] .bond-age-gate { display: none; }`;
+const LATIN_RANGE =
+  "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
+
+export const AGE_GATE_CRITICAL = `:root{--matte-black:#1B1D1C;--bone:#E1DAD0;--font-didot:"GFS Didot"}
+html,body{background:var(--matte-black,#1B1D1C);margin:0;color:var(--bone,#E1DAD0)}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:var(--matte-black,#1B1D1C);pointer-events:auto}
+html[data-bond-age="ok"] #bond-gate-cover{display:none}
+html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+html[data-bond-age="ok"] .bond-age-gate { display: none; }
+.bond-age-gate{position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;flex-direction:column;align-items:center}
+.bond-age-ask .bond-age-body{font-family:Aptos,"Segoe UI Variable","Segoe UI",Inter,"Inter Fallback",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
+@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/inter-latin.woff2") format("woff2");unicode-range:${LATIN_RANGE}}
+@font-face{font-family:"Inter";font-style:normal;font-weight:500;font-display:swap;src:url("/fonts/inter-latin.woff2") format("woff2");unicode-range:${LATIN_RANGE}}
+@font-face{font-family:"Inter Fallback";font-style:normal;font-weight:400;src:local("Arial");size-adjust:107.89%;ascent-override:89.79%;descent-override:22.36%;line-gap-override:0%}
+@font-face{font-family:"Inter Fallback";font-style:normal;font-weight:400;src:local("Liberation Sans");size-adjust:107.89%;ascent-override:89.79%;descent-override:22.36%;line-gap-override:0%}
+@font-face{font-family:"GFS Didot";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:${LATIN_RANGE}}
+@font-face{font-family:"Didot Fallback";font-style:normal;font-weight:400;src:local("Times New Roman");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
+@font-face{font-family:"Didot Fallback";font-style:normal;font-weight:400;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
+@font-face{font-family:"Didot Fallback";font-style:normal;font-weight:400;src:local("Noto Serif");size-adjust:94.39%;ascent-override:100.33%;descent-override:29.35%;line-gap-override:2.65%}
+.bond-age-mark,.bond-age-lead,.bond-age-title{font-family:"GFS Didot","Didot Fallback",Didot,serif;font-weight:400}`;

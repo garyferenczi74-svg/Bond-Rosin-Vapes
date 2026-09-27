@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  AGE_GATE_CRITICAL,
   BOND_AGE_KEY,
   BOND_AGE_MONTHS,
   HAUS_AGE_BOOT,
@@ -86,6 +87,14 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(order, /AgeGateShell/);
   assert.match(shell, /BondAgeGate/);
   assert.match(shell, /HAUS_AGE_BOOT/);
+  assert.match(shell, /id="bond-gate-cover"/);
+  assert.match(AGE_GATE_CRITICAL, /#bond-gate-cover/);
+  assert.match(AGE_GATE_CRITICAL, /font-display:swap/);
+  assert.match(AGE_GATE_CRITICAL, /size-adjust:107\.89%/);
+  assert.match(AGE_GATE_CRITICAL, /\/fonts\/inter-latin\.woff2/);
+  assert.match(AGE_GATE_CRITICAL, /\.bond-age-ask \.bond-age-body/);
+  assert.equal(read("src/app/layout.tsx").includes("next/font/google"), false);
+  assert.equal(read("src/app/layout.tsx").includes("fonts.googleapis.com"), false);
   assert.match(read("src/app/globals.css"), /@import "\.\.\/\.\.\/bond-age-gate\.css"/);
   assert.equal(haus.includes("iframe"), false);
   assert.equal(order.includes("iframe"), false);

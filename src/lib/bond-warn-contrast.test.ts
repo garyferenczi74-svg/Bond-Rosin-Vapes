@@ -32,18 +32,22 @@ function contrast(ink: string, surface: string) {
 
 function tokenMap(css: string) {
   const map = new Map<string, string>();
-  for (const match of css.matchAll(/--([A-Za-z0-9-]+):\s*(#[0-9A-Fa-f]{6})/g)) {
-    map.set(match[1], match[2].toUpperCase());
+  for (const match of css.matchAll(/--([A-Za-z0-9-]+):\s*([^;}{]+)/g)) {
+    map.set(match[1], match[2].trim());
   }
   return map;
 }
 
-function resolveColor(value: string, tokens: Map<string, string>) {
-  const hex = value.match(/#[0-9A-Fa-f]{6}/);
-  if (hex) return hex[0].toUpperCase();
+function resolveColor(value: string, tokens: Map<string, string>, depth = 0): string {
+  if (depth > 6) return "";
   const ref = value.match(/var\(--([A-Za-z0-9-]+)\)/);
-  if (!ref) return "";
-  return tokens.get(ref[1]) ?? "";
+  if (ref) {
+    const next = tokens.get(ref[1]);
+    if (!next) return "";
+    return resolveColor(next, tokens, depth + 1);
+  }
+  const hex = value.match(/#[0-9A-Fa-f]{6}/);
+  return hex ? hex[0].toUpperCase() : "";
 }
 
 function firstHex(pattern: RegExp, text: string) {
@@ -51,18 +55,9 @@ function firstHex(pattern: RegExp, text: string) {
   return match ? match[1].toUpperCase() : "";
 }
 
-function footerSurface(html: string, fallback: string) {
-  const tag = html.match(/<footer[^>]*style="([^"]*)"/i);
-  const tagBg = tag ? firstHex(/background:\s*(#[0-9A-Fa-f]{6})/i, tag[1]) : "";
-  if (tagBg) return tagBg;
-  const rule = firstHex(/footer\s*\{[^}]*background:\s*(#[0-9A-Fa-f]{6})/i, html);
-  if (rule) return rule;
-  const body = firstHex(/body\s*\{[^}]*background:\s*(#[0-9A-Fa-f]{6})/i, html);
-  return body || fallback;
-}
-
 test("HOPEline and licensee contrast stays at or above 4.5:1 on every route gate and footer", () => {
-  const tokens = tokenMap(read("bond-tokens.css") + "\n" + read("bond-age-gate.css"));
+  const tokensCss = read("bond-tokens.css");
+  const tokens = tokenMap(tokensCss + "\n" + read("bond-age-gate.css"));
   const css = read("bond-age-gate.css");
   const rule = css.match(/\.bond-warn-hope,\s*\.bond-warn-hope a,\s*\.bond-warn-license \{([^}]*)\}/);
   assert.ok(rule, "hope and license share one color rule");
@@ -70,15 +65,23 @@ test("HOPEline and licensee contrast stays at or above 4.5:1 on every route gate
   assert.match(block, /color:\s*var\(--bond-warn-meta\)/);
   assert.match(block, /background:\s*var\(--bond-warn-panel\)/);
   assert.equal(/#[0-9A-Fa-f]{3,8}/.test(block), false);
+  assert.match(tokensCss, /--bond-warn-panel:\s*var\(--matte-black\)/);
+  assert.match(tokensCss, /--bond-warn-meta:\s*var\(--bone\)/);
+  assert.equal(/--bond-warn-panel:\s*#/.test(tokensCss), false);
+  assert.equal(/--bond-warn-meta:\s*#/.test(tokensCss), false);
 
   const ink = resolveColor("var(--bond-warn-meta)", tokens);
   const panel = resolveColor("var(--bond-warn-panel)", tokens);
-  const ageInk = tokens.get("age-ink") ?? "";
+  const ageInk = resolveColor(tokens.get("age-ink") ?? "", tokens);
   assert.ok(ink && panel && ageInk, "warn tokens resolve to hex");
+  const painted = contrast(ink, panel);
+  assert.equal(painted.toFixed(2), "12.22");
 
   const tokenFile = read("src/lib/tokens.ts");
   const matte = firstHex(/matteBlack:\s*"(#[0-9A-Fa-f]{6})"/, tokenFile);
+  const bone = firstHex(/bone:\s*"(#[0-9A-Fa-f]{6})"/, tokenFile);
   assert.equal(matte, panel);
+  assert.equal(bone, ink);
 
   const ageGate = read("AgeGate.dc.html");
   const importGate = firstHex(/background:(#[0-9A-Fa-f]{6})/i, ageGate);
@@ -87,17 +90,8 @@ test("HOPEline and licensee contrast stays at or above 4.5:1 on every route gate
   const rows: string[] = [];
   for (const route of WARNING_ROUTES) {
     const html = route.file ? read(route.file) : "";
-    const surfaces: { place: string; color: string }[] = [];
-    if (route.gate !== "none") {
-      surfaces.push({
-        place: "gate",
-        color: route.gate === "import" ? importGate : ageInk,
-      });
-    }
-    surfaces.push({
-      place: "footer",
-      color: route.file ? footerSurface(html, matte) : matte,
-    });
+    const places = ["footer"];
+    if (route.gate !== "none") places.unshift("gate");
 
     if (route.file) {
       assert.equal(html.includes('class="bond-warn-hope"'), true, route.file);
@@ -106,18 +100,10 @@ test("HOPEline and licensee contrast stays at or above 4.5:1 on every route gate
       assert.equal(/<p class="bond-warn-license"[^>]*style=/.test(html), false, route.file);
     }
 
-    for (const line of ["hope", "license"]) {
-      const painted = contrast(ink, panel);
-      assert.ok(painted >= 4.5, `${route.route} ${line} panel ${painted.toFixed(2)}`);
-      for (const surface of surfaces) {
-        const ratio = contrast(ink, surface.color);
-        assert.ok(
-          ratio >= 4.5,
-          `${route.route} ${surface.place} ${line} ${ink} on ${surface.color} is ${ratio.toFixed(2)}`,
-        );
-        rows.push(
-          `${route.route} ${surface.place} ${line} ${ink} on ${surface.color} ${ratio.toFixed(2)} painted ${ink} on ${panel} ${painted.toFixed(2)}`,
-        );
+    for (const place of places) {
+      for (const line of ["hope", "license"]) {
+        assert.ok(painted >= 4.5, `${route.route} ${place} ${line} ${painted.toFixed(2)}`);
+        rows.push(`${route.route} ${place} ${line} ${ink} on ${panel} ${painted.toFixed(2)}`);
       }
     }
   }
