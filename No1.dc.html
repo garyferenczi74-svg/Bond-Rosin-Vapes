@@ -9,10 +9,26 @@
 html,body{background:var(--matte-black,#1B1D1C);margin:0}
 #bond-gate-cover{position:fixed;inset:0;z-index:8000;background:var(--matte-black,#1B1D1C);pointer-events:auto}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
+html:not([data-bond-age="ok"]) body>*:not(#bond-gate-cover){visibility:hidden}
+html:not([data-bond-age="ok"]) dc-import[name="AgeGate"],
+html:not([data-bond-age="ok"]) dc-import[name="AgeGate"] *,
+html:not([data-bond-age="ok"]) [style*="z-index:9999"],
+html:not([data-bond-age="ok"]) [style*="z-index:9999"] *,
+html:not([data-bond-age="ok"]) [style*="z-index: 9999"],
+html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 @media (prefers-reduced-motion: reduce){#bond-gate-cover{transition:none}}
 </style>
 <script id="bond-gate-boot">
-(function(){try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}})();
+(function(){
+  try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}
+  document.addEventListener("focusin",function(ev){
+    if(document.documentElement.getAttribute("data-bond-age")==="ok")return;
+    var t=ev.target;
+    if(!t||t===document.body||t===document.documentElement)return;
+    if(t.closest&&t.closest('dc-import[name="AgeGate"],.bond-age-gate,[style*="z-index:9999"],[style*="z-index: 9999"]'))return;
+    if(t.blur)t.blur();
+  },true);
+})();
 </script>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/gfs-didot-latin-400.woff2">

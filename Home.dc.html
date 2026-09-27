@@ -868,7 +868,7 @@ class Component extends DCLogic {
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
-    if (v.videoWidth > 1) reveal(true);
+    reveal(true);
   }
 
   function layoutCopy() {
@@ -976,7 +976,7 @@ class Component extends DCLogic {
       }
       t.classList.remove('hero-copy-flow');
       s.style.setProperty('--hero-copy-top', copyTop + 'px');
-      if (v.videoWidth > 1) reveal(true);
+      reveal(true);
     } catch (err) {
       flowFallback();
     }
@@ -1006,7 +1006,11 @@ class Component extends DCLogic {
       v._bondFail = function () { requestLayout(); };
       v.addEventListener('playing', requestLayout);
       v.addEventListener('loadedmetadata', requestLayout);
-      setTimeout(function () { reveal(true); }, 4000);
+      setTimeout(function () {
+        var stack = document.getElementById(STACK);
+        if (stack && stack.classList.contains('hero-in')) return;
+        reveal(true);
+      }, 4000);
     };
     if (document.fonts && document.fonts.status !== 'loaded') {
       var fired = false;
