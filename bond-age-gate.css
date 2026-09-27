@@ -19,7 +19,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: bond-age-in 0.6s var(--age-ease) both;
 }
 
 html:not([data-bond-age="ok"]) .bond-floor {
@@ -58,14 +57,13 @@ html[data-bond-age="ok"] .bond-age-gate {
   padding: 32px;
   width: 100%;
   box-sizing: border-box;
-  animation: bond-age-rise 0.7s var(--age-ease) both;
 }
 
 .bond-age-no { max-width: 520px; }
 .bond-age-ask { max-width: 560px; }
 
 .bond-age-mark {
-  font-family: "GFS Didot", Didot, serif;
+  font-family: var(--font-didot), "GFS Didot", Didot, serif;
   font-weight: 400;
   font-size: clamp(44px, 6vw, 64px);
   letter-spacing: 0.35em;
@@ -75,7 +73,6 @@ html[data-bond-age="ok"] .bond-age-gate {
   -webkit-background-clip: text;
   background-clip: text;
   transform-origin: center;
-  animation: bond-age-breathe 6.5s ease-in-out infinite, bond-age-scale 3.6s ease-in-out infinite;
 }
 
 .bond-age-ask .bond-age-mark {
@@ -83,7 +80,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 .bond-age-title {
-  font-family: "GFS Didot", Didot, serif;
+  font-family: var(--font-didot), "GFS Didot", Didot, serif;
   font-weight: 400;
   font-size: clamp(22px, 3vw, 30px);
   color: var(--bone);
@@ -92,7 +89,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 .bond-age-lead {
-  font-family: "GFS Didot", Didot, serif;
+  font-family: var(--font-didot), "GFS Didot", Didot, serif;
   font-size: clamp(18px, 2.6vw, 28px);
   letter-spacing: 0.03em;
   color: var(--bone);
@@ -159,7 +156,7 @@ html[data-bond-age="ok"] .bond-age-gate {
   color: var(--muted);
   border: 1px solid var(--line);
   border-radius: 2px;
-  font-family: "GFS Didot", Didot, serif;
+  font-family: var(--font-didot), "GFS Didot", Didot, serif;
   font-size: 13px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -240,7 +237,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 @media (prefers-reduced-motion: reduce) {
   .bond-age-gate,
   .bond-age-gate * {
-    animation: bond-age-fade 1ms linear both;
+    animation: none;
     transition-property: opacity;
     transform: none;
   }

@@ -1,13 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   BOND_AGE_KEY,
   BOND_AGE_MONTHS,
   HAUS_AGE_BOOT,
-  HAUS_AGE_HOST,
   bondAgeDecision,
   hausRouteShowsAgeGate,
   hausShowsAgeGate,
@@ -72,39 +71,34 @@ test("AgeGate shows on an unverified Haus door or floor and skips when the sessi
   assert.equal(bootMark(null, true), null);
 });
 
-test("Haus door and floor include AgeGate.dc.html instead of a copied gate", () => {
-  const layout = read("src/app/haus/layout.tsx");
-  const client = read("src/app/haus/age-gate-client.tsx");
-  const door = read("src/app/haus/page.tsx");
-  const host = read("haus-age-host.dc.html");
+test("Haus and order render the native gate and the old host stays unpublished", () => {
+  const haus = read("src/app/haus/layout.tsx");
+  const order = read("src/app/order/layout.tsx");
+  const shell = read("src/components/age-gate-shell.tsx");
   const gate = read("AgeGate.dc.html");
-  const no1 = read("No1.dc.html");
-  const reduced =
-    "@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }";
-  const bodyRule = "body { margin: 0; background: #1B1D1C; }";
-  const hostBody = "body { margin: 0; background: var(--matte-black); }";
+  const sync = read("scripts/sync-public.mjs");
+  const filesBlock = sync.slice(sync.indexOf("const files"), sync.indexOf("const dirs"));
+  const blockedStart = sync.indexOf("const blocked = new Set");
+  const blockedBlock = sync.slice(blockedStart, sync.indexOf("]);", blockedStart));
 
-  assert.match(door, /HausClient/);
-  assert.match(layout, /HausAgeGate/);
-  assert.match(layout, /HAUS_AGE_BOOT/);
-  assert.match(client, /hausShowsAgeGate/);
-  assert.match(client, /bond-entered/);
-  assert.ok(client.includes(`src={HAUS_AGE_HOST}`));
-  assert.equal(HAUS_AGE_HOST, "/haus-age-host.dc.html");
-  assert.match(host, /<dc-import name="AgeGate" hint-size="0px,0px"><\/dc-import>/);
-  assert.equal(host.includes("Birth month"), false);
-  assert.equal(host.includes("By entering, you verify"), false);
-  assert.equal(host.includes("sessionStorage.setItem"), false);
-  assert.match(host, /parent\.postMessage\(\{ type: "bond-entered" \}, location\.origin\)/);
-  assert.ok(gate.includes(bodyRule));
-  assert.ok(host.includes(hostBody));
-  assert.match(host, /--matte-black: #1B1D1C/);
-  assert.equal(host.includes("background: #1B1D1C"), false);
-  assert.ok(no1.includes(reduced));
-  assert.ok(host.includes(reduced));
+  assert.match(read("src/app/haus/page.tsx"), /HausClient/);
+  assert.match(haus, /AgeGateShell/);
+  assert.match(order, /AgeGateShell/);
+  assert.match(shell, /BondAgeGate/);
+  assert.match(shell, /HAUS_AGE_BOOT/);
+  assert.match(read("src/app/globals.css"), /@import "\.\.\/\.\.\/bond-age-gate\.css"/);
+  assert.equal(haus.includes("iframe"), false);
+  assert.equal(order.includes("iframe"), false);
+  assert.equal(shell.includes("iframe"), false);
+  assert.equal(shell.includes("unpkg.com"), false);
+  assert.equal(shell.includes("fonts.googleapis.com"), false);
+  assert.equal(existsSync(join(root, "haus-age-host.dc.html")), false);
+  assert.equal(existsSync(join(root, "src/app/haus/age-gate-client.tsx")), false);
+  assert.equal(filesBlock.includes("haus-age-host.dc.html"), false);
+  assert.match(blockedBlock, /haus-age-host\.dc\.html/);
   assert.match(gate, /sessionStorage\.getItem\('bond_age_ok'\)/);
   assert.match(gate, /sessionStorage\.setItem\('bond_age_ok'/);
-  assert.match(read("scripts/sync-public.mjs"), /haus-age-host\.dc\.html/);
+  assert.match(read("bond-age-gate.css"), /var\(--font-didot\)/);
   assert.equal(read("src/app/haus/haus-client.tsx").includes("AgeGate"), false);
   assert.equal(read("src/components/haus-frame.tsx").includes("AgeGate"), false);
 });
@@ -116,11 +110,8 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   const gateView = read("src/components/bond-age-gate.tsx");
   const thirdPartyScript = /unpkg\.com|fonts\.googleapis\.com|fonts\.gstatic\.com|support\.js|haus-age-host/;
 
-  assert.match(order, /BondAgeGate/);
-  assert.match(order, /HAUS_AGE_BOOT/);
-  assert.match(order, /href="\/bond-age-gate\.css"/);
+  assert.match(order, /AgeGateShell/);
   assert.equal(order.includes("HausAgeGate"), false);
-  assert.equal(order.includes("HAUS_AGE_CSS"), false);
   assert.equal(order.includes("iframe"), false);
   assert.equal(thirdPartyScript.test(order), false);
   assert.equal(thirdPartyScript.test(gateJs), false);
@@ -191,6 +182,44 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   assert.match(band, /OCM-Proc-25-000329/);
   assert.match(read("src/app/haus/haus-client.tsx"), /ComplianceBand/);
   assert.match(read("src/app/order/order-client.tsx"), /ComplianceBand/);
-  assert.match(read("src/app/haus/layout.tsx"), /HausAgeGate/);
-  assert.match(read("src/app/haus/age-gate-client.tsx"), /HAUS_AGE_HOST/);
+
+  const faq = read("FAQ.dc.html");
+  const riskHeading = faq.indexOf("<h2>Is cannabis risk-free?</h2>");
+  assert.ok(riskHeading > 0);
+  const riskSentence =
+    "No, and we will not pretend otherwise. Cannabis may cause impairment and may be habit forming, it can impair concentration, coordination, and judgment, there may be health risks associated with consumption, and it is not recommended for persons who are pregnant or nursing. Never drive or operate machinery under the influence. If someone ingests cannabis accidentally, contact the Poison Center at 1-800-222-1222 or call 9-1-1.";
+  assert.ok(faq.includes(riskSentence));
+  assert.ok(faq.indexOf(riskSentence) > riskHeading);
+});
+
+test("the shared bond_age_ok key clears the gate both ways and under 21 writes nothing", () => {
+  const marketing = read("AgeGate.dc.html");
+  const view = read("src/components/bond-age-gate.tsx");
+  const gateJs = read("bond-age-gate.js");
+  const stored = "1710000000000";
+
+  assert.match(marketing, /sessionStorage\.setItem\('bond_age_ok'/);
+  assert.match(marketing, /sessionStorage\.getItem\('bond_age_ok'\)/);
+  assert.match(marketing, /if \(raw\)/);
+  assert.equal(BOND_AGE_KEY, "bond_age_ok");
+
+  for (const path of ["/haus", "/faq", "/privacy", "/terms", "/order"]) {
+    assert.equal(routeShowsAgeGate(path, stored), false, path);
+    assert.equal(routeShowsAgeGate(path, null), true, path);
+  }
+  assert.equal(hausShowsAgeGate(stored), false);
+  assert.equal(bootMark(stored), "ok");
+  assert.equal(bootMark(null), null);
+
+  const enterAt = gateJs.indexOf('if (decision === "enter")');
+  const setAt = gateJs.indexOf("sessionStorage.setItem");
+  const declineAt = gateJs.indexOf('root.setAttribute("data-declined", "true")');
+  assert.ok(enterAt > 0 && setAt > enterAt && declineAt > setAt);
+
+  const viewDecline = view.indexOf('if (decision === "decline")');
+  const viewSet = view.indexOf("sessionStorage.setItem");
+  assert.ok(viewDecline > 0 && viewDecline < viewSet);
+  assert.match(view, /setDeclined\(true\)/);
+  assert.equal(bondAgeDecision("0", "2006", new Date(2026, 8, 27)), "decline");
+  assert.equal(bondAgeDecision("0", "1990", new Date(2026, 8, 27)), "enter");
 });
