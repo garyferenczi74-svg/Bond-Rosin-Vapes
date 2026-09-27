@@ -6,12 +6,14 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "../..");
+const repoRoot = join(here, "../../..");
 
 function read(rel: string): string {
   return readFileSync(join(root, rel), "utf8");
 }
 
 const CSS = read("app/globals.css");
+const TOKENS = readFileSync(join(repoRoot, "bond-tokens.css"), "utf8");
 const FRAME = read("components/portal-frame.tsx");
 const APP = read("components/vauxhall/command-app.tsx");
 const VIEWS = read("components/vauxhall/command-views.tsx");
@@ -19,7 +21,9 @@ const MOSAIC = read("components/vauxhall/wing-mosaics.tsx");
 const PORTFOLIO = read("components/vauxhall/product-portfolio.tsx");
 
 test("control room CSS stays on Bond tokens", () => {
-  assert.match(CSS, /--matte-black: #1B1D1C/);
+  assert.match(CSS, /@import "\.\.\/\.\.\/bond-tokens\.css"/);
+  assert.match(TOKENS, /--matte-black: #1B1D1C/);
+  assert.equal(CSS.includes("--matte-black: #"), false);
   assert.match(CSS, /--deep-charcoal: #2A2A2A/);
   assert.match(CSS, /--bone: #E1DAD0/);
   assert.match(CSS, /--product: #79C84A/);

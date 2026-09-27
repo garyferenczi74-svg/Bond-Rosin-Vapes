@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/bond-tokens.css">
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; overflow-x: hidden; max-width: 100%; }
@@ -270,7 +271,7 @@ function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); i
 function complianceBand(){
   return '<footer style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">'
     + '<div class="gold" style="font-size:10px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>'
-    + '<style>:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>'
+    + '<style>:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>'
     + '<div style="background:var(--bond-warning-yellow);color:var(--bond-warning-ink);border:1px solid var(--bond-warning-ink);padding:12px 14px;text-align:left;font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5">'
     + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>'
     + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">Cannabis can be addictive.</p>'

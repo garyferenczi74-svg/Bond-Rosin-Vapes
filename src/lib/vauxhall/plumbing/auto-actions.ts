@@ -24,7 +24,7 @@ export const AUTO_ACTION_ALLOWLIST: AutoActionItem[] = [
     label: "Throttle forms",
     enabled: PHASE_B_AUTO_ACTIONS_ENABLED,
     status: "Pending Felix counsel",
-    note: "Allowlist draft. Bond Circle signup throttle stays off.",
+    note: "Allowlist draft. Haus signup throttle stays off.",
   },
   {
     id: "block_source",

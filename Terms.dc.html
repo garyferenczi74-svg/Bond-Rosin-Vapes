@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Terms of Service . Bond</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/gfs-didot-latin-400.woff2">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
 <style>
   a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #E3C270;outline-offset:3px}
@@ -30,7 +31,7 @@
   .cband > div::before { content: "Health and Safety"; font-size:12px; letter-spacing: 0.32em; text-transform: uppercase; background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); -webkit-background-clip: text; background-clip: text; color:#E3C270; align-self: center; margin-bottom: 6px; }
   .cband span { font-size:16px; line-height: 1.85; color: #B0A99A; letter-spacing: 0.01em; }
   .cband span:last-child { font-size:16px; color: #B0A99A; }
-  :root { --bond-warning-yellow: #FFFF00; --bond-warning-ink: #1B1D1C; }
+  :root { --bond-warning-yellow: #FFFF00; --bond-warning-ink: var(--matte-black); }
   .bond-warn-box { background: var(--bond-warning-yellow); color: var(--bond-warning-ink); border: 1px solid var(--bond-warning-ink); padding: 12px 14px; text-align: left; }
   .bond-warn-box p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: var(--bond-warning-ink); margin: 0 0 8px; letter-spacing: 0; }
   .bond-warn-box p:last-child { margin: 0; }

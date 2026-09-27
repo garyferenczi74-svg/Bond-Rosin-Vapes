@@ -29,7 +29,8 @@
   .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
   @media (max-width: 720px) { .findrow { grid-template-columns: 1fr !important; } }
 </style>
-<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>
+<link rel="stylesheet" href="/bond-tokens.css">
+<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
 <div id="gate"></div>

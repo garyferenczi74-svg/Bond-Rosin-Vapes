@@ -824,7 +824,7 @@ export const SEED_RULES: SecurityRule[] = [
   {
     id: "rule-forms",
     name: "Form abuse",
-    citation: "Bond Circle signup velocity. Throttle is Phase B.",
+    citation: "Haus signup velocity. Throttle is Phase B.",
     enforcement: "MonitorEngine. Streaming.",
     gate: "runtime",
     group: "platform",

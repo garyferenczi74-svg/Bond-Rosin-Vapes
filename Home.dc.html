@@ -16,7 +16,8 @@
 <link rel="preload" as="fetch" href="./AgeGate.dc.html">
 <script src="./support.js"></script>
 <script src="./video-policy.js"></script>
-<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>
+<link rel="stylesheet" href="/bond-tokens.css">
+<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
 <x-dc>
@@ -121,7 +122,7 @@ input::placeholder { color: #B0A99A; }
 .hero-line2 { font-family: 'GFS Didot', Didot, serif; font-style: italic; font-weight: 400; color: #E1DAD0; font-size: 24px; line-height: 1.25; text-wrap: balance; margin: 0; margin-top: var(--hero-gap-line2); }
 .hero-subtext { font-family: 'GFS Didot', Didot, serif; font-weight: 400; color: #E1DAD0; letter-spacing: 0.3px; font-size: 17px; line-height: 1.45; text-wrap: balance; margin: 0; margin-top: var(--hero-gap-body); }
 .hero-buttons { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; pointer-events: auto; margin-top: var(--hero-gap-cta); margin-left: 0; margin-right: 0; gap: 16px; }
-.hero-btn { font-family: 'GFS Didot', Didot, serif; font-weight: 600; letter-spacing: 3px; line-height: 1; text-transform: uppercase; border-radius: 2px; cursor: pointer; font-size:16px; display: inline-block; box-sizing: border-box; margin: 0; min-height: 44px; transition: transform .28s cubic-bezier(0.23,0.74,0.33,1), background .28s cubic-bezier(0.23,0.74,0.33,1), box-shadow .28s cubic-bezier(0.23,0.74,0.33,1); }
+.hero-btn { font-family: 'GFS Didot', Didot, serif; font-weight: 400; letter-spacing: 3px; line-height: 1; text-transform: uppercase; border-radius: 2px; cursor: pointer; font-size:16px; display: inline-block; box-sizing: border-box; margin: 0; min-height: 44px; transition: transform .28s cubic-bezier(0.23,0.74,0.33,1), background .28s cubic-bezier(0.23,0.74,0.33,1), box-shadow .28s cubic-bezier(0.23,0.74,0.33,1); }
 .hero-btn:hover { transform: translateY(-4px) scale(1.025); }
 .hero-btn:active { transform: translateY(1px) scale(0.985); transition-duration: .12s; }
 .hero-btn:focus-visible { outline: 2px solid #F6D78D; outline-offset: 3px; }

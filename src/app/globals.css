@@ -1,7 +1,7 @@
+@import "../../bond-tokens.css";
 @import "../../bond-age-gate.css";
 
 :root {
-  --matte-black: #1B1D1C;
   --deep-charcoal: #2A2A2A;
   --bone: #E1DAD0;
   --muted: #8E887C;

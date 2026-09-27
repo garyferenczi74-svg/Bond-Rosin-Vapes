@@ -140,7 +140,7 @@ export const MONITOR_CATALOG: CatalogSeed[] = [
     demoCadenceMs: 2000,
     nextDueMs: 2000,
     ruleId: "rule-forms",
-    citation: "Bond Circle signup velocity and disposable domains.",
+    citation: "Haus signup velocity and disposable domains.",
     failSeverity: "P2",
   },
   {
