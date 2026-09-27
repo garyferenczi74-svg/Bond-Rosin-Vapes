@@ -97,10 +97,14 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.equal(privacy.includes("Correspondence preference"), false);
   assert.match(privacy, /Bond does not store a Haus correspondence preference/);
   assert.match(privacy, /There is no Bond Haus email list/);
-  assert.match(privacy, /While waiver W-2026-09-15-P1-OVERRIDE is on/);
-  assert.match(privacy, /the Haus door does not ask for an authenticator code and stores none/);
+  assert.match(privacy, /For now, the Haus door does not ask admins for an authenticator code and stores none/);
+  assert.match(privacy, /The sign-in record notes that this step was skipped/);
   assert.match(privacy, /factor named Bond Haus/);
-  assert.match(privacy, /Bond does not set a time limit on the factor or on mfa_enrolled/);
+  assert.match(privacy, /Bond records on that admin's account that the code step is set up/);
+  assert.match(privacy, /Bond does not set a time limit on either/);
+  assert.equal(privacy.includes("W-2026-09-15-P1-OVERRIDE"), false);
+  assert.equal(privacy.includes("aal1"), false);
+  assert.equal(privacy.includes("mfa_enrolled"), false);
   assert.match(privacy, /Effective date: September 27, 2026\./);
   assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
 });
