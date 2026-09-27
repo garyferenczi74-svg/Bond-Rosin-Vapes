@@ -4,24 +4,71 @@
 <meta charset="utf-8">
 <title>No. 1 Dialed . Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style id="bond-gate-cover-css">
+/* Cover paints before tokens arrive */
+html,body,#bond-gate-cover{background:#1B1D1C}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;pointer-events:auto}
+html,body{margin:0}
+html[data-bond-age="ok"] #bond-gate-cover{display:none}
+html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
+.bond-js-off{box-sizing:border-box;max-width:560px;margin:0 auto;padding:24px;text-align:center}
+.bond-js-note{font-family:Georgia,"Times New Roman",serif;font-size:22px;line-height:1.45;color:var(--bone);margin:0 0 24px}
+html:not([data-bond-age="ok"]) body>*:not(#bond-gate-cover){visibility:hidden}
+html:not([data-bond-age="ok"]) dc-import[name="AgeGate"],
+html:not([data-bond-age="ok"]) dc-import[name="AgeGate"] *,
+html:not([data-bond-age="ok"]) [style*="z-index:9999"],
+html:not([data-bond-age="ok"]) [style*="z-index:9999"] *,
+html:not([data-bond-age="ok"]) [style*="z-index: 9999"],
+html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
+@media (prefers-reduced-motion: reduce){#bond-gate-cover{transition:none}}
+</style>
+<noscript><style>body>*:not(#bond-gate-cover){display:none !important}#bond-gate-cover{display:flex !important;align-items:center;justify-content:center;overflow:auto}#bond-gate-cover .bond-js-off{visibility:visible !important}</style></noscript>
+<script id="bond-gate-boot">
+(function(){
+  try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}
+  document.addEventListener("focusin",function(ev){
+    if(document.documentElement.getAttribute("data-bond-age")==="ok")return;
+    var t=ev.target;
+    if(!t||t===document.body||t===document.documentElement)return;
+    if(t.closest&&t.closest('dc-import[name="AgeGate"],.bond-age-gate,[style*="z-index:9999"],[style*="z-index: 9999"]'))return;
+    if(t.blur)t.blur();
+  },true);
+})();
+</script>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/gfsdidot/v18/Jqzh5TybZ9vZMWFssvwSEO3HNyOWAQ.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/gfs-didot-latin-400.woff2">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="preload" as="image" href="media/posters/dialed_n.webp" media="(max-width: 767px)" fetchpriority="high">
 <link rel="preload" as="image" href="media/posters/dialed_w.webp" media="(min-width: 768px)" fetchpriority="high">
 <link rel="preload" as="fetch" href="./AgeGate.dc.html">
 <script src="./support.js"></script>
 <script src="./video-policy.js"></script>
-<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>
+<link rel="stylesheet" href="/bond-tokens.css">
+<link rel="stylesheet" href="/bond-age-gate.css">
+<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
-<x-dc>
+<div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">Bond requires JavaScript to confirm your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
+<x-dc inert>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-<script src="./image-slot.js"></script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<script>
+(function () {
+  var started = false;
+  function loadSlots() {
+    if (started) return;
+    started = true;
+    var el = document.createElement("script");
+    el.src = "./image-slot.js";
+    el.async = true;
+    document.head.appendChild(el);
+  }
+  window.addEventListener("bond-entered", loadSlots);
+  if (document.documentElement.getAttribute("data-bond-age") === "ok") loadSlots();
+})();
+</script>
 <style>
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #E3C270;outline-offset:3px}
 
@@ -126,7 +173,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     </div>
   </section>
 
-  <section data-screen-label="Purity" style="position:relative;background:#EFEBE2;overflow:hidden">
+  <section data-screen-label="Process" style="position:relative;background:#EFEBE2;overflow:hidden">
     <div style="position:absolute;top:0;right:0;bottom:0;width:min(34%,100%);min-width:0">
       <image-slot id="no1-rosin" shape="rect" style="position:absolute;inset:0;display:block" placeholder="Live rosin macro. Golden texture."></image-slot>
       <div style="position:absolute;inset:0;background:linear-gradient(90deg,#EFEBE2 0%,rgba(239,235,226,0) 45%);pointer-events:none"></div>
@@ -139,20 +186,8 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
           <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Chemical Solvents</div>
         </div>
         <div style="text-align:center;max-width:110px">
-          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M12 3c3.5 4.5 6 7.5 6 11a6 6 0 1 1-12 0c0-3.5 2.5-6.5 6-11z"></path></svg></div>
-          <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">Nothing Else</div>
-        </div>
-        <div style="text-align:center;max-width:110px">
           <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M10 3h4M11 3v6l-5 10a2 2 0 0 0 1.8 3h8.4a2 2 0 0 0 1.8-3l-5-10V3"></path></svg></div>
           <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Distillate</div>
-        </div>
-        <div style="text-align:center;max-width:110px">
-          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="#4E8A2B"><circle cx="12" cy="8" r="1"></circle><circle cx="8" cy="12" r="1"></circle><circle cx="16" cy="12" r="1"></circle><circle cx="10" cy="16" r="1"></circle><circle cx="14" cy="16" r="1"></circle></svg></div>
-          <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Fillers</div>
-        </div>
-        <div style="text-align:center;max-width:110px">
-          <div style="width:52px;height:52px;border:1px solid #4E8A2B;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4E8A2B" stroke-width="1.2"><path d="M12 5v14M5 12h14"></path></svg></div>
-          <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#5B564C;margin-top:14px;line-height:1.7">No Additives</div>
         </div>
       </div>
       <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(16px,1.7vw,19px);color:#1B1D1C;margin:clamp(40px,5vw,56px) 0 0">Daytime. Solventless live rosin. <span style="color:#3E6E22">Bond.</span></p>
@@ -169,15 +204,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <div style="max-width:1180px;margin:0 auto">
       <div style="max-width:720px;margin:0 auto 28px">
       <div style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin:0 0 14px">Health and Safety</div>
-      <div class="bond-warn-box" style="background:var(--bond-warning-yellow);color:var(--bond-warning-ink);border:1px solid var(--bond-warning-ink);padding:12px 14px;text-align:left;margin:0 0 12px">
-        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">Cannabis can be addictive.</p>
-        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>
-        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">There may be health risks associated with consumption of this product.</p>
-        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0;letter-spacing:0">Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
-      </div>
-      <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#B0A99A;margin:0 0 8px;letter-spacing:0">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
-      <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+      <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
       </div>
       <div style="font-family:'GFS Didot',Didot,serif;font-size:20px;letter-spacing:0.4em;padding-left:0.4em;color:#E1DAD0;margin:0 0 22px">BOND</div>
       <div style="font-family:'GFS Didot',Didot,serif;display:flex;gap:26px 34px;flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:0.16em;text-transform:uppercase">
@@ -199,9 +226,80 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 
   <div style="position:fixed;inset:0;z-index:1100;background:#0D0F0E;pointer-events:none;animation:fadeOut .7s cubic-bezier(0.22,1,0.36,1) .15s both"></div>
   <div ref="{{ fadeRef }}" style="position:fixed;inset:0;z-index:1200;background:#0D0F0E;opacity:0;pointer-events:none;transition:opacity .4s cubic-bezier(0.22,1,0.36,1)"></div>
-  <dc-import name="AgeGate" hint-size="0px,0px"></dc-import>
+  <dc-import name="AgeGate" hint-size="0px,0px" warn="Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis."></dc-import>
 </div>
 </x-dc>
+<script id="bond-gate-hold">
+(function () {
+  var cover = document.getElementById("bond-gate-cover");
+  var passed = false;
+  try { passed = Boolean(sessionStorage.getItem("bond_age_ok")); } catch (e) {}
+  function findGate() {
+    return document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
+  }
+  function hold() {
+    var gate = findGate();
+    var nav = document.querySelector("nav");
+    var root = nav ? nav.parentElement : document.querySelector("x-dc > div");
+    if (root == null) return;
+    var kids = root.children;
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      var keep = gate && el.contains(gate);
+      if (keep) {
+        el.inert = false;
+        el.removeAttribute("data-bond-hold");
+      } else {
+        el.inert = true;
+        el.setAttribute("data-bond-hold", "");
+      }
+    }
+    var node = gate;
+    while (node) {
+      if (node == document.documentElement) break;
+      if (node.inert) node.inert = false;
+      node = node.parentElement;
+    }
+  }
+  var watch = null;
+  function release() {
+    if (watch) watch.disconnect();
+    watch = null;
+    var held = document.querySelectorAll("[data-bond-hold]");
+    for (var i = 0; i < held.length; i++) {
+      held[i].inert = false;
+      held[i].removeAttribute("data-bond-hold");
+    }
+    if (cover == null || cover.parentNode == null) return;
+    var reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (reduce) {
+      cover.remove();
+      return;
+    }
+    cover.style.transition = "opacity 160ms linear";
+    cover.style.opacity = "0";
+    var removed = false;
+    function drop() {
+      if (removed) return;
+      removed = true;
+      if (cover.parentNode) cover.remove();
+    }
+    cover.addEventListener("transitionend", drop);
+    setTimeout(drop, 220);
+  }
+  if (passed) {
+    var locked = document.querySelectorAll("[inert]");
+    for (var j = 0; j < locked.length; j++) locked[j].inert = false;
+    if (cover && cover.parentNode) cover.remove();
+    return;
+  }
+  hold();
+  watch = new MutationObserver(function () { hold(); });
+  watch.observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener("bond-entered", release);
+})();
+</script>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = { narrow: false, menu: false };

@@ -5,17 +5,33 @@
 <title>Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="font" type="font/woff2" crossorigin fetchpriority="high" href="/fonts/gfs-didot-latin-400.woff2">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style id="bond-didot-face">
+@font-face{font-family:"GFS Didot";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"GFS Didot";font-style:normal;font-weight:500;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Didot";font-style:normal;font-weight:400;src:local("Noto Serif");size-adjust:94.39%;ascent-override:100.33%;descent-override:29.35%;line-gap-override:2.65%}
+@font-face{font-family:"Didot";font-style:normal;font-weight:500;src:local("Noto Serif");size-adjust:94.39%;ascent-override:100.33%;descent-override:29.35%;line-gap-override:2.65%}
+@font-face{font-family:"Didot";font-style:normal;font-weight:400;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
+@font-face{font-family:"Didot";font-style:normal;font-weight:500;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
+</style>
+<link rel="stylesheet" href="/bond-tokens.css">
+<link rel="stylesheet" href="/bond-age-gate.css">
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style>
+@font-face{font-family:"GFS Didot";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"GFS Didot";font-style:normal;font-weight:500;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Didot";font-style:normal;font-weight:400;src:local("Noto Serif");size-adjust:94.39%;ascent-override:100.33%;descent-override:29.35%;line-gap-override:2.65%}
+@font-face{font-family:"Didot";font-style:normal;font-weight:500;src:local("Noto Serif");size-adjust:94.39%;ascent-override:100.33%;descent-override:29.35%;line-gap-override:2.65%}
+@font-face{font-family:"Didot";font-style:normal;font-weight:400;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
+@font-face{font-family:"Didot";font-style:normal;font-weight:500;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
 body { margin: 0; background: #1B1D1C; }
 a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 @keyframes gateIn { from { opacity: 0; } to { opacity: 1; } }
@@ -43,13 +59,13 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
       <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>
       <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:16px;line-height:1.7;color:#B0A99A;max-width:440px;margin:26px auto 26px">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
       <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px;max-width:100%">
-        <select value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(160px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
+        <select aria-label="Birth month" value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(160px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
           <option value="" style="color:#1B1D1C">Birth month</option>
           <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
             <option value="{{ $index }}" style="color:#1B1D1C">{{ m }}</option>
           </sc-for>
         </select>
-        <select value="{{ year }}" onChange="{{ setYear }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(140px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
+        <select aria-label="Birth year" value="{{ year }}" onChange="{{ setYear }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(140px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
           <option value="" style="color:#1B1D1C">Birth year</option>
           <sc-for list="{{ years }}" as="y" hint-placeholder-count="0">
             <option value="{{ y }}" style="color:#1B1D1C">{{ y }}</option>
@@ -57,10 +73,7 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
         </select>
       </div>
       <button onClick="{{ enter }}" style="background:{{ enterBg }};color:{{ enterColor }};border:1px solid {{ enterBorder }};border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 56px;cursor:pointer;transition:background .4s,color .4s,border-color .4s,box-shadow .4s;box-shadow:{{ enterShadow }}">Enter</button>
-      <div style="border-top:1px solid rgba(194,154,69,0.15);padding:28px 8px 0;margin:36px auto 0;max-width:520px;text-align:center">
-        <div style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin:0 0 12px">Health and Safety</div>
-        <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0;letter-spacing:0.01em">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-      </div>
+      <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>{{ warn }}</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
     </div>
   </sc-if>
 </div>
@@ -97,6 +110,7 @@ class Component extends DCLogic {
     for (let y = now; y >= now - 100; y--) years.push(String(y));
     return {
       visible, declined, asking: !declined, months, years, month, year,
+      warn: this.props.warn || "Cannabis can be addictive.",
       enterBg: ready ? 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%)' : 'transparent',
       enterColor: ready ? '#141109' : '#8E887C',
       enterBorder: ready ? '#E3C270' : '#3A3C3B',
@@ -111,6 +125,7 @@ class Component extends DCLogic {
         if (nowD.getMonth() < b.getMonth()) age--;
         if (age >= 21) {
           try { sessionStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
+          try { document.documentElement.dataset.bondAge = "ok"; } catch (e) {}
           this.setState({ verified: true });
           try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
         } else this.setState({ declined: true });

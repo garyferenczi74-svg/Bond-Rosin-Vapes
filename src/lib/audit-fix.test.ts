@@ -95,7 +95,7 @@ test("Privacy and Terms drop the review banner and ship the locked date", () => 
     assert.equal(html.includes("[DATE]"), false, name);
     assert.equal(html.includes(".review {"), false, name);
   }
-  assert.match(read("Terms.dc.html"), /Effective date: September 16, 2026\./);
+  assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
   assert.match(read("Privacy.dc.html"), /Effective date: September 27, 2026\./);
 });
 
@@ -112,12 +112,35 @@ test("kebab SKU aliases rewrite to the existing SKU pages", () => {
   }
 });
 
-test("public marketing pages drop the bare fonts.googleapis.com preconnect", () => {
-  const stylesheet =
-    'href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap"';
+const selfHostedFaces = ["FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html"];
+
+test("public marketing pages self-host Didot and Inter", () => {
   for (const name of publicMarketing) {
     const html = read(name);
-    assert.equal(html.includes('rel="preconnect" href="https://fonts.googleapis.com"'), false, name);
-    assert.match(html, new RegExp(stylesheet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), name);
+    assert.equal(html.includes("fonts.googleapis.com"), false, name);
+    assert.equal(html.includes("fonts.gstatic.com"), false, name);
+    assert.match(html, /href="\/fonts\/fonts\.css"/, name);
+  }
+});
+
+test("faq privacy and terms self-host Didot and Inter", () => {
+  const css = read("fonts/fonts.css");
+  assert.match(css, /font-family: "GFS Didot"/);
+  assert.match(css, /font-family: "Inter"/);
+  assert.match(css, /font-weight: 400/);
+  assert.match(css, /font-weight: 500/);
+  assert.match(css, /font-display: swap/);
+  assert.equal(css.includes("fonts.googleapis.com"), false);
+  assert.equal(css.includes("fonts.gstatic.com"), false);
+  assert.match(read("fonts/OFL-GFS-Didot.txt"), /SIL Open Font License/);
+  assert.match(read("scripts/sync-public.mjs"), /"fonts"/);
+  assert.match(read("scripts/sync-public.mjs"), /bond-tokens\.css/);
+  for (const name of selfHostedFaces) {
+    const html = read(name);
+    assert.match(html, /href="\/fonts\/fonts\.css"/, name);
+    assert.match(html, /href="\/fonts\/gfs-didot-latin-400\.woff2"/, name);
+    assert.match(html, /href="\/bond-tokens\.css"/, name);
+    assert.equal((html.match(/rel="preload" as="font"/g) || []).length, 1, name);
+    assert.equal(html.includes("inter-latin.woff2"), false, name);
   }
 });

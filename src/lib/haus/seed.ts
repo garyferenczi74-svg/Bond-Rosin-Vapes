@@ -14,23 +14,23 @@ export const SEED_BATCHES: HausBatchPreview[] = [
   {
     batch: "BND-1-0518",
     title: "No. 1 Dialed",
-    body: "Sunrise Runtz",
+    body: "Sample batch A",
     state: "published",
-    coa: "COA-0518",
+    coa: "",
     shelfCount: 9,
   },
   {
     batch: "BND-3-0214",
     title: "No. 3 Peak",
-    body: "Sample batch",
+    body: "Sample batch C",
     state: "published",
-    coa: "COA-0214",
+    coa: "",
     shelfCount: 14,
   },
   {
     batch: "BND-1-0603",
     title: "No. 1 Dialed",
-    body: "Morning Mimosa",
+    body: "Sample batch E",
     state: "draft",
     coa: "",
     shelfCount: 0,
@@ -50,8 +50,8 @@ export const SEED_GUIDE: HausGuidePreview[] = [
 ];
 
 export const SEED_RESERVE: HausReservePreview[] = [
-  { id: "run-mz", cultivar: "Sample batch", claimed: 214, size: 1000, state: "open" },
-  { id: "run-ag", cultivar: "Autumn Gelato", claimed: 500, size: 500, state: "ended" },
+  { id: "run-mz", cultivar: "Sample batch C", claimed: 214, size: 1000, state: "open" },
+  { id: "run-ag", cultivar: "Sample batch D", claimed: 500, size: 500, state: "ended" },
 ];
 
 export function seedHausPersist(now = new Date()): HausPersist {

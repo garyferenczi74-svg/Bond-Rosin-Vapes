@@ -1,5 +1,4 @@
 .bond-age-gate {
-  --matte-black: #1B1D1C;
   --bone: #E1DAD0;
   --muted: #8E887C;
   --line: #3A3C3B;
@@ -17,8 +16,11 @@
   z-index: 9999;
   background: var(--age-ink);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow: auto;
+  padding: 24px 0;
 }
 
 html:not([data-bond-age="ok"]) .bond-floor {
@@ -54,9 +56,12 @@ html[data-bond-age="ok"] .bond-age-gate {
 .bond-age-panel {
   position: relative;
   text-align: center;
-  padding: 32px;
+  padding: 32px 16px;
   width: 100%;
   box-sizing: border-box;
+  margin-top: auto;
+  margin-bottom: auto;
+  flex: 0 0 auto;
 }
 
 .bond-age-no { max-width: 520px; }
@@ -97,7 +102,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 .bond-age-body {
-  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, "Inter Fallback", sans-serif;
   font-size: 16px;
   color: var(--age-copy);
   line-height: 1.7;
@@ -136,7 +141,7 @@ html[data-bond-age="ok"] .bond-age-gate {
   border: 1px solid var(--line);
   border-radius: 2px;
   color: var(--bone);
-  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, "Inter Fallback", sans-serif;
   font-size: 15px;
   padding: 14px 20px;
   min-width: 0;
@@ -174,32 +179,73 @@ html[data-bond-age="ok"] .bond-age-gate {
   box-shadow: 0 8px 40px color-mix(in srgb, var(--age-gold) 40%, transparent);
 }
 
-.bond-age-health {
-  border-top: 1px solid color-mix(in srgb, var(--age-gold) 15%, transparent);
-  padding: 28px 8px 0;
-  margin: 36px auto 0;
-  max-width: 520px;
-  text-align: center;
+.bond-warn {
+  width: 100%;
+  max-width: 720px;
+  margin: 28px auto 0;
+  text-align: left;
+  box-sizing: border-box;
 }
 
-.bond-age-health-label {
+.bond-warn-box {
+  background: var(--bond-warning-yellow);
+  color: var(--matte-black);
+  border: 1px solid var(--matte-black);
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.bond-warn-box p {
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  background: var(--age-gold-wash);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: var(--age-gold-light);
-  display: inline-block;
-  margin: 0 0 12px;
+  line-height: 1.5;
+  color: var(--matte-black);
+  margin: 0 0 8px;
+  letter-spacing: 0;
 }
 
-.bond-age-health p {
-  font-size: 16px;
-  line-height: 1.85;
-  color: var(--age-copy);
+.bond-warn-box p:last-child {
   margin: 0;
-  letter-spacing: 0.01em;
+}
+
+.bond-warn-hope,
+.bond-warn-hope a,
+.bond-warn-license {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--bond-warn-meta);
+  background: var(--bond-warn-panel);
+}
+
+.bond-warn-hope {
+  margin: 12px 0 0;
+  padding: 10px 12px 4px;
+}
+
+.bond-warn-hope a {
+  text-decoration: underline;
+}
+
+.bond-warn-license {
+  margin: 0;
+  padding: 4px 12px 10px;
+}
+
+@media (max-width: 420px) {
+  .bond-age-panel {
+    padding: 16px 12px 24px;
+  }
+
+  .bond-age-ask .bond-age-mark {
+    font-size: 36px;
+    letter-spacing: 0.18em;
+  }
+
+  .bond-age-enter {
+    padding: 16px 28px;
+  }
 }
 
 .bond-age-select:focus-visible,

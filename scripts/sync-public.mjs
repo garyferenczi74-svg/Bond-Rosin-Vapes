@@ -21,9 +21,10 @@ const files = [
   "image-slots.state.json",
   "bond-age-gate.js",
   "bond-age-gate.css",
+  "bond-tokens.css",
 ];
 
-const dirs = ["media"];
+const dirs = ["media", "fonts"];
 
 const blocked = new Set([
   "Admin.dc.html",

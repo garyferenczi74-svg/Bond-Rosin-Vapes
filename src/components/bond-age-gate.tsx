@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { BondWarn } from "@/components/bond-warn";
+import type { WarningRoute } from "@/lib/bond-warnings";
 import {
   BOND_AGE_KEY,
   BOND_AGE_MONTHS,
   bondAgeDecision,
   bondBirthYears,
   hausShowsAgeGate,
+  markBondAgePassed,
 } from "@/lib/haus/age-gate";
 
 function readStoredAge(): string | null {
@@ -17,7 +20,7 @@ function readStoredAge(): string | null {
   }
 }
 
-export function BondAgeGate({ children }: { children: ReactNode }) {
+export function BondAgeGate({ route, children }: { route: WarningRoute; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [declined, setDeclined] = useState(false);
   const [month, setMonth] = useState("");
@@ -29,7 +32,7 @@ export function BondAgeGate({ children }: { children: ReactNode }) {
       localStorage.removeItem(BOND_AGE_KEY);
     } catch (e) {}
     if (!hausShowsAgeGate(readStoredAge())) {
-      document.documentElement.setAttribute("data-bond-age", "ok");
+      markBondAgePassed(document.documentElement);
       setOpen(true);
     }
   }, []);
@@ -44,7 +47,7 @@ export function BondAgeGate({ children }: { children: ReactNode }) {
     try {
       sessionStorage.setItem(BOND_AGE_KEY, String(Date.now()));
     } catch (e) {}
-    document.documentElement.setAttribute("data-bond-age", "ok");
+    markBondAgePassed(document.documentElement);
     setOpen(true);
     try {
       window.dispatchEvent(new CustomEvent("bond-entered"));
@@ -102,10 +105,7 @@ export function BondAgeGate({ children }: { children: ReactNode }) {
           <button type="button" id="bond-age-enter" className="bond-age-enter" data-ready={ready ? "true" : "false"} onClick={enter}>
             Enter
           </button>
-          <div className="bond-age-health">
-            <div className="bond-age-health-label">Health and Safety</div>
-            <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-          </div>
+          <BondWarn route={route} />
         </div>
       </div>
       <div className="bond-floor" inert={open ? undefined : true}>

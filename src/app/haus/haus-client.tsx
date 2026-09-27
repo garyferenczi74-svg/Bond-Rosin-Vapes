@@ -166,27 +166,6 @@ export function HausClient() {
               >
                 Membership is by invitation from the Haus.
               </p>
-              <p
-                style={{
-                  fontSize: 13,
-                  lineHeight: 1.7,
-                  color: tokens.muted,
-                  margin: "22px 0 0",
-                  textAlign: "center",
-                }}
-              >
-                Not yet a member?{" "}
-                <a
-                  href="/#haus"
-                  style={{
-                    color: tokens.bone,
-                    borderBottom: `1px solid ${tokens.line}`,
-                    paddingBottom: 1,
-                  }}
-                >
-                  Join the Bond Haus.
-                </a>
-              </p>
             </>
           ) : null}
 

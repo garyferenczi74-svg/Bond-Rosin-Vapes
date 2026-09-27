@@ -87,6 +87,36 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
     /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\. Signing out does not clear that cookie\./,
   );
   assert.match(privacy, /\[PRIVACY EMAIL\]/);
+  assert.match(privacy, /optional notes on a batch you shelve/);
+  assert.equal(privacy.includes("optional tasting notes"), false);
+  assert.equal(privacy.includes("erase tasting notes"), false);
+  assert.match(privacy, /which chapter of The Number Guide you last opened/);
+  assert.equal(privacy.includes("Experience Guide"), false);
+  assert.equal(privacy.includes("email delivery"), false);
+  assert.match(privacy, /\(hosting, analytics\)/);
+  assert.equal(privacy.includes("Correspondence preference"), false);
+  assert.match(privacy, /Bond does not store a Haus correspondence preference/);
+  assert.match(privacy, /There is no Bond Haus email list/);
+  assert.match(privacy, /Haus members are not asked for an authenticator code/);
+  assert.match(
+    privacy,
+    /Each staff sign-in, and each staff page a staff member opens, creates a record of the staff member's account id and role, the IP address, browser and page used, and the time\. Sign-in records also note that the code step was skipped\. These records are kept until Bond has a deletion process in place\./,
+  );
+  assert.match(
+    privacy,
+    /An authenticator that has been set up but not yet confirmed stays with the account service and is reused at the next setup\./,
+  );
+  assert.match(privacy, /the setup image is shown to the staff member's browser and is not kept by Bond/);
+  assert.match(privacy, /Bond sets its confirmed flag once, at setup/);
+  assert.match(privacy, /After it is confirmed, the authenticator stays with the account service with no time limit/);
+  assert.equal(/until verified/i.test(privacy), false);
+  assert.equal(/until confirmed/i.test(privacy), false);
+  assert.equal(privacy.includes("W-2026-09-15-P1-OVERRIDE"), false);
+  assert.equal(privacy.includes("aal1"), false);
+  assert.equal(privacy.includes("mfa_enrolled"), false);
+  assert.equal(privacy.includes("factor id"), false);
+  assert.match(privacy, /Effective date: September 27, 2026\./);
+  assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
 });
 
 test("order portal says nothing is sent to the state tracking system", () => {
@@ -106,8 +136,85 @@ test("Haus admin erase line and cultivar name are corrected", () => {
   assert.equal(admin.includes("keeps no copy"), false);
   assert.equal(admin.includes("Midnight Zkittlez"), false);
   assert.equal(seed.includes("Midnight Zkittlez"), false);
-  assert.match(seed, /Sample batch/);
-  assert.match(admin, /Sample batch/);
+  assert.match(seed, /Sample batch A/);
+  assert.match(seed, /Sample batch C/);
+  assert.match(seed, /Sample batch D/);
+  assert.match(seed, /Sample batch E/);
+  assert.match(admin, /Sample batch A/);
+  assert.match(admin, /Sample batch B/);
+  assert.match(admin, /Sample batch C/);
+  assert.match(admin, /Sample batch D/);
+  assert.match(admin, /Sample batch E/);
   assert.equal(seed.includes("Alpine Reserve"), false);
   assert.equal(admin.includes("Alpine Reserve"), false);
+  for (const invented of [
+    "Sunrise Runtz",
+    "Evening Papaya",
+    "Autumn Gelato",
+    "Morning Mimosa",
+    "Lavender",
+    "Bergamot",
+    "Chamomile",
+    "Clove",
+    "Sandalwood",
+    "Musk",
+    "Gardenia",
+    "Fennel",
+    "Stone fruit",
+    "Cardamom",
+    "Loam",
+    "COA-0518",
+    "COA-0731",
+    "COA-0214",
+    "COA-0198",
+    "Terpene notes",
+  ]) {
+    assert.equal(seed.includes(invented), false, invented);
+    assert.equal(admin.includes(invented), false, invented);
+    assert.equal(read("Haus.dc.html").includes(invented), false, invented);
+  }
+  assert.equal(read("Haus.dc.html").includes("circleCorrespondence"), false);
+  assert.equal(read("Haus.dc.html").includes("prefHaus"), false);
+  assert.equal(read("Haus.dc.html").includes("Haus correspondence"), false);
+});
+
+test("process label, HOPEline short code, and license case stay on the served pages", () => {
+  const hope = "texting HOPENY (467369)";
+  const license = "OCM-PROC-25-000329";
+  for (const name of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html", "Finder.dc.html", "FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html"]) {
+    const html = read(name);
+    assert.equal(html.includes(hope), true, name);
+    assert.equal(html.includes("texting HOPENY,"), false, name);
+    assert.equal(html.includes(license), true, name);
+    assert.equal(html.includes("OCM-Proc-25-000329"), false, name);
+    assert.equal(html.includes("tel:18778467369"), true, name);
+    assert.equal(html.includes("https://oasas.ny.gov/hopeline"), true, name);
+    assert.equal(html.includes("1-877-8-HOPENY"), true, name);
+  }
+  for (const name of ["No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
+    const html = read(name);
+    assert.equal(html.includes('data-screen-label="Process"'), true, name);
+    assert.equal(html.includes('data-screen-label="Purity"'), false, name);
+    assert.equal(html.includes("THE PRODUCT IS PURE"), false, name);
+  }
+  assert.equal(read("Home.dc.html").includes("nothing added"), false);
+  assert.equal(read("Home.dc.html").includes("nothing removed"), false);
+  assert.equal(read("Home.dc.html").includes("The result is 100% solventless live rosin."), true);
+  const no2 = read("No2.dc.html");
+  assert.equal(no2.includes(">Process</div>"), true);
+  assert.equal(no2.includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
+  assert.equal(no2.includes("No chemical<br>solvents"), true);
+  assert.equal(no2.includes("No<br>distillate"), true);
+  assert.equal(no2.includes("Nothing<br>else"), false);
+  assert.equal(no2.includes("No<br>fillers"), false);
+  assert.equal(no2.includes("No<br>additives"), false);
+  const social = read("Social.dc.html");
+  assert.equal(social.includes("Pure on the inside"), false);
+  assert.equal(social.includes("A cleaner high"), false);
+  assert.equal(social.includes("loud purity"), false);
+  assert.equal(social.includes("What purity feels like"), false);
+  assert.equal(read("No2.dc.html").includes("NOTHING ADDED"), false);
+  assert.equal(read("No2.dc.html").includes("NOTHING IN THE WAY"), false);
+  assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
+  assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span><br>"), false);
 });

@@ -767,7 +767,7 @@ function AuditLogView({
 function DsarView({ store }: { store: VauxhallStore }) {
   return (
     <div>
-      <ConsoleHeader title="DSAR" subtitle="Data subject requests against Bond Circle. The clock is visible." />
+      <ConsoleHeader title="DSAR" subtitle="Data subject requests against Haus. The clock is visible." />
       {store.listDsar().map((item) => (
         <article key={item.id} className="card vx-ink-card" style={{ ["--wing-ink" as string]: tokens.security }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>

@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
-import { GFS_Didot } from "next/font/google";
 import "./globals.css";
 import { aptosStack } from "@/lib/tokens";
-
-const didot = GFS_Didot({
-  weight: "400",
-  subsets: ["greek", "latin"],
-  display: "swap",
-  variable: "--font-didot",
-});
+import { AGE_GATE_CRITICAL, HAUS_AGE_BOOT, HAUS_FONT_LATE } from "@/lib/haus/age-gate";
 
 export const metadata: Metadata = {
   title: "Bond",
@@ -18,7 +11,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={didot.variable} style={{ fontFamily: aptosStack }}>
+      <head>
+        <style dangerouslySetInnerHTML={{ __html: AGE_GATE_CRITICAL }} />
+        <script dangerouslySetInnerHTML={{ __html: HAUS_AGE_BOOT }} />
+        <script dangerouslySetInnerHTML={{ __html: HAUS_FONT_LATE }} />
+      </head>
+      <body style={{ fontFamily: aptosStack }}>
         {children}
       </body>
     </html>

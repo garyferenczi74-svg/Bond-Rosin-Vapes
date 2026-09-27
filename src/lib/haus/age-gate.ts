@@ -2,6 +2,10 @@
 
 export const BOND_AGE_KEY = "bond_age_ok";
 
+export function markBondAgePassed(documentElement: { dataset: { [key: string]: string | undefined } }): void {
+  documentElement.dataset.bondAge = "ok";
+}
+
 export const HAUS_DOOR_PATH = "/haus";
 
 export function hausShowsAgeGate(stored: string | null): boolean {
@@ -57,5 +61,31 @@ export function routeShowsAgeGate(pathname: string, stored: string | null): bool
 
 export const HAUS_AGE_BOOT = `(function(){var stored=null;try{stored=sessionStorage.getItem(${JSON.stringify(BOND_AGE_KEY)});}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();`;
 
-export const AGE_GATE_CRITICAL = `html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
-html[data-bond-age="ok"] .bond-age-gate { display: none; }`;
+const LATIN_RANGE =
+  "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
+
+export const AGE_GATE_CRITICAL = `/* Cover paints before tokens arrive */
+html,body,#bond-gate-cover{background:#1B1D1C}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;pointer-events:auto}
+html,body{margin:0;color:var(--bone)}
+:root{--font-didot:"GFS Didot"}
+html[data-bond-age="ok"] #bond-gate-cover{display:none}
+html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+html[data-bond-age="ok"] .bond-age-gate { display: none; }
+.bond-age-gate{position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;flex-direction:column;align-items:center}
+.bond-age-gate .bond-age-ask .bond-age-body{font-family:Arial,"Segoe UI",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
+.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:Georgia,"Times New Roman",serif;font-weight:400}`;
+
+function webFace(family: string, weight: string, file: string): string {
+  return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:swap;src:url("${file}") format("woff2");unicode-range:${LATIN_RANGE}}`;
+}
+
+export const HAUS_FONT_LATE_CSS = [
+  webFace("Inter", "400", "/fonts/inter-latin.woff2"),
+  webFace("Inter", "500", "/fonts/inter-latin.woff2"),
+  webFace("GFS Didot", "400", "/fonts/gfs-didot-latin-400.woff2"),
+  `html body .bond-age-gate .bond-age-ask .bond-age-body{font-family:Inter,"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif}`,
+  `html body .bond-age-gate .bond-age-panel .bond-age-mark,html body .bond-age-gate .bond-age-panel .bond-age-lead,html body .bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot",Didot,serif}`,
+].join("");
+
+export const HAUS_FONT_LATE = `(function(){function load(){if(document.getElementById("bond-gate-fonts"))return;var cover=document.getElementById("bond-gate-cover");var gate=document.querySelector(".bond-age-gate");if(cover==null&&gate==null)return;var node=document.createElement("style");node.id="bond-gate-fonts";node.textContent=${JSON.stringify(HAUS_FONT_LATE_CSS)};var parent=document.body;if(parent==null)parent=document.documentElement;parent.appendChild(node);}function arm(){requestAnimationFrame(function(){requestAnimationFrame(load);});}window.addEventListener("load",arm);})();`;

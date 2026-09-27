@@ -1,0 +1,7 @@
+:root {
+  --matte-black: #1B1D1C;
+  --bone: #E1DAD0;
+  --bond-warning-yellow: #FFFF00;
+  --bond-warn-panel: var(--matte-black);
+  --bond-warn-meta: var(--bone);
+}

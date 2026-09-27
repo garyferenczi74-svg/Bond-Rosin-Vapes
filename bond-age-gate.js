@@ -23,7 +23,7 @@
   var root = document.getElementById("bond-age-gate");
 
   function openFloor() {
-    document.documentElement.setAttribute("data-bond-age", "ok");
+    document.documentElement.dataset.bondAge = "ok";
     if (floor) floor.removeAttribute("inert");
     try { window.dispatchEvent(new CustomEvent("bond-entered")); } catch (e) {}
   }
