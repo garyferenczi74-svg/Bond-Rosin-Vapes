@@ -67,13 +67,24 @@ html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
 html[data-bond-age="ok"] .bond-age-gate { display: none; }
 .bond-age-gate{position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;flex-direction:column;align-items:center}
-.bond-age-ask .bond-age-body{font-family:Aptos,"Segoe UI Variable","Segoe UI",Inter,"Inter Fallback",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
-@font-face{font-family:"Inter";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/inter-latin.woff2") format("woff2");unicode-range:${LATIN_RANGE}}
-@font-face{font-family:"Inter";font-style:normal;font-weight:500;font-display:swap;src:url("/fonts/inter-latin.woff2") format("woff2");unicode-range:${LATIN_RANGE}}
+.bond-age-gate .bond-age-ask .bond-age-body{font-family:"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
 @font-face{font-family:"Inter Fallback";font-style:normal;font-weight:400;src:local("Arial");size-adjust:107.89%;ascent-override:89.79%;descent-override:22.36%;line-gap-override:0%}
 @font-face{font-family:"Inter Fallback";font-style:normal;font-weight:400;src:local("Liberation Sans");size-adjust:107.89%;ascent-override:89.79%;descent-override:22.36%;line-gap-override:0%}
-@font-face{font-family:"GFS Didot";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:${LATIN_RANGE}}
 @font-face{font-family:"Didot Fallback";font-style:normal;font-weight:400;src:local("Times New Roman");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
 @font-face{font-family:"Didot Fallback";font-style:normal;font-weight:400;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
 @font-face{font-family:"Didot Fallback";font-style:normal;font-weight:400;src:local("Noto Serif");size-adjust:94.39%;ascent-override:100.33%;descent-override:29.35%;line-gap-override:2.65%}
-.bond-age-mark,.bond-age-lead,.bond-age-title{font-family:"GFS Didot","Didot Fallback",Didot,serif;font-weight:400}`;
+.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:"Didot Fallback",Didot,serif;font-weight:400}`;
+
+function webFace(family: string, weight: string, file: string): string {
+  return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:swap;src:url("${file}") format("woff2");unicode-range:${LATIN_RANGE}}`;
+}
+
+export const HAUS_FONT_LATE_CSS = [
+  webFace("Inter", "400", "/fonts/inter-latin.woff2"),
+  webFace("Inter", "500", "/fonts/inter-latin.woff2"),
+  webFace("GFS Didot", "400", "/fonts/gfs-didot-latin-400.woff2"),
+  `.bond-age-gate .bond-age-ask .bond-age-body{font-family:Inter,"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif}`,
+  `.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot","Didot Fallback",Didot,serif}`,
+].join("");
+
+export const HAUS_FONT_LATE = `(function(){function load(){if(document.getElementById("bond-gate-fonts"))return;var cover=document.getElementById("bond-gate-cover");var gate=document.querySelector(".bond-age-gate");if(cover==null&&gate==null)return;var node=document.createElement("style");node.id="bond-gate-fonts";node.textContent=${JSON.stringify(HAUS_FONT_LATE_CSS)};document.head.appendChild(node);}window.addEventListener("load",load);})();`;

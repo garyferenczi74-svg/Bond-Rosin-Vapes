@@ -5,6 +5,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   AGE_GATE_CRITICAL,
+  HAUS_FONT_LATE,
+  HAUS_FONT_LATE_CSS,
   BOND_AGE_KEY,
   BOND_AGE_MONTHS,
   HAUS_AGE_BOOT,
@@ -89,10 +91,16 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(shell, /HAUS_AGE_BOOT/);
   assert.match(shell, /id="bond-gate-cover"/);
   assert.match(AGE_GATE_CRITICAL, /#bond-gate-cover/);
-  assert.match(AGE_GATE_CRITICAL, /font-display:swap/);
   assert.match(AGE_GATE_CRITICAL, /size-adjust:107\.89%/);
-  assert.match(AGE_GATE_CRITICAL, /\/fonts\/inter-latin\.woff2/);
-  assert.match(AGE_GATE_CRITICAL, /\.bond-age-ask \.bond-age-body/);
+  assert.match(AGE_GATE_CRITICAL, /Inter Fallback/);
+  assert.match(AGE_GATE_CRITICAL, /\.bond-age-gate \.bond-age-ask \.bond-age-body/);
+  assert.equal(AGE_GATE_CRITICAL.includes("woff2"), false);
+  assert.equal(AGE_GATE_CRITICAL.includes("font-display"), false);
+  assert.match(HAUS_FONT_LATE_CSS, /font-display:swap/);
+  assert.match(HAUS_FONT_LATE_CSS, /\/fonts\/inter-latin\.woff2/);
+  assert.match(HAUS_FONT_LATE_CSS, /\/fonts\/gfs-didot-latin-400\.woff2/);
+  assert.match(HAUS_FONT_LATE, /addEventListener\("load"/);
+  assert.match(read("src/app/layout.tsx"), /HAUS_FONT_LATE/);
   assert.equal(read("src/app/layout.tsx").includes("next/font/google"), false);
   assert.equal(read("src/app/layout.tsx").includes("fonts.googleapis.com"), false);
   assert.match(read("src/app/globals.css"), /@import "\.\.\/\.\.\/bond-age-gate\.css"/);
