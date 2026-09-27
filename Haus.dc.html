@@ -75,7 +75,7 @@ var GUIDE = [
   { id:'no3', title:'No. 3 Peak', kind:'comp', comp:'no3' },
   { id:'ritual', title:'The Ritual', kind:'ritual' }
 ];
-var INTENTIONS = ['Aroma','Flavor','Craft','Season','Evening'];
+var INTENTIONS = ['Daytime','Evening','Reserve','Season','Number'];
 var NAV = [['dashboard','Dashboard'],['salon','Salon'],['library','Library'],['guide','Guide'],['reserve','Reserve'],['events','Events'],['ritual','Ritual'],['account','Account']];
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -270,9 +270,12 @@ function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); i
 function complianceBand(){
   return '<div style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">'
     + '<div class="gold" style="font-size:10px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>'
-    + '<p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>'
-    + '<p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">Cannabis may cause impairment and may be habit forming.</p>'
-    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:0">Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p></div></div>';
+    + '<style>:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>'
+    + '<div style="background:var(--bond-warning-yellow);color:var(--bond-warning-ink);border:1px solid var(--bond-warning-ink);padding:12px 14px;text-align:left;font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5">'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0">Cannabis can be addictive.</p></div>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#8E887C;margin:12px 0 0">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit">oasas.ny.gov/hopeline</a>.</p>'
+    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:12px 0 0">Cedargrowth Organics LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p></div></div>';
 }
 function chrome(active, inner){
   var nav = NAV.map(function(n){ return '<a class="navlink'+(active===n[0]?' on':'')+'" href="#/haus/'+n[0]+'">'+esc(n[1])+'</a>'; }).join('');

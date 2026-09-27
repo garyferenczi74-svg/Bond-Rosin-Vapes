@@ -66,7 +66,7 @@ export function BondAgeGate({ children }: { children: ReactNode }) {
         </div>
         <div className="bond-age-panel bond-age-ask">
           <div className="bond-age-mark">BOND</div>
-          <p className="bond-age-lead">Intentional elevation is for adults.</p>
+          <p className="bond-age-lead">Please confirm your age.</p>
           <div className="bond-age-rule bond-age-rule-wide"></div>
           <p className="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
           <div className="bond-age-fields">
@@ -104,7 +104,7 @@ export function BondAgeGate({ children }: { children: ReactNode }) {
           </button>
           <div className="bond-age-health">
             <div className="bond-age-health-label">Health and Safety</div>
-            <p>For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
+            <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
           </div>
         </div>
       </div>

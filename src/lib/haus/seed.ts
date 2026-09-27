@@ -22,7 +22,7 @@ export const SEED_BATCHES: HausBatchPreview[] = [
   {
     batch: "BND-3-0214",
     title: "No. 3 Peak",
-    body: "Alpine Reserve",
+    body: "Sample batch",
     state: "published",
     coa: "COA-0214",
     shelfCount: 14,
@@ -50,7 +50,7 @@ export const SEED_GUIDE: HausGuidePreview[] = [
 ];
 
 export const SEED_RESERVE: HausReservePreview[] = [
-  { id: "run-mz", cultivar: "Alpine Reserve", claimed: 214, size: 1000, state: "open" },
+  { id: "run-mz", cultivar: "Sample batch", claimed: 214, size: 1000, state: "open" },
   { id: "run-ag", cultivar: "Autumn Gelato", claimed: 500, size: 500, state: "ended" },
 ];
 

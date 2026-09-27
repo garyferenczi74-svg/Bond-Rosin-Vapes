@@ -29,6 +29,7 @@
   .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
   @media (max-width: 720px) { .findrow { grid-template-columns: 1fr !important; } }
 </style>
+<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>
 </head>
 <body>
 <div id="gate"></div>
@@ -54,10 +55,14 @@
   </main>
   <div style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">
     <div class="gold" style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>
-    <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
-    <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">Cannabis may cause impairment and may be habit forming. Sold only at dispensaries licensed by New York State. This site does not sell cannabis and no one can lawfully ship these products to you.</p>
+    <div class="bond-warn-box" style="background:var(--bond-warning-yellow);color:var(--bond-warning-ink);border:1px solid var(--bond-warning-ink);padding:12px 14px;text-align:left;margin:0 0 12px">
+      <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
+      <p id="bondRotWarn" style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0">Cannabis can be addictive.</p>
+    </div>
+    <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#B0A99A;margin:0 0 8px">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
+    <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">Sold only at dispensaries licensed by New York State. This site does not sell cannabis and no one can lawfully ship these products to you.</p>
     <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0">These are sample listings, not real stores.</p>
-    <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+    <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Cedargrowth Organics LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
   </div></div>
 </div>
 
@@ -215,7 +220,7 @@ function showGate(){
   document.getElementById('gate').innerHTML = '<div style="position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;align-items:center;justify-content:center;padding:24px">'
     + '<div style="text-align:center;max-width:460px;width:100%">'
     + '<div class="didot gold" style="font-size:clamp(46px,8vw,72px);letter-spacing:0.35em;padding-left:0.35em;line-height:1">BOND</div>'
-    + '<p class="didot" style="font-size:16px;letter-spacing:0.14em;color:#E1DAD0;margin:22px 0 0">Intentional elevation is for adults.</p>'
+    + '<p class="didot" style="font-size:16px;letter-spacing:0.14em;color:#E1DAD0;margin:22px 0 0">Please confirm your age.</p>'
     + '<p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:16px 0 0">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>'
     + '<div style="display:flex;gap:12px;margin:26px 0 0"><select id="gMonth" class="field"><option value="">Birth month</option>'+months.map(function(m,i){ return '<option value="'+i+'">'+m+'</option>'; }).join('')+'</select><select id="gYear" class="field"><option value="">Birth year</option>'+years+'</select></div>'
     + '<button id="gEnter" class="btn" style="margin-top:18px;width:100%;padding:16px">Enter</button>'
@@ -230,6 +235,16 @@ function showGate(){
   });
 }
 if (!ageOk()) showGate();
+</script>
+<script>
+(function(){
+  var w=["Cannabis can be addictive.","Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.","There may be health risks associated with consumption of this product.","Cannabis is not recommended for use by persons who are pregnant or nursing."];
+  try {
+    var idx=sessionStorage.getItem('bond_warn_idx');
+    if(idx===null){ var c=(parseInt(localStorage.getItem('bond_warn_ctr')||'-1',10)+1)%w.length; localStorage.setItem('bond_warn_ctr',String(c)); idx=String(c); sessionStorage.setItem('bond_warn_idx',idx); }
+    var el=document.getElementById('bondRotWarn'); if(el) el.textContent=w[parseInt(idx,10)];
+  } catch(e){}
+})();
 </script>
 </body>
 </html>

@@ -133,7 +133,7 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
     assert.match(html, /src="\/bond-age-gate\.js"/, name);
     assert.match(html, /sessionStorage\.getItem\("bond_age_ok"\)/, name);
     assert.match(html, /class="bond-floor" inert/, name);
-    assert.match(html, /Intentional elevation is for adults\./, name);
+    assert.match(html, /Please confirm your age\./, name);
     assert.match(html, /Birth month/, name);
     assert.match(html, /Not yet/, name);
     assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-floor \{ visibility: hidden; \}/, name);
@@ -149,7 +149,7 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   assert.match(gateJs, /localStorage\.removeItem\(KEY\)/);
   assert.match(gateJs, /data-declined", "true"/);
   assert.match(gateView, /sessionStorage\.setItem\(BOND_AGE_KEY, String\(Date\.now\(\)\)\)/);
-  assert.match(gateView, /Intentional elevation is for adults\./);
+  assert.match(gateView, /Please confirm your age\./);
   assert.match(gateView, /Not yet/);
   assert.match(gateCss, /transition-property: opacity/);
   const reduced = gateCss.slice(gateCss.indexOf("@media (prefers-reduced-motion: reduce)"));
@@ -178,7 +178,12 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
 
   const band = read("src/components/compliance-band.tsx");
   assert.match(band, /21\+ Cannabis products\. Keep out of reach of children\./);
-  assert.match(band, /For use only by adults 21 years of age and older\./);
+  assert.match(band, /For use only by persons 21 years of age and older\./);
+  assert.match(band, /--bond-warning-yellow|warningYellow/);
+  assert.match(band, /Cedargrowth Organics LLC\./);
+  assert.match(band, /tel:18778467369/);
+  assert.match(band, /https:\/\/oasas\.ny\.gov\/hopeline/);
+  assert.match(band, /Cannabis can be addictive\./);
   assert.match(band, /OCM-Proc-25-000329/);
   assert.match(read("src/app/haus/haus-client.tsx"), /ComplianceBand/);
   assert.match(read("src/app/order/order-client.tsx"), /ComplianceBand/);
@@ -187,7 +192,7 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   const riskHeading = faq.indexOf("<h2>Is cannabis risk-free?</h2>");
   assert.ok(riskHeading > 0);
   const riskSentence =
-    "No, and we will not pretend otherwise. Cannabis may cause impairment and may be habit forming, it can impair concentration, coordination, and judgment, there may be health risks associated with consumption, and it is not recommended for persons who are pregnant or nursing. Never drive or operate machinery under the influence. If someone ingests cannabis accidentally, contact the Poison Center at 1-800-222-1222 or call 9-1-1.";
+    "No, and we will not pretend otherwise. Cannabis can be addictive. Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis. There may be health risks associated with consumption of this product. Cannabis is not recommended for use by persons who are pregnant or nursing. If someone accidentally consumes cannabis, contact the Poison Center at 1-800-222-1222 or call 9-1-1.";
   assert.ok(faq.includes(riskSentence));
   assert.ok(faq.indexOf(riskSentence) > riskHeading);
 });

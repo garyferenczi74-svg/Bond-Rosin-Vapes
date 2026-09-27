@@ -52,22 +52,22 @@ test("launch blocker copy is replaced on Home No1 and No3", () => {
     assert.equal(pages.includes(line), false, line);
   }
   assert.match(home, /Nothing can be reserved right now\. Check back here\./);
-  assert.match(home, /Citrus\. Pine\. Bright craft\./);
-  assert.match(home, /Cool herb\. Soft citrus\. Evening craft\./);
-  assert.match(home, /Ripe mango\. Blood orange\. Amber\./);
-  assert.match(home, /Bright citrus\. A daytime aroma\./);
-  assert.match(home, /Cool herb\. An evening aroma\./);
-  assert.match(home, /Ripe fruit\. A reserve aroma\./);
-  assert.match(home, /Which aroma are you meeting\?/);
+  assert.match(home, /Daytime\. Bright\. Crisp\./);
+  assert.match(home, /Evening\. Soft\. Round\./);
+  assert.match(home, /Reserve Edition\. Solventless live rosin\./);
+  assert.match(home, /Which number are you meeting\?/);
+  assert.match(home, /No\. 1\. A daytime number\./);
+  assert.match(home, /Bond with No\. 1\./);
+  assert.equal(home.includes("bond_circle"), false);
   assert.match(home, />Haus</);
   assert.equal(home.includes(">Admin<"), false);
   assert.match(home, /transition-property: opacity/);
-  assert.match(no1, /Citrus\. Pine\. Bright craft\./);
-  assert.match(no1, /Crafted for citrus, pine, and clean resin\./);
-  assert.match(no1, /A citrus and pine expression from Bond's solventless live rosin collection\./);
-  assert.match(no3, /Ripe by craft\. Seasoned by the press\./);
-  assert.match(no3, /Ripe mango, blood orange, and amber, pressed as a reserve craft\./);
+  assert.match(no1, /Daytime\. Bright\. Crisp\./);
+  assert.match(no1, /PURE CONSUMPTION<br>DAYTIME/);
+  assert.match(no1, /No\. 1 is the daytime number in Bond's solventless live rosin collection\./);
+  assert.match(no3, /Reserve Edition\. Solventless live rosin\./);
   assert.equal(no3.includes("Elevated by nature"), false);
+  assert.equal(no3.includes("Alpine"), false);
 });
 
 test("privacy age flag matches sessionStorage and the Haus records section stays", () => {
@@ -104,6 +104,8 @@ test("Haus admin erase line and cultivar name are corrected", () => {
   assert.equal(admin.includes("keeps no copy"), false);
   assert.equal(admin.includes("Midnight Zkittlez"), false);
   assert.equal(seed.includes("Midnight Zkittlez"), false);
-  assert.match(seed, /Alpine Reserve/);
-  assert.match(admin, /Alpine Reserve/);
+  assert.match(seed, /Sample batch/);
+  assert.match(admin, /Sample batch/);
+  assert.equal(seed.includes("Alpine Reserve"), false);
+  assert.equal(admin.includes("Alpine Reserve"), false);
 });
