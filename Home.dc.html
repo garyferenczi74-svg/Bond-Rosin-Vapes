@@ -146,6 +146,7 @@ input::placeholder { color: #B0A99A; }
   position: absolute; left: 50%; top: var(--hero-copy-top, 62%); bottom: auto; transform: translateX(-50%); width: 100%; max-width: 720px; padding: 0 32px 24px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 0; text-align: center; pointer-events: none; z-index: 4;
 }
 .hero-text:not(.hero-in) { visibility: hidden; }
+.hero-text.hero-in { visibility: visible; }
 .hero-text .hero-row { opacity: 0; transform: translateY(14px); transition: opacity .45s cubic-bezier(0.44,0,0.56,1), transform .45s cubic-bezier(0.44,0,0.56,1); }
 .hero-text.hero-in .hero-row { opacity: 1; transform: translateY(0); }
 .hero-text.hero-in .hero-tagline { transition-delay: 0s; }
@@ -1012,16 +1013,10 @@ class Component extends DCLogic {
         reveal(true);
       }, 4000);
     };
+    go();
     if (document.fonts && document.fonts.status !== 'loaded') {
-      var fired = false;
-      var timer = setTimeout(function () { if (fired) return; fired = true; go(); }, 600);
-      document.fonts.ready.then(function () {
-        if (fired) { requestLayout(); return; }
-        fired = true;
-        clearTimeout(timer);
-        go();
-      });
-    } else go();
+      document.fonts.ready.then(function () { requestLayout(); });
+    }
   }
   function released() {
     var t = document.getElementById(STAGE);
