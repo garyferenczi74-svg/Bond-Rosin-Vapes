@@ -43,7 +43,7 @@ export function ComplianceBand() {
   } as const;
 
   return (
-    <div
+    <footer
       style={{
         borderTop: `1px solid ${tokens.deepCharcoal}`,
         padding: "36px clamp(20px, 4vw, 56px) 40px",
@@ -106,6 +106,6 @@ export function ComplianceBand() {
           21+ Cannabis products. Keep out of reach of children.
         </p>
       </div>
-    </div>
+    </footer>
   );
 }

@@ -52,8 +52,8 @@ test("launch blocker copy is replaced on Home No1 and No3", () => {
     assert.equal(pages.includes(line), false, line);
   }
   assert.match(home, /Nothing can be reserved right now\. Check back here\./);
-  assert.match(home, /Daytime\. Bright\. Crisp\./);
-  assert.match(home, /Evening\. Soft\. Round\./);
+  assert.match(home, /Daytime\. Solventless live rosin\./);
+  assert.match(home, /Evening\. Solventless live rosin\./);
   assert.match(home, /Reserve Edition\. Solventless live rosin\./);
   assert.equal(home.includes("Reserve Edition. Reserve Edition."), false);
   assert.match(home, /Which number are you meeting\?/);
@@ -63,7 +63,7 @@ test("launch blocker copy is replaced on Home No1 and No3", () => {
   assert.match(home, />Haus</);
   assert.equal(home.includes(">Admin<"), false);
   assert.match(home, /transition-property: opacity/);
-  assert.match(no1, /Daytime\. Bright\. Crisp\./);
+  assert.match(no1, /Daytime\. Solventless live rosin\./);
   assert.match(no1, /PURE CONSUMPTION<br>DAYTIME/);
   assert.match(no1, /No\. 1 is the daytime number in Bond's solventless live rosin collection\./);
   assert.match(no3, /Reserve Edition\. Solventless live rosin\./);

@@ -45,7 +45,7 @@ export const wings: {
     href: "/vauxhall/product",
     title: "Product",
     hairline: tokens.product,
-    summary: "The Numbered Collection. Choose your moment.",
+    summary: "The Numbered Collection. Daytime, evening, and the Reserve Edition.",
   },
   {
     id: "security",

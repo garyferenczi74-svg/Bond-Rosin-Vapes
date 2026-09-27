@@ -44,8 +44,8 @@ export const SEED_EVENTS: HausEventPreview[] = [
 ];
 
 export const SEED_GUIDE: HausGuidePreview[] = [
-  { id: "cover", title: "The Experience Guide", body: "", state: "published" },
-  { id: "notes", title: "On Notes", body: "A note is a memory before it is a smell.", state: "published" },
+  { id: "cover", title: "The Number Guide", body: "", state: "published" },
+  { id: "notes", title: "On Notes", body: "No. 1 is the daytime number. No. 2 is the evening number. No. 3 is the Reserve Edition. Solventless live rosin.", state: "published" },
   { id: "ritual", title: "The Ritual", body: "Prepare. Pause. Close.", state: "draft" },
 ];
 
@@ -69,7 +69,7 @@ export function seedHausPersist(now = new Date()): HausPersist {
       },
       {
         id: "HW-2",
-        title: "The Experience Guide",
+        title: "The Number Guide",
         body: "Chapter On Notes is open.",
         link: "guide",
         from: isoDay(-29, now),

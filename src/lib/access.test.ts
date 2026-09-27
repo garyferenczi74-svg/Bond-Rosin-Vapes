@@ -160,11 +160,11 @@ test("SKU footer Bond Haus points at Next /haus", () => {
   const no2 = readFileSync(join(root, "No2.dc.html"), "utf8");
   const no3 = readFileSync(join(root, "No3.dc.html"), "utf8");
   assert.match(no1, /No\. 1 is the daytime number in Bond's solventless live rosin collection\./);
-  assert.match(no1, /Daytime\. Bright\. Crisp\./);
+  assert.match(no1, /Daytime\. Solventless live rosin\./);
   assert.equal(no1.includes("Formulated for focus, clarity, and momentum."), false);
   assert.equal(no1.includes("Focus. Clarity. Momentum."), false);
-  assert.match(no2, /A cooler, quieter number in Bond's 100% solventless live rosin collection\./);
-  assert.match(no3, /A reserve expression from Bond's solventless live rosin collection\./);
+  assert.match(no2, /No\. 2 is the evening number in Bond's solventless live rosin collection\./);
+  assert.match(no3, /No\. 3 is the Reserve Edition in Bond's solventless live rosin collection\./);
 });
 
 test("public marketing exposes /order only as Home header Order", () => {

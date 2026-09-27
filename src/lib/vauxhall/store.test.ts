@@ -108,9 +108,9 @@ test("SKU seed is the Prompt 1 standing catalog", () => {
     skus.map((sku) => sku.editionName),
     ["Dialed", "Unwind", "Peak"],
   );
-  assert.equal(skus[0]?.triad, "Focus. Clarity. Momentum.");
-  assert.equal(skus[1]?.triad, "Release. Stillness. Restoration.");
-  assert.equal(skus[2]?.triad, "Edge. Elevation. Expansion.");
+  assert.equal(skus[0]?.triad, "Daytime. Solventless live rosin.");
+  assert.equal(skus[1]?.triad, "Evening. Solventless live rosin.");
+  assert.equal(skus[2]?.triad, "Reserve Edition. Solventless live rosin.");
   assert.equal(skus[0]?.hex, SKU_ACCENTS["no-1"]);
   assert.equal(skus[1]?.hex, SKU_ACCENTS["no-2"]);
   assert.equal(skus[2]?.hex, SKU_ACCENTS["no-3"]);
