@@ -180,7 +180,12 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   assert.match(band, /21\+ Cannabis products\. Keep out of reach of children\./);
   assert.match(band, /For use only by persons 21 years of age and older\./);
   assert.match(band, /--bond-warning-yellow|warningYellow/);
-  assert.match(band, /Cedargrowth Organics LLC\./);
+  assert.match(band, /Cedargrowth LLC\./);
+  assert.equal(band.includes("Cedargrowth Organics"), false);
+  assert.match(band, /Cannabis can impair concentration and coordination\./);
+  assert.match(band, /There may be health risks associated with consumption of this product\./);
+  assert.match(band, /Cannabis is not recommended for use by persons who are pregnant or nursing\./);
+  assert.equal(band.includes("bond_warn_idx"), false);
   assert.match(band, /tel:18778467369/);
   assert.match(band, /https:\/\/oasas\.ny\.gov\/hopeline/);
   assert.match(band, /Cannabis can be addictive\./);

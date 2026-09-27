@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { tokens } from "@/lib/tokens";
 
 const GOLD =
@@ -9,7 +6,7 @@ const GOLD =
 const REQUIRED =
   "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
 
-const ROTATING = [
+const HEALTH = [
   "Cannabis can be addictive.",
   "Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.",
   "There may be health risks associated with consumption of this product.",
@@ -17,37 +14,23 @@ const ROTATING = [
 ] as const;
 
 export function ComplianceBand() {
-  const [warn, setWarn] = useState<string>(ROTATING[0]);
-
-  useEffect(() => {
-    try {
-      let idx = sessionStorage.getItem("bond_warn_idx");
-      if (idx === null) {
-        const c =
-          (parseInt(localStorage.getItem("bond_warn_ctr") || "-1", 10) + 1) % ROTATING.length;
-        localStorage.setItem("bond_warn_ctr", String(c));
-        idx = String(c);
-        sessionStorage.setItem("bond_warn_idx", idx);
-      }
-      const n = parseInt(idx, 10);
-      if (n >= 0 && n < ROTATING.length) setWarn(ROTATING[n]);
-    } catch (e) {}
-  }, []);
-
   const warnText = {
     fontFamily: "Arial, Helvetica, sans-serif",
     fontSize: 12,
     lineHeight: 1.5,
     color: tokens.warningInk,
-    margin: 0,
+    margin: "0 0 8px",
   } as const;
 
   return (
     <footer
       style={{
+        position: "relative",
+        zIndex: 2,
         borderTop: `1px solid ${tokens.deepCharcoal}`,
         padding: "36px clamp(20px, 4vw, 56px) 40px",
         textAlign: "center",
+        background: tokens.matteBlack,
       }}
     >
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
@@ -68,6 +51,8 @@ export function ComplianceBand() {
         </div>
         <div
           style={{
+            position: "relative",
+            zIndex: 2,
             background: tokens.warningYellow,
             color: tokens.warningInk,
             border: `1px solid ${tokens.warningInk}`,
@@ -75,8 +60,12 @@ export function ComplianceBand() {
             textAlign: "left",
           }}
         >
-          <p style={{ ...warnText, margin: "0 0 8px" }}>{REQUIRED}</p>
-          <p style={warnText}>{warn}</p>
+          <p style={warnText}>{REQUIRED}</p>
+          {HEALTH.map((line, index) => (
+            <p key={line} style={index === HEALTH.length - 1 ? { ...warnText, margin: 0 } : warnText}>
+              {line}
+            </p>
+          ))}
         </div>
         <p
           style={{
@@ -99,7 +88,7 @@ export function ComplianceBand() {
           .
         </p>
         <p style={{ fontSize: 11, lineHeight: 1.7, color: tokens.muted, margin: "12px 0 0" }}>
-          Cedargrowth Organics LLC. Licensed by the New York State Office of Cannabis Management.
+          Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management.
           OCM-Proc-25-000329
         </p>
         <p style={{ fontSize: 12, lineHeight: 1.7, color: tokens.muted, margin: "16px 0 0" }}>

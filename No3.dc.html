@@ -167,27 +167,19 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <a href="Home.dc.html#choose" onClick="{{ goChoose }}" style="font-family:'GFS Didot',Didot,serif;display:inline-block;background:transparent;color:#E1DAD0;border:1px solid #E1DAD0;border-radius:2px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;padding:16px 36px">Find Your Number</a>
   </section>
 
-  <script>
-  (function(){
-    var w=["Cannabis can be addictive.","Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.","There may be health risks associated with consumption of this product.","Cannabis is not recommended for use by persons who are pregnant or nursing."];
-    try {
-      var idx=sessionStorage.getItem('bond_warn_idx');
-      if(idx===null){ var c=(parseInt(localStorage.getItem('bond_warn_ctr')||'-1',10)+1)%w.length; localStorage.setItem('bond_warn_ctr',String(c)); idx=String(c); sessionStorage.setItem('bond_warn_idx',idx); }
-      var el=document.getElementById('bondRotWarn'); if(el) el.textContent=w[parseInt(idx,10)];
-    } catch(e){}
-  })();
-  </script>
-
   <footer style="background:#1B1D1C;padding:34px clamp(20px,4vw,56px) 40px;text-align:center">
     <div style="max-width:1180px;margin:0 auto">
       <div style="max-width:720px;margin:0 auto 28px">
       <div style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin:0 0 14px">Health and Safety</div>
       <div class="bond-warn-box" style="background:var(--bond-warning-yellow);color:var(--bond-warning-ink);border:1px solid var(--bond-warning-ink);padding:12px 14px;text-align:left;margin:0 0 12px">
         <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-        <p id="bondRotWarn" style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0;letter-spacing:0">Cannabis can be addictive.</p>
+        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">Cannabis can be addictive.</p>
+        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>
+        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px;letter-spacing:0">There may be health risks associated with consumption of this product.</p>
+        <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0;letter-spacing:0">Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
       </div>
       <p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#B0A99A;margin:0 0 8px;letter-spacing:0">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
-      <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Cedargrowth Organics LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+      <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
       </div>
       <div style="font-family:'GFS Didot',Didot,serif;font-size:20px;letter-spacing:0.4em;padding-left:0.4em;color:#E1DAD0;margin:0 0 22px">BOND</div>
       <div style="font-family:'GFS Didot',Didot,serif;display:flex;gap:26px 34px;flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:0.16em;text-transform:uppercase">

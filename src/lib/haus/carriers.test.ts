@@ -463,7 +463,7 @@ test("Ritual is a product-free quiet timer", () => {
   );
   assert.equal(haus.includes("keeps no copy"), false);
   assert.equal(haus.includes("Begin a ritual with "), false);
-  assert.match(haus, /var INTENTIONS = \['Daytime','Evening','Reserve','Season','Number'\];/);
+  assert.match(haus, /var INTENTIONS = \['Daytime','Evening','Press','Season','Number'\];/);
   assert.match(haus, /Set an intention, and begin when ready\./);
   assert.match(haus, /\['Prepare','Clear the space\. Remove distractions\.','prepare'\],\['Pause','Be still\. Set your intention\.','pause'\],\['Close','Return when ready\.','elevate'\]/);
   assert.equal(haus.includes("Breathe. Set your intention."), false);

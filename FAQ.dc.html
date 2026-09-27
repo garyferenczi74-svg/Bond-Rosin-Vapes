@@ -124,10 +124,13 @@
     <div style="flex:1 0 100%;max-width:720px;margin:0 auto 20px;text-align:center">
       <div class="bond-warn-box">
         <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-        <p id="bondRotWarn">Cannabis can be addictive.</p>
+        <p>Cannabis can be addictive.</p>
+        <p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>
+        <p>There may be health risks associated with consumption of this product.</p>
+        <p>Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
       </div>
       <p class="bond-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
-      <p class="bond-license">Cedargrowth Organics LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+      <p class="bond-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
     </div>
     <span>21+ Cannabis products. Keep out of reach of children.</span>
     <span style="display:flex;gap:22px;flex-wrap:wrap">
@@ -138,16 +141,6 @@
     </span>
   </footer>
 
-  <script>
-  (function(){
-    var w=["Cannabis can be addictive.","Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.","There may be health risks associated with consumption of this product.","Cannabis is not recommended for use by persons who are pregnant or nursing."];
-    try {
-      var idx=sessionStorage.getItem('bond_warn_idx');
-      if(idx===null){ var c=(parseInt(localStorage.getItem('bond_warn_ctr')||'-1',10)+1)%w.length; localStorage.setItem('bond_warn_ctr',String(c)); idx=String(c); sessionStorage.setItem('bond_warn_idx',idx); }
-      var el=document.getElementById('bondRotWarn'); if(el) el.textContent=w[parseInt(idx,10)];
-    } catch(e){}
-  })();
-  </script>
 </div>
 <script src="/bond-age-gate.js"></script>
 </body>

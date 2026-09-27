@@ -64,7 +64,8 @@ test("launch blocker copy is replaced on Home No1 and No3", () => {
   assert.equal(home.includes(">Admin<"), false);
   assert.match(home, /transition-property: opacity/);
   assert.match(no1, /Daytime\. Solventless live rosin\./);
-  assert.match(no1, /PURE CONSUMPTION<br>DAYTIME/);
+  assert.match(no1, /LIVE ROSIN<br>DAYTIME/);
+  assert.equal(no1.includes("PURE CONSUMPTION"), false);
   assert.match(no1, /No\. 1 is the daytime number in Bond's solventless live rosin collection\./);
   assert.match(no3, /Reserve Edition\. Solventless live rosin\./);
   assert.equal(no3.includes("Elevated by nature"), false);
