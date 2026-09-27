@@ -90,6 +90,7 @@ function routeFiles() {
     ["/Privacy.dc.html", "Privacy.dc.html"],
     ["/Terms.dc.html", "Terms.dc.html"],
     ["/Finder.dc.html", "Finder.dc.html"],
+    ["/AgeGate.dc.html", "AgeGate.dc.html"],
   ] as const;
   for (const pair of aliases) rows.push({ route: pair[0], files: [pair[1]] });
   return rows;

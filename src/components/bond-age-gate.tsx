@@ -9,6 +9,7 @@ import {
   bondAgeDecision,
   bondBirthYears,
   hausShowsAgeGate,
+  markBondAgePassed,
 } from "@/lib/haus/age-gate";
 
 function readStoredAge(): string | null {
@@ -31,7 +32,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
       localStorage.removeItem(BOND_AGE_KEY);
     } catch (e) {}
     if (!hausShowsAgeGate(readStoredAge())) {
-      document.documentElement.setAttribute("data-bond-age", "ok");
+      markBondAgePassed(document.documentElement);
       setOpen(true);
     }
   }, []);
@@ -46,7 +47,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
     try {
       sessionStorage.setItem(BOND_AGE_KEY, String(Date.now()));
     } catch (e) {}
-    document.documentElement.setAttribute("data-bond-age", "ok");
+    markBondAgePassed(document.documentElement);
     setOpen(true);
     try {
       window.dispatchEvent(new CustomEvent("bond-entered"));

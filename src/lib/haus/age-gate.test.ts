@@ -13,6 +13,7 @@ import {
   bondAgeDecision,
   hausRouteShowsAgeGate,
   hausShowsAgeGate,
+  markBondAgePassed,
   routeShowsAgeGate,
 } from "./age-gate.ts";
 
@@ -264,4 +265,137 @@ test("the shared bond_age_ok key clears the gate both ways and under 21 writes n
   assert.match(view, /setDeclined\(true\)/);
   assert.equal(bondAgeDecision("0", "2006", new Date(2026, 8, 27)), "decline");
   assert.equal(bondAgeDecision("0", "1990", new Date(2026, 8, 27)), "enter");
+  assert.match(gateJs, /document\.documentElement\.dataset\.bondAge = "ok"/);
+  assert.match(view, /markBondAgePassed\(document\.documentElement\)/);
+  assert.equal(HAUS_FONT_LATE_CSS.includes("Didot Fallback"), false);
+  assert.match(HAUS_FONT_LATE_CSS, /font-family:"GFS Didot",Didot,serif/);
+});
+
+function marketingEnterSource(): string {
+  const source = read("AgeGate.dc.html");
+  const start = source.indexOf("enter: () => {");
+  assert.ok(start > 0);
+  const bodyStart = source.indexOf("{", start);
+  let depth = 0;
+  let end = bodyStart;
+  for (; end < source.length; end++) {
+    const ch = source[end];
+    if (ch === "{") depth += 1;
+    else if (ch === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        end += 1;
+        break;
+      }
+    }
+  }
+  return source.slice(bodyStart + 1, end - 1);
+}
+
+function slotScript(html: string): string {
+  const marker = "function loadSlots()";
+  const at = html.indexOf(marker);
+  assert.ok(at > 0);
+  const start = html.lastIndexOf("<script>", at);
+  const end = html.indexOf("</script>", at);
+  return html.slice(start + "<script>".length, end);
+}
+
+function mainDisplayed(html: string, ageOk: boolean): boolean {
+  const hidesBody = html.includes(
+    'html:not([data-bond-age="ok"]) body>*:not(#bond-gate-cover){visibility:hidden}',
+  );
+  if (hidesBody && !ageOk) return false;
+  return ageOk && html.includes('html[data-bond-age="ok"] #bond-gate-cover{display:none}');
+}
+
+function runGate(html: string, month: string, year: string) {
+  const dataset: { bondAge?: string } = {};
+  const store = new Map<string, string>();
+  const scripts: string[] = [];
+  const listeners: Array<(ev: Event) => void> = [];
+  let declined = false;
+  const document = {
+    documentElement: {
+      dataset,
+      getAttribute(name: string) {
+        if (name === "data-bond-age") return dataset.bondAge ?? null;
+        return null;
+      },
+    },
+    createElement(tag: string) {
+      assert.equal(tag, "script");
+      return { src: "", async: false };
+    },
+    head: {
+      appendChild(el: { src: string }) {
+        scripts.push(el.src);
+      },
+    },
+  };
+  const window = {
+    addEventListener(type: string, fn: (ev: Event) => void) {
+      if (type === "bond-entered") listeners.push(fn);
+    },
+    dispatchEvent(ev: Event) {
+      if (ev.type === "bond-entered") {
+        for (const fn of listeners) fn(ev);
+      }
+      return true;
+    },
+  };
+  const sessionStorage = {
+    setItem(key: string, value: string) {
+      store.set(key, value);
+    },
+    getItem(key: string) {
+      return store.get(key) ?? null;
+    },
+  };
+  const self = {
+    setState(next: { declined?: boolean }) {
+      if (next.declined) declined = true;
+    },
+  };
+  const ready = month !== "" && year !== "";
+  const arm = new Function("document", "window", slotScript(html));
+  arm(document, window);
+  const enter = new Function(
+    "ready",
+    "month",
+    "year",
+    "document",
+    "sessionStorage",
+    "window",
+    "CustomEvent",
+    marketingEnterSource(),
+  );
+  enter.call(self, ready, month, year, document, sessionStorage, window, CustomEvent);
+  return { dataset, store, scripts, declined };
+}
+
+test("a first pass stamps the age attribute and shows Home and the product pages", () => {
+  const pages = ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"];
+  for (const name of pages) {
+    const html = read(name);
+    const passed = runGate(html, "0", "1990");
+    assert.equal(passed.dataset.bondAge, "ok", name);
+    assert.equal(passed.store.get("bond_age_ok") != null, true, name);
+    assert.equal(passed.declined, false, name);
+    assert.equal(mainDisplayed(html, passed.dataset.bondAge === "ok"), true, name);
+    assert.deepEqual(passed.scripts, ["./image-slot.js"], name);
+
+    const refused = runGate(html, "0", "2010");
+    assert.equal(refused.dataset.bondAge, undefined, name);
+    assert.equal(refused.store.size, 0, name);
+    assert.equal(refused.declined, true, name);
+    assert.deepEqual(refused.scripts, [], name);
+    if (html.includes('body>*:not(#bond-gate-cover){visibility:hidden}')) {
+      assert.equal(mainDisplayed(html, false), false, name);
+    }
+  }
+
+  const root = { dataset: { bondAge: "" } };
+  markBondAgePassed(root);
+  assert.equal(root.dataset.bondAge, "ok");
 });

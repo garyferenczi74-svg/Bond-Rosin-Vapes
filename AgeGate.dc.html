@@ -125,6 +125,7 @@ class Component extends DCLogic {
         if (nowD.getMonth() < b.getMonth()) age--;
         if (age >= 21) {
           try { sessionStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
+          try { document.documentElement.dataset.bondAge = "ok"; } catch (e) {}
           this.setState({ verified: true });
           try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
         } else this.setState({ declined: true });
