@@ -99,6 +99,8 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(HAUS_FONT_LATE_CSS, /font-display:swap/);
   assert.match(HAUS_FONT_LATE_CSS, /\/fonts\/inter-latin\.woff2/);
   assert.match(HAUS_FONT_LATE_CSS, /\/fonts\/gfs-didot-latin-400\.woff2/);
+  assert.match(HAUS_FONT_LATE_CSS, /html body \.bond-age-gate \.bond-age-ask \.bond-age-body/);
+  assert.match(HAUS_FONT_LATE, /document\.body/);
   assert.match(HAUS_FONT_LATE, /addEventListener\("load"/);
   assert.match(read("src/app/layout.tsx"), /HAUS_FONT_LATE/);
   assert.equal(read("src/app/layout.tsx").includes("next/font/google"), false);

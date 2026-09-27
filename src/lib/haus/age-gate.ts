@@ -83,8 +83,8 @@ export const HAUS_FONT_LATE_CSS = [
   webFace("Inter", "400", "/fonts/inter-latin.woff2"),
   webFace("Inter", "500", "/fonts/inter-latin.woff2"),
   webFace("GFS Didot", "400", "/fonts/gfs-didot-latin-400.woff2"),
-  `.bond-age-gate .bond-age-ask .bond-age-body{font-family:Inter,"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif}`,
-  `.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot","Didot Fallback",Didot,serif}`,
+  `html body .bond-age-gate .bond-age-ask .bond-age-body{font-family:Inter,"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif}`,
+  `html body .bond-age-gate .bond-age-panel .bond-age-mark,html body .bond-age-gate .bond-age-panel .bond-age-lead,html body .bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot","Didot Fallback",Didot,serif}`,
 ].join("");
 
-export const HAUS_FONT_LATE = `(function(){function load(){if(document.getElementById("bond-gate-fonts"))return;var cover=document.getElementById("bond-gate-cover");var gate=document.querySelector(".bond-age-gate");if(cover==null&&gate==null)return;var node=document.createElement("style");node.id="bond-gate-fonts";node.textContent=${JSON.stringify(HAUS_FONT_LATE_CSS)};document.head.appendChild(node);}window.addEventListener("load",load);})();`;
+export const HAUS_FONT_LATE = `(function(){function load(){if(document.getElementById("bond-gate-fonts"))return;var cover=document.getElementById("bond-gate-cover");var gate=document.querySelector(".bond-age-gate");if(cover==null&&gate==null)return;var node=document.createElement("style");node.id="bond-gate-fonts";node.textContent=${JSON.stringify(HAUS_FONT_LATE_CSS)};var parent=document.body;if(parent==null)parent=document.documentElement;parent.appendChild(node);}window.addEventListener("load",load);})();`;
