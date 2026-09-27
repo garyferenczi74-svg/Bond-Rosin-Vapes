@@ -114,18 +114,12 @@ test("kebab SKU aliases rewrite to the existing SKU pages", () => {
 
 const selfHostedFaces = ["FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html"];
 
-test("public marketing pages drop the bare fonts.googleapis.com preconnect", () => {
-  const stylesheet =
-    'href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap"';
+test("public marketing pages self-host Didot and Inter", () => {
   for (const name of publicMarketing) {
     const html = read(name);
-    assert.equal(html.includes('rel="preconnect" href="https://fonts.googleapis.com"'), false, name);
-    if (selfHostedFaces.includes(name)) {
-      assert.equal(html.includes("fonts.googleapis.com"), false, name);
-      assert.equal(html.includes("fonts.gstatic.com"), false, name);
-    } else {
-      assert.match(html, new RegExp(stylesheet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")), name);
-    }
+    assert.equal(html.includes("fonts.googleapis.com"), false, name);
+    assert.equal(html.includes("fonts.gstatic.com"), false, name);
+    assert.match(html, /href="\/fonts\/fonts\.css"/, name);
   }
 });
 

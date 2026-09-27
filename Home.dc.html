@@ -4,13 +4,22 @@
 <meta charset="utf-8">
 <title>Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style id="bond-gate-cover-css">
+:root{--matte-black:#1B1D1C}
+html,body{background:var(--matte-black,#1B1D1C);margin:0}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:var(--matte-black,#1B1D1C);pointer-events:auto}
+html[data-bond-age="ok"] #bond-gate-cover{display:none}
+@media (prefers-reduced-motion: reduce){#bond-gate-cover{transition:none}}
+</style>
+<script id="bond-gate-boot">
+(function(){try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin fetchpriority="high" href="/fonts/gfs-didot-latin-400.woff2">
 <noscript><style>#hero-textstack .hero-row{opacity:1 !important;transform:none !important}</style></noscript>
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <style id="bond-didot-face">
 @font-face{font-family:"GFS Didot";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/gfs-didot-latin-400.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:"Didot";font-style:normal;font-weight:400;src:local("Noto Serif");size-adjust:76.81%;ascent-override:123.3%;descent-override:36.06%;line-gap-override:3.25%}
@@ -25,10 +34,11 @@
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
+<div id="bond-gate-cover" aria-hidden="true"></div>
 <x-dc>
 <helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0D0F0E"></rect><text x="50" y="57" font-family="Didot,serif" font-size="16" letter-spacing="5" fill="#C29A45" text-anchor="middle">BOND</text></svg></template>
-<link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/fonts/fonts.css">
 <script>
 (function () {
   var started = false;
@@ -472,6 +482,55 @@ input::placeholder { color: #B0A99A; }
   <dc-import name="AgeGate" bypass="{{ gateBypass }}" hint-size="0px,0px" warn="Cannabis can be addictive."></dc-import>
 </div>
 </x-dc>
+<script id="bond-gate-hold">
+(function () {
+  var cover = document.getElementById("bond-gate-cover");
+  var passed = false;
+  try { passed = Boolean(sessionStorage.getItem("bond_age_ok")); } catch (e) {}
+  function contentNodes() {
+    var gate = document.querySelector('dc-import[name="AgeGate"]');
+    var parent = gate ? gate.parentElement : null;
+    if (parent == null) return [];
+    return Array.prototype.filter.call(parent.children, function (el) { return el == gate ? false : true; });
+  }
+  function hold() {
+    contentNodes().forEach(function (el) {
+      el.inert = true;
+      el.setAttribute("data-bond-hold", "");
+    });
+  }
+  function release() {
+    var held = document.querySelectorAll("[data-bond-hold]");
+    for (var i = 0; i < held.length; i++) {
+      held[i].inert = false;
+      held[i].removeAttribute("data-bond-hold");
+    }
+    if (cover == null || cover.parentNode == null) return;
+    var reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+    if (reduce) {
+      cover.remove();
+      return;
+    }
+    cover.style.transition = "opacity 160ms linear";
+    cover.style.opacity = "0";
+    var removed = false;
+    function drop() {
+      if (removed) return;
+      removed = true;
+      if (cover.parentNode) cover.remove();
+    }
+    cover.addEventListener("transitionend", drop);
+    setTimeout(drop, 220);
+  }
+  if (passed) {
+    if (cover && cover.parentNode) cover.remove();
+    return;
+  }
+  hold();
+  window.addEventListener("bond-entered", release);
+})();
+</script>
 <script type="text/x-dc" data-dc-script data-props="{&quot;locatorLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;CMS&quot;},&quot;gateBypass&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
 class Component extends DCLogic {
   state = { narrow: false, reduced: false, modal: false, menu: false, step: 1, exp: null, mom: null, set: null, email: '', joined: false, age21: false, ageErr: false };

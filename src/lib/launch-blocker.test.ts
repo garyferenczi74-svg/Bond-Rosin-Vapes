@@ -100,7 +100,11 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /Haus members are not asked for an authenticator code/);
   assert.match(
     privacy,
-    /each sign-in record notes that the step was skipped, along with the IP address, browser and page used, and sign-in records are kept until Bond has a deletion process in place\./,
+    /Each staff sign-in, and each staff page a staff member opens, creates a record of the staff member's account id and role, the IP address, browser and page used, and the time\. Sign-in records also note that the code step was skipped\. These records are kept until Bond has a deletion process in place\./,
+  );
+  assert.match(
+    privacy,
+    /An authenticator that has been set up but not yet confirmed stays with the account service and is reused at the next setup\./,
   );
   assert.match(privacy, /the setup image is shown to the staff member's browser and is not kept by Bond/);
   assert.match(privacy, /Bond sets its confirmed flag once, at setup/);

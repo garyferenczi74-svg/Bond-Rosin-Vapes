@@ -24,7 +24,7 @@ export default async function VauxhallPage({
     action: "admin.view_wing",
     target: route.wing,
     before: null,
-    after: { wing: route.wing, view: route.view },
+    after: { wing: route.wing, view: route.view, role: session.role },
     meta: await readRequestMeta(route.path),
   });
 
