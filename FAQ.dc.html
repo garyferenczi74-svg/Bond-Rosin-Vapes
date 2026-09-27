@@ -29,12 +29,6 @@
   .cband span { font-size:16px; line-height: 1.85; color: #B0A99A; letter-spacing: 0.01em; }
   .cband span:last-child { font-size:16px; color: #B0A99A; }
   :root { --bond-warning-yellow: #FFFF00; --bond-warning-ink: var(--matte-black); }
-  .bond-warn-box { background: var(--bond-warning-yellow); color: var(--bond-warning-ink); border: 1px solid var(--bond-warning-ink); padding: 12px 14px; text-align: left; }
-  .bond-warn-box p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: var(--bond-warning-ink); margin: 0 0 8px; letter-spacing: 0; }
-  .bond-warn-box p:last-child { margin: 0; }
-  .bond-hope, .bond-hope a { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: #B0A99A; }
-  .bond-hope { margin: 12px 0 0; }
-  .bond-license { font-size: 16px; line-height: 1.7; color: #B0A99A; margin: 12px 0 0; letter-spacing: 0.02em; }
   footer { background: #1B1D1C; padding: 40px clamp(20px,4vw,56px); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size:12px; color: #8E887C; }
   footer a { color: #8E887C; text-decoration: none; }
   html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
@@ -68,10 +62,7 @@
       </select>
     </div>
     <button type="button" id="bond-age-enter" class="bond-age-enter" data-ready="false">Enter</button>
-    <div class="bond-age-health">
-      <div class="bond-age-health-label">Health and Safety</div>
-      <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-    </div>
+    <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
   </div>
 </div>
 <div class="bond-floor" inert>
@@ -122,15 +113,7 @@
 
   <footer>
     <div style="flex:1 0 100%;max-width:720px;margin:0 auto 20px;text-align:center">
-      <div class="bond-warn-box">
-        <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
-        <p>Cannabis can be addictive.</p>
-        <p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>
-        <p>There may be health risks associated with consumption of this product.</p>
-        <p>Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
-      </div>
-      <p class="bond-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
-      <p class="bond-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p>
+      <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
     </div>
     <span>21+ Cannabis products. Keep out of reach of children.</span>
     <span style="display:flex;gap:22px;flex-wrap:wrap">

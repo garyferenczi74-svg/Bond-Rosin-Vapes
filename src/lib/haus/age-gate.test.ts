@@ -177,22 +177,26 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   }
 
   const band = read("src/components/compliance-band.tsx");
+  const warnings = read("src/lib/bond-warnings.ts");
   assert.match(band, /21\+ Cannabis products\. Keep out of reach of children\./);
-  assert.match(band, /For use only by persons 21 years of age and older\./);
-  assert.match(band, /--bond-warning-yellow|warningYellow/);
-  assert.match(band, /Cedargrowth LLC\./);
-  assert.equal(band.includes("Cedargrowth Organics"), false);
-  assert.match(band, /Cannabis can impair concentration and coordination\./);
-  assert.match(band, /There may be health risks associated with consumption of this product\./);
-  assert.match(band, /Cannabis is not recommended for use by persons who are pregnant or nursing\./);
+  assert.match(band, /BondWarn/);
+  assert.match(band, /warningRouteForPath/);
+  assert.match(warnings, /For use only by persons 21 years of age and older\./);
+  assert.match(read("bond-age-gate.css"), /--bond-warning-yellow/);
+  assert.match(warnings, /Cedargrowth LLC\./);
+  assert.equal(warnings.includes("Cedargrowth Organics"), false);
+  assert.match(warnings, /Cannabis can impair concentration and coordination\./);
+  assert.match(warnings, /There may be health risks associated with consumption of this product\./);
+  assert.match(warnings, /Cannabis is not recommended for use by persons who are pregnant or nursing\./);
   assert.equal(band.includes("bond_warn_idx"), false);
-  assert.match(band, /tel:18778467369/);
-  assert.match(band, /https:\/\/oasas\.ny\.gov\/hopeline/);
-  assert.match(band, /texting HOPENY \(467369\)/);
-  assert.match(band, /1-877-8-HOPENY/);
-  assert.match(band, /Cannabis can be addictive\./);
-  assert.match(band, /OCM-PROC-25-000329/);
-  assert.equal(band.includes("OCM-Proc-25-000329"), false);
+  assert.equal(warnings.includes("bond_warn_idx"), false);
+  assert.match(warnings, /tel:18778467369/);
+  assert.match(warnings, /https:\/\/oasas\.ny\.gov\/hopeline/);
+  assert.match(warnings, /texting HOPENY \(467369\)/);
+  assert.match(warnings, /1-877-8-HOPENY/);
+  assert.match(warnings, /Cannabis can be addictive\./);
+  assert.match(warnings, /OCM-PROC-25-000329/);
+  assert.equal(warnings.includes("OCM-Proc-25-000329"), false);
   assert.match(read("src/app/haus/haus-client.tsx"), /ComplianceBand/);
   assert.match(read("src/app/order/order-client.tsx"), /ComplianceBand/);
 

@@ -5,8 +5,12 @@ import { IDLE_COOKIE, isIdleExpired } from "@/lib/access";
 export async function updateSession(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-bond-path", request.nextUrl.pathname);
 
-  let response = NextResponse.next({ request });
+  let response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   if (!url || !key) {
     return { response, userId: null as string | null, idleExpired: false };
@@ -21,7 +25,9 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => {
           request.cookies.set(name, value);
         });
-        response = NextResponse.next({ request });
+        response = NextResponse.next({
+          request: { headers: requestHeaders },
+        });
         cookiesToSet.forEach(({ name, value, options }) => {
           response.cookies.set(name, value, options);
         });
