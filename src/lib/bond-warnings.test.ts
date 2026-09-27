@@ -74,7 +74,7 @@ test("gate and footer share one warning block and one css rule", () => {
     const html = read(row.file);
     const block = warnBlockForRoute(row.route);
     const copies = html.split(block).length - 1;
-    const expected = row.gate === "inline" ? 2 : 1;
+    const expected = row.gate === "inline" || row.gate === "import" ? 2 : 1;
     assert.equal(copies, expected, row.file);
     const assigned = dLineForRoute(row.route);
     for (const line of D_LINES) {

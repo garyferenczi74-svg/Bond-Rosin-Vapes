@@ -91,9 +91,15 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(shell, /HAUS_AGE_BOOT/);
   assert.match(shell, /id="bond-gate-cover"/);
   assert.match(AGE_GATE_CRITICAL, /#bond-gate-cover/);
-  assert.match(AGE_GATE_CRITICAL, /size-adjust:107\.89%/);
-  assert.match(AGE_GATE_CRITICAL, /Inter Fallback/);
+  assert.match(AGE_GATE_CRITICAL, /background:#1B1D1C/);
+  assert.equal(AGE_GATE_CRITICAL.includes("local("), false);
+  assert.equal(AGE_GATE_CRITICAL.includes("--matte-black:"), false);
+  assert.equal(AGE_GATE_CRITICAL.includes("--bone:"), false);
+  assert.equal(AGE_GATE_CRITICAL.includes("var(--matte-black,"), false);
+  assert.equal(AGE_GATE_CRITICAL.includes("var(--bone,"), false);
   assert.match(AGE_GATE_CRITICAL, /\.bond-age-gate \.bond-age-ask \.bond-age-body/);
+  assert.match(gate, /aria-label="Birth month"/);
+  assert.match(gate, /aria-label="Birth year"/);
   assert.equal(AGE_GATE_CRITICAL.includes("woff2"), false);
   assert.equal(AGE_GATE_CRITICAL.includes("font-display"), false);
   assert.match(HAUS_FONT_LATE_CSS, /font-display:swap/);

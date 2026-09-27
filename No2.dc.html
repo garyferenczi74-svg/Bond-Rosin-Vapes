@@ -5,10 +5,13 @@
 <title>No. 2 Unwind . Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style id="bond-gate-cover-css">
-:root{--matte-black:#1B1D1C}
-html,body{background:var(--matte-black,#1B1D1C);margin:0}
-#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:var(--matte-black,#1B1D1C);pointer-events:auto}
+/* Cover paints before tokens arrive */
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:#1B1D1C;pointer-events:auto}
+html,body{background:var(--matte-black);margin:0}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
+html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
+.bond-js-off{box-sizing:border-box;max-width:560px;margin:0 auto;padding:24px;text-align:center}
+.bond-js-note{font-family:Georgia,"Times New Roman",serif;font-size:22px;line-height:1.45;color:var(--bone);margin:0 0 24px}
 html:not([data-bond-age="ok"]) body>*:not(#bond-gate-cover){visibility:hidden}
 html:not([data-bond-age="ok"]) dc-import[name="AgeGate"],
 html:not([data-bond-age="ok"]) dc-import[name="AgeGate"] *,
@@ -18,6 +21,7 @@ html:not([data-bond-age="ok"]) [style*="z-index: 9999"],
 html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 @media (prefers-reduced-motion: reduce){#bond-gate-cover{transition:none}}
 </style>
+<noscript><style>body>*:not(#bond-gate-cover){display:none !important}#bond-gate-cover{display:flex !important;align-items:center;justify-content:center;overflow:auto}#bond-gate-cover .bond-js-off{visibility:visible !important}</style></noscript>
 <script id="bond-gate-boot">
 (function(){
   try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}
@@ -45,7 +49,7 @@ html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
-<div id="bond-gate-cover" aria-hidden="true"></div>
+<div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">Bond requires JavaScript to confirm your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>There may be health risks associated with consumption of this product.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
 <x-dc inert>
 <helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0C131C"></rect><text x="50" y="57" font-family="Didot,serif" font-size="20" letter-spacing="4" fill="#86ACE3" text-anchor="middle">No.2</text></svg></template>
