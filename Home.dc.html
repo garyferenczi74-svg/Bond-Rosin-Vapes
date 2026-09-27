@@ -487,19 +487,37 @@ input::placeholder { color: #B0A99A; }
   var cover = document.getElementById("bond-gate-cover");
   var passed = false;
   try { passed = Boolean(sessionStorage.getItem("bond_age_ok")); } catch (e) {}
-  function contentNodes() {
-    var gate = document.querySelector('dc-import[name="AgeGate"]');
-    var parent = gate ? gate.parentElement : null;
-    if (parent == null) return [];
-    return Array.prototype.filter.call(parent.children, function (el) { return el == gate ? false : true; });
+  function findGate() {
+    return document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
   }
   function hold() {
-    contentNodes().forEach(function (el) {
-      el.inert = true;
-      el.setAttribute("data-bond-hold", "");
-    });
+    var gate = findGate();
+    var nav = document.querySelector("nav");
+    var root = nav ? nav.parentElement : document.querySelector("x-dc > div");
+    if (root == null) return;
+    var kids = root.children;
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      var keep = gate && el.contains(gate);
+      if (keep) {
+        el.inert = false;
+        el.removeAttribute("data-bond-hold");
+      } else {
+        el.inert = true;
+        el.setAttribute("data-bond-hold", "");
+      }
+    }
+    var node = gate;
+    while (node) {
+      if (node == document.documentElement) break;
+      if (node.inert) node.inert = false;
+      node = node.parentElement;
+    }
   }
+  var watch = null;
   function release() {
+    if (watch) watch.disconnect();
+    watch = null;
     var held = document.querySelectorAll("[data-bond-hold]");
     for (var i = 0; i < held.length; i++) {
       held[i].inert = false;
@@ -528,6 +546,8 @@ input::placeholder { color: #B0A99A; }
     return;
   }
   hold();
+  watch = new MutationObserver(function () { hold(); });
+  watch.observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener("bond-entered", release);
 })();
 </script>
