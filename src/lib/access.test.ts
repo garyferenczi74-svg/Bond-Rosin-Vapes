@@ -123,16 +123,16 @@ function stripComments(source: string) {
     .replace(/(^|[^:])\/\/.*$/gm, "$1");
 }
 
-test("Next /haus shows a reciprocal Haus invite to the Home band", () => {
+test("Next /haus membership is by invitation", () => {
   const client = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), "../app/haus/haus-client.tsx"),
     "utf8",
   );
   assert.match(client, /The Haus is for members\./);
   assert.match(client, /Membership is by invitation from the Haus\./);
-  assert.match(client, /Not yet a member\?/);
-  assert.match(client, /Join the Bond Haus\./);
-  assert.match(client, /href="\/#haus"/);
+  assert.equal(client.includes("Not yet a member?"), false);
+  assert.equal(client.includes("Join the Bond Haus."), false);
+  assert.equal(client.includes('href="/#haus"'), false);
   assert.match(client, /ComplianceBand/);
   const band = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), "../components/compliance-band.tsx"),

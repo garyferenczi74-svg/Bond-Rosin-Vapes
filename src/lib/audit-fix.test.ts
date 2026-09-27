@@ -95,7 +95,7 @@ test("Privacy and Terms drop the review banner and ship the locked date", () => 
     assert.equal(html.includes("[DATE]"), false, name);
     assert.equal(html.includes(".review {"), false, name);
   }
-  assert.match(read("Terms.dc.html"), /Effective date: September 16, 2026\./);
+  assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
   assert.match(read("Privacy.dc.html"), /Effective date: September 27, 2026\./);
 });
 

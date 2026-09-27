@@ -379,6 +379,9 @@ test("Finder sample heading and Product sample directory stay fictional", () => 
   assert.equal(finder.includes("Enter your city to see sample listings within fifty miles. These are not real stores."), true);
   assert.equal(finder.includes("No other sample listings within fifty miles. These are not real stores."), true);
   assert.equal(finder.includes("sample listings within fifty miles of "), true);
+  assert.equal(finder.includes("No shops carrying Bond within fifty miles of '+esc(key)+' yet."), true);
+  assert.equal(finder.includes("Join the Haus"), false);
+  assert.equal(finder.includes("to hear when Bond arrives near you"), false);
   assert.equal(finder.includes("These are not real stores. Distances are approximate, measured from the center of each city."), true);
 
   const product = read("Product.dc.html");

@@ -87,6 +87,22 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
     /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\. Signing out does not clear that cookie\./,
   );
   assert.match(privacy, /\[PRIVACY EMAIL\]/);
+  assert.match(privacy, /optional notes on a batch you shelve/);
+  assert.equal(privacy.includes("optional tasting notes"), false);
+  assert.equal(privacy.includes("erase tasting notes"), false);
+  assert.match(privacy, /which chapter of The Number Guide you last opened/);
+  assert.equal(privacy.includes("Experience Guide"), false);
+  assert.equal(privacy.includes("email delivery"), false);
+  assert.match(privacy, /\(hosting, analytics\)/);
+  assert.equal(privacy.includes("Correspondence preference"), false);
+  assert.match(privacy, /Bond does not store a Haus correspondence preference/);
+  assert.match(privacy, /There is no Bond Haus email list/);
+  assert.match(privacy, /While waiver W-2026-09-15-P1-OVERRIDE is on/);
+  assert.match(privacy, /the Haus door does not ask for an authenticator code and stores none/);
+  assert.match(privacy, /factor named Bond Haus/);
+  assert.match(privacy, /Bond does not set a time limit on the factor or on mfa_enrolled/);
+  assert.match(privacy, /Effective date: September 27, 2026\./);
+  assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
 });
 
 test("order portal says nothing is sent to the state tracking system", () => {
@@ -106,8 +122,68 @@ test("Haus admin erase line and cultivar name are corrected", () => {
   assert.equal(admin.includes("keeps no copy"), false);
   assert.equal(admin.includes("Midnight Zkittlez"), false);
   assert.equal(seed.includes("Midnight Zkittlez"), false);
-  assert.match(seed, /Sample batch/);
-  assert.match(admin, /Sample batch/);
+  assert.match(seed, /Sample batch A/);
+  assert.match(seed, /Sample batch C/);
+  assert.match(seed, /Sample batch D/);
+  assert.match(seed, /Sample batch E/);
+  assert.match(admin, /Sample batch A/);
+  assert.match(admin, /Sample batch B/);
+  assert.match(admin, /Sample batch C/);
+  assert.match(admin, /Sample batch D/);
+  assert.match(admin, /Sample batch E/);
   assert.equal(seed.includes("Alpine Reserve"), false);
   assert.equal(admin.includes("Alpine Reserve"), false);
+  for (const invented of [
+    "Sunrise Runtz",
+    "Evening Papaya",
+    "Autumn Gelato",
+    "Morning Mimosa",
+    "Lavender",
+    "Bergamot",
+    "Chamomile",
+    "Clove",
+    "Sandalwood",
+    "Musk",
+    "Gardenia",
+    "Fennel",
+    "Stone fruit",
+    "Cardamom",
+    "Loam",
+    "COA-0518",
+    "COA-0731",
+    "COA-0214",
+    "COA-0198",
+    "Terpene notes",
+  ]) {
+    assert.equal(seed.includes(invented), false, invented);
+    assert.equal(admin.includes(invented), false, invented);
+    assert.equal(read("Haus.dc.html").includes(invented), false, invented);
+  }
+  assert.equal(read("Haus.dc.html").includes("circleCorrespondence"), false);
+  assert.equal(read("Haus.dc.html").includes("prefHaus"), false);
+  assert.equal(read("Haus.dc.html").includes("Haus correspondence"), false);
+});
+
+test("process label, HOPEline short code, and license case stay on the served pages", () => {
+  const hope = "texting HOPENY (467369)";
+  const license = "OCM-PROC-25-000329";
+  for (const name of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html", "Finder.dc.html", "FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html"]) {
+    const html = read(name);
+    assert.equal(html.includes(hope), true, name);
+    assert.equal(html.includes("texting HOPENY,"), false, name);
+    assert.equal(html.includes(license), true, name);
+    assert.equal(html.includes("OCM-Proc-25-000329"), false, name);
+    assert.equal(html.includes("tel:18778467369"), true, name);
+    assert.equal(html.includes("https://oasas.ny.gov/hopeline"), true, name);
+    assert.equal(html.includes("1-877-8-HOPENY"), true, name);
+  }
+  for (const name of ["No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
+    const html = read(name);
+    assert.equal(html.includes('data-screen-label="Process"'), true, name);
+    assert.equal(html.includes('data-screen-label="Purity"'), false, name);
+    assert.equal(html.includes("THE PRODUCT IS PURE"), false, name);
+  }
+  assert.equal(read("No2.dc.html").includes(">Process</div>"), true);
+  assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
+  assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span><br>"), false);
 });

@@ -125,20 +125,20 @@ var Store = {
     var d = {
       houseWrites: [
         { id:'HW-1', title:'A Reserve run has been pressed', body:'A Reserve run has been pressed. No. 3 Peak.', link:'reserve', from:'2026-07-20', until:'', order:1, state:'published' },
-        { id:'HW-2', title:'The Experience Guide', body:'Chapter On Notes is open.', link:'guide', from:'2026-07-18', until:'', order:2, state:'published' },
+        { id:'HW-2', title:'The Number Guide', body:'Chapter On Notes is open.', link:'guide', from:'2026-07-18', until:'', order:2, state:'published' },
         { id:'HW-3', title:'A bright press.', body:'A bright press, made with care.', link:'', from:'', until:'', order:3, state:'draft' },
         { id:'HW-4', title:'A quiet press', body:'A press kept for the end of the day.', link:'', from:'', until:'', order:4, state:'draft' }
       ],
       batches: [
-        { batch:'BND-1-0518', sku:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', coa:'COA-0518', top:'No. 1', heart:'Daytime', base:'Solventless live rosin', run:null, state:'published', shelfCount:9 },
-        { batch:'BND-2-0731', sku:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', coa:'COA-0731', top:'Lavender, Bergamot', heart:'Chamomile, Clove', base:'Sandalwood, Musk', run:null, state:'published', shelfCount:6 },
-        { batch:'BND-3-0214', sku:'no3', cultivar:'Sample batch', harvest:'2026-03-18', pressing:'2026-03-30', coa:'COA-0214', top:'No. 3', heart:'Reserve Edition', base:'Solventless live rosin', run:{ number:214, size:1000 }, state:'published', shelfCount:14 },
-        { batch:'BND-3-0198', sku:'no3', cultivar:'Autumn Gelato', harvest:'2025-10-30', pressing:'2025-11-12', coa:'COA-0198', top:'Stone fruit, Clove', heart:'Rose, Cardamom', base:'Oud, Loam', run:{ number:0, size:500 }, state:'retired', shelfCount:3 },
-        { batch:'BND-1-0603', sku:'no1', cultivar:'Morning Mimosa', harvest:'2026-06-01', pressing:'2026-06-14', coa:'', top:'No. 1', heart:'Daytime', base:'Solventless live rosin', run:null, state:'draft', shelfCount:0 }
+        { batch:'BND-1-0518', sku:'no1', cultivar:'Sample batch A', harvest:'2026-04-10', pressing:'2026-04-22', coa:'', top:'', heart:'', base:'', run:null, state:'published', shelfCount:9 },
+        { batch:'BND-2-0731', sku:'no2', cultivar:'Sample batch B', harvest:'2026-05-02', pressing:'2026-05-15', coa:'', top:'', heart:'', base:'', run:null, state:'published', shelfCount:6 },
+        { batch:'BND-3-0214', sku:'no3', cultivar:'Sample batch C', harvest:'2026-03-18', pressing:'2026-03-30', coa:'', top:'', heart:'', base:'', run:{ number:214, size:1000 }, state:'published', shelfCount:14 },
+        { batch:'BND-3-0198', sku:'no3', cultivar:'Sample batch D', harvest:'2025-10-30', pressing:'2025-11-12', coa:'', top:'', heart:'', base:'', run:{ number:0, size:500 }, state:'retired', shelfCount:3 },
+        { batch:'BND-1-0603', sku:'no1', cultivar:'Sample batch E', harvest:'2026-06-01', pressing:'2026-06-14', coa:'', top:'', heart:'', base:'', run:null, state:'draft', shelfCount:0 }
       ],
       reserveRuns: [
-        { id:'run-mz', sku:'no3', cultivar:'Sample batch', pressing:'2026-03-30', size:1000, claimed:214, state:'open' },
-        { id:'run-ag', sku:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, claimed:500, state:'ended' }
+        { id:'run-mz', sku:'no3', cultivar:'Sample batch C', pressing:'2026-03-30', size:1000, claimed:214, state:'open' },
+        { id:'run-ag', sku:'no3', cultivar:'Sample batch D', pressing:'2025-11-12', size:500, claimed:500, state:'ended' }
       ],
       events: [
         { id:'ev1', name:'An Evening of Three', date:'2026-08-14', city:'Manhattan', line:'The three compositions, poured slowly, in a quiet room.', capacity:40, confirmed:37, state:'open', requests:[{code:'MAN-014',state:'requested'},{code:'MAN-021',state:'requested'},{code:'MAN-033',state:'confirmed'}] },
@@ -166,7 +166,7 @@ var Store = {
         { email:'ellis@example.com', state:'suspended' }
       ],
       counts: { members:3, activeShelves:2, ritualsThisMonth:11, notesHeld:14, rsvpTotals:49 },
-      settings: { invitationWindow:true, registrationPause:false, welcomeText:'This floor is yours. Your shelf, your guide, your rituals, kept quietly.', privacyWall:'The house does not read the guest book. Member tasting notes, ritual reflections, and session histories are structurally unreadable from any admin context. There is no override.' },
+      settings: { invitationWindow:true, registrationPause:false, welcomeText:'This floor is yours. Your shelf, your guide, your rituals, kept quietly.', privacyWall:'The house does not read the guest book. Member notes, ritual reflections, and session histories are structurally unreadable from any admin context. There is no override.' },
       audit: [
         { ts:'2026-07-27 09:02:11', actor:'Gary', action:'Published House Write HW-1', before:'draft', after:'published' },
         { ts:'2026-07-27 09:05:40', actor:'Gary', action:'Published batch BND-3-0214', before:'draft', after:'published' }
@@ -338,7 +338,6 @@ function batchEditor(b){
   function f(k,label,val){ return '<div><div class="lbl">'+label+'</div><input class="vfield bField" data-bf="'+k+'" data-bid="'+esc(b.batch)+'" value="'+esc(val)+'" style="margin-top:6px"></div>'; }
   return '<div class="card" style="margin-top:16px;border-color:#55503F55"><div style="display:flex;justify-content:space-between"><span class="lbl">Edit '+esc(b.batch)+'</span><span>'+stateChip(b.state)+'</span></div>'
     + '<div class="split" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">'+f('cultivar','Cultivar',b.cultivar)+f('harvest','Harvest',b.harvest)+f('pressing','Pressing',b.pressing)+f('coa','COA stub',b.coa)+'</div>'
-    + '<div class="lbl" style="margin-top:14px">Terpene notes</div><div class="split" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:6px">'+f('top','Top',b.top)+f('heart','Heart',b.heart)+f('base','Base',b.base)+'</div>'
     + '<div style="font-size:12px;color:#8E887C;margin-top:12px">'+b.shelfCount+' members shelve this batch. Names are never listed.</div>'
     + '<div style="display:flex;gap:10px;margin-top:14px">'+(b.state !== 'published'?'<button class="act go" data-bpublish="'+esc(b.batch)+'">Publish</button>':'')+(b.state !== 'retired'?'<button class="act no" data-bretire="'+esc(b.batch)+'">Retire</button>':'')+'</div>'
     + (b.coa?'':'<div style="font-size:12px;color:#C08457;margin-top:10px">A COA stub is required before publish.</div>')+'</div>';
@@ -371,7 +370,7 @@ function renderEvents(){
 
 // ---------- Guide ----------
 function renderGuide(){
-  var head = headerBar('Guide', 'The Experience Guide chapters. Publish updates the member Guide live.', pv());
+  var head = headerBar('Guide', 'The Number Guide chapters. Publish updates the member Guide live.', pv());
   var rows = Store.data.guide.sort(function(a,b){ return a.order-b.order; }).map(function(g){ return '<div class="card gRow" data-gid="'+g.id+'" style="margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center"><div><span class="mono" style="color:#5E5A52">'+g.order+'</span> <span style="color:#E1DAD0">'+esc(g.title)+'</span> <span class="badge">'+esc(g.kind)+'</span></div>'+stateChip(g.state)+'</div>'; }).join('');
   var editor = '';
   if (guideSel){ var g=Store.byId('guide',guideSel); if (g){

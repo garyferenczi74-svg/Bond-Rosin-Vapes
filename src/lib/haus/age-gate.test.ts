@@ -188,8 +188,11 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   assert.equal(band.includes("bond_warn_idx"), false);
   assert.match(band, /tel:18778467369/);
   assert.match(band, /https:\/\/oasas\.ny\.gov\/hopeline/);
+  assert.match(band, /texting HOPENY \(467369\)/);
+  assert.match(band, /1-877-8-HOPENY/);
   assert.match(band, /Cannabis can be addictive\./);
-  assert.match(band, /OCM-Proc-25-000329/);
+  assert.match(band, /OCM-PROC-25-000329/);
+  assert.equal(band.includes("OCM-Proc-25-000329"), false);
   assert.match(read("src/app/haus/haus-client.tsx"), /ComplianceBand/);
   assert.match(read("src/app/order/order-client.tsx"), /ComplianceBand/);
 

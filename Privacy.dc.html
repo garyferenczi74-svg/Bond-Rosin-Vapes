@@ -91,14 +91,14 @@
     <p class="lead">Bond respects the people who visit its house. This policy explains what we collect, why, and the control you keep. We built the site to know as little about you as possible, because discretion is not a feature of this brand; it is the brand.</p>
 
     <h2>1. Who we are</h2>
-    <p>This site is operated by Cedargrowth LLC, a New York State licensed cannabis business (OCM-Proc-25-000329), the company behind Bond ("Bond," "we," "us"). Contact: [PRIVACY EMAIL].</p>
+    <p>This site is operated by Cedargrowth LLC, a New York State licensed cannabis business (OCM-PROC-25-000329), the company behind Bond ("Bond," "we," "us"). Contact: [PRIVACY EMAIL].</p>
 
     <h2>2. Age verification, first and always</h2>
     <p>New York law requires this site to verify that every visitor is 21 or older before viewing. When you verify, we store a flag in sessionStorage for this browser session, under the name bond_age_ok. The flag is the time you entered. It is not a cookie and it is not kept for 30 days. Closing the browser session clears it. We do not store your date of birth.</p>
 
     <h2>3. What we collect</h2>
     <ul>
-      <li>Bond Haus: the Home Haus form stores nothing and sends nothing. There is no Bond Haus email list.</li>
+      <li>Bond Haus: the Home Haus form stores nothing and sends nothing. There is no Bond Haus email list, and Bond does not store a Haus correspondence preference.</li>
       <li>Dispensary Login: dispensary name, address, contact name, phone number, licensed partner email, New York OCM license number, a hashed password, 21+ confirmation, and account status. Passwords are stored hashed only. They are never logged in plaintext and are never sent to Metrc. Creating access does not grant order rights until Bond operations elevates the account.</li>
       <li>Site analytics: aggregated usage data (pages viewed, approximate region, device type), configured to avoid building individual profiles.</li>
       <li>Dispensary finder: a location you choose to share is used for the lookup and is not stored.</li>
@@ -110,20 +110,20 @@
     <ul>
       <li>Email. Purpose: to open the Haus door and to recognize your session. On the Next door it is kept in a cookie for one day, or until you sign out. On the Haus floor it is kept in the page until you refresh or erase the whole account.</li>
       <li>Password. Purpose: to open the Haus door. The Haus floor does not keep the password after you submit the form. Your Haus password is held by our account service. Bond has no deletion process for it yet, so it is kept until one is in place.</li>
+      <li>Authenticator code. While waiver W-2026-09-15-P1-OVERRIDE is on, the Haus door does not ask for an authenticator code and stores none. The sign-in record notes that the code step was waived, at assurance level aal1, and that record stays until a deletion process is in place. When the waiver is off, the door asks an admin for a 6 digit code from an authenticator. Enrolling stores a time-based one-time factor named Bond Haus with the account service, including its factor id and setup image, until that factor is verified. An unverified factor already in progress is kept and reused. The code you type is checked by the account service and is not written into Bond storage. A challenge id exists only for that check. After a successful check, the account service marks the factor verified and Bond sets mfa_enrolled true on that admin row. Bond does not set a time limit on the factor or on mfa_enrolled.</li>
       <li>First name. Purpose: to greet you on the Haus floor. Kept in the page until you refresh or erase the whole account. The Next door does not ask for a first name.</li>
       <li>Age 21 confirmation. Purpose: to confirm the Haus is for adults 21 and over. On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year. Signing out does not clear that cookie. On the Haus floor the confirmation is kept in the page until you refresh or erase the whole account.</li>
       <li>City. Purpose: to look up a New York city when you ask which licensed dispensaries are near you. Kept in the page until you refresh or erase the whole account.</li>
-      <li>Notes. Purpose: optional tasting notes on a batch you shelve. Kept in the page until you refresh, erase notes, or erase the whole account.</li>
+      <li>Notes. Purpose: optional notes on a batch you shelve. Kept in the page until you refresh, erase notes, or erase the whole account.</li>
       <li>Ritual reflections and sessions. Purpose: a date, an intention, the minutes you set, and an optional reflection after a quiet timer. No product is stored with the session. Kept in the page until you refresh, erase reflections, erase ritual history, or erase the whole account. Older sessions that named a product are ignored.</li>
       <li>Reserve queue. Purpose: a draft request with your email, the run, the dispensary, the city, and the date. Today this request is not sent to any dispensary or to anyone else. One copy is stored in your browser until you clear site data for this site. A second copy is kept in the page until you refresh, close it, or erase the whole account. Erasing the account does not clear the browser copy.</li>
-      <li>Correspondence preference. Purpose: whether you want Haus correspondence. Kept in the page until you refresh or erase the whole account.</li>
       <li>Shelf. Purpose: the batch records you register, aside from the notes above. Kept in the page until you refresh or erase the whole account.</li>
       <li>Run numbers on your record. Purpose: the Reserve run numbers you add from a shelved batch. Kept in the page until you refresh or erase the whole account.</li>
       <li>Evenings. Purpose: a request or confirmation for a house evening. Kept in the page until you refresh or erase the whole account.</li>
-      <li>Guide place. Purpose: which chapter of the Experience Guide you last opened. Kept in the page until you refresh or erase the whole account.</li>
+      <li>Guide place. Purpose: which chapter of The Number Guide you last opened. Kept in the page until you refresh or erase the whole account.</li>
       <li>Door attempts. Each attempt at the Haus door records a hashed form of the email entered, the network address, and whether the attempt succeeded, so repeated attempts can be limited. These records are kept for members and nonmembers alike until a deletion process is in place.</li>
     </ul>
-    <p>From Account on the Haus floor you can download the page record, erase tasting notes, erase ritual reflections, erase ritual history, or erase the whole account. Erasing the account does not remove your password from the account service or the records of door attempts. Signing out clears the one day session cookie. To remove the browser reserve queue, clear site data for this site. To remove the one year age confirmation cookie, clear cookies for this site or wait for it to expire.</p>
+    <p>From Account on the Haus floor you can download the page record, erase notes, erase ritual reflections, erase ritual history, or erase the whole account. Erasing the account does not remove your password from the account service or the records of door attempts. Signing out clears the one day session cookie. To remove the browser reserve queue, clear site data for this site. To remove the one year age confirmation cookie, clear cookies for this site or wait for it to expire.</p>
 
     <h2>4. What we do not collect</h2>
     <p>We sell nothing on this site, so we hold no purchase records, no payment details, and no government identification. We collect no health information of any kind. We do not buy data about you from anyone. Dispensary Login credentials stay on Bond systems and are not sent to Metrc.</p>
@@ -132,13 +132,13 @@
     <p>To operate the site, to operate Dispensary Login for licensed partners, to comply with New York cannabis law, and to measure what is working. The Home Haus form stores nothing and sends nothing. Nothing else.</p>
 
     <h2>6. Sharing</h2>
-    <p>Only with service providers who help us run the site (hosting, email delivery, analytics), each bound to our instructions; with the Office of Cannabis Management or other authorities where the law requires; and never sold, and never shared for cross-context behavioral advertising.</p>
+    <p>Only with service providers who help us run the site (hosting, analytics), each bound to our instructions; with the Office of Cannabis Management or other authorities where the law requires; and never sold, and never shared for cross-context behavioral advertising.</p>
 
     <h2>7. Cookies</h2>
     <p>The age check is a sessionStorage flag named bond_age_ok. It is cleared when the browser session ends. It is not a cookie. These other keys stay in the browser and are never sent: localStorage bondDispensaryDir and bondNyCities (Finder), and localStorage bondFindResult (Home quiz). The Haus door uses two cookies: bond_haus_ack, kept for one year, and bond_haus_member, kept for one day. Analytics cookies may also be present. Your browser controls let you clear site data.</p>
 
     <h2>8. Your choices and rights</h2>
-    <p>There is no Bond Haus email list, so there is no unsubscribe link for one. Depending on where you live, you may have rights to access, correct, or delete your personal information; send requests to [PRIVACY EMAIL] and we will verify and respond within the time your state's law requires, and we honor reasonable requests regardless of state.</p>
+    <p>There is no Bond Haus email list, so there is no unsubscribe link for one. Bond does not store a Haus correspondence preference. Depending on where you live, you may have rights to access, correct, or delete your personal information; send requests to [PRIVACY EMAIL] and we will verify and respond within the time your state's law requires, and we honor reasonable requests regardless of state.</p>
 
     <h2>9. Retention</h2>
     <p>The Home Haus form stores nothing and sends nothing, so Bond keeps no Bond Haus subscription records from it. Dispensary Login records are kept while the partner account is active and as long as New York business and cannabis recordkeeping requires, then deleted or disabled when operations revokes the account. Analytics persist in aggregate. The bond_age_ok flag is cleared when the browser session ends.</p>
@@ -162,8 +162,8 @@
         <p>There may be health risks associated with consumption of this product.</p>
         <p>Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
       </div>
-      <p class="bond-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
-      <p class="bond-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+      <p class="bond-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
+      <p class="bond-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p>
     </div>
     <span>21+ Cannabis products. Keep out of reach of children.</span>
     <span style="display:flex;gap:22px;flex-wrap:wrap">

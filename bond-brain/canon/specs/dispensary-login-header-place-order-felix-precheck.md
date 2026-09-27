@@ -19,7 +19,7 @@ OCM number is the NY OCM adult-use license number. Hash passwords. Never log pla
 
 ## D. Part 129
 
-YES. Header Place Order is licensee marketing. Destination `/order` needs a 21+ age gate, no youth-appeal chrome, and standing Bond identity / warning pack (OCM-Proc-25-000329). FAIL tip without the age gate.
+YES. Header Place Order is licensee marketing. Destination `/order` needs a 21+ age gate, no youth-appeal chrome, and standing Bond identity / warning pack (OCM-PROC-25-000329). FAIL tip without the age gate.
 
 ## OUT
 

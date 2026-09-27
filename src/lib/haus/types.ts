@@ -1,7 +1,7 @@
 export const HAUS_LEDGER_COOKIE = "bond_haus_ledger";
 
 export const PRIVACY_WALL =
-  "The house does not read the guest book. Member tasting notes, ritual reflections, and session histories are structurally unreadable from any admin context. There is no override.";
+  "The house does not read the guest book. Member notes, ritual reflections, and session histories are structurally unreadable from any admin context. There is no override.";
 
 export type PublishState = "draft" | "published" | "retired";
 export type InviteState = "issued" | "accepted" | "expired" | "revoked";

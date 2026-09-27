@@ -37,7 +37,7 @@ Replace the Home header Bond Haus tab with Place Order. Destination is Dispensar
 - [x] Header Place Order treated as licensee marketing CTA
 - [x] Destination `/order` has 21+ age gate
 - [x] No youth-appeal order chrome
-- [x] Licensee identity / warnings per Bond Part 129 marketing checklist (OCM-Proc-25-000329 on the compliance band)
+- [x] Licensee identity / warnings per Bond Part 129 marketing checklist (OCM-PROC-25-000329 on the compliance band)
 - [x] Felix tip Pre-Check named: `/canon/specs/dispensary-login-header-place-order-felix-precheck.md`
 - [x] Privacy amend covers dispensary login before first real signup
 

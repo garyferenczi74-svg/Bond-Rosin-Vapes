@@ -76,7 +76,7 @@ export function ComplianceBand() {
             margin: "12px 0 0",
           }}
         >
-          Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY,
+          Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369),
           calling{" "}
           <a href="tel:18778467369" style={{ color: "inherit" }}>
             1-877-8-HOPENY
@@ -89,7 +89,7 @@ export function ComplianceBand() {
         </p>
         <p style={{ fontSize: 11, lineHeight: 1.7, color: tokens.muted, margin: "12px 0 0" }}>
           Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management.
-          OCM-Proc-25-000329
+          OCM-PROC-25-000329
         </p>
         <p style={{ fontSize: 12, lineHeight: 1.7, color: tokens.muted, margin: "16px 0 0" }}>
           21+ Cannabis products. Keep out of reach of children.

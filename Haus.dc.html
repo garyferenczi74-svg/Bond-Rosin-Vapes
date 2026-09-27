@@ -59,14 +59,14 @@ var GOLD = 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62
 var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 var COMPS = [
-  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Daytime','Solventless','Live rosin'], top:['No. 1'], heart:['Daytime'], base:['Solventless live rosin'] },
-  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Evening','Solventless','Live rosin'], top:['No. 2'], heart:['Evening'], base:['Solventless live rosin'] },
-  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Reserve Edition','Solventless','Live rosin'], top:['No. 3'], heart:['Reserve Edition'], base:['Solventless live rosin'] }
+  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Daytime','Solventless','Live rosin'], top:[], heart:[], base:[] },
+  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Evening','Solventless','Live rosin'], top:[], heart:[], base:[] },
+  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Reserve Edition','Solventless','Live rosin'], top:[], heart:[], base:[] }
 ];
 var BATCH_RECORDS = {
-  'BND-1-0518': { comp:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', batch:'BND-1-0518', run:null },
-  'BND-2-0731': { comp:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', batch:'BND-2-0731', run:null },
-  'BND-3-0214': { comp:'no3', cultivar:'', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
+  'BND-1-0518': { comp:'no1', cultivar:'Sample batch A', harvest:'2026-04-10', pressing:'2026-04-22', batch:'BND-1-0518', run:null },
+  'BND-2-0731': { comp:'no2', cultivar:'Sample batch B', harvest:'2026-05-02', pressing:'2026-05-15', batch:'BND-2-0731', run:null },
+  'BND-3-0214': { comp:'no3', cultivar:'Sample batch C', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
 };
 var GUIDE = [
   { id:'cover', title:'The Number Guide', kind:'cover' },
@@ -201,7 +201,7 @@ var HausStore = {
   member: null,
   seed: function(){
     this.member = {
-      signedIn:false, entered:false, first:'Gary', name:'Gary Ferenczi', email:DEMO_EMAIL, circle:true, age21:false, // circle: Haus correspondence pref. Do not rename without a data migration.
+      signedIn:false, entered:false, first:'Gary', name:'Gary Ferenczi', email:DEMO_EMAIL, age21:false,
       shelf: [], claims: [], reserveHolds: [], city: '', guidePlace: 0,
       events: [
         { id:'ev1', name:'An Evening of Three', date:'2026-08-14', city:'Manhattan', line:'The three compositions, poured slowly, in a quiet room.', capacity:'open', rsvp:'none' },
@@ -211,8 +211,8 @@ var HausStore = {
       sessions: []
     };
     this.reserveRuns = [
-      { id:'run-mz', comp:'no3', cultivar:'', pressing:'2026-03-30', size:1000, status:'current' },
-      { id:'run-ag', comp:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, status:'closed' }
+      { id:'run-mz', comp:'no3', cultivar:'Sample batch C', pressing:'2026-03-30', size:1000, status:'current' },
+      { id:'run-ag', comp:'no3', cultivar:'Sample batch D', pressing:'2025-11-12', size:500, status:'closed' }
     ];
     this.houseWrites = [
       { text:'A Reserve run has been pressed. No. 3 Peak.', view:'reserve' },
@@ -259,7 +259,7 @@ var HausStore = {
     return rec;
   },
   releaseHold: function(id){ this.member.reserveHolds = this.member.reserveHolds.filter(function(h){ return h.id !== id; }); },
-  record: function(){ var m=this.member; return { name:m.name, email:m.email, circleCorrespondence:m.circle, shelf:m.shelf, reserveClaims:m.claims, reserveHolds:m.reserveHolds, ritualHistory:(m.sessions||[]).map(sessionFields), guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; } // circleCorrespondence: Haus email pref key. Do not rename without a data migration.
+  record: function(){ var m=this.member; return { name:m.name, email:m.email, shelf:m.shelf, reserveClaims:m.claims, reserveHolds:m.reserveHolds, ritualHistory:(m.sessions||[]).map(sessionFields), guidePlace:m.guidePlace, events:m.events.map(function(e){ return { name:e.name, rsvp:e.rsvp }; }) }; }
 };
 
 // ================= chrome =================
@@ -278,8 +278,8 @@ function complianceBand(){
     + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>'
     + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">There may be health risks associated with consumption of this product.</p>'
     + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0">Cannabis is not recommended for use by persons who are pregnant or nursing.</p></div>'
-    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#8E887C;margin:12px 0 0">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit">oasas.ny.gov/hopeline</a>.</p>'
-    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:12px 0 0">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p></div></footer>';
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#8E887C;margin:12px 0 0">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369" style="color:inherit">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit">oasas.ny.gov/hopeline</a>.</p>'
+    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:12px 0 0">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></footer>';
 }
 function chrome(active, inner){
   var nav = NAV.map(function(n){ return '<a class="navlink'+(active===n[0]?' on':'')+'" href="#/haus/'+n[0]+'">'+esc(n[1])+'</a>'; }).join('');
@@ -424,8 +424,7 @@ function renderDashboard(){
 
   // account
   var aCard = '<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Account</span><a href="#/haus/account" style="font-size:11.5px;color:#8E887C;border-bottom:1px solid #3A3C3B;padding-bottom:1px">Manage</a></div>'
-    + '<div style="margin-top:12px;font-size:12.5px;color:#B0A99A">'+esc(m.name)+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:4px">'+esc(m.email)+'</div>'
-    + '<div style="font-size:11.5px;color:#6E685E;margin-top:8px">Haus correspondence '+(m.circle?'on':'off')+'</div></div>';
+    + '<div style="margin-top:12px;font-size:12.5px;color:#B0A99A">'+esc(m.name)+'</div><div style="font-size:11.5px;color:#8E887C;margin-top:4px">'+esc(m.email)+'</div></div>';
 
   var fr = findResult(); var rc = fr ? comp(fr.comp) : null;
   var recCard = rc
@@ -455,17 +454,19 @@ function renderLibrary(){
   chrome('library', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Library</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">What you own, and what you thought of it. Never what you did.</p>' + reg + shelfCard + detail);
 }
 function pyramid(c){
-  function tier(label, arr){ return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+arr.join(' . ')+'</span></div>'; }
-  return '<div style="margin-top:14px">'+tier('Top notes', c.top)+tier('Heart', c.heart)+tier('Base', c.base)+'</div>';
+  function tier(label, arr){ if (!arr || !arr.length) return ''; return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+arr.join(' . ')+'</span></div>'; }
+  var html = tier('Top notes', c.top)+tier('Heart', c.heart)+tier('Base', c.base);
+  return html ? '<div style="margin-top:14px">'+html+'</div>' : '';
 }
 function batchPyramid(b, c){
   var sb = sharedBatch(b.batch);
   function toArr(v){ return v==null||v===''?null:(Array.isArray(v)?v:String(v).split(',').map(function(s){ return s.trim(); }).filter(Boolean)); }
-  var top = toArr(sb?sb.top:null) || toArr(b.top) || c.top;
-  var heart = toArr(sb?sb.heart:null) || toArr(b.heart) || c.heart;
-  var base = toArr(sb?sb.base:null) || toArr(b.base) || c.base;
-  function tier(label, arr){ return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+esc(arr.join(' . '))+'</span></div>'; }
-  return '<div style="margin-top:14px">'+tier('Top notes', top)+tier('Heart', heart)+tier('Base', base)+'</div>';
+  var top = toArr(sb?sb.top:null) || toArr(b.top) || c.top || [];
+  var heart = toArr(sb?sb.heart:null) || toArr(b.heart) || c.heart || [];
+  var base = toArr(sb?sb.base:null) || toArr(b.base) || c.base || [];
+  function tier(label, arr){ if (!arr || !arr.length) return ''; return '<div style="display:flex;gap:12px;align-items:baseline;padding:7px 0;border-bottom:1px solid #2A2C29"><span class="lbl" style="min-width:78px">'+label+'</span><span style="font-size:13px;color:#B0A99A">'+esc(arr.join(' . '))+'</span></div>'; }
+  var html = tier('Top notes', top)+tier('Heart', heart)+tier('Base', base);
+  return html ? '<div style="margin-top:14px">'+html+'</div>' : '';
 }
 function batchEntry(b){
   var c = comp(b.comp);
@@ -480,7 +481,7 @@ function batchEntry(b){
     + '</div></div>';
 }
 
-// ================= 3. Experience Guide =================
+// ================= 3. The Number Guide =================
 function renderGuide(){
   var m = HausStore.member; var idx = m.guidePlace; var ch = GUIDE[idx];
   var page;
@@ -496,7 +497,8 @@ function renderGuide(){
     page = '<div style="background:#F2ECE0;border-radius:4px;padding:44px clamp(24px,4vw,56px);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:'+c.tint.replace('0.05','0.14')+';pointer-events:none"></div><div style="position:relative">'
       + '<div class="didot" style="font-size:30px;color:#2A2620">'+esc(c.name)+'</div><div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8270;margin-top:8px">'+c.triad.join(' . ')+'</div>'
       + '<div style="height:1px;background:'+c.accent+';width:60px;margin:20px 0"></div>'
-      + '<div style="font-size:14px;line-height:1.9;color:#4A463E"><strong style="color:#2A2620">Top notes.</strong> '+c.top.join(', ')+'. <strong style="color:#2A2620">Heart.</strong> '+c.heart.join(', ')+'. <strong style="color:#2A2620">Base.</strong> '+c.base.join(', ')+'.</div></div></div>';
+      + ((c.top.length||c.heart.length||c.base.length)?'<div style="font-size:14px;line-height:1.9;color:#4A463E"><strong style="color:#2A2620">Top notes.</strong> '+c.top.join(', ')+'. <strong style="color:#2A2620">Heart.</strong> '+c.heart.join(', ')+'. <strong style="color:#2A2620">Base.</strong> '+c.base.join(', ')+'.</div>':'')
+      + '</div></div>';
   } else {
     page = paperSpread('The Ritual', '<div style="display:flex;flex-direction:column;gap:0">'+[['Prepare','Clear the space. Remove distractions.'],['Pause','Be still. Set your intention.'],['Close','Return when ready.']].map(function(s,i,a){ return '<div style="display:flex;gap:16px;align-items:flex-start"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:#C08457"></span>'+(i<a.length-1?'<span style="width:1px;height:42px;background:#C0845766"></span>':'')+'</div><div style="padding-bottom:26px"><div class="didot" style="font-size:19px;color:#2A2620">'+s[0]+'</div><div style="font-size:14px;color:#4A463E;margin-top:4px">'+s[1]+'</div></div></div>'; }).join('')+'</div>');
   }
@@ -682,11 +684,10 @@ function renderAccount(){
   var inner = '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">Account</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">Plain and complete. Everything the house holds, in your hands.</p>'
     + '<div class="card"><div class="lbl">Member</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px">'
     + '<div><div style="font-size:11px;color:#6E685E">Name</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.name)+'</div></div>'
-    + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div>'
-    + '<div style="margin-top:18px"><label style="display:flex;gap:10px;align-items:center;font-size:13.5px;color:#B0A99A;cursor:pointer"><input type="checkbox" id="prefHaus"'+(m.circle?' checked':'')+'> Haus correspondence</label></div></div>'
+    + '<div><div style="font-size:11px;color:#6E685E">Email</div><div style="color:#E1DAD0;margin-top:4px">'+esc(m.email)+'</div></div></div></div>'
     + '<div class="card" style="margin-top:16px"><div class="lbl">Your data</div><p style="font-size:13px;color:#8E887C;margin:12px 0 14px;line-height:1.7">Everything here is private, optional, and yours to erase, exactly as the Privacy Policy promises. This does not remove your password from the account service, the records of door attempts, or reserve requests stored in this browser.</p>'
     + '<button id="dlRecord" class="htab on" style="padding:0 22px;height:40px">Download my record</button>'
-    + '<div style="margin-top:18px">'+eraseRow('notes','Tasting notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
+    + '<div style="margin-top:18px">'+eraseRow('notes','Notes')+eraseRow('reflections','Ritual reflections')+eraseRow('history','Ritual history')+eraseRow('account','The whole account')+'</div></div>';
   chrome('account', inner);
 }
 
@@ -765,10 +766,6 @@ document.addEventListener('click', function(ev){
 document.addEventListener('input', function(ev){
   if (ev.target.id==='rFree' && ev.target.value.trim()){ ritual.freeText=ev.target.value; }
 });
-document.addEventListener('change', function(ev){
-  if (ev.target.id==='prefHaus'){ HausStore.member.circle=ev.target.checked; toast(ev.target.checked?'Haus correspondence on.':'Haus correspondence off.'); }
-});
-
 function downloadRecord(){
   var blob = new Blob([JSON.stringify(HausStore.record(),null,2)], { type:'application/json' });
   var url = URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download='bond-haus-record.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
