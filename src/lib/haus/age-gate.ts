@@ -62,7 +62,7 @@ const LATIN_RANGE =
 
 export const AGE_GATE_CRITICAL = `/* Cover paints before tokens arrive */
 #bond-gate-cover{position:fixed;inset:0;z-index:8000;background:#1B1D1C;pointer-events:auto}
-html,body{background:var(--matte-black);margin:0;color:var(--bone)}
+html,body{background:#1B1D1C;margin:0;color:var(--bone)}
 :root{--font-didot:"GFS Didot"}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
