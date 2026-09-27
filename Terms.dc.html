@@ -7,6 +7,7 @@
 <title>Terms of Service . Bond</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/bond-age-gate.css">
 <style>
   a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #E3C270;outline-offset:3px}
 
@@ -31,17 +32,43 @@
   .cband span:last-child { font-size:16px; color: #B0A99A; }
   footer { background: #1B1D1C; padding: 40px clamp(20px,4vw,56px); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size:12px; color: #8E887C; }
   footer a { color: #8E887C; text-decoration: none; }
-  :root { --matte-black: #1B1D1C; }
   html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
-  html[data-bond-age="ok"] .bond-age-frame { display: none; }
-  .bond-age-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 9999; background: var(--matte-black); }
+  html[data-bond-age="ok"] .bond-age-gate { display: none; }
 </style>
 <script>
 (function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
 </script>
 </head>
 <body>
-<iframe id="bond-age-frame" class="bond-age-frame" title="Age gate" src="/haus-age-host.dc.html"></iframe>
+<div id="bond-age-gate" class="bond-age-gate" data-declined="false">
+  <div class="bond-age-veil"></div>
+  <div class="bond-age-veil-soft"></div>
+  <div class="bond-age-panel bond-age-no">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-title">Not yet</p>
+    <p class="bond-age-body">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
+    <div class="bond-age-rule"></div>
+  </div>
+  <div class="bond-age-panel bond-age-ask">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-lead">Intentional elevation is for adults.</p>
+    <div class="bond-age-rule bond-age-rule-wide"></div>
+    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
+    <div class="bond-age-fields">
+      <select id="bond-age-month" class="bond-age-select bond-age-month" aria-label="Birth month">
+        <option value="">Birth month</option>
+      </select>
+      <select id="bond-age-year" class="bond-age-select bond-age-year" aria-label="Birth year">
+        <option value="">Birth year</option>
+      </select>
+    </div>
+    <button type="button" id="bond-age-enter" class="bond-age-enter" data-ready="false">Enter</button>
+    <div class="bond-age-health">
+      <div class="bond-age-health-label">Health and Safety</div>
+      <p>For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
+    </div>
+  </div>
+</div>
 <div class="bond-floor" inert>
   <header class="head">
     <a href="Home.dc.html" class="wordmark">BOND</a>
@@ -131,28 +158,6 @@
   })();
   </script>
 </div>
-<script>
-(function(){
-  var frame=document.getElementById("bond-age-frame");
-  var floor=document.querySelector(".bond-floor");
-  function readAge(){ try { return sessionStorage.getItem("bond_age_ok"); } catch(e){ return null; } }
-  function passed(raw){ return raw!=null && raw!==""; }
-  function openFloor(){
-    document.documentElement.setAttribute("data-bond-age","ok");
-    if(frame&&frame.parentNode) frame.parentNode.removeChild(frame);
-    if(floor) floor.removeAttribute("inert");
-  }
-  if(passed(readAge())){ openFloor(); return; }
-  window.addEventListener("message", function(event){
-    if(event.origin!==location.origin) return;
-    var data=event.data;
-    if(!data||typeof data!=="object"||data.type!=="bond-entered") return;
-    openFloor();
-  });
-  var timer=window.setInterval(function(){
-    if(passed(readAge())){ window.clearInterval(timer); openFloor(); }
-  }, 400);
-})();
-</script>
+<script src="/bond-age-gate.js"></script>
 </body>
 </html>

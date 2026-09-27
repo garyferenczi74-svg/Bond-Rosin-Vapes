@@ -5,8 +5,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   BOND_AGE_KEY,
+  BOND_AGE_MONTHS,
   HAUS_AGE_BOOT,
   HAUS_AGE_HOST,
+  bondAgeDecision,
   hausRouteShowsAgeGate,
   hausShowsAgeGate,
   routeShowsAgeGate,
@@ -107,30 +109,88 @@ test("Haus door and floor include AgeGate.dc.html instead of a copied gate", () 
   assert.equal(read("src/components/haus-frame.tsx").includes("AgeGate"), false);
 });
 
-test("faq privacy terms and order reuse the same AgeGate and bond_age_ok", () => {
+test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   const order = read("src/app/order/layout.tsx");
-  assert.match(order, /HausAgeGate/);
+  const gateJs = read("bond-age-gate.js");
+  const gateCss = read("bond-age-gate.css");
+  const gateView = read("src/components/bond-age-gate.tsx");
+  const thirdPartyScript = /unpkg\.com|fonts\.googleapis\.com|fonts\.gstatic\.com|support\.js|haus-age-host/;
+
+  assert.match(order, /BondAgeGate/);
   assert.match(order, /HAUS_AGE_BOOT/);
-  assert.match(order, /HAUS_AGE_CSS/);
+  assert.match(order, /href="\/bond-age-gate\.css"/);
+  assert.equal(order.includes("HausAgeGate"), false);
+  assert.equal(order.includes("HAUS_AGE_CSS"), false);
+  assert.equal(order.includes("iframe"), false);
+  assert.equal(thirdPartyScript.test(order), false);
+  assert.equal(thirdPartyScript.test(gateJs), false);
+  assert.equal(thirdPartyScript.test(gateCss), false);
+  assert.equal(thirdPartyScript.test(gateView), false);
+  assert.equal(gateJs.includes("iframe"), false);
+  assert.equal(gateView.includes("iframe"), false);
+
   assert.match(read("next.config.ts"), /source: "\/faq", destination: "\/FAQ\.dc\.html"/);
   assert.match(read("next.config.ts"), /source: "\/privacy", destination: "\/Privacy\.dc\.html"/);
   assert.match(read("next.config.ts"), /source: "\/terms", destination: "\/Terms\.dc\.html"/);
+  assert.match(read("scripts/sync-public.mjs"), /bond-age-gate\.js/);
+  assert.match(read("scripts/sync-public.mjs"), /bond-age-gate\.css/);
+
   for (const name of ["FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html"]) {
     const html = read(name);
-    assert.match(html, /src="\/haus-age-host\.dc\.html"/, name);
+    assert.match(html, /id="bond-age-gate"/, name);
+    assert.match(html, /href="\/bond-age-gate\.css"/, name);
+    assert.match(html, /src="\/bond-age-gate\.js"/, name);
     assert.match(html, /sessionStorage\.getItem\("bond_age_ok"\)/, name);
     assert.match(html, /class="bond-floor" inert/, name);
+    assert.match(html, /Intentional elevation is for adults\./, name);
+    assert.match(html, /Birth month/, name);
+    assert.match(html, /Not yet/, name);
     assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-floor \{ visibility: hidden; \}/, name);
-    assert.match(html, /background: var\(--matte-black\)/, name);
-    assert.equal(/\.bond-age-frame \{[^}]*transform/.test(html), false, name);
-    assert.equal(html.includes("Birth month"), false, name);
+    assert.equal(html.includes("haus-age-host"), false, name);
+    assert.equal(html.includes("<iframe"), false, name);
+    assert.equal(html.includes("unpkg.com"), false, name);
+    assert.equal(html.includes("support.js"), false, name);
     assert.equal(html.includes('sessionStorage.setItem("bond_age_ok"'), false, name);
     assert.equal(html.includes("sessionStorage.setItem('bond_age_ok'"), false, name);
   }
+
+  assert.match(gateJs, /sessionStorage\.setItem\(KEY, String\(Date\.now\(\)\)\)/);
+  assert.match(gateJs, /localStorage\.removeItem\(KEY\)/);
+  assert.match(gateJs, /data-declined", "true"/);
+  assert.match(gateView, /sessionStorage\.setItem\(BOND_AGE_KEY, String\(Date\.now\(\)\)\)/);
+  assert.match(gateView, /Intentional elevation is for adults\./);
+  assert.match(gateView, /Not yet/);
+  assert.match(gateCss, /transition-property: opacity/);
+  const reduced = gateCss.slice(gateCss.indexOf("@media (prefers-reduced-motion: reduce)"));
+  assert.equal(reduced.includes("translate"), false);
+  assert.equal(reduced.includes("scale"), false);
+  assert.match(reduced, /transform: none/);
+
+  const fnMatch = gateJs.match(/function bondAgeDecision\(month, year, now\) \{[\s\S]*?\n  \}/);
+  assert.ok(fnMatch);
+  const bondAgeDecisionJs = new Function(`return (${fnMatch[1] ?? fnMatch[0]})`)() as typeof bondAgeDecision;
+  const monthList = gateJs.match(/var MONTHS = (\[[\s\S]*?\]);/);
+  assert.ok(monthList);
+  assert.deepEqual(JSON.parse(monthList[1].replace(/'/g, '"')), [...BOND_AGE_MONTHS]);
+  const samples = [
+    ["", "1990", new Date(2026, 8, 27), "wait"],
+    ["0", "", new Date(2026, 8, 27), "wait"],
+    ["0", "1990", new Date(2026, 8, 27), "enter"],
+    ["8", "2005", new Date(2026, 8, 27), "enter"],
+    ["9", "2005", new Date(2026, 8, 27), "decline"],
+    ["0", "2006", new Date(2026, 8, 27), "decline"],
+  ] as const;
+  for (const [month, year, now, expected] of samples) {
+    assert.equal(bondAgeDecision(month, year, now), expected);
+    assert.equal(bondAgeDecisionJs(month, year, now), expected);
+  }
+
   const band = read("src/components/compliance-band.tsx");
   assert.match(band, /21\+ Cannabis products\. Keep out of reach of children\./);
   assert.match(band, /For use only by adults 21 years of age and older\./);
   assert.match(band, /OCM-Proc-25-000329/);
   assert.match(read("src/app/haus/haus-client.tsx"), /ComplianceBand/);
   assert.match(read("src/app/order/order-client.tsx"), /ComplianceBand/);
+  assert.match(read("src/app/haus/layout.tsx"), /HausAgeGate/);
+  assert.match(read("src/app/haus/age-gate-client.tsx"), /HAUS_AGE_HOST/);
 });

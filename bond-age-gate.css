@@ -1,0 +1,247 @@
+.bond-age-gate {
+  --matte-black: #1B1D1C;
+  --bone: #E1DAD0;
+  --muted: #8E887C;
+  --line: #3A3C3B;
+  --age-ink: #0D0F0E;
+  --age-word: #E8E1D5;
+  --age-gold-deep: #8F6B25;
+  --age-gold: #C29A45;
+  --age-gold-light: #E3C270;
+  --age-copy: #B0A99A;
+  --age-enter-ink: #141109;
+  --age-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --age-gold-wash: linear-gradient(160deg, var(--age-gold-deep) 0%, var(--age-gold) 38%, var(--age-gold-light) 50%, var(--age-gold) 62%, var(--age-gold-deep) 100%);
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--age-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bond-age-in 0.6s var(--age-ease) both;
+}
+
+html:not([data-bond-age="ok"]) .bond-floor {
+  visibility: hidden;
+}
+
+html[data-bond-age="ok"] .bond-age-gate {
+  display: none;
+}
+
+.bond-age-veil,
+.bond-age-veil-soft {
+  position: absolute;
+  inset: 0;
+}
+
+.bond-age-veil {
+  background:
+    radial-gradient(900px 600px at 50% 38%, color-mix(in srgb, var(--age-gold) 7%, transparent), transparent 70%),
+    radial-gradient(1200px 700px at 50% 100%, color-mix(in srgb, var(--age-ink) 90%, transparent), transparent 80%);
+}
+
+.bond-age-veil-soft {
+  opacity: 0.45;
+  mix-blend-mode: overlay;
+}
+
+.bond-age-gate[data-declined="false"] .bond-age-no,
+.bond-age-gate[data-declined="true"] .bond-age-ask {
+  display: none;
+}
+
+.bond-age-panel {
+  position: relative;
+  text-align: center;
+  padding: 32px;
+  width: 100%;
+  box-sizing: border-box;
+  animation: bond-age-rise 0.7s var(--age-ease) both;
+}
+
+.bond-age-no { max-width: 520px; }
+.bond-age-ask { max-width: 560px; }
+
+.bond-age-mark {
+  font-family: "GFS Didot", Didot, serif;
+  font-weight: 400;
+  font-size: clamp(44px, 6vw, 64px);
+  letter-spacing: 0.35em;
+  padding-left: 0.35em;
+  color: var(--age-word);
+  background: var(--age-gold-wash);
+  -webkit-background-clip: text;
+  background-clip: text;
+  transform-origin: center;
+  animation: bond-age-breathe 6.5s ease-in-out infinite, bond-age-scale 3.6s ease-in-out infinite;
+}
+
+.bond-age-ask .bond-age-mark {
+  font-size: clamp(52px, 8vw, 84px);
+}
+
+.bond-age-title {
+  font-family: "GFS Didot", Didot, serif;
+  font-weight: 400;
+  font-size: clamp(22px, 3vw, 30px);
+  color: var(--bone);
+  line-height: 1.5;
+  margin: 48px 0 16px;
+}
+
+.bond-age-lead {
+  font-family: "GFS Didot", Didot, serif;
+  font-size: clamp(18px, 2.6vw, 28px);
+  letter-spacing: 0.03em;
+  color: var(--bone);
+  margin: 24px 0 0;
+}
+
+.bond-age-body {
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  font-size: 16px;
+  color: var(--age-copy);
+  line-height: 1.7;
+  margin: 0 0 40px;
+}
+
+.bond-age-ask .bond-age-body {
+  max-width: 440px;
+  margin: 26px auto;
+}
+
+.bond-age-rule {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--age-gold), transparent);
+  margin: 0 auto;
+}
+
+.bond-age-rule-wide {
+  width: min(420px, 80%);
+  margin: 30px auto 0;
+}
+
+.bond-age-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 32px;
+  max-width: 100%;
+}
+
+.bond-age-select {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--bone);
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  font-size: 15px;
+  padding: 14px 20px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  cursor: pointer;
+}
+
+.bond-age-month { width: min(160px, 100%); }
+.bond-age-year { width: min(140px, 100%); }
+
+.bond-age-select option { color: var(--matte-black); }
+
+.bond-age-enter {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-family: "GFS Didot", Didot, serif;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 18px 56px;
+  cursor: pointer;
+  transition-property: background, color, border-color, box-shadow, opacity;
+  transition-duration: 0.4s;
+  box-shadow: none;
+}
+
+.bond-age-enter[data-ready="true"] {
+  background: var(--age-gold-wash);
+  color: var(--age-enter-ink);
+  border-color: var(--age-gold-light);
+  box-shadow: 0 8px 40px color-mix(in srgb, var(--age-gold) 40%, transparent);
+}
+
+.bond-age-health {
+  border-top: 1px solid color-mix(in srgb, var(--age-gold) 15%, transparent);
+  padding: 28px 8px 0;
+  margin: 36px auto 0;
+  max-width: 520px;
+  text-align: center;
+}
+
+.bond-age-health-label {
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  background: var(--age-gold-wash);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: var(--age-gold-light);
+  display: inline-block;
+  margin: 0 0 12px;
+}
+
+.bond-age-health p {
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--age-copy);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.bond-age-select:focus-visible,
+.bond-age-enter:focus-visible {
+  outline: 2px solid var(--age-gold-light);
+  outline-offset: 3px;
+}
+
+@keyframes bond-age-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bond-age-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bond-age-breathe {
+  0% { color: var(--age-word); }
+  50% { color: transparent; }
+  100% { color: var(--age-word); }
+}
+
+@keyframes bond-age-scale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.13); }
+}
+
+@keyframes bond-age-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bond-age-gate,
+  .bond-age-gate * {
+    animation: bond-age-fade 1ms linear both;
+    transition-property: opacity;
+    transform: none;
+  }
+}

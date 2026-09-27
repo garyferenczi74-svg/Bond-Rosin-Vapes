@@ -10,6 +10,38 @@ export function hausShowsAgeGate(stored: string | null): boolean {
   return stored == null || stored === "";
 }
 
+export const BOND_AGE_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
+export function bondBirthYears(now: Date): string[] {
+  const end = now.getFullYear();
+  const years: string[] = [];
+  for (let y = end; y >= end - 100; y--) years.push(String(y));
+  return years;
+}
+
+// Same month index and birth-on-the-first rule as AgeGate.dc.html.
+export function bondAgeDecision(month: string, year: string, now: Date): "wait" | "enter" | "decline" {
+  if (month === "" || year === "") return "wait";
+  const born = new Date(parseInt(year, 10), parseInt(month, 10), 1);
+  let age = now.getFullYear() - born.getFullYear();
+  if (now.getMonth() < born.getMonth()) age = age - 1;
+  if (age >= 21) return "enter";
+  return "decline";
+}
+
 export function hausRouteShowsAgeGate(pathname: string, stored: string | null): boolean {
   if (pathname !== HAUS_DOOR_PATH && !pathname.startsWith(`${HAUS_DOOR_PATH}/`)) return false;
   return hausShowsAgeGate(stored);

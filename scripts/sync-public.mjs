@@ -20,6 +20,8 @@ const files = [
   "video-policy.js",
   "image-slot.js",
   "image-slots.state.json",
+  "bond-age-gate.js",
+  "bond-age-gate.css",
 ];
 
 const dirs = ["media"];
