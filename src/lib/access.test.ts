@@ -238,6 +238,6 @@ test("Home keeps id=circle hash alias and stores no Haus email", () => {
   assert.match(home, /FROM PLANT TO BOND/);
   assert.match(
     home,
-    /We start with exceptional cannabis, then use heat, pressure, and time to preserve what is real\. The result is 100% solventless live rosin, nothing added, nothing removed\./,
+    /We start with exceptional cannabis, then use heat, pressure, and time to preserve what is real\. The result is 100% solventless live rosin\./,
   );
 });
