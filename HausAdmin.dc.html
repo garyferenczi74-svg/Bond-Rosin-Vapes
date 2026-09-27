@@ -132,12 +132,12 @@ var Store = {
       batches: [
         { batch:'BND-1-0518', sku:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', coa:'COA-0518', top:'Citrus peel, Green anise', heart:'Pine, Black pepper', base:'Cedar, Warm earth', run:null, state:'published', shelfCount:9 },
         { batch:'BND-2-0731', sku:'no2', cultivar:'Evening Papaya', harvest:'2026-05-02', pressing:'2026-05-15', coa:'COA-0731', top:'Lavender, Bergamot', heart:'Chamomile, Clove', base:'Sandalwood, Musk', run:null, state:'published', shelfCount:6 },
-        { batch:'BND-3-0214', sku:'no3', cultivar:'Midnight Zkittlez', harvest:'2026-03-18', pressing:'2026-03-30', coa:'COA-0214', top:'Ripe mango, Blood orange', heart:'Gardenia, Fennel', base:'Amber, Loam', run:{ number:214, size:1000 }, state:'published', shelfCount:14 },
+        { batch:'BND-3-0214', sku:'no3', cultivar:'Alpine Reserve', harvest:'2026-03-18', pressing:'2026-03-30', coa:'COA-0214', top:'Ripe mango, Blood orange', heart:'Gardenia, Fennel', base:'Amber, Loam', run:{ number:214, size:1000 }, state:'published', shelfCount:14 },
         { batch:'BND-3-0198', sku:'no3', cultivar:'Autumn Gelato', harvest:'2025-10-30', pressing:'2025-11-12', coa:'COA-0198', top:'Stone fruit, Clove', heart:'Rose, Cardamom', base:'Oud, Loam', run:{ number:0, size:500 }, state:'retired', shelfCount:3 },
         { batch:'BND-1-0603', sku:'no1', cultivar:'Morning Mimosa', harvest:'2026-06-01', pressing:'2026-06-14', coa:'', top:'Orange blossom, Anise', heart:'Pine, Pepper', base:'Cedar, Amber', run:null, state:'draft', shelfCount:0 }
       ],
       reserveRuns: [
-        { id:'run-mz', sku:'no3', cultivar:'Midnight Zkittlez', pressing:'2026-03-30', size:1000, claimed:214, state:'open' },
+        { id:'run-mz', sku:'no3', cultivar:'Alpine Reserve', pressing:'2026-03-30', size:1000, claimed:214, state:'open' },
         { id:'run-ag', sku:'no3', cultivar:'Autumn Gelato', pressing:'2025-11-12', size:500, claimed:500, state:'ended' }
       ],
       events: [
@@ -481,7 +481,7 @@ document.addEventListener('click', function(ev){
   var rv=t.closest('[data-revoke]'); if (rv){ Store.revokeInvitation(rv.getAttribute('data-revoke')); toast('Revoked. Registration will fail with the neutral line.'); renderMembers(); return; }
   var su=t.closest('[data-suspend]'); if (su){ var reason=prompt('Reason for suspension:'); if (reason !== null){ Store.suspendAccount(su.getAttribute('data-suspend'), reason||'No reason recorded'); toast('Suspended. Sign-in shows the neutral door line.'); renderMembers(); } return; }
   var re=t.closest('[data-reinstate]'); if (re){ Store.reinstateAccount(re.getAttribute('data-reinstate')); toast('Reinstated.'); renderMembers(); return; }
-  var ea=t.closest('[data-erase]'); if (ea){ Store.eraseAccount(ea.getAttribute('data-erase')); toast('Erased. The house keeps no copy.'); renderMembers(); return; }
+  var ea=t.closest('[data-erase]'); if (ea){ Store.eraseAccount(ea.getAttribute('data-erase')); toast('Erased.'); renderMembers(); return; }
 
   // settings
   if (t.id==='saveWelcome'){ var txt=valOf('welcomeText'); var hits=lint(txt); if (hits.length){ toast('Blocked: '+hits.map(function(h){return h.kind;}).join(', ')); return; } var b4=Store.data.settings.welcomeText; Store.data.settings.welcomeText=txt; Store.audit('Edited welcome text', b4, txt); Store.save(); toast('Saved.'); renderSettings(); return; }

@@ -19,7 +19,8 @@ export const ORDER_COPY = {
   mainPage: "Main page",
   privacy: "Privacy",
   formTitle: "Order reservation",
-  formLine: "Reservation files as a Bond Orders draft. No Metrc write.",
+  formLine:
+    "Reservation files as a Bond Orders draft. Nothing is sent to the state tracking system from this page.",
   licenseCheck: "License check against Bond account record.",
   pendingWait: "This account is pending. Bond operations must elevate it before reservation access opens.",
   pendingBlock: "This account is pending. Bond operations must elevate it before a reservation can be filed.",

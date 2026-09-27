@@ -32,9 +32,18 @@
   .cband span:last-child { font-size:16px; color: #B0A99A; }
   footer { background: #1B1D1C; padding: 40px clamp(20px,4vw,56px); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size:12px; color: #8E887C; }
   footer a { color: #8E887C; text-decoration: none; }
+  :root { --matte-black: #1B1D1C; }
+  html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+  html[data-bond-age="ok"] .bond-age-frame { display: none; }
+  .bond-age-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 9999; background: var(--matte-black); }
 </style>
+<script>
+(function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
+</script>
 </head>
 <body>
+<iframe id="bond-age-frame" class="bond-age-frame" title="Age gate" src="/haus-age-host.dc.html"></iframe>
+<div class="bond-floor" inert>
   <header class="head">
     <a href="Home.dc.html" class="wordmark">BOND</a>
     <a href="Home.dc.html" class="back">Back to site</a>
@@ -50,7 +59,7 @@
     <p>This site is operated by Cedargrowth Organics LLC, a New York State licensed cannabis business (OCM-Proc-25-000329), the company behind Bond ("Bond," "we," "us"). Contact: [PRIVACY EMAIL].</p>
 
     <h2>2. Age verification, first and always</h2>
-    <p>New York law requires this site to verify that every visitor is 21 or older before viewing. When you verify, we store a verification flag in a cookie on your device for 30 days, together with your consent to view cannabis-related material. We do not store your date of birth.</p>
+    <p>New York law requires this site to verify that every visitor is 21 or older before viewing. When you verify, we store a flag in sessionStorage for this browser session, under the name bond_age_ok. The flag is the time you entered. It is not a cookie and it is not kept for 30 days. Closing the browser session clears it. We do not store your date of birth.</p>
 
     <h2>3. What we collect</h2>
     <ul>
@@ -58,7 +67,6 @@
       <li>Dispensary Login: dispensary name, address, contact name, phone number, licensed partner email, New York OCM license number, a hashed password, 21+ confirmation, and elevation state. Passwords are stored hashed only. They are never logged in plaintext and are never sent to Metrc. Creating access does not grant order rights until Bond operations elevates the account.</li>
       <li>Site analytics: aggregated usage data (pages viewed, approximate region, device type), configured to avoid building individual profiles.</li>
       <li>Dispensary finder: a location you choose to share is used for the lookup and is not stored.</li>
-      <li>Bond Haus accounts: if member accounts launch, we will collect what is needed to operate them, and this policy will be updated before that day.</li>
     </ul>
 
     <h2>Haus member records</h2>
@@ -138,5 +146,29 @@
     } catch(e){}
   })();
   </script>
+</div>
+<script>
+(function(){
+  var frame=document.getElementById("bond-age-frame");
+  var floor=document.querySelector(".bond-floor");
+  function readAge(){ try { return sessionStorage.getItem("bond_age_ok"); } catch(e){ return null; } }
+  function passed(raw){ return raw!=null && raw!==""; }
+  function openFloor(){
+    document.documentElement.setAttribute("data-bond-age","ok");
+    if(frame&&frame.parentNode) frame.parentNode.removeChild(frame);
+    if(floor) floor.removeAttribute("inert");
+  }
+  if(passed(readAge())){ openFloor(); return; }
+  window.addEventListener("message", function(event){
+    if(event.origin!==location.origin) return;
+    var data=event.data;
+    if(!data||typeof data!=="object"||data.type!=="bond-entered") return;
+    openFloor();
+  });
+  var timer=window.setInterval(function(){
+    if(passed(readAge())){ window.clearInterval(timer); openFloor(); }
+  }, 400);
+})();
+</script>
 </body>
 </html>

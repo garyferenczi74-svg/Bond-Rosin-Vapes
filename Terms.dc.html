@@ -31,9 +31,18 @@
   .cband span:last-child { font-size:16px; color: #B0A99A; }
   footer { background: #1B1D1C; padding: 40px clamp(20px,4vw,56px); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size:12px; color: #8E887C; }
   footer a { color: #8E887C; text-decoration: none; }
+  :root { --matte-black: #1B1D1C; }
+  html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+  html[data-bond-age="ok"] .bond-age-frame { display: none; }
+  .bond-age-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; z-index: 9999; background: var(--matte-black); }
 </style>
+<script>
+(function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
+</script>
 </head>
 <body>
+<iframe id="bond-age-frame" class="bond-age-frame" title="Age gate" src="/haus-age-host.dc.html"></iframe>
+<div class="bond-floor" inert>
   <header class="head">
     <a href="Home.dc.html" class="wordmark">BOND</a>
     <a href="Home.dc.html" class="back">Back to site</a>
@@ -121,5 +130,29 @@
     } catch(e){}
   })();
   </script>
+</div>
+<script>
+(function(){
+  var frame=document.getElementById("bond-age-frame");
+  var floor=document.querySelector(".bond-floor");
+  function readAge(){ try { return sessionStorage.getItem("bond_age_ok"); } catch(e){ return null; } }
+  function passed(raw){ return raw!=null && raw!==""; }
+  function openFloor(){
+    document.documentElement.setAttribute("data-bond-age","ok");
+    if(frame&&frame.parentNode) frame.parentNode.removeChild(frame);
+    if(floor) floor.removeAttribute("inert");
+  }
+  if(passed(readAge())){ openFloor(); return; }
+  window.addEventListener("message", function(event){
+    if(event.origin!==location.origin) return;
+    var data=event.data;
+    if(!data||typeof data!=="object"||data.type!=="bond-entered") return;
+    openFloor();
+  });
+  var timer=window.setInterval(function(){
+    if(passed(readAge())){ window.clearInterval(timer); openFloor(); }
+  }, 400);
+})();
+</script>
 </body>
 </html>

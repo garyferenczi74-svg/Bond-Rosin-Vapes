@@ -15,6 +15,16 @@ export function hausRouteShowsAgeGate(pathname: string, stored: string | null): 
   return hausShowsAgeGate(stored);
 }
 
+const PUBLIC_AGE_EXACT = new Set(["/faq", "/privacy", "/terms", "/order", "/haus"]);
+
+export function routeShowsAgeGate(pathname: string, stored: string | null): boolean {
+  const path = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (path.startsWith("/vauxhall")) return false;
+  const covered = PUBLIC_AGE_EXACT.has(path) || path.startsWith(`${HAUS_DOOR_PATH}/`);
+  if (!covered) return false;
+  return hausShowsAgeGate(stored);
+}
+
 export const HAUS_AGE_BOOT = `(function(){var stored=null;try{stored=sessionStorage.getItem(${JSON.stringify(BOND_AGE_KEY)});}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();`;
 
 export const HAUS_AGE_CSS = `

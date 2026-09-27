@@ -39,6 +39,9 @@ export function ComplianceBand() {
         <p style={{ fontSize: 11, lineHeight: 1.7, color: "#6E685E", margin: 0 }}>
           Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329
         </p>
+        <p style={{ fontSize: 12, lineHeight: 1.7, color: tokens.muted, margin: "16px 0 0" }}>
+          21+ Cannabis products. Keep out of reach of children.
+        </p>
       </div>
     </div>
   );
