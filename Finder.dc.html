@@ -28,13 +28,44 @@
   .toggle { font-size: 12.5px; letter-spacing: 0.04em; color: #8E887C; cursor: pointer; }
   .scroll::-webkit-scrollbar { width: 8px; } .scroll::-webkit-scrollbar-thumb { background: #2A2C29; border-radius: 4px; }
   @media (max-width: 720px) { .findrow { grid-template-columns: 1fr !important; } }
+  html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+  html[data-bond-age="ok"] .bond-age-gate { display: none; }
 </style>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
+<script>
+(function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
+</script>
 </head>
 <body>
-<div id="gate"></div>
+<div id="bond-age-gate" class="bond-age-gate" data-declined="false">
+  <div class="bond-age-veil"></div>
+  <div class="bond-age-veil-soft"></div>
+  <div class="bond-age-panel bond-age-no">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-title">Not yet</p>
+    <p class="bond-age-body">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
+    <div class="bond-age-rule"></div>
+  </div>
+  <div class="bond-age-panel bond-age-ask">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-lead">Please confirm your age.</p>
+    <div class="bond-age-rule bond-age-rule-wide"></div>
+    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
+    <div class="bond-age-fields">
+      <select id="bond-age-month" class="bond-age-select bond-age-month" aria-label="Birth month">
+        <option value="">Birth month</option>
+      </select>
+      <select id="bond-age-year" class="bond-age-select bond-age-year" aria-label="Birth year">
+        <option value="">Birth year</option>
+      </select>
+    </div>
+    <button type="button" id="bond-age-enter" class="bond-age-enter" data-ready="false">Enter</button>
+    <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
+  </div>
+</div>
+<div class="bond-floor" inert>
 <div id="app" style="min-height:100vh;display:flex;flex-direction:column">
   <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:24px clamp(20px,4vw,56px);border-bottom:1px solid #2A2C29">
     <a href="Home.dc.html" class="didot" style="font-size:19px;letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5">BOND</a>
@@ -57,8 +88,9 @@
   </main>
   <footer style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">
     <div class="gold" style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>
-    <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div><p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">Sold only at dispensaries licensed by New York State. This site does not sell cannabis and no one can lawfully ship these products to you.</p><p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0">These are sample listings, not real stores.</p>
+    <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div><p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">Sold only at dispensaries licensed by New York State. This site does not sell cannabis.</p><p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0">These are sample listings, not real stores.</p>
   </div></footer>
+</div>
 </div>
 
 <script>
@@ -157,12 +189,14 @@ function haversine(a, b){ var R=3959; function r(d){ return d*Math.PI/180; } var
 function carrierSet(){ try { var raw=localStorage.getItem('bondBondCarriers'); if (raw) return JSON.parse(raw); } catch(e){} return DISPENSARIES.filter(function(d){ return d.bond; }).map(function(d){ return d.lic; }); }
 function carries(lic){ return carrierSet().indexOf(lic) !== -1; }
 
-// publish the directory (with coordinates) and the city table so other pages,
-// including the Bond Haus Reserve Room, can find the nearest carrier
-try {
-  localStorage.setItem('bondDispensaryDir', JSON.stringify(DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]||[0,0,'','']; return { lic:d.lic, name:d.name, city:d.city, addr:d.addr, county:c[2], region:c[3], lat:c[0], lng:c[1], bond:d.bond }; })));
-  localStorage.setItem('bondNyCities', JSON.stringify(NY_CITIES));
-} catch(e){}
+// Directory rows are written only after the shared age gate is passed.
+function publishFinderDirectory(){
+  try {
+    localStorage.setItem('bondDispensaryDir', JSON.stringify(DISPENSARIES.map(function(d){ var c=NY_CITIES[d.city]||[0,0,'','']; return { lic:d.lic, name:d.name, city:d.city, addr:d.addr, county:c[2], region:c[3], lat:c[0], lng:c[1], bond:d.bond }; })));
+    localStorage.setItem('bondNyCities', JSON.stringify(NY_CITIES));
+  } catch(e){}
+}
+window.addEventListener('bond-entered', publishFinderDirectory);
 
 var lastCity = '';
 function render(){
@@ -206,30 +240,7 @@ document.getElementById('findBtn').addEventListener('click', render);
 document.getElementById('cityIn').addEventListener('keydown', function(e){ if (e.key==='Enter') render(); });
 document.getElementById('allToggle').addEventListener('change', function(){ if (lastCity) render(); });
 render();
-
-// ---- compact age gate, shares the browser session remember with the rest of the site ----
-function ageOk(){ try { if (sessionStorage.getItem('bond_age_ok')) return true; } catch(e){} return false; }
-function showGate(){
-  var months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  var now=new Date().getFullYear(); var years=''; for (var y=now;y>=now-100;y--) years+='<option>'+y+'</option>';
-  document.getElementById('gate').innerHTML = '<div style="position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;align-items:center;justify-content:center;padding:24px">'
-    + '<div style="text-align:center;max-width:460px;width:100%">'
-    + '<div class="didot gold" style="font-size:clamp(46px,8vw,72px);letter-spacing:0.35em;padding-left:0.35em;line-height:1">BOND</div>'
-    + '<p class="didot" style="font-size:16px;letter-spacing:0.14em;color:#E1DAD0;margin:22px 0 0">Please confirm your age.</p>'
-    + '<p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:16px 0 0">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>'
-    + '<div style="display:flex;gap:12px;margin:26px 0 0"><select id="gMonth" class="field"><option value="">Birth month</option>'+months.map(function(m,i){ return '<option value="'+i+'">'+m+'</option>'; }).join('')+'</select><select id="gYear" class="field"><option value="">Birth year</option>'+years+'</select></div>'
-    + '<button id="gEnter" class="btn" style="margin-top:18px;width:100%;padding:16px">Enter</button>'
-    + '<p id="gFail" class="didot" style="font-size:14px;font-style:italic;color:#B0A99A;margin:16px 0 0;min-height:20px"></p>'
-    + '</div></div>';
-  document.getElementById('gEnter').addEventListener('click', function(){
-    var m=document.getElementById('gMonth').value, yr=document.getElementById('gYear').value; var fail=document.getElementById('gFail');
-    if (m==='' || yr===''){ fail.textContent='Please choose your birth month and year.'; return; }
-    var b=new Date(parseInt(yr,10), parseInt(m,10), 1), d=new Date(); var age=d.getFullYear()-b.getFullYear(); if (d.getMonth()<b.getMonth()) age--;
-    if (age>=21){ try { sessionStorage.setItem('bond_age_ok', String(Date.now())); } catch(e){} document.getElementById('gate').innerHTML=''; }
-    else { fail.textContent='You must be 21 or older to enter.'; }
-  });
-}
-if (!ageOk()) showGate();
 </script>
+<script src="/bond-age-gate.js"></script>
 </body>
 </html>

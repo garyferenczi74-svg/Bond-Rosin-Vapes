@@ -98,9 +98,15 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /Bond does not store a Haus correspondence preference/);
   assert.match(privacy, /There is no Bond Haus email list/);
   assert.match(privacy, /Haus members are not asked for an authenticator code/);
-  assert.match(privacy, /each staff sign-in record notes that the step was skipped/);
-  assert.match(privacy, /Bond does not set a time limit on that record/);
-  assert.match(privacy, /Sign-in records are kept until Bond has a deletion process in place/);
+  assert.match(
+    privacy,
+    /each sign-in record notes that the step was skipped, along with the IP address, browser and page used, and sign-in records are kept until Bond has a deletion process in place\./,
+  );
+  assert.match(privacy, /the setup image is shown to the staff member's browser and is not kept by Bond/);
+  assert.match(privacy, /Bond sets its confirmed flag once, at setup/);
+  assert.match(privacy, /After it is confirmed, the authenticator stays with the account service with no time limit/);
+  assert.equal(/until verified/i.test(privacy), false);
+  assert.equal(/until confirmed/i.test(privacy), false);
   assert.equal(privacy.includes("W-2026-09-15-P1-OVERRIDE"), false);
   assert.equal(privacy.includes("aal1"), false);
   assert.equal(privacy.includes("mfa_enrolled"), false);
@@ -187,8 +193,22 @@ test("process label, HOPEline short code, and license case stay on the served pa
     assert.equal(html.includes('data-screen-label="Purity"'), false, name);
     assert.equal(html.includes("THE PRODUCT IS PURE"), false, name);
   }
-  assert.equal(read("No2.dc.html").includes(">Process</div>"), true);
-  assert.equal(read("No2.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
+  assert.equal(read("Home.dc.html").includes("nothing added"), false);
+  assert.equal(read("Home.dc.html").includes("nothing removed"), false);
+  assert.equal(read("Home.dc.html").includes("The result is 100% solventless live rosin."), true);
+  const no2 = read("No2.dc.html");
+  assert.equal(no2.includes(">Process</div>"), true);
+  assert.equal(no2.includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
+  assert.equal(no2.includes("No chemical<br>solvents"), true);
+  assert.equal(no2.includes("No<br>distillate"), true);
+  assert.equal(no2.includes("Nothing<br>else"), false);
+  assert.equal(no2.includes("No<br>fillers"), false);
+  assert.equal(no2.includes("No<br>additives"), false);
+  const social = read("Social.dc.html");
+  assert.equal(social.includes("Pure on the inside"), false);
+  assert.equal(social.includes("A cleaner high"), false);
+  assert.equal(social.includes("loud purity"), false);
+  assert.equal(social.includes("What purity feels like"), false);
   assert.equal(read("No2.dc.html").includes("NOTHING ADDED"), false);
   assert.equal(read("No2.dc.html").includes("NOTHING IN THE WAY"), false);
   assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);

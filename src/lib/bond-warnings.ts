@@ -28,7 +28,7 @@ export const WARNING_ROUTES = [
   { route: "/no1", label: "No1", file: "No1.dc.html", gate: "import", d: 2 },
   { route: "/no2", label: "No2", file: "No2.dc.html", gate: "import", d: 3 },
   { route: "/no3", label: "No3", file: "No3.dc.html", gate: "import", d: 4 },
-  { route: "/finder", label: "/finder", file: "Finder.dc.html", gate: "none", d: 1 },
+  { route: "/finder", label: "/finder", file: "Finder.dc.html", gate: "inline", d: 1 },
   { route: "/faq", label: "/faq", file: "FAQ.dc.html", gate: "inline", d: 2 },
   { route: "/privacy", label: "/privacy", file: "Privacy.dc.html", gate: "inline", d: 3 },
   { route: "/terms", label: "/terms", file: "Terms.dc.html", gate: "inline", d: 4 },

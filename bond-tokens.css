@@ -1,4 +1,6 @@
 :root {
   --matte-black: #1B1D1C;
   --bond-warning-yellow: #FFFF00;
+  --bond-warn-panel: #1B1D1C;
+  --bond-warn-meta: #E1DAD0;
 }

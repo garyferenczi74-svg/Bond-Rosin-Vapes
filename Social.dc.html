@@ -138,7 +138,7 @@ var HOOK_POOL = [
   'Find your number. Then hold it.',
   'The knurl is not decoration. It is a promise.',
   'From plant to Bond, and nothing in between.',
-  'Quiet on the outside. Pure on the inside.',
+  'Quiet on the outside. The press on the inside.',
   'One plant. One press. One standard.',
   'What you consume matters, so we made it honest.',
   'Rosin the way it should be, unhurried and clean.',
@@ -193,10 +193,10 @@ var SocialStore = {
     mk({ title:'Bone and gold', hookType:'Quiet flex', territory:'Quiet Luxury', state:'draft', ageM:70 });
     mk({ title:'One plant, one press', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'draft', ageM:110 });
     mk({ title:'Dialed in at dusk', hookType:'Ritual moment', territory:'Wellness Ritual', state:'draft', ageM:150 });
-    mk({ title:'Quiet luxury, loud purity', hookType:'Quiet flex', territory:'Fragrance and Watches', state:'draft', ageM:220 });
+    mk({ title:'Quiet luxury, held close', hookType:'Quiet flex', territory:'Fragrance and Watches', state:'draft', ageM:220 });
     // in_clearance, 4 (Morning Routine carries 3 flagged edits)
     mk({ title:'Morning Routine', hookType:'Ritual moment', territory:'Wellness Ritual', state:'in_clearance', ageM:26,
-      flaggedEdits:['Tighten the open. The first line runs long.','Second beat repeats the word pure. Vary it.','Warning card sits under three seconds. Hold it to four.'] });
+      flaggedEdits:['Tighten the open. The first line runs long.','Second beat repeats the opening. Vary it.','Warning card sits under three seconds. Hold it to four.'] });
     mk({ title:'Nothing added, everything real', hookType:'Zero claim', territory:'Cannabis Lifestyle', state:'in_clearance', ageM:44 });
     mk({ title:'The press, in 15 seconds', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'in_clearance', ageM:52 });
     mk({ title:'With your highest self', hookType:'Founder voice', territory:'Quiet Luxury', state:'in_clearance', source:'manual', ageM:60 });
@@ -207,13 +207,13 @@ var SocialStore = {
     mk({ title:'The knurl, up close', hookType:'Sensory precision', territory:'Fragrance and Watches', state:'owner_approved', ageM:90 });
     mk({ title:'Rosin the right way', hookType:'Process reveal', territory:'Cannabis Lifestyle', state:'owner_approved', ageM:120 });
     // scheduled, 12 across 6 lanes and Mon to Fri
-    var schedTitles = ['World on a plate','Unwind at six','From plant to Bond','Peak, unhurried','The standard, kept','Hand pressed','Pure on the inside','Slow and clean','Your highest self','The honest hit','No solvents, ever','Taste the plant'];
+    var schedTitles = ['World on a plate','Unwind at six','From plant to Bond','Peak, unhurried','The standard, kept','Hand pressed','The evening press','Slow and clean','Your highest self','The honest hit','No solvents, ever','Taste the plant'];
     for (var s=0;s<12;s++){
       mk({ title: schedTitles[s], hookType: HOOK_TYPES[s%6], territory: TERRITORIES[s%5], state:'scheduled', ageM: 200+s*15,
         slot:{ platform: PLATFORMS[s%6], day: DAYS[s%5], time: (s%2? '6:30 PM':'9:00 PM') } });
     }
     // published, 8 for analyzer and tracking
-    var pubTitles = ['Nothing to hide','The first press','A cleaner high','What purity feels like','Method, not marketing','The quiet room','One number, held','Real from the root'];
+    var pubTitles = ['Nothing to hide','The first press','The evening number','What the press holds','Method, not marketing','The quiet room','One number, held','Real from the root'];
     for (var p=0;p<8;p++){
       var rate = (4.0 + ((p*13)%30)/10);
       mk({ title: pubTitles[p], hookType: HOOK_TYPES[p%6], territory: TERRITORIES[p%5], state:'published', ageM: 400+p*40,

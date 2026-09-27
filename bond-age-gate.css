@@ -215,10 +215,13 @@ html[data-bond-age="ok"] .bond-age-gate {
   font-size: 12px;
   line-height: 1.5;
   letter-spacing: 0;
+  color: var(--bond-warn-meta);
+  background: var(--bond-warn-panel);
 }
 
 .bond-warn-hope {
   margin: 12px 0 0;
+  padding: 10px 12px 4px;
 }
 
 .bond-warn-hope a {
@@ -226,7 +229,8 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 .bond-warn-license {
-  margin: 12px 0 0;
+  margin: 0;
+  padding: 4px 12px 10px;
 }
 
 @media (max-width: 420px) {
