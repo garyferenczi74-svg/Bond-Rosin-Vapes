@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bond</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
+<link rel="preload" as="script" crossorigin href="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap">
+<link rel="preload" as="fetch" href="./AgeGate.dc.html">
+<script src="./support.js"></script>
+<style>
+body { margin: 0; background: #1B1D1C; }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; } }
+</style>
+</head>
+<body>
+<x-dc>
+<dc-import name="AgeGate" hint-size="0px,0px"></dc-import>
+</x-dc>
+<script>
+addEventListener("bond-entered", function () {
+  try { parent.postMessage({ type: "bond-entered" }, location.origin); } catch (e) {}
+});
+</script>
+</body>
+</html>

@@ -131,7 +131,7 @@ test("Next /haus shows a reciprocal Haus invite to the Home band", () => {
   assert.match(client, /The Haus is for members\./);
   assert.match(client, /Membership is by invitation from the Haus\./);
   assert.match(client, /Not yet a member\?/);
-  assert.match(client, /Join the Bond Haus for first access\./);
+  assert.match(client, /Join the Bond Haus\./);
   assert.match(client, /href="\/#haus"/);
   assert.match(client, /ComplianceBand/);
   const band = readFileSync(

@@ -40,14 +40,14 @@
   <main style="flex:1;padding:44px clamp(20px,4vw,56px) 20px">
     <div style="max-width:900px;margin:0 auto">
       <div class="didot" style="font-size:clamp(28px,4.5vw,44px);letter-spacing:0.05em">Find Bond in New York</div>
-      <p style="font-size:16px;line-height:1.75;color:#8E887C;max-width:560px;margin:16px 0 0">Bond is sold only at licensed New York State dispensaries. Enter your city and the house shows the licensed shops within fifty miles, and which of them carry Bond.</p>
+      <p style="font-size:16px;line-height:1.75;color:#8E887C;max-width:560px;margin:16px 0 0">Bond is sold only at licensed New York State dispensaries. Enter your city to see sample listings within fifty miles. These are not real stores.</p>
       <div class="findrow" style="display:grid;grid-template-columns:1fr auto;gap:12px;margin-top:28px;max-width:560px">
         <input id="cityIn" class="field" list="cityList" placeholder="Your city or town in New York" autocomplete="off">
         <datalist id="cityList"></datalist>
         <button id="findBtn" class="btn">Find</button>
       </div>
       <div style="margin-top:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">
-        <label class="toggle" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="allToggle"> Also show other licensed dispensaries nearby</label>
+        <label class="toggle" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="allToggle"> Also show other sample listings nearby</label>
       </div>
       <div id="results" style="margin-top:28px"></div>
     </div>
@@ -56,7 +56,7 @@
     <div class="gold" style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>
     <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>
     <p style="font-size:16px;line-height:1.85;color:#B0A99A;margin:0 0 8px">Cannabis may cause impairment and may be habit forming. Sold only at dispensaries licensed by New York State. This site does not sell cannabis and no one can lawfully ship these products to you.</p>
-    <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0">Sample directory pending live OCM sync. Verify any license with the New York State Office of Cannabis Management Dispensary Verification Tool.</p>
+    <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0">These are sample listings, not real stores.</p>
     <p style="font-size:16px;line-height:1.7;color:#B0A99A;margin:0;letter-spacing:0.02em">Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
   </div></div>
 </div>
@@ -173,7 +173,7 @@ function render(){
     var samples = DISPENSARIES.map(function(d){
       return '<div class="card" style="margin-bottom:10px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start"><div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="didot" style="font-size:17px;color:#E1DAD0">'+esc(d.name)+'</span></div><div style="font-size:12.5px;color:#8E887C;margin-top:5px">'+esc(d.addr)+'</div></div></div>';
     }).join('');
-    out.innerHTML = '<div class="card" style="color:#8E887C">Enter your city to see licensed dispensaries within fifty miles.</div><div style="margin-top:12px">'+samples+'</div>';
+    out.innerHTML = '<div class="card" style="color:#8E887C">Enter your city to see sample listings within fifty miles. These are not real stores.</div><div style="margin-top:12px">'+samples+'</div>';
     return;
   }
   // match a New York place
@@ -191,10 +191,10 @@ function render(){
   if (carriers.length) html += '<div style="margin-top:12px">'+carriers.map(function(x){ return row(x, true); }).join('')+'</div>';
   else html += '<div class="card" style="margin-top:12px;color:#8E887C">No shops carrying Bond within fifty miles of '+esc(key)+' yet. <a href="Home.dc.html#haus" style="color:#E1DAD0;border-bottom:1px solid #3A3C3B">Join the Haus</a> to hear when Bond arrives near you.</div>';
   if (showAll){
-    html += '<div class="lbl" style="margin-top:28px">Other licensed dispensaries within fifty miles</div>';
-    html += others.length ? '<div style="margin-top:12px">'+others.map(function(x){ return row(x, false); }).join('')+'</div>' : '<div class="card" style="margin-top:12px;color:#B0A99A">No other licensed dispensaries within fifty miles.</div>';
+    html += '<div class="lbl" style="margin-top:28px">Sample listings (not real stores)</div>';
+    html += others.length ? '<div style="margin-top:12px">'+others.map(function(x){ return row(x, false); }).join('')+'</div>' : '<div class="card" style="margin-top:12px;color:#B0A99A">No other sample listings within fifty miles. These are not real stores.</div>';
   }
-  html += '<p style="font-size:12px;color:#B0A99A;margin-top:20px;line-height:1.7">'+near.length+' licensed dispensaries within fifty miles of '+esc(key)+'. Distances are approximate, measured from the center of each city.</p>';
+  html += '<p style="font-size:12px;color:#B0A99A;margin-top:20px;line-height:1.7">'+near.length+' sample listings within fifty miles of '+esc(key)+'. These are not real stores. Distances are approximate, measured from the center of each city.</p>';
   out.innerHTML = html;
   lastCity = input;
 }

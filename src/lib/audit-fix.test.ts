@@ -96,7 +96,7 @@ test("Privacy and Terms drop the review banner and ship the locked date", () => 
     assert.equal(html.includes(".review {"), false, name);
   }
   assert.match(read("Terms.dc.html"), /Effective date: September 16, 2026\./);
-  assert.match(read("Privacy.dc.html"), /Effective date: September 17, 2026\./);
+  assert.match(read("Privacy.dc.html"), /Effective date: September 24, 2026\./);
 });
 
 test("kebab SKU aliases rewrite to the existing SKU pages", () => {

@@ -10,6 +10,7 @@ const files = [
   "No2.dc.html",
   "No3.dc.html",
   "AgeGate.dc.html",
+  "haus-age-host.dc.html",
   "FAQ.dc.html",
   "Terms.dc.html",
   "Privacy.dc.html",
