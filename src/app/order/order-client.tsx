@@ -158,7 +158,8 @@ export function OrderClient({
               lotId: "",
               metrcUid: "",
             })),
-            documents: "Partner reservation. Draft only. No Metrc write.",
+            documents:
+              "Partner reservation. Draft only. Nothing is sent to the state tracking system from this page.",
             notes,
             source: "partner",
           },
@@ -170,7 +171,7 @@ export function OrderClient({
             agent: "Q",
             type: "ORDER_REQUEST",
             summary: "ORDER_REQUEST",
-            sub: `${result.id} . ${session?.accountName ?? "account"} . draft . no Metrc write`,
+            sub: `${result.id} . ${session?.accountName ?? "account"} . draft . nothing is sent to the state tracking system from this page`,
             audit: "A-partner",
           },
         ],

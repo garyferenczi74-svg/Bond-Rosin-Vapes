@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { enterHausAction } from "@/app/haus/actions";
+import { ComplianceBand } from "@/components/compliance-band";
 import { tokens } from "@/lib/tokens";
 
 export function WelcomeClient({
@@ -25,6 +26,7 @@ export function WelcomeClient({
   }
 
   return (
+    <>
     <main
       style={{
         minHeight: "100vh",
@@ -117,5 +119,7 @@ export function WelcomeClient({
         </p>
       </div>
     </main>
+    <ComplianceBand />
+  </>
   );
 }

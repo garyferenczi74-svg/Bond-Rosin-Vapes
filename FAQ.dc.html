@@ -8,6 +8,7 @@
 <title>FAQ . Bond</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/bond-age-gate.css">
 <style>
   a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #E3C270;outline-offset:3px}
 
@@ -27,11 +28,53 @@
   .cband > div::before { content: "Health and Safety"; font-size:12px; letter-spacing: 0.32em; text-transform: uppercase; background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); -webkit-background-clip: text; background-clip: text; color:#E3C270; align-self: center; margin-bottom: 6px; }
   .cband span { font-size:16px; line-height: 1.85; color: #B0A99A; letter-spacing: 0.01em; }
   .cband span:last-child { font-size:16px; color: #B0A99A; }
+  :root { --bond-warning-yellow: #FFFF00; --bond-warning-ink: #1B1D1C; }
+  .bond-warn-box { background: var(--bond-warning-yellow); color: var(--bond-warning-ink); border: 1px solid var(--bond-warning-ink); padding: 12px 14px; text-align: left; }
+  .bond-warn-box p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: var(--bond-warning-ink); margin: 0 0 8px; letter-spacing: 0; }
+  .bond-warn-box p:last-child { margin: 0; }
+  .bond-hope, .bond-hope a { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: #B0A99A; }
+  .bond-hope { margin: 12px 0 0; }
+  .bond-license { font-size: 16px; line-height: 1.7; color: #B0A99A; margin: 12px 0 0; letter-spacing: 0.02em; }
   footer { background: #1B1D1C; padding: 40px clamp(20px,4vw,56px); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size:12px; color: #8E887C; }
   footer a { color: #8E887C; text-decoration: none; }
+  html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+  html[data-bond-age="ok"] .bond-age-gate { display: none; }
 </style>
+<script>
+(function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
+</script>
 </head>
 <body>
+<div id="bond-age-gate" class="bond-age-gate" data-declined="false">
+  <div class="bond-age-veil"></div>
+  <div class="bond-age-veil-soft"></div>
+  <div class="bond-age-panel bond-age-no">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-title">Not yet</p>
+    <p class="bond-age-body">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
+    <div class="bond-age-rule"></div>
+  </div>
+  <div class="bond-age-panel bond-age-ask">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-lead">Please confirm your age.</p>
+    <div class="bond-age-rule bond-age-rule-wide"></div>
+    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
+    <div class="bond-age-fields">
+      <select id="bond-age-month" class="bond-age-select bond-age-month" aria-label="Birth month">
+        <option value="">Birth month</option>
+      </select>
+      <select id="bond-age-year" class="bond-age-select bond-age-year" aria-label="Birth year">
+        <option value="">Birth year</option>
+      </select>
+    </div>
+    <button type="button" id="bond-age-enter" class="bond-age-enter" data-ready="false">Enter</button>
+    <div class="bond-age-health">
+      <div class="bond-age-health-label">Health and Safety</div>
+      <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
+    </div>
+  </div>
+</div>
+<div class="bond-floor" inert>
   <header class="head">
     <a href="Home.dc.html" class="wordmark">BOND</a>
     <a href="Home.dc.html" class="back">Back to site</a>
@@ -41,16 +84,16 @@
     <h1>Questions, answered quietly.</h1>
 
     <h2>What is Bond?</h2>
-    <p>A solventless live rosin house, licensed in New York State. Three numbered compositions, each built around a different kind of moment. Made for adults who notice the difference between made well and made fast.</p>
+    <p>A solventless live rosin house, licensed in New York State. Three numbers: daytime, evening, and the Reserve Edition. Made for adults who notice the difference between made well and made fast.</p>
 
     <h2>What is solventless live rosin?</h2>
     <p>Cannabis, fresh frozen at harvest, washed in ice water, and pressed with heat and patience. No chemical solvents at any step. What the plant made, exactly as it made it.</p>
 
     <h2>What makes Bond different?</h2>
-    <p>Five zeros. No chemical solvents. No added terpenes. No distillate. No fillers. No additives. When the product is pure, the experience is real.</p>
+    <p>Five zeros. No chemical solvents. Nothing else added. No distillate. No fillers. No additives.</p>
 
     <h2>What do the numbers mean?</h2>
-    <p>Each number is composed around how you want to arrive. No. 1 DIALED, our daytime composition. No. 2 UNWIND, our evening composition. No. 3 PEAK, our Reserve Edition, our most intensive pressing. Cannabis affects every individual differently; the numbers describe the moment each was composed for, not a promised outcome. Choose the moment that fits, and start low.</p>
+    <p>No. 1 DIALED is the daytime number. No. 2 UNWIND is the evening number. No. 3 PEAK is the Reserve Edition. Each number is solventless live rosin.</p>
 
     <h2>What is a Reserve Edition?</h2>
     <p>A limited pressing of a single small-batch cultivar, numbered by run. When a run ends, it ends.</p>
@@ -62,7 +105,7 @@
     <p>Every batch is tested by a licensed independent laboratory, and every unit carries its batch number with a certificate of analysis available through the batch lookup. Every Bond is accountable.</p>
 
     <h2>Is cannabis risk-free?</h2>
-    <p>No, and we will not pretend otherwise. Cannabis may cause impairment and may be habit forming, it can impair concentration, coordination, and judgment, there may be health risks associated with consumption, and it is not recommended for persons who are pregnant or nursing. Never drive or operate machinery under the influence. If someone ingests cannabis accidentally, contact the Poison Center at 1-800-222-1222 or call 9-1-1.</p>
+    <p>No, and we will not pretend otherwise. Cannabis can be addictive. Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis. There may be health risks associated with consumption of this product. Cannabis is not recommended for use by persons who are pregnant or nursing. If someone accidentally consumes cannabis, contact the Poison Center at 1-800-222-1222 or call 9-1-1.</p>
 
     <h2>Do I need to be 21?</h2>
     <p>Yes. This site, and everything Bond makes, is for adults 21 and over, full stop. Keep every cannabis product out of reach of children and pets.</p>
@@ -77,15 +120,18 @@
     <p>[PRESS EMAIL]. We read everything and reply to the right things.</p>
   </main>
 
-  <div class="cband">
-    <div>
-      <span>For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</span>
-      <span id="bondRotWarn">Cannabis may cause impairment and may be habit forming.</span>
-      <span>Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</span>
-    </div>
-  </div>
-
   <footer>
+    <div style="flex:1 0 100%;max-width:720px;margin:0 auto 20px;text-align:center">
+      <div class="bond-warn-box">
+        <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
+        <p>Cannabis can be addictive.</p>
+        <p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>
+        <p>There may be health risks associated with consumption of this product.</p>
+        <p>Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
+      </div>
+      <p class="bond-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
+      <p class="bond-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+    </div>
     <span>21+ Cannabis products. Keep out of reach of children.</span>
     <span style="display:flex;gap:22px;flex-wrap:wrap">
       <a href="Home.dc.html">Home</a>
@@ -95,15 +141,7 @@
     </span>
   </footer>
 
-  <script>
-  (function(){
-    var w=["Cannabis may cause impairment and may be habit forming.","Cannabis can impair concentration, coordination, and judgment. Do not operate a vehicle or machinery under the influence of cannabis.","There may be health risks associated with consumption of this product.","Cannabis is not recommended for use by persons who are pregnant or nursing."];
-    try {
-      var idx=sessionStorage.getItem('bond_warn_idx');
-      if(idx===null){ var c=(parseInt(localStorage.getItem('bond_warn_ctr')||'-1',10)+1)%w.length; localStorage.setItem('bond_warn_ctr',String(c)); idx=String(c); sessionStorage.setItem('bond_warn_idx',idx); }
-      var el=document.getElementById('bondRotWarn'); if(el) el.textContent=w[parseInt(idx,10)];
-    } catch(e){}
-  })();
-  </script>
+</div>
+<script src="/bond-age-gate.js"></script>
 </body>
 </html>

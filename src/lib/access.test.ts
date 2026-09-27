@@ -71,13 +71,13 @@ test("middleware matcher covers every cloaked static path", () => {
   }
 });
 
-test("Home public Admin links point at Next /haus", () => {
+test("Home public Haus links point at Next /haus", () => {
   const home = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../Home.dc.html"), "utf8");
-  const adminHrefs = [...home.matchAll(/href="([^"]+)"[^>]*>Admin</g)].map((m) => m[1]);
-  assert.ok(adminHrefs.length >= 2, "footer and menu must both expose Admin");
-  assert.ok(adminHrefs.every((href) => href === "/haus"));
+  const hausHrefs = [...home.matchAll(/href="([^"]+)"[^>]*>Haus</g)].map((m) => m[1]);
+  assert.ok(hausHrefs.length >= 2, "footer and menu must both expose Haus");
+  assert.ok(hausHrefs.every((href) => href === "/haus"));
   assert.equal(home.includes('href="Admin.dc.html"'), false);
-  assert.equal(home.includes("Haus.dc.html\">Admin"), false);
+  assert.equal(home.includes(">Admin<"), false);
   const footer = home.slice(home.indexOf("<footer"));
   const caption = footer.match(/letter-spacing:0\.16em;text-transform:uppercase">([\s\S]*?)<\/div>/);
   assert.ok(caption, "footer caption row must exist");
@@ -85,7 +85,7 @@ test("Home public Admin links point at Next /haus", () => {
     m[1],
     m[2].trim(),
   ]);
-  assert.deepEqual(footerCaptions.at(-1), ["/haus", "Admin"]);
+  assert.deepEqual(footerCaptions.at(-1), ["/haus", "Haus"]);
   assert.equal(footer.includes("/haus/admin"), false);
 });
 
@@ -159,10 +159,12 @@ test("SKU footer Bond Haus points at Next /haus", () => {
   const no1 = readFileSync(join(root, "No1.dc.html"), "utf8");
   const no2 = readFileSync(join(root, "No2.dc.html"), "utf8");
   const no3 = readFileSync(join(root, "No3.dc.html"), "utf8");
-  assert.match(no1, /A focused expression from Bond's solventless live rosin collection\./);
-  assert.match(no1, /Clarity\. Momentum\./);
-  assert.match(no2, /A cooler, quieter number in Bond's 100% solventless live rosin collection\./);
-  assert.match(no3, /A reserve expression from Bond's solventless live rosin collection\./);
+  assert.match(no1, /No\. 1 is the daytime number in Bond's solventless live rosin collection\./);
+  assert.match(no1, /Daytime\. Solventless live rosin\./);
+  assert.equal(no1.includes("Formulated for focus, clarity, and momentum."), false);
+  assert.equal(no1.includes("Focus. Clarity. Momentum."), false);
+  assert.match(no2, /No\. 2 is the evening number in Bond's solventless live rosin collection\./);
+  assert.match(no3, /No\. 3 is the Reserve Edition in Bond's solventless live rosin collection\./);
 });
 
 test("public marketing exposes /order only as Home header Order", () => {
@@ -211,21 +213,28 @@ test("Privacy Dispensary Login collection lists every field the door collects", 
   assert.match(sentence, /New York OCM license number/);
   assert.match(sentence, /hashed password/);
   assert.match(sentence, /21\+ confirmation/);
-  assert.match(sentence, /elevation state/);
+  assert.match(sentence, /account status/);
   assert.match(sentence, /never sent to Metrc/);
   assert.match(sentence, /never logged in plaintext/);
   assert.match(sentence, /does not grant order rights until Bond operations elevates the account/);
-  assert.match(privacy, /Bond Haus: your email address/);
-  assert.match(privacy, /we store a verification flag in a cookie/);
+  assert.match(privacy, /the Home Haus form stores nothing and sends nothing/);
+  assert.match(privacy, /sessionStorage for this browser session/);
+  assert.match(privacy, /under the name bond_age_ok/);
+  assert.equal(privacy.includes("we store a verification flag in a cookie"), false);
+  assert.equal(privacy.includes("if member accounts launch"), false);
+  assert.match(
+    privacy,
+    /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\./,
+  );
 });
 
-test("Home keeps id=circle hash alias and bond_circle waitlist key", () => {
+test("Home keeps id=circle hash alias and stores no Haus email", () => {
   const home = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../Home.dc.html"), "utf8");
   assert.match(home, /id="circle"/);
   assert.match(home, /Hash alias/);
-  assert.match(home, /localStorage\.getItem\('bond_circle'\)/);
-  assert.match(home, /localStorage\.setItem\('bond_circle'/);
-  assert.match(home, /Haus is the canonical membership name/);
+  assert.equal(home.includes("bond_circle"), false);
+  assert.equal(home.includes("localStorage.setItem('bond_circle'"), false);
+  assert.match(home, /Nothing is sent from this page\./);
   assert.match(home, /FROM PLANT TO BOND/);
   assert.match(
     home,

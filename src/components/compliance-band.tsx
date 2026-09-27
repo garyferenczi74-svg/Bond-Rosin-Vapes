@@ -3,13 +3,34 @@ import { tokens } from "@/lib/tokens";
 const GOLD =
   "linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%)";
 
+const REQUIRED =
+  "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
+
+const HEALTH = [
+  "Cannabis can be addictive.",
+  "Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.",
+  "There may be health risks associated with consumption of this product.",
+  "Cannabis is not recommended for use by persons who are pregnant or nursing.",
+] as const;
+
 export function ComplianceBand() {
+  const warnText = {
+    fontFamily: "Arial, Helvetica, sans-serif",
+    fontSize: 12,
+    lineHeight: 1.5,
+    color: tokens.warningInk,
+    margin: "0 0 8px",
+  } as const;
+
   return (
-    <div
+    <footer
       style={{
+        position: "relative",
+        zIndex: 2,
         borderTop: `1px solid ${tokens.deepCharcoal}`,
         padding: "36px clamp(20px, 4vw, 56px) 40px",
         textAlign: "center",
+        background: tokens.matteBlack,
       }}
     >
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
@@ -28,18 +49,52 @@ export function ComplianceBand() {
         >
           Health and Safety
         </div>
-        <p style={{ fontSize: 11.5, lineHeight: 1.85, color: tokens.muted, margin: "0 0 8px" }}>
-          For use only by adults 21 years of age and older. Keep out of reach of children and pets.
-          In case of accidental ingestion or overconsumption, contact the Poison Center at
-          1-800-222-1222 or call 9-1-1. Please consume responsibly.
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            background: tokens.warningYellow,
+            color: tokens.warningInk,
+            border: `1px solid ${tokens.warningInk}`,
+            padding: "12px 14px",
+            textAlign: "left",
+          }}
+        >
+          <p style={warnText}>{REQUIRED}</p>
+          {HEALTH.map((line, index) => (
+            <p key={line} style={index === HEALTH.length - 1 ? { ...warnText, margin: 0 } : warnText}>
+              {line}
+            </p>
+          ))}
+        </div>
+        <p
+          style={{
+            fontFamily: "Arial, Helvetica, sans-serif",
+            fontSize: 12,
+            lineHeight: 1.5,
+            color: tokens.muted,
+            margin: "12px 0 0",
+          }}
+        >
+          Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY,
+          calling{" "}
+          <a href="tel:18778467369" style={{ color: "inherit" }}>
+            1-877-8-HOPENY
+          </a>
+          , or visiting{" "}
+          <a href="https://oasas.ny.gov/hopeline" style={{ color: "inherit" }}>
+            oasas.ny.gov/hopeline
+          </a>
+          .
         </p>
-        <p style={{ fontSize: 11.5, lineHeight: 1.85, color: tokens.muted, margin: "0 0 8px" }}>
-          Cannabis may cause impairment and may be habit forming.
+        <p style={{ fontSize: 11, lineHeight: 1.7, color: tokens.muted, margin: "12px 0 0" }}>
+          Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management.
+          OCM-Proc-25-000329
         </p>
-        <p style={{ fontSize: 11, lineHeight: 1.7, color: "#6E685E", margin: 0 }}>
-          Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329
+        <p style={{ fontSize: 12, lineHeight: 1.7, color: tokens.muted, margin: "16px 0 0" }}>
+          21+ Cannabis products. Keep out of reach of children.
         </p>
       </div>
-    </div>
+    </footer>
   );
 }

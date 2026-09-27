@@ -348,7 +348,12 @@ test("order surface copy stays neutral and off Metrc claims", () => {
       assert.equal(chunk.includes("!"), false, `${rel} string has a bang: ${chunk}`);
     }
   }
-  assert.equal(ORDER_COPY.formLine.includes("No Metrc write"), true);
+  assert.equal(ORDER_COPY.formLine.includes("No Metrc write"), false);
+  assert.match(ORDER_COPY.formLine, /Nothing is sent to the state tracking system from this page/);
+  const portal = read("../../app/order/order-client.tsx");
+  assert.equal(portal.includes("No Metrc write"), false);
+  assert.equal(portal.includes("no Metrc write"), false);
+  assert.match(portal, /Nothing is sent to the state tracking system from this page/);
   assert.equal(ORDER_COPY.doorTitle, "Dispensary Login");
   assert.equal(ORDER_COPY.formTitle, "Order reservation");
   assert.equal(ORDER_COPY.signUpTab, "Sign up");

@@ -595,7 +595,7 @@ function scoreHook(text){
   if (CLAIMS.some(function(w){ return new RegExp('\\b'+w+'\\b').test(low); })) s -= 2;
   if (s>=5) return { fit:'Strong fit', fitColor:'#7CBF4E' };
   if (s>=4) return { fit:'Fits', fitColor:'#86ACE3' };
-  return { fit:'Soft', fitColor:'#C08457' };
+  return { fit:'Low', fitColor:'#C08457' };
 }
 function makeHooks(startIdx){
   var out = [];

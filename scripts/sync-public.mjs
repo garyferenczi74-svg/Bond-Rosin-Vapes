@@ -10,7 +10,6 @@ const files = [
   "No2.dc.html",
   "No3.dc.html",
   "AgeGate.dc.html",
-  "haus-age-host.dc.html",
   "FAQ.dc.html",
   "Terms.dc.html",
   "Privacy.dc.html",
@@ -20,6 +19,8 @@ const files = [
   "video-policy.js",
   "image-slot.js",
   "image-slots.state.json",
+  "bond-age-gate.js",
+  "bond-age-gate.css",
 ];
 
 const dirs = ["media"];
@@ -32,6 +33,7 @@ const blocked = new Set([
   "Product.dc.html",
   "Security.dc.html",
   "Social.dc.html",
+  "haus-age-host.dc.html",
 ]);
 
 mkdirSync(publicDir, { recursive: true });

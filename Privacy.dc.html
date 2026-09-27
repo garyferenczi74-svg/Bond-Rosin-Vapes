@@ -7,6 +7,7 @@
 <title>Privacy Policy . Bond</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/bond-age-gate.css">
 <style>
   a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #E3C270;outline-offset:3px}
 
@@ -30,11 +31,53 @@
   .cband > div::before { content: "Health and Safety"; font-size:12px; letter-spacing: 0.32em; text-transform: uppercase; background: linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%); -webkit-background-clip: text; background-clip: text; color:#E3C270; align-self: center; margin-bottom: 6px; }
   .cband span { font-size:16px; line-height: 1.85; color: #B0A99A; letter-spacing: 0.01em; }
   .cband span:last-child { font-size:16px; color: #B0A99A; }
+  :root { --bond-warning-yellow: #FFFF00; --bond-warning-ink: #1B1D1C; }
+  .bond-warn-box { background: var(--bond-warning-yellow); color: var(--bond-warning-ink); border: 1px solid var(--bond-warning-ink); padding: 12px 14px; text-align: left; }
+  .bond-warn-box p { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: var(--bond-warning-ink); margin: 0 0 8px; letter-spacing: 0; }
+  .bond-warn-box p:last-child { margin: 0; }
+  .bond-hope, .bond-hope a { font-family: Arial, Helvetica, sans-serif; font-size: 12px; line-height: 1.5; color: #B0A99A; }
+  .bond-hope { margin: 12px 0 0; }
+  .bond-license { font-size: 16px; line-height: 1.7; color: #B0A99A; margin: 12px 0 0; letter-spacing: 0.02em; }
   footer { background: #1B1D1C; padding: 40px clamp(20px,4vw,56px); display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size:12px; color: #8E887C; }
   footer a { color: #8E887C; text-decoration: none; }
+  html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
+  html[data-bond-age="ok"] .bond-age-gate { display: none; }
 </style>
+<script>
+(function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
+</script>
 </head>
 <body>
+<div id="bond-age-gate" class="bond-age-gate" data-declined="false">
+  <div class="bond-age-veil"></div>
+  <div class="bond-age-veil-soft"></div>
+  <div class="bond-age-panel bond-age-no">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-title">Not yet</p>
+    <p class="bond-age-body">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
+    <div class="bond-age-rule"></div>
+  </div>
+  <div class="bond-age-panel bond-age-ask">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-lead">Please confirm your age.</p>
+    <div class="bond-age-rule bond-age-rule-wide"></div>
+    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
+    <div class="bond-age-fields">
+      <select id="bond-age-month" class="bond-age-select bond-age-month" aria-label="Birth month">
+        <option value="">Birth month</option>
+      </select>
+      <select id="bond-age-year" class="bond-age-select bond-age-year" aria-label="Birth year">
+        <option value="">Birth year</option>
+      </select>
+    </div>
+    <button type="button" id="bond-age-enter" class="bond-age-enter" data-ready="false">Enter</button>
+    <div class="bond-age-health">
+      <div class="bond-age-health-label">Health and Safety</div>
+      <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
+    </div>
+  </div>
+</div>
+<div class="bond-floor" inert>
   <header class="head">
     <a href="Home.dc.html" class="wordmark">BOND</a>
     <a href="Home.dc.html" class="back">Back to site</a>
@@ -42,23 +85,22 @@
 
   <main class="wrap">
     <h1>Privacy Policy</h1>
-    <p class="eff">Effective date: September 24, 2026.</p>
+    <p class="eff">Effective date: September 27, 2026.</p>
 
     <p class="lead">Bond respects the people who visit its house. This policy explains what we collect, why, and the control you keep. We built the site to know as little about you as possible, because discretion is not a feature of this brand; it is the brand.</p>
 
     <h2>1. Who we are</h2>
-    <p>This site is operated by Cedargrowth Organics LLC, a New York State licensed cannabis business (OCM-Proc-25-000329), the company behind Bond ("Bond," "we," "us"). Contact: [PRIVACY EMAIL].</p>
+    <p>This site is operated by Cedargrowth LLC, a New York State licensed cannabis business (OCM-Proc-25-000329), the company behind Bond ("Bond," "we," "us"). Contact: [PRIVACY EMAIL].</p>
 
     <h2>2. Age verification, first and always</h2>
-    <p>New York law requires this site to verify that every visitor is 21 or older before viewing. When you verify, we store a verification flag in a cookie on your device for 30 days, together with your consent to view cannabis-related material. We do not store your date of birth.</p>
+    <p>New York law requires this site to verify that every visitor is 21 or older before viewing. When you verify, we store a flag in sessionStorage for this browser session, under the name bond_age_ok. The flag is the time you entered. It is not a cookie and it is not kept for 30 days. Closing the browser session clears it. We do not store your date of birth.</p>
 
     <h2>3. What we collect</h2>
     <ul>
-      <li>Bond Haus: your email address, your confirmation that you are 21 or older, the page you joined from, and the time you joined. New York requires the age confirmation for cannabis email marketing; we keep the record of it and nothing more.</li>
-      <li>Dispensary Login: dispensary name, address, contact name, phone number, licensed partner email, New York OCM license number, a hashed password, 21+ confirmation, and elevation state. Passwords are stored hashed only. They are never logged in plaintext and are never sent to Metrc. Creating access does not grant order rights until Bond operations elevates the account.</li>
+      <li>Bond Haus: the Home Haus form stores nothing and sends nothing. There is no Bond Haus email list.</li>
+      <li>Dispensary Login: dispensary name, address, contact name, phone number, licensed partner email, New York OCM license number, a hashed password, 21+ confirmation, and account status. Passwords are stored hashed only. They are never logged in plaintext and are never sent to Metrc. Creating access does not grant order rights until Bond operations elevates the account.</li>
       <li>Site analytics: aggregated usage data (pages viewed, approximate region, device type), configured to avoid building individual profiles.</li>
       <li>Dispensary finder: a location you choose to share is used for the lookup and is not stored.</li>
-      <li>Bond Haus accounts: if member accounts launch, we will collect what is needed to operate them, and this policy will be updated before that day.</li>
     </ul>
 
     <h2>Haus member records</h2>
@@ -86,19 +128,19 @@
     <p>We sell nothing on this site, so we hold no purchase records, no payment details, and no government identification. We collect no health information of any kind. We do not buy data about you from anyone. Dispensary Login credentials stay on Bond systems and are not sent to Metrc.</p>
 
     <h2>5. How we use information</h2>
-    <p>To operate the site, to operate Dispensary Login for licensed partners, to comply with New York cannabis law, to send Bond Haus correspondence you asked for, and to measure what is working. Nothing else.</p>
+    <p>To operate the site, to operate Dispensary Login for licensed partners, to comply with New York cannabis law, and to measure what is working. The Home Haus form stores nothing and sends nothing. Nothing else.</p>
 
     <h2>6. Sharing</h2>
     <p>Only with service providers who help us run the site (hosting, email delivery, analytics), each bound to our instructions; with the Office of Cannabis Management or other authorities where the law requires; and never sold, and never shared for cross-context behavioral advertising.</p>
 
     <h2>7. Cookies</h2>
-    <p>The age and consent verification flag, session cookies necessary for the site to function, and analytics cookies. Your browser controls let you clear or block cookies; blocking the verification cookie means you will verify on each visit, because the law requires the gate, not the cookie.</p>
+    <p>The age check is a sessionStorage flag named bond_age_ok. It is cleared when the browser session ends. It is not a cookie. These other keys stay in the browser and are never sent: localStorage bondDispensaryDir and bondNyCities (Finder), and localStorage bondFindResult (Home quiz). The Haus door uses two cookies: bond_haus_ack, kept for one year, and bond_haus_member, kept for one day. Analytics cookies may also be present. Your browser controls let you clear site data.</p>
 
     <h2>8. Your choices and rights</h2>
-    <p>Every Bond Haus email includes an unsubscribe link that works the first time. Depending on where you live, you may have rights to access, correct, or delete your personal information; send requests to [PRIVACY EMAIL] and we will verify and respond within the time your state's law requires, and we honor reasonable requests regardless of state.</p>
+    <p>There is no Bond Haus email list, so there is no unsubscribe link for one. Depending on where you live, you may have rights to access, correct, or delete your personal information; send requests to [PRIVACY EMAIL] and we will verify and respond within the time your state's law requires, and we honor reasonable requests regardless of state.</p>
 
     <h2>9. Retention</h2>
-    <p>Bond Haus records, including the required age confirmation, are kept while you are subscribed and as long as New York law requires us to retain marketing compliance records, then deleted. Dispensary Login records are kept while the partner account is active and as long as New York business and cannabis recordkeeping requires, then deleted or disabled when operations revokes the account. Analytics persist in aggregate. The verification cookie expires on its own.</p>
+    <p>The Home Haus form stores nothing and sends nothing, so Bond keeps no Bond Haus subscription records from it. Dispensary Login records are kept while the partner account is active and as long as New York business and cannabis recordkeeping requires, then deleted or disabled when operations revokes the account. Analytics persist in aggregate. The bond_age_ok flag is cleared when the browser session ends.</p>
 
     <h2>10. Security</h2>
     <p>Access controls, encryption in transit, and a least-access, audited internal environment, consistent with the New York SHIELD Act's reasonable safeguards requirement. We design so a breach would find very little to take.</p>
@@ -110,15 +152,18 @@
     <p>If this policy changes, the effective date changes with it, and material changes will be noted plainly on this page.</p>
   </main>
 
-  <div class="cband">
-    <div>
-      <span>For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</span>
-      <span id="bondRotWarn">Cannabis may cause impairment and may be habit forming.</span>
-      <span>Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</span>
-    </div>
-  </div>
-
   <footer>
+    <div style="flex:1 0 100%;max-width:720px;margin:0 auto 20px;text-align:center">
+      <div class="bond-warn-box">
+        <p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
+        <p>Cannabis can be addictive.</p>
+        <p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>
+        <p>There may be health risks associated with consumption of this product.</p>
+        <p>Cannabis is not recommended for use by persons who are pregnant or nursing.</p>
+      </div>
+      <p class="bond-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit;text-decoration:underline">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit;text-decoration:underline">oasas.ny.gov/hopeline</a>.</p>
+      <p class="bond-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p>
+    </div>
     <span>21+ Cannabis products. Keep out of reach of children.</span>
     <span style="display:flex;gap:22px;flex-wrap:wrap">
       <a href="Home.dc.html">Home</a>
@@ -128,15 +173,7 @@
     </span>
   </footer>
 
-  <script>
-  (function(){
-    var w=["Cannabis may cause impairment and may be habit forming.","Cannabis can impair concentration, coordination, and judgment. Do not operate a vehicle or machinery under the influence of cannabis.","There may be health risks associated with consumption of this product.","Cannabis is not recommended for use by persons who are pregnant or nursing."];
-    try {
-      var idx=sessionStorage.getItem('bond_warn_idx');
-      if(idx===null){ var c=(parseInt(localStorage.getItem('bond_warn_ctr')||'-1',10)+1)%w.length; localStorage.setItem('bond_warn_ctr',String(c)); idx=String(c); sessionStorage.setItem('bond_warn_idx',idx); }
-      var el=document.getElementById('bondRotWarn'); if(el) el.textContent=w[parseInt(idx,10)];
-    } catch(e){}
-  })();
-  </script>
+</div>
+<script src="/bond-age-gate.js"></script>
 </body>
 </html>

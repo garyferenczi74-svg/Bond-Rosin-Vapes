@@ -37,8 +37,8 @@ const BATCH_NOTE = "No lots recorded. No COA on file.";
 
 export const NUMBERED_COLLECTION: CollectionFrame = {
   name: "The Numbered Collection",
-  line: "Choose your moment.",
-  close: "When the product is pure, the experience is real.",
+  line: "Three numbers. Daytime, evening, and the Reserve Edition.",
+  close: "Solventless live rosin.",
 };
 
 export const SEED_SKUS: Sku[] = [
@@ -47,8 +47,8 @@ export const SEED_SKUS: Sku[] = [
     number: "No. 1",
     editionName: "Dialed",
     moment: "Daytime",
-    triad: "Focus. Clarity. Momentum.",
-    bondLine: "your potential",
+    triad: "Daytime. Solventless live rosin.",
+    bondLine: "Bond with No. 1.",
     accentToken: "No. 1",
     hex: SKU_ACCENTS["no-1"],
     formats: ["0.5g", "1g"],
@@ -60,9 +60,9 @@ export const SEED_SKUS: Sku[] = [
     id: "no-2",
     number: "No. 2",
     editionName: "Unwind",
-    moment: "Nighttime",
-    triad: "Release. Stillness. Restoration.",
-    bondLine: "the moment",
+    moment: "Evening",
+    triad: "Evening. Solventless live rosin.",
+    bondLine: "Bond with No. 2.",
     accentToken: "No. 2",
     hex: SKU_ACCENTS["no-2"],
     formats: ["0.5g", "1g"],
@@ -74,9 +74,9 @@ export const SEED_SKUS: Sku[] = [
     id: "no-3",
     number: "No. 3",
     editionName: "Peak",
-    moment: "Reserve",
-    triad: "Edge. Elevation. Expansion.",
-    bondLine: "your edge",
+    moment: "Reserve Edition",
+    triad: "Reserve Edition. Solventless live rosin.",
+    bondLine: "Bond with No. 3.",
     accentToken: "No. 3",
     hex: SKU_ACCENTS["no-3"],
     formats: ["0.5g", "1g"],
@@ -281,7 +281,7 @@ export const SEED_CANON: CanonDoc[] = [
     id: "copy-bank",
     name: "prototype/copy-bank",
     ver: "v5",
-    body: "Approved lines. With your highest self. What you consume matters. Nothing added, everything real. When the product is pure the experience is real.",
+    body: "Approved lines. With your highest self. What you consume matters. Nothing added, everything real. Solventless live rosin.",
     prior: "v4: earlier hero lines before membership was unified under Haus.",
   },
   {
@@ -1091,13 +1091,13 @@ export const SEED_VARIATIONS: ScriptVariation[] = [
   {
     id: "var-01",
     hook: "Nothing added. Nothing in the way.",
-    caption: "When the product is pure, the experience is real.",
+    caption: "Solventless live rosin.",
     platform: "Short",
     provenance: "Film Day asset library mock.",
   },
   {
     id: "var-02",
-    hook: "Choose your moment.",
+    hook: "Which number are you meeting?",
     caption: "The Numbered Collection. Dialed. Unwind. Peak.",
     platform: "Reel",
     provenance: "Film Day asset library mock.",

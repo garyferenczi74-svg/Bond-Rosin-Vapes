@@ -92,7 +92,7 @@ export function HausWing({
   if (active === "batches") return <ParkedDesk title="Batches" note="The house records the member Library checks." />;
   if (active === "reserve") return <ParkedDesk title="Reserve" note="Numbered run registry." />;
   if (active === "events") return <ParkedDesk title="Events" note="Member evenings." />;
-  if (active === "guide") return <ParkedDesk title="Guide" note="The Experience Guide chapters." />;
+  if (active === "guide") return <ParkedDesk title="Guide" note="The Number Guide chapters." />;
   return <DashboardDesk store={store} onToast={onToast} />;
 }
 

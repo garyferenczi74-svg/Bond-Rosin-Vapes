@@ -15,6 +15,8 @@ export const tokens = {
   security: SKU_ACCENTS["no-3"],
   muted: "#8E887C",
   line: "#3A3C3B",
+  warningYellow: "#FFFF00",
+  warningInk: "#1B1D1C",
 } as const;
 
 export const aptosStack =
@@ -43,7 +45,7 @@ export const wings: {
     href: "/vauxhall/product",
     title: "Product",
     hairline: tokens.product,
-    summary: "The Numbered Collection. Choose your moment.",
+    summary: "The Numbered Collection. Daytime, evening, and the Reserve Edition.",
   },
   {
     id: "security",

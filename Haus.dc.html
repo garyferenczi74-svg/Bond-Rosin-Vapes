@@ -58,9 +58,9 @@ var GOLD = 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62
 var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 var COMPS = [
-  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Bright','Crisp','Zesty'], top:['Citrus peel','Green anise'], heart:['Pine','Black pepper'], base:['Cedar','Warm earth'] },
-  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Soft','Round','Floral'], top:['Lavender','Bergamot'], heart:['Chamomile','Clove'], base:['Sandalwood','Musk'] },
-  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Deep','Full','Rich'], top:['Ripe mango','Blood orange'], heart:['Gardenia','Fennel'], base:['Amber','Loam'] }
+  { id:'no1', name:'No. 1 Dialed', tier:'Everyday', accent:'#B8946A', tint:'rgba(184,148,106,0.05)', triad:['Daytime','Solventless','Live rosin'], top:['No. 1'], heart:['Daytime'], base:['Solventless live rosin'] },
+  { id:'no2', name:'No. 2 Unwind', tier:'Evening', accent:'#7E93A8', tint:'rgba(126,147,168,0.05)', triad:['Evening','Solventless','Live rosin'], top:['No. 2'], heart:['Evening'], base:['Solventless live rosin'] },
+  { id:'no3', name:'No. 3 Peak', tier:'Reserve', accent:'#C08457', tint:'rgba(192,132,87,0.05)', triad:['Reserve Edition','Solventless','Live rosin'], top:['No. 3'], heart:['Reserve Edition'], base:['Solventless live rosin'] }
 ];
 var BATCH_RECORDS = {
   'BND-1-0518': { comp:'no1', cultivar:'Sunrise Runtz', harvest:'2026-04-10', pressing:'2026-04-22', batch:'BND-1-0518', run:null },
@@ -68,14 +68,14 @@ var BATCH_RECORDS = {
   'BND-3-0214': { comp:'no3', cultivar:'', harvest:'2026-03-18', pressing:'2026-03-30', batch:'BND-3-0214', run:{ number:214, size:1000 } }
 };
 var GUIDE = [
-  { id:'cover', title:'The Experience Guide', kind:'cover' },
-  { id:'notes', title:'On Notes', kind:'essay', body:'A note is a memory before it is a smell. The house presses so the plant arrives whole, its top notes lifting first, its heart holding the middle, its base staying after the rest has gone. Read a composition the way you would read a room: what greets you, what stays, what lingers when you have left.' },
+  { id:'cover', title:'The Number Guide', kind:'cover' },
+  { id:'notes', title:'On Notes', kind:'essay', body:'No. 1 is the daytime number. No. 2 is the evening number. No. 3 is the Reserve Edition. Solventless live rosin.' },
   { id:'no1', title:'No. 1 Dialed', kind:'comp', comp:'no1' },
   { id:'no2', title:'No. 2 Unwind', kind:'comp', comp:'no2' },
   { id:'no3', title:'No. 3 Peak', kind:'comp', comp:'no3' },
   { id:'ritual', title:'The Ritual', kind:'ritual' }
 ];
-var INTENTIONS = ['Aroma','Flavor','Craft','Season','Evening'];
+var INTENTIONS = ['Daytime','Evening','Press','Season','Number'];
 var NAV = [['dashboard','Dashboard'],['salon','Salon'],['library','Library'],['guide','Guide'],['reserve','Reserve'],['events','Events'],['ritual','Ritual'],['account','Account']];
 
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -215,7 +215,7 @@ var HausStore = {
     ];
     this.houseWrites = [
       { text:'A Reserve run has been pressed. No. 3 Peak.', view:'reserve' },
-      { text:'The Experience Guide, chapter On Notes, is open.', view:'guide' }
+      { text:'The Number Guide, chapter On Notes, is open.', view:'guide' }
     ];
     // published admin content overrides the defaults
     if (HAUS_SHARED){
@@ -268,11 +268,17 @@ var toastTimer = null;
 function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); if (toastTimer) clearTimeout(toastTimer); toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2800); }
 
 function complianceBand(){
-  return '<div style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">'
+  return '<footer style="border-top:1px solid #2A2C29;padding:36px clamp(20px,4vw,56px) 40px;text-align:center"><div style="max-width:720px;margin:0 auto">'
     + '<div class="gold" style="font-size:10px;letter-spacing:0.32em;text-transform:uppercase;display:inline-block;margin:0 0 12px">Health and Safety</div>'
-    + '<p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">For use only by adults 21 years of age and older. Keep out of reach of children and pets. In case of accidental ingestion or overconsumption, contact the Poison Center at 1-800-222-1222 or call 9-1-1. Please consume responsibly.</p>'
-    + '<p style="font-size:11.5px;line-height:1.85;color:#8E887C;margin:0 0 8px">Cannabis may cause impairment and may be habit forming.</p>'
-    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:0">Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p></div></div>';
+    + '<style>:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:#1B1D1C}</style>'
+    + '<div style="background:var(--bond-warning-yellow);color:var(--bond-warning-ink);border:1px solid var(--bond-warning-ink);padding:12px 14px;text-align:left;font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5">'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">Cannabis can be addictive.</p>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0 0 8px">There may be health risks associated with consumption of this product.</p>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:var(--bond-warning-ink);margin:0">Cannabis is not recommended for use by persons who are pregnant or nursing.</p></div>'
+    + '<p style="font-family:Arial, Helvetica, sans-serif;font-size:12px;line-height:1.5;color:#8E887C;margin:12px 0 0">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY, calling <a href="tel:18778467369" style="color:inherit">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline" style="color:inherit">oasas.ny.gov/hopeline</a>.</p>'
+    + '<p style="font-size:11px;line-height:1.7;color:#6E685E;margin:12px 0 0">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-Proc-25-000329</p></div></footer>';
 }
 function chrome(active, inner){
   var nav = NAV.map(function(n){ return '<a class="navlink'+(active===n[0]?' on':'')+'" href="#/haus/'+n[0]+'">'+esc(n[1])+'</a>'; }).join('');
@@ -480,7 +486,7 @@ function renderGuide(){
   if (ch.kind==='cover'){
     page = '<div style="background:#1B1D1C;border:1px solid #2A2C29;border-radius:4px;padding:70px 30px;text-align:center;position:relative;overflow:hidden">'
       + '<div style="position:absolute;top:36px;left:50%;transform:translateX(-50%);display:flex;gap:16px;opacity:0.5">'+COMPS.map(function(c){ return '<span style="width:8px;height:8px;border-radius:50%;background:'+c.accent+'"></span>'; }).join('')+'</div>'
-      + '<div class="didot gold" style="font-size:clamp(30px,5vw,46px);letter-spacing:0.05em;margin-top:20px">The Experience Guide</div>'
+      + '<div class="didot gold" style="font-size:clamp(30px,5vw,46px);letter-spacing:0.05em;margin-top:20px">The Number Guide</div>'
       + '<div style="font-size:12.5px;letter-spacing:0.24em;text-transform:uppercase;color:#8E887C;margin-top:16px">Bond Haus edition</div></div>';
   } else if (ch.kind==='essay'){
     page = paperSpread(ch.title, '<p style="font-size:15.5px;line-height:2;color:#4A463E;margin:0">'+esc(ch.body)+'</p>');
@@ -494,7 +500,7 @@ function renderGuide(){
     page = paperSpread('The Ritual', '<div style="display:flex;flex-direction:column;gap:0">'+[['Prepare','Clear the space. Remove distractions.'],['Pause','Be still. Set your intention.'],['Close','Return when ready.']].map(function(s,i,a){ return '<div style="display:flex;gap:16px;align-items:flex-start"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:11px;height:11px;border-radius:50%;background:#C08457"></span>'+(i<a.length-1?'<span style="width:1px;height:42px;background:#C0845766"></span>':'')+'</div><div style="padding-bottom:26px"><div class="didot" style="font-size:19px;color:#2A2620">'+s[0]+'</div><div style="font-size:14px;color:#4A463E;margin-top:4px">'+s[1]+'</div></div></div>'; }).join('')+'</div>');
   }
   var ribbon = '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><button class="htab" id="gPrev"'+(idx===0?' disabled':'')+'>Previous</button><span style="font-size:12px;color:#6E685E">Chapter '+(idx+1)+' of '+GUIDE.length+' . '+esc(ch.title)+'</span><button class="htab" id="gNext"'+(idx===GUIDE.length-1?' disabled':'')+'>Next</button></div>';
-  chrome('guide', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Experience Guide</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">A reading ribbon keeps your place.</p><div class="soft">'+page+'</div>'+ribbon);
+  chrome('guide', '<div class="didot" style="font-size:clamp(24px,3.5vw,34px);color:#E1DAD0">The Number Guide</div><p style="font-size:13.5px;color:#8E887C;margin:8px 0 24px">A reading ribbon keeps your place.</p><div class="soft">'+page+'</div>'+ribbon);
 }
 function paperSpread(title, body){
   return '<div style="background:#F2ECE0;border-radius:4px;padding:44px clamp(24px,4vw,56px)"><div class="didot" style="font-size:28px;color:#2A2620">'+esc(title)+'</div><div style="height:1px;background:#C29A4566;width:60px;margin:18px 0 22px"></div>'+body+'</div>';

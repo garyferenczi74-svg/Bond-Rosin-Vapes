@@ -1,5 +1,5 @@
 import { AgeGateShell } from "@/components/age-gate-shell";
 
-export default function HausLayout({ children }: { children: React.ReactNode }) {
+export default function OrderLayout({ children }: { children: React.ReactNode }) {
   return <AgeGateShell>{children}</AgeGateShell>;
 }
