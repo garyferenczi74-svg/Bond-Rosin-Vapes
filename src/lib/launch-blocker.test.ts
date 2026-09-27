@@ -184,6 +184,9 @@ test("process label, HOPEline short code, and license case stay on the served pa
     assert.equal(html.includes("THE PRODUCT IS PURE"), false, name);
   }
   assert.equal(read("No2.dc.html").includes(">Process</div>"), true);
+  assert.equal(read("No2.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
+  assert.equal(read("No2.dc.html").includes("NOTHING ADDED"), false);
+  assert.equal(read("No2.dc.html").includes("NOTHING IN THE WAY"), false);
   assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
   assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span><br>"), false);
 });

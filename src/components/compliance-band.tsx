@@ -18,7 +18,7 @@ export function ComplianceBand() {
     fontFamily: "Arial, Helvetica, sans-serif",
     fontSize: 12,
     lineHeight: 1.5,
-    color: tokens.warningInk,
+    color: "var(--matte-black)",
     margin: "0 0 8px",
   } as const;
 
@@ -53,9 +53,9 @@ export function ComplianceBand() {
           style={{
             position: "relative",
             zIndex: 2,
-            background: tokens.warningYellow,
-            color: tokens.warningInk,
-            border: `1px solid ${tokens.warningInk}`,
+            background: "var(--bond-warning-yellow)",
+            color: "var(--matte-black)",
+            border: "1px solid var(--matte-black)",
             padding: "12px 14px",
             textAlign: "left",
           }}
