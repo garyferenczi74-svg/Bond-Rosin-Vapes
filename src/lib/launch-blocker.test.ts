@@ -55,6 +55,7 @@ test("launch blocker copy is replaced on Home No1 and No3", () => {
   assert.match(home, /Daytime\. Bright\. Crisp\./);
   assert.match(home, /Evening\. Soft\. Round\./);
   assert.match(home, /Reserve Edition\. Solventless live rosin\./);
+  assert.equal(home.includes("Reserve Edition. Reserve Edition."), false);
   assert.match(home, /Which number are you meeting\?/);
   assert.match(home, /No\. 1\. A daytime number\./);
   assert.match(home, /Bond with No\. 1\./);
