@@ -6,8 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style id="bond-gate-cover-css">
 /* Cover paints before tokens arrive */
-#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:#1B1D1C;pointer-events:auto}
-html,body{background:#1B1D1C;margin:0}
+html,body,#bond-gate-cover{background:#1B1D1C}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;pointer-events:auto}
+html,body{margin:0}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 .bond-js-off{box-sizing:border-box;max-width:560px;margin:0 auto;padding:24px;text-align:center}

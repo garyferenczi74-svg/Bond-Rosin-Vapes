@@ -6,8 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style id="bond-gate-cover-css">
 /* Cover paints before tokens arrive */
-#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:#1B1D1C;pointer-events:auto}
-html,body{background:#1B1D1C;margin:0}
+html,body,#bond-gate-cover{background:#1B1D1C}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;pointer-events:auto}
+html,body{margin:0}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 .bond-js-off{box-sizing:border-box;max-width:560px;margin:0 auto;padding:24px;text-align:center}
@@ -54,7 +55,21 @@ html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 <helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0C131C"></rect><text x="50" y="57" font-family="Didot,serif" font-size="20" letter-spacing="4" fill="#86ACE3" text-anchor="middle">No.2</text></svg></template>
 <link rel="stylesheet" href="/fonts/fonts.css">
-<script src="./image-slot.js"></script>
+<script>
+(function () {
+  var started = false;
+  function loadSlots() {
+    if (started) return;
+    started = true;
+    var el = document.createElement("script");
+    el.src = "./image-slot.js";
+    el.async = true;
+    document.head.appendChild(el);
+  }
+  window.addEventListener("bond-entered", loadSlots);
+  if (document.documentElement.getAttribute("data-bond-age") === "ok") loadSlots();
+})();
+</script>
 <style>
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #E3C270;outline-offset:3px}
 

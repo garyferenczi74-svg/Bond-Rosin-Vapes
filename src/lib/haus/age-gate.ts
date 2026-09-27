@@ -61,8 +61,9 @@ const LATIN_RANGE =
   "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
 
 export const AGE_GATE_CRITICAL = `/* Cover paints before tokens arrive */
-#bond-gate-cover{position:fixed;inset:0;z-index:8000;background:#1B1D1C;pointer-events:auto}
-html,body{background:#1B1D1C;margin:0;color:var(--bone)}
+html,body,#bond-gate-cover{background:#1B1D1C}
+#bond-gate-cover{position:fixed;inset:0;z-index:8000;pointer-events:auto}
+html,body{margin:0;color:var(--bone)}
 :root{--font-didot:"GFS Didot"}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
