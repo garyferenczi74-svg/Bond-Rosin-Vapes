@@ -288,3 +288,32 @@ html[data-bond-age="ok"] .bond-age-gate {
     transform: none;
   }
 }
+
+/* Viewports about 640px tall or shorter scroll inside the gate. Taller viewports keep the centered panel. */
+@media (max-height: 640px) {
+  html:not([data-bond-age="ok"]),
+  html:not([data-bond-age="ok"]) body {
+    overflow: hidden;
+  }
+
+  .bond-age-gate {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    justify-content: flex-start;
+  }
+
+  .bond-age-panel {
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .bond-age-dc {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+}

@@ -74,7 +74,8 @@ html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
 html[data-bond-age="ok"] .bond-age-gate { display: none; }
 .bond-age-gate{position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;flex-direction:column;align-items:center}
 .bond-age-gate .bond-age-ask .bond-age-body{font-family:Arial,"Segoe UI",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
-.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:Georgia,"Times New Roman",serif;font-weight:400}`;
+.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+@media (max-height:640px){html:not([data-bond-age="ok"]),html:not([data-bond-age="ok"]) body{overflow:hidden}.bond-age-gate{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;justify-content:flex-start}.bond-age-gate .bond-age-panel{margin-top:0;margin-bottom:0;flex-shrink:0}.bond-age-dc{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;align-items:flex-start !important;justify-content:flex-start !important}}`;
 
 function webFace(family: string, weight: string, file: string): string {
   return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:swap;src:url("${file}") format("woff2");unicode-range:${LATIN_RANGE}}`;
