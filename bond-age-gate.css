@@ -313,7 +313,8 @@ html[data-bond-age="ok"] .bond-age-gate {
     max-height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* Row flex. Start on the cross axis so a tall panel can scroll. Keep the row centered. */
     align-items: flex-start !important;
-    justify-content: flex-start !important;
+    justify-content: center !important;
   }
 }

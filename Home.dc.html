@@ -988,6 +988,19 @@ class Component extends DCLogic {
     var fixed = naturalCopy - flex;
     if (!(fixed > 20)) fixed = Math.max(80, naturalCopy * 0.55);
     var cover = Math.max(cw / srcW, ch / srcH);
+    // Gold BOND on bond_hero_d.v6.webp, source px of the 1920 frame: x 204 to 1686.
+    // Height-sized cover meets a width fit of those edges at aspect 1.40.
+    // Below that, cap the scale so B and D stay 8px inside the viewport.
+    // At 1.40 and wider the cap is above cover, so 1133x744, 1180x820 and 1194x834 stay put.
+    var wordL = 204 * (srcW / 1920);
+    var wordR = 1686 * (srcW / 1920);
+    var midSrc = srcW / 2;
+    var edgePad = 8;
+    var halfW = cw / 2;
+    var fitL = (halfW - edgePad) / (midSrc - wordL);
+    var fitR = (halfW - edgePad) / (wordR - midSrc);
+    var wordFit = Math.min(fitL, fitR);
+    if (wordFit > 0) cover = Math.min(cover, wordFit);
     var floorGap = Math.max(8, fs * 0.5);
     var floorPad = 8;
     var tail = 2;
