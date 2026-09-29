@@ -34,8 +34,9 @@ html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 </style>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
-<link rel="preload" as="image" href="media/posters/bond_hero_m.webp" media="(max-width: 1199px) and (max-aspect-ratio: 1/1)" fetchpriority="high">
-<link rel="preload" as="image" href="media/posters/bond_hero_d.v6.webp" media="(min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1199/1198)" fetchpriority="high">
+<!-- Poster preload media is the clip choice. Desktop matches data-wide-mq. Mobile is the portrait complement. -->
+<link rel="preload" as="image" href="media/posters/bond_hero_m.webp" media="(max-width: 1199px) and (max-aspect-ratio: 999/1000)" fetchpriority="high">
+<link rel="preload" as="image" href="media/posters/bond_hero_d.v6.webp" media="(min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preload" as="fetch" href="./AgeGate.dc.html">
 <script src="./support.js"></script>
 <script src="./video-policy.js"></script>
@@ -86,6 +87,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   --hero-nav-clear: 1.5;
   --hero-clear-min: 1;
   --hero-clear-max: 2;
+  --hero-band-gap: 16;
   --hero-media-left: 0;
   --hero-media-width: 100%;
   --hero-media-top: 0;
@@ -109,12 +111,21 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 .hero-endplate { display: block; pointer-events: none; opacity: 0; transition: opacity .4s cubic-bezier(0.44,0,0.56,1); }
 .hero-endplate img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 .hero-endplate.hero-endplate-on { opacity: 1; }
-@media (min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1199/1198) {
+@media (min-width: 1200px) {
   #top {
     --hero-media-top: -80px;
     --hero-media-height: 115%;
     --hero-media-min-height: 100%;
   }
+}
+@media (max-width: 1199px) and (min-aspect-ratio: 1/1) {
+  #top {
+    --hero-media-top: 0px;
+    --hero-media-height: 100%;
+    --hero-media-min-height: 0px;
+  }
+}
+@media (min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1/1) {
   .hero-media::before {
     content: '';
     position: absolute; left: 0; right: 0; bottom: 0; height: 36%;
@@ -131,7 +142,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 48%, #000000 100%);
   }
 }
-@media (max-width: 1199px) and (max-aspect-ratio: 1/1) {
+@media (max-width: 1199px) and (max-aspect-ratio: 999/1000) {
   #top {
     --hero-media-top: 0;
     --hero-media-height: 100%;
@@ -177,7 +188,7 @@ input::placeholder { color: #B0A99A; }
 #top.hero-copy-flow { display: flex; flex-direction: column; }
 #top.hero-copy-flow .hero-media { position: relative; flex: 1 1 auto; min-height: 48vh; }
 #top.hero-copy-flow .hero-text { position: relative; left: auto; top: auto; transform: none; width: 100%; margin: 0 auto; padding: var(--hero-tagline-gap) 32px 32px; }
-@media (max-width: 1199px) and (max-aspect-ratio: 1/1) {
+@media (max-width: 1199px) and (max-aspect-ratio: 999/1000) {
   .hero-text { --hero-tagline-size: 17px; top: var(--hero-copy-top, 56%); bottom: auto; max-width: 342px; padding: 0 24px 24px; }
   #top.hero-copy-flow .hero-text { padding: var(--hero-tagline-gap) 24px 28px; }
   .hero-tagline { gap: 6px; max-width: 100%; flex-wrap: wrap; }
@@ -190,8 +201,8 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-primary { padding: 16px 20px; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
-/* Short landscape keeps the mobile type scale on the wide lockup so the copy fits under the 16:9 frame. */
-@media (max-width: 1199px) and (max-height: 620px) and (min-aspect-ratio: 1199/1198) {
+/* Landscape under 1200 uses one type scale at every height. No height gate. */
+@media (max-width: 1199px) and (min-aspect-ratio: 1/1) {
   .hero-text { --hero-tagline-size: 17px; }
   .hero-tagline { gap: 6px; }
   .hero-tagline h1 { letter-spacing: 2px; padding-left: 2px; line-height: 1.15; }
@@ -248,14 +259,13 @@ input::placeholder { color: #B0A99A; }
   <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
-        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1199/1198)"
+        data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1/1)"
         data-desktop-webm="media/ladder/bond_hero_d.1080.vp9.v6.webm"
         data-desktop-mp4="media/ladder/bond_hero_d.1080.h264.v6.mp4"
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
         data-mobile-mp4="media/ladder/bond_hero_m.1080.h264.v1.mp4"
         data-desktop-poster="media/posters/bond_hero_d.v6.webp"
-        data-mobile-poster="media/posters/bond_hero_m.webp"
-        poster="media/posters/bond_hero_d.v6.webp"></video>
+        data-mobile-poster="media/posters/bond_hero_m.webp"></video>
       <picture class="hero-endplate" aria-hidden="true"
         data-desk-avif="media/endplates/hero_endplate_16x9.1920.v1.avif 1920w, media/endplates/hero_endplate_16x9.2560.v1.avif 2560w, media/endplates/hero_endplate_16x9.3840.v1.avif 3840w"
         data-desk-webp="media/endplates/hero_endplate_16x9.1920.v1.webp 1920w, media/endplates/hero_endplate_16x9.2560.v1.webp 2560w, media/endplates/hero_endplate_16x9.3840.v1.webp 3840w"
@@ -787,10 +797,13 @@ class Component extends DCLogic {
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
   var WIDE_MQ = '(min-width: 1200px)';
-  // Landscape under 1200 is wider than tall. 1199/1198 is the nearest integer pair, so every such window matches.
-  // Those windows use the desktop 16:9 frame. Portrait, including square, stays on the portrait clip.
-  var LAND_MQ = '(max-width: 1199px) and (min-aspect-ratio: 1199/1198)';
+  // Same condition as the desktop poster preload and data-wide-mq, minus the 1200 clause.
+  // Landscape under 1200, any height: width/height >= 1. Portrait under 1200 stays on the 9:16 plate.
+  var LAND_MQ = '(max-width: 1199px) and (min-aspect-ratio: 1/1)';
   var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
+  // Desktop plate, source px on a 1080 tall frame. Feet are the 643 optical line. Cap is the gold shoulder.
+  var DESK_CAP = 308;
+  var DESK_FEET = 643;
   var MEDIA_VARS = [
     '--hero-media-left',
     '--hero-media-top',
@@ -818,6 +831,12 @@ class Component extends DCLogic {
     for (i = 0; i < MEDIA_VARS.length; i++) t.style.removeProperty(MEDIA_VARS[i]);
   }
 
+  function clearBandTweaks(s) {
+    if (!s) return;
+    s.style.removeProperty('--hero-gap-line2');
+    s.style.removeProperty('padding-bottom');
+  }
+
   function flowFallback() {
     var t = document.getElementById(STAGE);
     var s = document.getElementById(STACK);
@@ -826,7 +845,10 @@ class Component extends DCLogic {
       t.style.removeProperty('height');
       t.style.removeProperty('min-height');
     }
-    if (s) s.style.removeProperty('--hero-copy-top');
+    if (s) {
+      s.style.removeProperty('--hero-copy-top');
+      clearBandTweaks(s);
+    }
     clearMediaBox(t);
     var media = document.querySelector('.hero-media');
     if (media) {
@@ -848,20 +870,32 @@ class Component extends DCLogic {
     }
   }
 
-  function isLandscapeUnder1200() {
+  function isLandscapeBand() {
     try { return window.matchMedia(LAND_MQ).matches; } catch (e) {
       var w = window.innerWidth || 0;
       var h = window.innerHeight || 0;
-      return w < 1200 && h > 0 && w > h;
+      return w < 1200 && h > 0 && w >= h;
     }
   }
 
   function useDesktopFrame() {
-    return isWideNow() || isLandscapeUnder1200();
+    return isWideNow() || isLandscapeBand();
+  }
+
+  function measureCopy(s) {
+    var tagEl = s.querySelector('.hero-tagline');
+    var btnEl = s.querySelector('.hero-buttons');
+    var padB = parseFloat(window.getComputedStyle(s).paddingBottom) || 0;
+    if (tagEl && btnEl) {
+      var span = btnEl.getBoundingClientRect().bottom - tagEl.getBoundingClientRect().top;
+      if (span > 1) return span + padB;
+    }
+    return (s.offsetHeight > 1) ? s.offsetHeight : 220;
   }
 
   function layoutDesktop(t, s, v) {
     clearMediaBox(t);
+    clearBandTweaks(s);
     var media = document.querySelector('.hero-media');
     if (media) {
       media.style.removeProperty('background-size');
@@ -901,6 +935,144 @@ class Component extends DCLogic {
     reveal(true);
   }
 
+  // Landscape under 1200. Same desktop plate as 1200 and up, pinned so the wordmark cap
+  // clears the measured nav. Gaps tighten, then the plate scale, only when the copy would leave the hero.
+  // 1200 and up does not call this. The feet lock in layoutDesktop stays as it is.
+  function layoutBand(t, s, v) {
+    clearMediaBox(t);
+    clearBandTweaks(s);
+    t.style.removeProperty('height');
+    t.style.removeProperty('min-height');
+    var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.removeProperty('background-size');
+      media.style.removeProperty('background-position');
+      media.style.removeProperty('background-repeat');
+    }
+    var ch = t.clientHeight;
+    var cw = t.clientWidth || window.innerWidth || 0;
+    if (ch < 2 || cw < 2) { flowFallback(); return; }
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var cap = DESK_CAP * (srcH / 1080);
+    var feet = DESK_FEET * (srcH / 1080);
+    var wordSrc = feet - cap;
+    if (!(wordSrc > 1)) { flowFallback(); return; }
+    var nav = document.querySelector('nav');
+    var navR = nav ? nav.getBoundingClientRect() : { bottom: 64 };
+    var tR = t.getBoundingClientRect();
+    var navBottom = Math.max(0, navR.bottom - tR.top);
+    var h1 = s.querySelector('.hero-tagline h1');
+    var fs = 17;
+    if (h1) {
+      var parsed = parseFloat(window.getComputedStyle(h1).fontSize);
+      if (parsed > 0) fs = parsed;
+    }
+    var naturalGap = 1.6 * fs;
+    if (naturalGap < 0.75 * fs) naturalGap = 0.75 * fs;
+    var tcs = window.getComputedStyle(t);
+    var gapNav = readNum(tcs, '--hero-band-gap', 16);
+    var naturalCopy = measureCopy(s);
+    var padB = parseFloat(window.getComputedStyle(s).paddingBottom) || 0;
+    var flex = (3 * naturalGap) + padB;
+    var fixed = naturalCopy - flex;
+    if (!(fixed > 20)) fixed = Math.max(80, naturalCopy * 0.55);
+    var cover = Math.max(cw / srcW, ch / srcH);
+    var floorGap = Math.max(8, fs * 0.5);
+    var floorPad = 8;
+    var tail = 2;
+    function needAt(scale, gap, pad) {
+      return navBottom + gapNav + (wordSrc * scale) + gap + fixed + (3 * gap) + pad + tail;
+    }
+    var scale = cover;
+    var gap = naturalGap;
+    var pad = padB;
+    if (needAt(scale, gap, pad) > ch) {
+      if (needAt(cover, floorGap, floorPad) <= ch) {
+        var lo = floorGap;
+        var hi = naturalGap;
+        var i;
+        for (i = 0; i < 14; i++) {
+          var mid = (lo + hi) / 2;
+          var midPad = Math.max(floorPad, padB * (mid / naturalGap));
+          if (needAt(cover, mid, midPad) > ch) hi = mid;
+          else lo = mid;
+        }
+        gap = lo;
+        pad = Math.max(floorPad, padB * (gap / naturalGap));
+      } else {
+        gap = floorGap;
+        pad = floorPad;
+        var room = ch - navBottom - gapNav - gap - fixed - (3 * gap) - pad - tail;
+        scale = room / wordSrc;
+        if (!(scale > 0.08)) {
+          scale = cover;
+          ch = Math.ceil(needAt(scale, gap, pad));
+          t.style.height = ch + 'px';
+          t.style.minHeight = ch + 'px';
+        }
+      }
+    }
+    if (Math.abs(gap - naturalGap) > 0.4 || Math.abs(pad - padB) > 0.4) {
+      s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
+      s.style.paddingBottom = pad.toFixed(2) + 'px';
+      var measured = measureCopy(s);
+      var predict = fixed + (3 * gap) + pad;
+      var drift = measured - predict;
+      if (drift > 2) {
+        var room2 = ch - navBottom - gapNav - gap - measured - tail;
+        var scale2 = room2 / wordSrc;
+        if (scale2 + 0.0001 >= cover) scale = cover;
+        else if (scale2 > 0.08) scale = scale2;
+        else {
+          scale = cover;
+          ch = Math.ceil(navBottom + gapNav + (wordSrc * scale) + gap + measured);
+          t.style.height = ch + 'px';
+          t.style.minHeight = ch + 'px';
+        }
+      }
+    }
+    var vidW = srcW * scale;
+    var vidH = srcH * scale;
+    var left = (cw - vidW) / 2;
+    var copyH = measureCopy(s);
+    var top = (navBottom + gapNav) - (cap * scale);
+    var spare = ch - (navBottom + gapNav + (wordSrc * scale) + gap + copyH);
+    if (spare > 4) {
+      var bonus = Math.min(spare * 0.4, 36);
+      var top2 = top + bonus;
+      var copyOk = (top2 + (feet * scale) + gap + copyH) <= (ch + 0.5);
+      var navOk = (top2 + (cap * scale)) >= (navBottom + gapNav - 0.5);
+      var covers = top2 <= 0.5 && (top2 + vidH) >= (ch - 0.5);
+      if (copyOk && navOk && (covers || scale + 0.0001 < cover)) top = top2;
+    }
+    t.style.setProperty('--hero-media-width', vidW + 'px');
+    t.style.setProperty('--hero-media-height', vidH + 'px');
+    t.style.setProperty('--hero-media-left', left + 'px');
+    t.style.setProperty('--hero-media-top', top + 'px');
+    t.style.setProperty('--hero-media-max-width', 'none');
+    t.style.setProperty('--hero-media-min-height', '0px');
+    t.style.setProperty('--hero-media-object-fit', 'fill');
+    if (media) {
+      media.style.backgroundSize = vidW + 'px ' + vidH + 'px';
+      media.style.backgroundPosition = left + 'px ' + top + 'px';
+      media.style.backgroundRepeat = 'no-repeat';
+    }
+    var copyTop = Math.ceil(top + (feet * scale) + gap);
+    if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
+    t.classList.remove('hero-copy-flow');
+    s.style.setProperty('--hero-copy-top', copyTop + 'px');
+    var sR = s.getBoundingClientRect();
+    var tR2 = t.getBoundingClientRect();
+    var overflow = sR.bottom - tR2.bottom;
+    if (overflow > 0.5) {
+      var grown = Math.ceil(ch + overflow + 2);
+      t.style.height = grown + 'px';
+      t.style.minHeight = grown + 'px';
+    }
+    reveal(true);
+  }
+
   function layoutCopy() {
     try {
       var t = document.getElementById(STAGE);
@@ -909,7 +1081,9 @@ class Component extends DCLogic {
       if (t === null || s === null) return;
       var hidden = !v || v.style.display === 'none' || reduced === true;
       if (hidden) { flowFallback(); return; }
-      if (useDesktopFrame()) { layoutDesktop(t, s, v); return; }
+      if (isWideNow()) { layoutDesktop(t, s, v); return; }
+      if (isLandscapeBand()) { layoutBand(t, s, v); return; }
+      clearBandTweaks(s);
       t.style.removeProperty('height');
       t.style.removeProperty('min-height');
       var ch = t.clientHeight;

@@ -34,7 +34,7 @@ const heroLock =
 const privacyForm =
   "The Home Haus form stores nothing and sends nothing. Nothing else.";
 
-const heroHash = "265db66a936309c5852cf9718adc0ea41b216620f95e13246a842ba1b270d3dc";
+const heroHash = "501bb7dfd2c6d956a711a22f97cabed1a6d131fca9cbe5f6ada8f4eadb07a110";
 const videoHash = "3a0e46818304d3980f2202950372e5aea6b1cfe59f313ebbe203aa42634513e3";
 
 function normalize(html: string) {
