@@ -34,6 +34,7 @@ html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 </style>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
+<!-- Poster preload media is the clip choice. Desktop matches data-wide-mq. Mobile is the portrait complement. -->
 <link rel="preload" as="image" href="media/posters/bond_hero_m.webp" media="(max-width: 1199px) and (max-aspect-ratio: 999/1000)" fetchpriority="high">
 <link rel="preload" as="image" href="media/posters/bond_hero_d.v6.webp" media="(min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1/1)" fetchpriority="high">
 <link rel="preload" as="fetch" href="./AgeGate.dc.html">
@@ -187,7 +188,7 @@ input::placeholder { color: #B0A99A; }
 #top.hero-copy-flow { display: flex; flex-direction: column; }
 #top.hero-copy-flow .hero-media { position: relative; flex: 1 1 auto; min-height: 48vh; }
 #top.hero-copy-flow .hero-text { position: relative; left: auto; top: auto; transform: none; width: 100%; margin: 0 auto; padding: var(--hero-tagline-gap) 32px 32px; }
-@media (max-width: 1199px) and (max-aspect-ratio: 1/1) {
+@media (max-width: 1199px) and (max-aspect-ratio: 999/1000) {
   .hero-text { --hero-tagline-size: 17px; top: var(--hero-copy-top, 56%); bottom: auto; max-width: 342px; padding: 0 24px 24px; }
   #top.hero-copy-flow .hero-text { padding: var(--hero-tagline-gap) 24px 28px; }
   .hero-tagline { gap: 6px; max-width: 100%; flex-wrap: wrap; }
@@ -200,8 +201,8 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-primary { padding: 16px 20px; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
-/* Short landscape keeps the mobile type scale on the 16:9 plate so the copy can sit under the wordmark. */
-@media (max-width: 1199px) and (max-height: 620px) and (min-aspect-ratio: 1/1) {
+/* Landscape under 1200 uses one type scale at every height. No height gate. */
+@media (max-width: 1199px) and (min-aspect-ratio: 1/1) {
   .hero-text { --hero-tagline-size: 17px; }
   .hero-tagline { gap: 6px; }
   .hero-tagline h1 { letter-spacing: 2px; padding-left: 2px; line-height: 1.15; }
@@ -264,8 +265,7 @@ input::placeholder { color: #B0A99A; }
         data-mobile-webm="media/ladder/bond_hero_m.1080.vp9.v1.webm"
         data-mobile-mp4="media/ladder/bond_hero_m.1080.h264.v1.mp4"
         data-desktop-poster="media/posters/bond_hero_d.v6.webp"
-        data-mobile-poster="media/posters/bond_hero_m.webp"
-        poster="media/posters/bond_hero_d.v6.webp"></video>
+        data-mobile-poster="media/posters/bond_hero_m.webp"></video>
       <picture class="hero-endplate" aria-hidden="true"
         data-desk-avif="media/endplates/hero_endplate_16x9.1920.v1.avif 1920w, media/endplates/hero_endplate_16x9.2560.v1.avif 2560w, media/endplates/hero_endplate_16x9.3840.v1.avif 3840w"
         data-desk-webp="media/endplates/hero_endplate_16x9.1920.v1.webp 1920w, media/endplates/hero_endplate_16x9.2560.v1.webp 2560w, media/endplates/hero_endplate_16x9.3840.v1.webp 3840w"
@@ -797,6 +797,7 @@ class Component extends DCLogic {
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
   var WIDE_MQ = '(min-width: 1200px)';
+  // Same condition as the desktop poster preload and data-wide-mq, minus the 1200 clause.
   // Landscape under 1200, any height: width/height >= 1. Portrait under 1200 stays on the 9:16 plate.
   var LAND_MQ = '(max-width: 1199px) and (min-aspect-ratio: 1/1)';
   var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
