@@ -201,15 +201,25 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-primary { padding: 16px 20px; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
-/* Landscape under 1200. One continuous scale, no 819px or 620px step. At 819 wide the clamps sit on the 17/16/13px scale. Narrower windows shrink with the width so the 16:9 plate can stay inside the hero. */
-@media (max-width: 1199px) and (min-aspect-ratio: 1/1) {
-  .hero-text { --hero-tagline-size: clamp(12px, 2.08vw, 17px); }
-  .hero-tagline { gap: clamp(4px, 0.73vw, 6px); }
-  .hero-tagline h1 { letter-spacing: clamp(1px, 0.24vw, 2px); padding-left: clamp(1px, 0.24vw, 2px); line-height: 1.15; }
-  .hero-rule { width: clamp(24px, 4.4vw, 36px); }
-  .hero-line2 { font-size: clamp(13px, 1.95vw, 16px); line-height: 1.3; }
-  .hero-subtext { font-size: clamp(13px, 1.95vw, 16px); line-height: 1.4; }
-  .hero-btn { font-size: clamp(11px, 1.59vw, 13px); letter-spacing: clamp(1.5px, 0.31vw, 2.5px); }
+/* Short landscape from 819 wide. Lower width limit is explicit. Heights stay on this one scale, with no 620px step. */
+@media (min-width: 819px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) {
+  .hero-text { --hero-tagline-size: 17px; }
+  .hero-tagline { gap: 6px; }
+  .hero-tagline h1 { letter-spacing: 2px; padding-left: 2px; line-height: 1.15; }
+  .hero-rule { width: 36px; }
+  .hero-line2 { font-size: 16px; line-height: 1.3; }
+  .hero-subtext { font-size: 16px; line-height: 1.4; }
+  .hero-btn { font-size: 13px; letter-spacing: 2.5px; }
+}
+/* Below 819. Phone landscape keeps the 16:9 plate, and the type meets the 819 rule at 818px so the step is zero. 2.078vw of 818 is 17px. */
+@media (max-width: 818px) and (min-aspect-ratio: 1/1) {
+  .hero-text { --hero-tagline-size: clamp(12px, 2.078vw, 17px); }
+  .hero-tagline { gap: clamp(4px, 0.7335vw, 6px); }
+  .hero-tagline h1 { letter-spacing: clamp(1px, 0.2445vw, 2px); padding-left: clamp(1px, 0.2445vw, 2px); line-height: 1.15; }
+  .hero-rule { width: clamp(24px, 4.401vw, 36px); }
+  .hero-line2 { font-size: clamp(13px, 1.956vw, 16px); line-height: 1.3; }
+  .hero-subtext { font-size: clamp(13px, 1.956vw, 16px); line-height: 1.4; }
+  .hero-btn { font-size: clamp(11px, 1.589vw, 13px); letter-spacing: clamp(1.5px, 0.3056vw, 2.5px); }
 }
 /* 1200 and up, owner-requested. Clamped tagline, italic, and CTA. Drop the plate and the copy together until the wordmark cap (plate y 298 of 1080) sits a clamp(24px, 4vh, 48px) gap under the 67px nav. 147px is the 67px nav plus the 80px crop. Zero on tall windows. Under 1200, layoutBand owns clearance and the landscape type scale stays fixed. */
 @media (min-width: 1200px) {
