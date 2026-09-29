@@ -201,8 +201,8 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-primary { padding: 16px 20px; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
-/* Landscape under 1200 uses one type scale at every height. No height gate. */
-@media (max-width: 1199px) and (min-aspect-ratio: 1/1) {
+/* Short landscape from 819 wide. Lower width limit is explicit. Heights stay on this one scale, with no 620px step. */
+@media (min-width: 819px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) {
   .hero-text { --hero-tagline-size: 17px; }
   .hero-tagline { gap: 6px; }
   .hero-tagline h1 { letter-spacing: 2px; padding-left: 2px; line-height: 1.15; }
@@ -210,6 +210,16 @@ input::placeholder { color: #B0A99A; }
   .hero-line2 { font-size: 16px; line-height: 1.3; }
   .hero-subtext { font-size: 16px; line-height: 1.4; }
   .hero-btn { font-size: 13px; letter-spacing: 2.5px; }
+}
+/* Below 819. Phone landscape keeps the 16:9 plate, and the type meets the 819 rule at 818px so the step is zero. 2.078vw of 818 is 17px. */
+@media (max-width: 818px) and (min-aspect-ratio: 1/1) {
+  .hero-text { --hero-tagline-size: clamp(12px, 2.078vw, 17px); }
+  .hero-tagline { gap: clamp(4px, 0.7335vw, 6px); }
+  .hero-tagline h1 { letter-spacing: clamp(1px, 0.2445vw, 2px); padding-left: clamp(1px, 0.2445vw, 2px); line-height: 1.15; }
+  .hero-rule { width: clamp(24px, 4.401vw, 36px); }
+  .hero-line2 { font-size: clamp(13px, 1.956vw, 16px); line-height: 1.3; }
+  .hero-subtext { font-size: clamp(13px, 1.956vw, 16px); line-height: 1.4; }
+  .hero-btn { font-size: clamp(11px, 1.589vw, 13px); letter-spacing: clamp(1.5px, 0.3056vw, 2.5px); }
 }
 @media (max-width: 767px) { #process, #process > div { height: 60vh !important; min-height: 440px !important; } }
 @media (prefers-reduced-motion: reduce) {
@@ -978,6 +988,19 @@ class Component extends DCLogic {
     var fixed = naturalCopy - flex;
     if (!(fixed > 20)) fixed = Math.max(80, naturalCopy * 0.55);
     var cover = Math.max(cw / srcW, ch / srcH);
+    // Gold BOND on bond_hero_d.v6.webp, source px of the 1920 frame: x 204 to 1686.
+    // Height-sized cover meets a width fit of those edges at aspect 1.40.
+    // Below that, cap the scale so B and D stay 8px inside the viewport.
+    // At 1.40 and wider the cap is above cover, so 1133x744, 1180x820 and 1194x834 stay put.
+    var wordL = 204 * (srcW / 1920);
+    var wordR = 1686 * (srcW / 1920);
+    var midSrc = srcW / 2;
+    var edgePad = 8;
+    var halfW = cw / 2;
+    var fitL = (halfW - edgePad) / (midSrc - wordL);
+    var fitR = (halfW - edgePad) / (wordR - midSrc);
+    var wordFit = Math.min(fitL, fitR);
+    if (wordFit > 0) cover = Math.min(cover, wordFit);
     var floorGap = Math.max(8, fs * 0.5);
     var floorPad = 8;
     var tail = 2;
