@@ -201,15 +201,15 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-primary { padding: 16px 20px; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
-/* Landscape under 1200 uses one type scale at every height. No height gate. */
+/* Landscape under 1200. One continuous scale, no 819px or 620px step. At 819 wide the clamps sit on the 17/16/13px scale. Narrower windows shrink with the width so the 16:9 plate can stay inside the hero. */
 @media (max-width: 1199px) and (min-aspect-ratio: 1/1) {
-  .hero-text { --hero-tagline-size: 17px; }
-  .hero-tagline { gap: 6px; }
-  .hero-tagline h1 { letter-spacing: 2px; padding-left: 2px; line-height: 1.15; }
-  .hero-rule { width: 36px; }
-  .hero-line2 { font-size: 16px; line-height: 1.3; }
-  .hero-subtext { font-size: 16px; line-height: 1.4; }
-  .hero-btn { font-size: 13px; letter-spacing: 2.5px; }
+  .hero-text { --hero-tagline-size: clamp(12px, 2.08vw, 17px); }
+  .hero-tagline { gap: clamp(4px, 0.73vw, 6px); }
+  .hero-tagline h1 { letter-spacing: clamp(1px, 0.24vw, 2px); padding-left: clamp(1px, 0.24vw, 2px); line-height: 1.15; }
+  .hero-rule { width: clamp(24px, 4.4vw, 36px); }
+  .hero-line2 { font-size: clamp(13px, 1.95vw, 16px); line-height: 1.3; }
+  .hero-subtext { font-size: clamp(13px, 1.95vw, 16px); line-height: 1.4; }
+  .hero-btn { font-size: clamp(11px, 1.59vw, 13px); letter-spacing: clamp(1.5px, 0.31vw, 2.5px); }
 }
 /* 1200 and up, owner-requested. Clamped tagline, italic, and CTA. Drop the plate and the copy together until the wordmark cap (plate y 298 of 1080) sits a clamp(24px, 4vh, 48px) gap under the 67px nav. 147px is the 67px nav plus the 80px crop. Zero on tall windows. Under 1200, layoutBand owns clearance and the landscape type scale stays fixed. */
 @media (min-width: 1200px) {
@@ -812,9 +812,8 @@ class Component extends DCLogic {
 (function () {
   var VID = 'hero-video', STACK = 'hero-textstack', STAGE = 'top';
   var WIDE_MQ = '(min-width: 1200px)';
-  // Under-1200 half of data-wide-mq. The poster preloads use that full query and its negation.
-  // Landscape under 1200, any height: width/height >= 1. Portrait under 1200 stays on the 9:16 plate.
-  var LAND_MQ = '(max-width: 1199px) and (min-aspect-ratio: 1/1)';
+  // Clip choice is data-wide-mq on #hero-video. Poster preloads use that string and its negation.
+  // There is no second selection query. Landscape under 1200 is the wide query minus the 1200px clause.
   var MOB_L = { refW: 1080, refH: 1920, x: 121, y: 650, w: 836, h: 200, base: 849 };
   // Desktop plate, source px on a 1080 tall frame. Feet are the 643 optical line. Cap is the gold shoulder.
   var DESK_CAP = 308;
@@ -885,12 +884,19 @@ class Component extends DCLogic {
     }
   }
 
+  function wideQuery() {
+    var v = document.getElementById(VID);
+    return (v && v.getAttribute('data-wide-mq')) || WIDE_MQ;
+  }
+
   function isLandscapeBand() {
-    try { return window.matchMedia(LAND_MQ).matches; } catch (e) {
-      var w = window.innerWidth || 0;
-      var h = window.innerHeight || 0;
-      return w < 1200 && h > 0 && w >= h;
-    }
+    var w = window.innerWidth || 0;
+    var h = window.innerHeight || 0;
+    try {
+      if (window.matchMedia(WIDE_MQ).matches) return false;
+      if (window.matchMedia(wideQuery()).matches) return true;
+    } catch (e) {}
+    return w < 1200 && h > 0 && w >= h;
   }
 
   function useDesktopFrame() {
@@ -1142,8 +1148,14 @@ class Component extends DCLogic {
       if (!(maxBlock > 40)) maxBlock = Math.max(80, availH * 0.72);
       var sW = (wordMax * cw) / lw;
       var sH = (maxBlock - gapPx - copyH) / lh;
-      // Width-tied floor. The fixed 0.15 scale pinned the portrait clip at 162 by 288.
-      if (!(sH > 0)) sH = (wordMax * cw) / (srcW > 1 ? srcW : L.refW);
+      // Width-tied floor, then contained in the hero. The uncapped floor painted a 9:16 box
+      // of 574x1020 at 667x375 and 703x1251 at 818x460.
+      if (!(sH > 0)) {
+        var fitW = srcW > 1 ? srcW : L.refW;
+        var fitH = srcH > 1 ? srcH : L.refH;
+        var contained = Math.min(cw / fitW, ch / fitH);
+        sH = Math.min((wordMax * cw) / fitW, contained > 0 ? contained : (wordMax * cw) / fitW);
+      }
       var scale = Math.min(sW, sH);
       if (!(scale > 0) || scale !== scale) { flowFallback(); return; }
       var wordH = lh * scale;
