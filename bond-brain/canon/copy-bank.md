@@ -2,7 +2,7 @@
 Version: 2026-09-16 (Prompt 6b residual Haus door membership word; Prompt 4 Torrie locks stand)
 
 ## Hero
-BOND WITH YOUR HIGHEST SELF.
+BOND WITH YOUR HIGHER SELF.
 
 ## Triads
 - Focus. Clarity. Momentum.
@@ -96,7 +96,7 @@ SKU strip line: A reserve expression from Bond's solventless live rosin collecti
 SKU strip tagline: Higher presence. Deepest expression.
 
 ### Preserved (untouched)
-Nav set (No. 1 Dialed, No. 2 Unwind, No. 3 Peak, From Plant to Bond, Find Your Bond, Bond Circle). Hero "Bond with your highest self". Five-zeros purity strip. Footer 21+ line.
+Nav set (No. 1 Dialed, No. 2 Unwind, No. 3 Peak, From Plant to Bond, Find Your Bond, Bond Circle). Hero "Bond with your higher self". Five-zeros purity strip. Footer 21+ line.
 
 ## Prompt 6b residual (Haus door membership word)
 Standing brief: /canon/specs/prompt-6b-residual-haus-only-membership.md

@@ -56,7 +56,7 @@ File every verdict to JB and M at the same time. FAIL returns to Q with the rece
 | Em dash / en dash | Zero em dashes and en dashes anywhere, including layer names and embeds | Any U+2014 or U+2013 character in the candidate surface or source layers inspected |
 | Exclamation points | None in house copy | Any exclamation point in brand copy |
 | Forbidden vocabulary | None of: dank, loud, gas, stoned, hits, rips, medicated, cure, heal, treat | Any forbidden term in visible or embedded copy |
-| Hero | "BOND WITH YOUR HIGHEST SELF." when the hero is present | Altered hero line |
+| Hero | "BOND WITH YOUR HIGHER SELF." when the hero is present | Altered hero line |
 | Triads | Period-separated forms only when used | Comma or dash joined triads |
 
 ## 5. Age gate and deep links
