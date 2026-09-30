@@ -207,13 +207,21 @@ html[data-bond-age="ok"] .bond-age-gate {
 .bond-age-dc .bond-warn-box::before,
 .bond-age-off .bond-warn-box::before,
 #bond-gate-cover .bond-warn-box::before {
-  content: "";
   position: absolute;
   inset: -4px;
-  background: var(--bond-plant-gold);
   pointer-events: none;
+}
+
+@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))) {
+.bond-age-gate .bond-warn-box::before,
+.bond-age-dc .bond-warn-box::before,
+.bond-age-off .bond-warn-box::before,
+#bond-gate-cover .bond-warn-box::before {
+  content: "";
+  background: var(--bond-plant-gold);
   -webkit-clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 3px 3px, 3px calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 3px, 3px 3px);
   clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 3px 3px, 3px calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 3px, 3px 3px);
+}
 }
 
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
