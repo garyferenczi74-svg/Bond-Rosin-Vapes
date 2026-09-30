@@ -11,6 +11,7 @@ import {
   BOND_AGE_MONTHS,
   HAUS_AGE_BOOT,
   bondAgeDecision,
+  bondAgeEntry,
   hausRouteShowsAgeGate,
   hausShowsAgeGate,
   markBondAgePassed,
@@ -94,6 +95,8 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(AGE_GATE_CRITICAL, /#bond-gate-cover/);
   assert.match(AGE_GATE_CRITICAL, /background:#1B1D1C/);
   const ringGuard = "@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor))";
+  const clipGuard =
+    "@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)))";
   for (const name of [
     "bond-age-gate.css",
     "AgeGate.dc.html",
@@ -106,9 +109,19 @@ test("Haus and order render the native gate and the old host stays unpublished",
     "Privacy.dc.html",
     "Terms.dc.html",
   ]) {
-    assert.ok(read(name).includes(ringGuard), name);
+    const html = read(name);
+    assert.ok(html.includes(ringGuard), name);
+    assert.ok(html.includes(clipGuard), name);
+    const clipAt = html.indexOf(clipGuard);
+    const selAt = html.indexOf(".bond-age-gate .bond-warn-box::before");
+    assert.ok(clipAt >= 0 && selAt > clipAt, name);
+    assert.ok(html.indexOf(ringGuard) > clipAt, name);
   }
   assert.ok(AGE_GATE_CRITICAL.includes(ringGuard));
+  assert.ok(AGE_GATE_CRITICAL.includes(clipGuard));
+  assert.ok(
+    AGE_GATE_CRITICAL.indexOf(".bond-age-gate .bond-warn-box::before") > AGE_GATE_CRITICAL.indexOf(clipGuard),
+  );
   assert.equal(AGE_GATE_CRITICAL.includes("local("), false);
   assert.equal(AGE_GATE_CRITICAL.includes("--matte-black:"), false);
   assert.equal(AGE_GATE_CRITICAL.includes("--bone:"), false);
@@ -325,7 +338,7 @@ function mainDisplayed(html: string, ageOk: boolean): boolean {
   return ageOk && html.includes('html[data-bond-age="ok"] #bond-gate-cover{display:none}');
 }
 
-function runGate(html: string, month: string, year: string) {
+function runGate(html: string, month: string, year: string, ofAge = true) {
   const dataset: { bondAge?: string } = {};
   const store = new Map<string, string>();
   const scripts: string[] = [];
@@ -373,20 +386,19 @@ function runGate(html: string, month: string, year: string) {
       if (next.declined) declined = true;
     },
   };
-  const ready = month !== "" && year !== "";
   const arm = new Function("document", "window", slotScript(html));
   arm(document, window);
   const enter = new Function(
-    "ready",
     "month",
     "year",
+    "ofAge",
     "document",
     "sessionStorage",
     "window",
     "CustomEvent",
     marketingEnterSource(),
   );
-  enter.call(self, ready, month, year, document, sessionStorage, window, CustomEvent);
+  enter.call(self, month, year, ofAge, document, sessionStorage, window, CustomEvent);
   return { dataset, store, scripts, declined };
 }
 
@@ -401,10 +413,14 @@ test("a first pass stamps the age attribute and shows Home and the product pages
     assert.equal(mainDisplayed(html, passed.dataset.bondAge === "ok"), true, name);
     assert.deepEqual(passed.scripts, ["./image-slot.js"], name);
 
-    const refused = runGate(html, "0", "2010");
+    const refused = runGate(html, "0", "2010", true);
     assert.equal(refused.dataset.bondAge, undefined, name);
     assert.equal(refused.store.size, 0, name);
     assert.equal(refused.declined, true, name);
+    const unchecked = runGate(html, "0", "1990", false);
+    assert.equal(unchecked.dataset.bondAge, undefined, name);
+    assert.equal(unchecked.store.size, 0, name);
+    assert.equal(unchecked.declined, false, name);
     assert.deepEqual(refused.scripts, [], name);
     if (html.includes('body>*:not(#bond-gate-cover){visibility:hidden}')) {
       assert.equal(mainDisplayed(html, false), false, name);
@@ -414,4 +430,110 @@ test("a first pass stamps the age attribute and shows Home and the product pages
   const root = { dataset: { bondAge: "" } };
   markBondAgePassed(root);
   assert.equal(root.dataset.bondAge, "ok");
+});
+
+test("entry needs a valid month, a year of 21 or older, and the affirmation box", () => {
+  const now = new Date(2026, 8, 27);
+  const samples = [
+    ["", "1990", true, "wait"],
+    ["0", "", true, "wait"],
+    ["0", "1990", false, "wait"],
+    ["8", "2005", false, "wait"],
+    ["0", "2010", true, "decline"],
+    ["0", "2006", true, "decline"],
+    ["9", "2005", true, "decline"],
+    ["0", "1990", true, "enter"],
+    ["8", "2005", true, "enter"],
+  ] as const;
+  for (const [month, year, affirmed, expected] of samples) {
+    assert.equal(bondAgeEntry(month, year, affirmed, now), expected, `${month}|${year}|${affirmed}`);
+  }
+  assert.equal(bondAgeDecision("0", "1990", now), "enter");
+  assert.equal(bondAgeEntry("0", "1990", false, now), "wait");
+
+  const gateJs = read("bond-age-gate.js");
+  const affirmAt = gateJs.indexOf("if (affirmEl.checked !== true) return;");
+  const decisionAt = gateJs.indexOf("var decision = bondAgeDecision");
+  const setAt = gateJs.indexOf("sessionStorage.setItem");
+  assert.ok(affirmAt > 0 && decisionAt > affirmAt && setAt > decisionAt);
+  assert.match(gateJs, /getElementById\("bond-age-affirm"\)/);
+  assert.match(gateJs, /affirmEl\.addEventListener\("change", syncReady\)/);
+  assert.equal(gateJs.includes("document.cookie"), false);
+  assert.equal(gateJs.includes("location.search"), false);
+  assert.equal(gateJs.includes("URLSearchParams"), false);
+
+  const view = read("src/components/bond-age-gate.tsx");
+  assert.match(view, /const \[affirmed, setAffirmed\] = useState\(false\)/);
+  assert.match(view, /bondAgeEntry\(month, year, affirmed, new Date\(\)\)/);
+  assert.match(view, /<label htmlFor="bond-age-affirm">I am 21 years of age or older<\/label>/);
+  assert.match(view, /type="checkbox"/);
+  assert.match(view, /checked=\{affirmed\}/);
+  assert.match(view, /I am 21 years of age or older/);
+  assert.match(view, /aria-label="Birth month"/);
+  assert.match(view, /aria-label="Birth year"/);
+  assert.equal(view.includes("document.cookie"), false);
+  assert.equal(view.includes("location.search"), false);
+  assert.equal(view.includes("URLSearchParams"), false);
+  assert.equal(view.includes('tabindex="-1"'), false);
+
+  const gate = read("AgeGate.dc.html");
+  const noscript = gate.slice(gate.indexOf("<noscript>"), gate.indexOf("</noscript>"));
+  const scripted = gate.slice(gate.indexOf("<x-dc>"));
+  assert.equal(noscript.includes("I am 21 years of age or older"), false);
+  assert.match(noscript, /aria-label="Birth month"/);
+  assert.match(noscript, /aria-label="Birth year"/);
+  assert.match(scripted, /ofAge: false/);
+  assert.match(scripted, /aria-label="Birth month"/);
+  assert.match(scripted, /aria-label="Birth year"/);
+  const row = scripted.match(/<div class="bond-age-affirm">[\s\S]*?<\/div>/);
+  assert.ok(row);
+  assert.match(row[0], /<label for="bond-age-affirm">I am 21 years of age or older<\/label>/);
+  assert.match(row[0], /type="checkbox"/);
+  assert.equal(row[0].includes("disabled"), false);
+  assert.equal(row[0].includes("tabindex"), false);
+  assert.match(row[0], /checked="\{\{ ofAge \}\}"/);
+  assert.match(scripted, /month, year, ofAge/);
+  const mount = scripted.slice(scripted.indexOf("componentDidMount"), scripted.indexOf("renderVals"));
+  assert.equal(mount.includes("ofAge"), false);
+  assert.equal(scripted.includes("document.cookie"), false);
+  assert.equal(scripted.includes("location.search"), false);
+  assert.equal(scripted.includes("URLSearchParams"), false);
+  assert.match(scripted, /if \(month === '' \|\| year === '' \|\| ofAge !== true\) return;/);
+
+  const css = read("bond-age-gate.css");
+  assert.match(css, /\.bond-age-affirm-input:focus-visible/);
+  assert.match(css, /font-size: 9px/);
+  const boxRule = css.slice(css.indexOf(".bond-warn-box p {"), css.indexOf("}", css.indexOf(".bond-warn-box p {")));
+  assert.equal(boxRule.includes("scale("), false);
+  assert.equal(boxRule.includes("zoom"), false);
+  assert.equal(boxRule.includes("overflow"), false);
+  assert.match(boxRule, /font-family: Arial, Helvetica, sans-serif/);
+
+  for (const name of ["FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html", "Finder.dc.html"]) {
+    const html = read(name);
+    const fieldsStart = html.indexOf('class="bond-age-fields"');
+    const fields = html.slice(fieldsStart, html.indexOf("bond-age-enter", fieldsStart));
+    const monthAt = fields.indexOf("Birth month");
+    const yearAt = fields.indexOf("Birth year");
+    const boxAt = fields.indexOf("I am 21 years of age or older");
+    assert.ok(monthAt >= 0 && yearAt > monthAt && boxAt > yearAt, name);
+    const row = fields.match(/<div class="bond-age-affirm">[\s\S]*?<\/div>/);
+    assert.ok(row, name);
+    assert.match(row[0], /<input type="checkbox" id="bond-age-affirm" class="bond-age-affirm-input">/, name);
+    assert.match(row[0], /<label for="bond-age-affirm">I am 21 years of age or older<\/label>/, name);
+    assert.equal(row[0].includes("checked"), false, name);
+    assert.equal(row[0].includes("disabled"), false, name);
+    assert.equal(row[0].includes("tabindex"), false, name);
+    assert.equal(html.includes("document.cookie"), false, name);
+    assert.equal(html.includes("URLSearchParams"), false, name);
+  }
+
+  for (const name of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
+    const html = read(name);
+    assert.match(html, /dc-import name="AgeGate"/, name);
+    const coverStart = html.indexOf('<div id="bond-gate-cover">');
+    const cover = html.slice(coverStart, html.indexOf("</div></div></div>", coverStart));
+    assert.equal(cover.includes("I am 21 years of age or older"), false, name);
+    assert.match(cover, /class="bond-warn-box"/, name);
+  }
 });

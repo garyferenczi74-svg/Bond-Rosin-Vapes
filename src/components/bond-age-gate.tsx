@@ -6,7 +6,7 @@ import type { WarningRoute } from "@/lib/bond-warnings";
 import {
   BOND_AGE_KEY,
   BOND_AGE_MONTHS,
-  bondAgeDecision,
+  bondAgeEntry,
   bondBirthYears,
   hausShowsAgeGate,
   markBondAgePassed,
@@ -25,6 +25,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
   const [declined, setDeclined] = useState(false);
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
+  const [affirmed, setAffirmed] = useState(false);
   const [years] = useState(() => bondBirthYears(new Date()));
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
   }, []);
 
   function enter() {
-    const decision = bondAgeDecision(month, year, new Date());
+    const decision = bondAgeEntry(month, year, affirmed, new Date());
     if (decision === "wait") return;
     if (decision === "decline") {
       setDeclined(true);
@@ -54,7 +55,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
     } catch (e) {}
   }
 
-  const ready = month !== "" && year !== "";
+  const ready = month !== "" && year !== "" && affirmed;
 
   return (
     <>
@@ -101,6 +102,16 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
                 </option>
               ))}
             </select>
+            <div className="bond-age-affirm">
+              <input
+                id="bond-age-affirm"
+                className="bond-age-affirm-input"
+                type="checkbox"
+                checked={affirmed}
+                onChange={(event) => setAffirmed(event.target.checked)}
+              />
+              <label htmlFor="bond-age-affirm">I am 21 years of age or older</label>
+            </div>
           </div>
           <button type="button" id="bond-age-enter" className="bond-age-enter" data-ready={ready ? "true" : "false"} onClick={enter}>
             Enter
