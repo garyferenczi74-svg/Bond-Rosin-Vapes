@@ -1,4 +1,5 @@
-.bond-age-gate {
+.bond-age-gate,
+.bond-age-off {
   --bone: #E1DAD0;
   --muted: #8E887C;
   --line: #3A3C3B;
@@ -11,6 +12,9 @@
   --age-enter-ink: #141109;
   --age-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --age-gold-wash: linear-gradient(160deg, var(--age-gold-deep) 0%, var(--age-gold) 38%, var(--age-gold-light) 50%, var(--age-gold) 62%, var(--age-gold-deep) 100%);
+}
+
+.bond-age-gate {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -197,6 +201,20 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 /* 3px gold ring outside the 1px black border. The mask keeps the gradient off the yellow fill. */
+/* Outline and box-shadow cannot paint a gradient token, so the fallback clips the same token to a 3px ring. */
+
+.bond-age-gate .bond-warn-box::before,
+.bond-age-dc .bond-warn-box::before,
+.bond-age-off .bond-warn-box::before,
+#bond-gate-cover .bond-warn-box::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  background: var(--bond-plant-gold);
+  pointer-events: none;
+  -webkit-clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 3px 3px, 3px calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 3px, 3px 3px);
+  clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 3px 3px, 3px calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 3px, 3px 3px);
+}
 
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
 .bond-age-gate .bond-warn-box::before,
@@ -210,6 +228,8 @@ html[data-bond-age="ok"] .bond-age-gate {
   padding: 3px;
   background: var(--bond-plant-gold);
   pointer-events: none;
+  -webkit-clip-path: none;
+  clip-path: none;
   -webkit-mask:
     linear-gradient(black, black) content-box,
     linear-gradient(black, black);
