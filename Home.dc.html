@@ -202,6 +202,23 @@ input::placeholder { color: #B0A99A; }
   .hero-btn-primary { padding: 16px 20px; }
   .hero-btn-secondary { padding: 15px 20px; }
 }
+/* Phone portrait. Rules sit on the tagline line. Padding keeps the stacked row height. Rule length uses the space beside a 17px tagline, and shrinks first at 320. */
+@media (max-width: 767px) and (max-aspect-ratio: 999/1000) {
+  .hero-tagline {
+    flex-wrap: nowrap;
+    position: relative;
+    padding-top: calc(3px + 6px);
+    padding-bottom: calc(3px + 6px);
+  }
+  .hero-tagline h1 { flex: 0 0 auto; white-space: nowrap; max-width: none; }
+  .hero-rule {
+    position: absolute;
+    top: calc(50% - 1.5px);
+    width: clamp(12px, calc((100vw - 274px) / 2 - 6px), 36px);
+  }
+  .hero-rule-l { right: calc(100% + 6px); }
+  .hero-rule-r { left: calc(100% + 6px); }
+}
 /* Short landscape from 819 wide. Lower width limit is explicit. Heights stay on this one scale, with no 620px step. */
 @media (min-width: 819px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) {
   .hero-text { --hero-tagline-size: 17px; }
