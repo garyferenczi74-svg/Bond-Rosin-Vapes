@@ -93,6 +93,22 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(shell, /id="bond-gate-cover"/);
   assert.match(AGE_GATE_CRITICAL, /#bond-gate-cover/);
   assert.match(AGE_GATE_CRITICAL, /background:#1B1D1C/);
+  const ringGuard = "@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor))";
+  for (const name of [
+    "bond-age-gate.css",
+    "AgeGate.dc.html",
+    "Home.dc.html",
+    "No1.dc.html",
+    "No2.dc.html",
+    "No3.dc.html",
+    "Finder.dc.html",
+    "FAQ.dc.html",
+    "Privacy.dc.html",
+    "Terms.dc.html",
+  ]) {
+    assert.ok(read(name).includes(ringGuard), name);
+  }
+  assert.ok(AGE_GATE_CRITICAL.includes(ringGuard));
   assert.equal(AGE_GATE_CRITICAL.includes("local("), false);
   assert.equal(AGE_GATE_CRITICAL.includes("--matte-black:"), false);
   assert.equal(AGE_GATE_CRITICAL.includes("--bone:"), false);

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Bond</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin fetchpriority="high" href="/fonts/gfs-didot-latin-400.woff2">
 <link rel="preload" as="script" crossorigin href="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
@@ -19,9 +20,31 @@
 </style>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
+<style id="bond-age-ring">@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}</style>
 <script src="./support.js"></script>
 </head>
 <body>
+<noscript>
+<style>x-dc{display:none}</style>
+<div class="bond-age-off">
+  <div class="bond-age-panel bond-age-ask">
+    <div class="bond-age-mark">BOND</div>
+    <p class="bond-age-lead">Please confirm your age.</p>
+    <div class="bond-age-rule bond-age-rule-wide"></div>
+    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
+    <div class="bond-age-fields">
+      <select class="bond-age-select bond-age-month" aria-label="Birth month">
+        <option value="">Birth month</option>
+      </select>
+      <select class="bond-age-select bond-age-year" aria-label="Birth year">
+        <option value="">Birth year</option>
+      </select>
+    </div>
+    <button type="button" class="bond-age-enter" data-ready="false">Enter</button>
+    <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
+  </div>
+</div>
+</noscript>
 <x-dc>
 <helmet>
 <link rel="stylesheet" href="/fonts/fonts.css">

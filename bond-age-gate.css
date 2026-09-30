@@ -198,8 +198,10 @@ html[data-bond-age="ok"] .bond-age-gate {
 
 /* 3px gold ring outside the 1px black border. The mask keeps the gradient off the yellow fill. */
 
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
 .bond-age-gate .bond-warn-box::before,
 .bond-age-dc .bond-warn-box::before,
+.bond-age-off .bond-warn-box::before,
 #bond-gate-cover .bond-warn-box::before {
   content: "";
   position: absolute;
@@ -216,6 +218,28 @@ html[data-bond-age="ok"] .bond-age-gate {
     linear-gradient(black, black) content-box,
     linear-gradient(black, black);
   mask-composite: exclude;
+}
+}
+
+.bond-age-off {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0D0F0E;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 100dvh;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+.bond-age-off .bond-age-panel {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .bond-warn-box p {

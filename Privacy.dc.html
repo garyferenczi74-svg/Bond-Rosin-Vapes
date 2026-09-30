@@ -37,6 +37,7 @@
   footer a { color: #8E887C; text-decoration: none; }
   html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
   html[data-bond-age="ok"] .bond-age-gate { display: none; }
+  @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}
 </style>
 <script>
 (function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
