@@ -187,6 +187,12 @@ html[data-bond-age="ok"] .bond-age-gate {
   box-sizing: border-box;
 }
 
+.bond-age-gate,
+.bond-age-dc,
+#bond-gate-cover {
+  --bond-warning-yellow: var(--bond-plant-gold);
+}
+
 .bond-warn-box {
   background: var(--bond-warning-yellow);
   color: var(--matte-black);

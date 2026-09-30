@@ -1,6 +1,7 @@
 :root {
   --matte-black: #1B1D1C;
   --bone: #E1DAD0;
+  --bond-plant-gold: linear-gradient(105deg, #8B5520 0%, #D5A55E 18%, #FFF0B5 42%, #C68A35 61%, #F6D78D 80%, #91571F 100%);
   --bond-warning-yellow: #FFFF00;
   --bond-warn-panel: var(--matte-black);
   --bond-warn-meta: var(--bone);

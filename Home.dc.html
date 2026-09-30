@@ -13,6 +13,7 @@ html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 .bond-js-off{box-sizing:border-box;max-width:560px;margin:0 auto;padding:24px;text-align:center}
 .bond-js-note{font-family:Georgia,"Times New Roman",serif;font-size:22px;line-height:1.45;color:var(--bone);margin:0 0 24px}
+.bond-age-gate,.bond-age-dc,#bond-gate-cover{--bond-warning-yellow:var(--bond-plant-gold)}
 @media (prefers-reduced-motion: reduce){#bond-gate-cover{transition:none}}
 </style>
 <script id="bond-gate-boot">
@@ -40,7 +41,7 @@ html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 <link rel="preload" as="fetch" href="./AgeGate.dc.html">
 <script src="./support.js"></script>
 <script src="./video-policy.js"></script>
-<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
+<style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}.bond-age-gate,.bond-age-dc,#bond-gate-cover{--bond-warning-yellow:var(--bond-plant-gold)}</style>
 </head>
 <body>
 <div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">Bond requires JavaScript to confirm your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
@@ -181,7 +182,7 @@ input::placeholder { color: #B0A99A; }
 .hero-btn:hover { transform: translateY(-4px) scale(1.025); }
 .hero-btn:active { transform: translateY(1px) scale(0.985); transition-duration: .12s; }
 .hero-btn:focus-visible { outline: 2px solid #F6D78D; outline-offset: 3px; }
-.hero-btn-primary { padding: 16px 32px; color: #17130F; border: 1px solid #E5BA6E; background: linear-gradient(105deg, #8B5520 0%, #D5A55E 18%, #FFF0B5 42%, #C68A35 61%, #F6D78D 80%, #91571F 100%); box-shadow: 0 1px 0 rgba(255,245,196,0.8), 0 5px 16px rgba(201,137,49,0.32), 0 0 26px rgba(222,168,80,0.22); }
+.hero-btn-primary { padding: 16px 32px; color: #17130F; border: 1px solid #E5BA6E; background: var(--bond-plant-gold); box-shadow: 0 1px 0 rgba(255,245,196,0.8), 0 5px 16px rgba(201,137,49,0.32), 0 0 26px rgba(222,168,80,0.22); }
 .hero-btn-primary:hover { background: #FFE2A3; box-shadow: 0 12px 30px rgba(238,186,91,0.62); }
 .hero-btn-secondary { padding: 15px 32px; color: #E1DAD0; border: 1px solid #E9BD82; background: linear-gradient(105deg, rgba(41,24,10,0.68) 0%, rgba(0,0,0,0.35) 48%, rgba(75,47,17,0.58) 100%); box-shadow: inset 0 1px 0 rgba(255,231,170,0.32), 0 0 0 1px rgba(116,72,25,0.55), 0 3px 12px rgba(0,0,0,0.32); }
 .hero-btn-secondary:hover { background: #C48735; box-shadow: 0 12px 30px rgba(238,186,91,0.54); }
