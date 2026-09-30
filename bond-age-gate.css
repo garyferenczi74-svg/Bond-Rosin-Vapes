@@ -282,7 +282,7 @@ html[data-bond-age="ok"] .bond-age-gate {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #0D0F0E;
+  background: var(--age-ink);
   display: flex;
   flex-direction: column;
   align-items: center;
