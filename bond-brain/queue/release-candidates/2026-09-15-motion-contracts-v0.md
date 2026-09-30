@@ -27,7 +27,7 @@ Public tokens unchanged from Prompt 1 (2026-07-22):
 - Only loud gestures. No timing, easing, or choreography in canon. Do not invent.
 
 ### Copy (copy-bank.md | 2026-07-22)
-- Hero: BOND WITH YOUR HIGHEST SELF.
+- Hero: BOND WITH YOUR HIGHER SELF.
 - Triads: Focus. Clarity. Momentum. / Release. Stillness. Restoration. / Edge. Elevation. Expansion.
 - Bond lines: your potential / the moment / your edge
 - Forbidden: dank, loud, gas, stoned, hits, rips, medicated, cure, heal, treat

@@ -245,7 +245,7 @@ export const SEED_DRAFTS: SocialDraft[] = [
   },
   {
     id: "d-209",
-    title: "With your highest self",
+    title: "With your higher self",
     kind: "Carousel",
     blocker: "Awaiting Felix originality check",
   },
@@ -281,7 +281,7 @@ export const SEED_CANON: CanonDoc[] = [
     id: "copy-bank",
     name: "prototype/copy-bank",
     ver: "v5",
-    body: "Approved lines. With your highest self. What you consume matters. Nothing added, everything real. Solventless live rosin.",
+    body: "Approved lines. With your higher self. What you consume matters. Nothing added, everything real. Solventless live rosin.",
     prior: "v4: earlier hero lines before membership was unified under Haus.",
   },
   {
@@ -1011,7 +1011,7 @@ export const SEED_SOCIAL_PIPELINE: SocialPipelineItem[] = [
   },
   {
     id: "d-209",
-    title: "With your highest self",
+    title: "With your higher self",
     kind: "Carousel",
     stage: "owner",
     desk: "Editor",
@@ -1104,7 +1104,7 @@ export const SEED_VARIATIONS: ScriptVariation[] = [
   },
   {
     id: "var-03",
-    hook: "With your highest self.",
+    hook: "With your higher self.",
     caption: "What you consume matters.",
     platform: "Carousel",
     provenance: "Film Day asset library mock.",

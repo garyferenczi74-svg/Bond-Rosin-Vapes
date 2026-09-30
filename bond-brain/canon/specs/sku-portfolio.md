@@ -53,7 +53,7 @@ Three numbers. One Bond standard. Future No. 4 may be added later; adding a SKU 
 - Collection name: The Numbered Collection
 - Collection line: Choose your moment.
 - Closing line: When the product is pure, the experience is real.
-- Hero remains: BOND WITH YOUR HIGHEST SELF.
+- Hero remains: BOND WITH YOUR HIGHER SELF.
 
 ## Forbidden
 - Guide triad variants (Stillness Rest Ease; Euphoria Bliss Indulgence)
