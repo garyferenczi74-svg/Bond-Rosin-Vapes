@@ -187,18 +187,35 @@ html[data-bond-age="ok"] .bond-age-gate {
   box-sizing: border-box;
 }
 
-.bond-age-gate,
-.bond-age-dc,
-#bond-gate-cover {
-  --bond-warning-yellow: var(--bond-plant-gold);
-}
-
 .bond-warn-box {
+  position: relative;
   background: var(--bond-warning-yellow);
   color: var(--matte-black);
   border: 1px solid var(--matte-black);
   padding: 12px 14px;
   text-align: left;
+}
+
+/* 3px gold ring outside the 1px black border. The mask keeps the gradient off the yellow fill. */
+
+.bond-age-gate .bond-warn-box::before,
+.bond-age-dc .bond-warn-box::before,
+#bond-gate-cover .bond-warn-box::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  box-sizing: border-box;
+  padding: 3px;
+  background: var(--bond-plant-gold);
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(black, black) content-box,
+    linear-gradient(black, black);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(black, black) content-box,
+    linear-gradient(black, black);
+  mask-composite: exclude;
 }
 
 .bond-warn-box p {
