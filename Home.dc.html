@@ -88,6 +88,8 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   --hero-clear-min: 1;
   --hero-clear-max: 2;
   --hero-band-gap: 16;
+  --hero-cap-clear: 16;
+  --hero-word-gap: 12;
   --hero-media-left: 0;
   --hero-media-width: 100%;
   --hero-media-top: 0;
@@ -266,7 +268,7 @@ input::placeholder { color: #B0A99A; }
     </div>
   </nav>
 
-  <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden">
+  <section id="top" class="hero-hold" data-screen-label="S1 Arrival" style="position:relative;background:#000000;overflow:hidden;--hero-cap-clear:16;--hero-word-gap:12">
     <div class="hero-media">
       <video id="hero-video" class="hero-video" muted playsinline preload="auto" disablepictureinpicture
         data-bond-video data-hero="1" data-loop="0" data-wide-mq="(min-width: 1200px), (max-width: 1199px) and (min-aspect-ratio: 1/1)"
@@ -874,6 +876,43 @@ class Component extends DCLogic {
     return (n > 0) ? n : fallback;
   }
 
+  function wordGapPx(t) {
+    return readNum(window.getComputedStyle(t), '--hero-word-gap', 12);
+  }
+
+  // Cap sits this far under the nav controls that cross the gold wordmark.
+  function navCapAnchor(t, wordLeft, wordRight) {
+    var nav = document.querySelector('nav');
+    var clear = readNum(window.getComputedStyle(t), '--hero-cap-clear', 16);
+    var tTop = t.getBoundingClientRect().top;
+    if (!nav) return clear;
+    var nodes = nav.querySelectorAll('a, button');
+    var hit = 0;
+    var any = 0;
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      var r = nodes[i].getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) continue;
+      var b = r.bottom - tTop;
+      if (b > any) any = b;
+      if (r.right < wordLeft + 0.5 || r.left > wordRight - 0.5) continue;
+      if (b > hit) hit = b;
+    }
+    var base = (hit > 0) ? hit : any;
+    if (!(base > 0)) {
+      var nr = nav.getBoundingClientRect();
+      base = Math.max(0, nr.bottom - tTop);
+    }
+    return base + clear;
+  }
+
+  function deskWordSpan(cw, srcW, scale) {
+    var wordL = 204 * (srcW / 1920);
+    var wordR = 1686 * (srcW / 1920);
+    var left = (cw - srcW * scale) / 2;
+    return { left: left + wordL * scale, right: left + wordR * scale, plateLeft: left };
+  }
+
   function isWideNow() {
     try { return window.matchMedia(WIDE_MQ).matches; } catch (e) {
       return (window.innerWidth || 0) >= 1200;
@@ -920,34 +959,42 @@ class Component extends DCLogic {
     if (elW < 2 || elH < 2 || ch < 2) { flowFallback(); return; }
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
-    // Dreamina clip: optical BOND feet at y=643 of 1080. Raise so feet match the 6c 541/1080 lock.
-    var baseSrc = 643 * (srcH / 1080);
-    var refSrc = 541 * (srcH / 1080);
+    var cw = t.clientWidth || elW;
+    // Same cover scale as the 115% plate. The box is then shifted so the gold cap
+    // clears the nav controls, and the tagline sits on the word gap under the feet.
     var scale = Math.max(elW / srcW, elH / srcH);
+    var rendW = srcW * scale;
     var rendH = srcH * scale;
-    var offY = (elH - rendH) / 2;
-    var cropTop = -80;
-    var topPx = cropTop - ((baseSrc - refSrc) * scale);
+    var capSrc = DESK_CAP * (srcH / 1080);
+    var feetSrc = DESK_FEET * (srcH / 1080);
+    var span = deskWordSpan(cw, srcW, scale);
+    var anchor = navCapAnchor(t, span.left, span.right);
+    var topPx = anchor - (capSrc * scale);
+    var leftPx = span.plateLeft;
+    t.style.setProperty('--hero-media-width', rendW + 'px');
+    t.style.setProperty('--hero-media-height', rendH + 'px');
+    t.style.setProperty('--hero-media-left', leftPx + 'px');
     t.style.setProperty('--hero-media-top', topPx + 'px');
-    var baseY = topPx + offY + (baseSrc * scale);
-    var h1 = s.querySelector('.hero-tagline h1');
-    var fs = 28;
-    if (h1) {
-      var parsed = parseFloat(window.getComputedStyle(h1).fontSize);
-      if (parsed > 0) fs = parsed;
+    t.style.setProperty('--hero-media-max-width', 'none');
+    t.style.setProperty('--hero-media-min-height', '0px');
+    t.style.setProperty('--hero-media-object-fit', 'fill');
+    if (media) {
+      media.style.backgroundSize = rendW + 'px ' + rendH + 'px';
+      media.style.backgroundPosition = leftPx + 'px ' + topPx + 'px';
+      media.style.backgroundRepeat = 'no-repeat';
     }
-    var gapEm = 1.6;
-    if (gapEm < 0.75) gapEm = 0.75;
-    var copyTop = Math.ceil(baseY + (gapEm * fs));
+    var baseY = topPx + (feetSrc * scale);
+    var markGap = wordGapPx(t);
+    var copyTop = Math.ceil(baseY + markGap);
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
     reveal(true);
   }
 
-  // Landscape under 1200. Same desktop plate as 1200 and up, pinned so the wordmark cap
-  // clears the measured nav. Gaps tighten, then the plate scale, only when the copy would leave the hero.
-  // 1200 and up does not call this. The feet lock in layoutDesktop stays as it is.
+  // Landscape under 1200. Same desktop plate as 1200 and up. The gold cap clears the nav
+  // controls that cross it, and the tagline uses the word gap under the feet.
+  // Line gaps tighten, then the plate scale, only when the copy would leave the hero.
   function layoutBand(t, s, v) {
     clearMediaBox(t);
     clearBandTweaks(s);
@@ -968,10 +1015,6 @@ class Component extends DCLogic {
     var feet = DESK_FEET * (srcH / 1080);
     var wordSrc = feet - cap;
     if (!(wordSrc > 1)) { flowFallback(); return; }
-    var nav = document.querySelector('nav');
-    var navR = nav ? nav.getBoundingClientRect() : { bottom: 64 };
-    var tR = t.getBoundingClientRect();
-    var navBottom = Math.max(0, navR.bottom - tR.top);
     var h1 = s.querySelector('.hero-tagline h1');
     var fs = 17;
     if (h1) {
@@ -980,8 +1023,6 @@ class Component extends DCLogic {
     }
     var naturalGap = 1.6 * fs;
     if (naturalGap < 0.75 * fs) naturalGap = 0.75 * fs;
-    var tcs = window.getComputedStyle(t);
-    var gapNav = readNum(tcs, '--hero-band-gap', 16);
     var naturalCopy = measureCopy(s);
     var padB = parseFloat(window.getComputedStyle(s).paddingBottom) || 0;
     var flex = (3 * naturalGap) + padB;
@@ -1001,11 +1042,13 @@ class Component extends DCLogic {
     var fitR = (halfW - edgePad) / (wordR - midSrc);
     var wordFit = Math.min(fitL, fitR);
     if (wordFit > 0) cover = Math.min(cover, wordFit);
+    var spanCover = deskWordSpan(cw, srcW, cover);
+    var anchor = navCapAnchor(t, spanCover.left, spanCover.right);
     var floorGap = Math.max(8, fs * 0.5);
     var floorPad = 8;
     var tail = 2;
     function needAt(scale, gap, pad) {
-      return navBottom + gapNav + (wordSrc * scale) + gap + fixed + (3 * gap) + pad + tail;
+      return anchor + (wordSrc * scale) + gap + fixed + (3 * gap) + pad + tail;
     }
     var scale = cover;
     var gap = naturalGap;
@@ -1026,7 +1069,7 @@ class Component extends DCLogic {
       } else {
         gap = floorGap;
         pad = floorPad;
-        var room = ch - navBottom - gapNav - gap - fixed - (3 * gap) - pad - tail;
+        var room = ch - anchor - gap - fixed - (3 * gap) - pad - tail;
         scale = room / wordSrc;
         if (!(scale > 0.08)) {
           scale = cover;
@@ -1043,13 +1086,13 @@ class Component extends DCLogic {
       var predict = fixed + (3 * gap) + pad;
       var drift = measured - predict;
       if (drift > 2) {
-        var room2 = ch - navBottom - gapNav - gap - measured - tail;
+        var room2 = ch - anchor - gap - measured - tail;
         var scale2 = room2 / wordSrc;
         if (scale2 + 0.0001 >= cover) scale = cover;
         else if (scale2 > 0.08) scale = scale2;
         else {
           scale = cover;
-          ch = Math.ceil(navBottom + gapNav + (wordSrc * scale) + gap + measured);
+          ch = Math.ceil(anchor + (wordSrc * scale) + gap + measured);
           t.style.height = ch + 'px';
           t.style.minHeight = ch + 'px';
         }
@@ -1058,17 +1101,11 @@ class Component extends DCLogic {
     var vidW = srcW * scale;
     var vidH = srcH * scale;
     var left = (cw - vidW) / 2;
-    var copyH = measureCopy(s);
-    var top = (navBottom + gapNav) - (cap * scale);
-    var spare = ch - (navBottom + gapNav + (wordSrc * scale) + gap + copyH);
-    if (spare > 4) {
-      var bonus = Math.min(spare * 0.4, 36);
-      var top2 = top + bonus;
-      var copyOk = (top2 + (feet * scale) + gap + copyH) <= (ch + 0.5);
-      var navOk = (top2 + (cap * scale)) >= (navBottom + gapNav - 0.5);
-      var covers = top2 <= 0.5 && (top2 + vidH) >= (ch - 0.5);
-      if (copyOk && navOk && (covers || scale + 0.0001 < cover)) top = top2;
-    }
+    var span = deskWordSpan(cw, srcW, scale);
+    anchor = navCapAnchor(t, span.left, span.right);
+    var top = anchor - (cap * scale);
+    var markGap = wordGapPx(t);
+    if (markGap > gap) markGap = gap;
     t.style.setProperty('--hero-media-width', vidW + 'px');
     t.style.setProperty('--hero-media-height', vidH + 'px');
     t.style.setProperty('--hero-media-left', left + 'px');
@@ -1081,7 +1118,7 @@ class Component extends DCLogic {
       media.style.backgroundPosition = left + 'px ' + top + 'px';
       media.style.backgroundRepeat = 'no-repeat';
     }
-    var copyTop = Math.ceil(top + (feet * scale) + gap);
+    var copyTop = Math.ceil(top + (feet * scale) + markGap);
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
@@ -1125,7 +1162,9 @@ class Component extends DCLogic {
       }
       var gapEm = 1.6;
       if (gapEm < 0.75) gapEm = 0.75;
-      var gapPx = gapEm * fs;
+      var gapFit = gapEm * fs;
+      var gapPx = wordGapPx(t);
+      if (gapPx > gapFit) gapPx = gapFit;
       var tcs = window.getComputedStyle(t);
       var wordMax = readNum(tcs, '--hero-wordmark-max', 0.86);
       var navMul = readNum(tcs, '--hero-nav-clear', 1.5);
@@ -1149,7 +1188,7 @@ class Component extends DCLogic {
       var maxBlock = availH - minTop - minBot;
       if (!(maxBlock > 40)) maxBlock = Math.max(80, availH * 0.72);
       var sW = (wordMax * cw) / lw;
-      var sH = (maxBlock - gapPx - copyH) / lh;
+      var sH = (maxBlock - gapFit - copyH) / lh;
       // Width-tied floor. The fixed 0.15 scale pinned the portrait clip at 162 by 288.
       if (!(sH > 0)) sH = (wordMax * cw) / (srcW > 1 ? srcW : L.refW);
       var scale = Math.min(sW, sH);
@@ -1184,8 +1223,13 @@ class Component extends DCLogic {
         if (topClear < minTop) { topClear = minTop; botClear = slack - topClear; }
       }
       var letterTop = navBottom + topClear;
-      var videoTop = letterTop - (ly * scale);
       var letterLeft = (cw - lw * scale) / 2;
+      var anchor = navCapAnchor(t, letterLeft, letterLeft + (lw * scale));
+      if (letterTop > anchor) {
+        var roomBelow = ch - (anchor + wordH + gapPx + copyH);
+        if (roomBelow >= minBot) letterTop = anchor;
+      }
+      var videoTop = letterTop - (ly * scale);
       var videoLeft = letterLeft - (lx * scale);
       var copyTop = Math.ceil(letterTop + wordH + gapPx);
       if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
