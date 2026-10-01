@@ -5,4 +5,9 @@
   --bond-warning-yellow: #FFFF00;
   --bond-warn-panel: var(--matte-black);
   --bond-warn-meta: var(--bone);
+  --bond-hw-field: #F0E6D9;
+  --bond-hw-ink: #050404;
+  --bond-hw-muted: #3F3730;
+  --bond-hw-leader: #2C2925;
+  --bond-hw-dot: #4FEC2E;
 }

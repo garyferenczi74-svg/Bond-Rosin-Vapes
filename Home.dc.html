@@ -258,76 +258,278 @@ input::placeholder { color: #B0A99A; }
 #top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
 </style>
 <style id="bond-hardware-css">
-/* Hardware section. Every rule is scoped under .bond-hw. Colours come from bond-tokens.css, plus two page values named once here. */
+/* Hardware section. Every rule is scoped under .bond-hw. */
 .bond-hw {
-  --bond-hw-bg: var(--bone);
-  --bond-hw-ink: var(--matte-black);
-  --bond-hw-muted: #5B564C;
-  --bond-hw-gold: #C29A45;
-  --bond-hw-line: color-mix(in srgb, var(--matte-black) 22%, transparent);
+  --bond-hw-sans: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
+  --bond-hw-serif: "GFS Didot", Didot, serif;
+  background: var(--bond-hw-field);
+  color: var(--matte-black);
+  margin: 0;
+}
+.bond-hw-frame {
   position: relative;
-  background: var(--bond-hw-bg);
-  color: var(--bond-hw-ink);
-  padding: clamp(80px, 10vw, 140px) clamp(20px, 4vw, 56px);
+  width: 100%;
+  aspect-ratio: 1672 / 941;
+  container-type: inline-size;
   overflow: hidden;
+  background: var(--bond-hw-field);
 }
-.bond-hw::before { content: ""; position: absolute; top: 0; left: 50%; width: min(1180px, calc(100% - 40px)); height: 1px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, var(--bond-hw-gold), transparent); }
-.bond-hw-head { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 760px; margin: 0 auto; }
-.bond-hw-eyebrow { font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--bond-hw-muted); padding-left: 0.32em; }
-.bond-hw-rule { width: 1px; height: 36px; background: linear-gradient(180deg, var(--bond-hw-gold), transparent); margin: 22px auto; }
-.bond-hw-title { font-family: 'GFS Didot', Didot, serif; font-weight: 400; font-size: clamp(36px, 5.2vw, 72px); line-height: 1.08; letter-spacing: 0.01em; color: var(--bond-hw-ink); margin: 0; text-wrap: balance; }
-.bond-hw-lede { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: var(--bond-hw-ink); max-width: 30ch; margin: 24px auto 0; text-wrap: balance; }
-.bond-hw-stage { display: grid; grid-template-columns: 1fr minmax(200px, 300px) 1fr; align-items: center; gap: clamp(24px, 4vw, 64px); max-width: 1180px; margin: clamp(48px, 6vw, 80px) auto 0; }
-.bond-hw-feats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: clamp(40px, 7vw, 120px); }
-.bond-hw-feat { position: relative; font-size: 13px; line-height: 1.5; letter-spacing: 0.2em; color: var(--bond-hw-ink); }
-.bond-hw-feat::after { content: ""; display: block; width: 56px; height: 1px; margin-top: 14px; background: linear-gradient(90deg, var(--bond-hw-gold), transparent); }
-.bond-hw-feats-l .bond-hw-feat { text-align: right; padding-right: 2px; }
-.bond-hw-feats-l .bond-hw-feat::after { margin-left: auto; background: linear-gradient(270deg, var(--bond-hw-gold), transparent); }
-.bond-hw-feats-l .bond-hw-feat:first-child { margin-top: -8%; }
-.bond-hw-feats-r .bond-hw-feat:first-child { margin-top: -18%; }
-.bond-hw-figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
-.bond-hw-img { display: block; width: 100%; max-width: 300px; height: auto; aspect-ratio: 330 / 702; }
-.bond-hw-caption { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 18px; text-align: center; }
-.bond-hw-caption-k { font-size: 12px; letter-spacing: 0.2em; color: var(--bond-hw-ink); }
-.bond-hw-caption-v { font-size: 13px; line-height: 1.5; color: var(--bond-hw-muted); }
-.bond-hw-steps { list-style: none; margin: clamp(56px, 7vw, 96px) auto 0; padding: 32px 0 0; max-width: 1180px; border-top: 1px solid var(--bond-hw-line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.bond-hw-step { display: flex; align-items: flex-start; gap: 16px; padding: 4px clamp(12px, 2vw, 32px); border-left: 1px solid var(--bond-hw-line); }
-.bond-hw-step:first-child { border-left: 0; padding-left: 0; }
-.bond-hw-num { font-family: 'GFS Didot', Didot, serif; font-size: clamp(40px, 3.6vw, 56px); line-height: 0.9; color: var(--bond-hw-ink); flex: 0 0 auto; }
-.bond-hw-step-body { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; min-width: 0; }
-.bond-hw-step-k { font-size: 12px; letter-spacing: 0.2em; color: var(--bond-hw-ink); font-weight: 600; }
-.bond-hw-step-v { font-size: 16px; line-height: 1.4; color: var(--bond-hw-ink); }
-.bond-hw-step-n { font-size: 13px; line-height: 1.4; color: var(--bond-hw-muted); }
-/* Tablet: device beside the features, steps in two rows. */
-@media (max-width: 1023px) {
-  .bond-hw-stage { grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); grid-template-areas: "fig l" "fig r"; column-gap: clamp(32px, 6vw, 64px); row-gap: 40px; align-items: center; max-width: 640px; }
-  .bond-hw-figure { grid-area: fig; }
-  .bond-hw-feats-l { grid-area: l; align-self: end; }
-  .bond-hw-feats-r { grid-area: r; align-self: start; }
-  .bond-hw-feats { gap: 40px; }
-  .bond-hw-feats-l .bond-hw-feat { text-align: left; padding-right: 0; }
-  .bond-hw-feats-l .bond-hw-feat::after { margin-left: 0; background: linear-gradient(90deg, var(--bond-hw-gold), transparent); }
-  .bond-hw-feats-l .bond-hw-feat:first-child, .bond-hw-feats-r .bond-hw-feat:first-child { margin-top: 0; }
-  .bond-hw-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; max-width: 640px; }
-  .bond-hw-step:nth-child(3) { border-left: 0; padding-left: 0; }
+.bond-hw-plate {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
 }
-/* Phone: one column. Device first, then features, then steps. */
-@media (max-width: 599px) {
-  .bond-hw-stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "fig" "l" "r"; row-gap: 28px; max-width: 420px; }
-  .bond-hw-img { max-width: 220px; }
-  .bond-hw-feats { gap: 28px; }
-  .bond-hw-feats-l { align-self: auto; }
-  .bond-hw-feat, .bond-hw-feats-l .bond-hw-feat { text-align: center; }
-  .bond-hw-feat::after, .bond-hw-feats-l .bond-hw-feat::after { margin: 14px auto 0; background: linear-gradient(90deg, transparent, var(--bond-hw-gold), transparent); }
-  .bond-hw-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 0; row-gap: 28px; padding-top: 28px; }
-  .bond-hw-step { flex-direction: column; gap: 10px; padding: 0 0 0 16px; }
-  .bond-hw-step:nth-child(odd) { border-left: 0; padding-left: 0; }
+.bond-hw-device { display: none; }
+.bond-hw-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
-/* Reveal. Only armed once the script runs, so content never hides without it. */
-.bond-hw.bond-hw-armed .bond-hw-rv { opacity: 0; transform: translateY(12px); transition: opacity .4s cubic-bezier(0.22,1,0.36,1), transform .4s cubic-bezier(0.22,1,0.36,1); }
-.bond-hw.bond-hw-armed .bond-hw-rv.bond-hw-in { opacity: 1; transform: none; }
+.bond-hw-leaders { stroke: var(--bond-hw-leader); }
+.bond-hw-dots { fill: var(--bond-hw-dot); }
+.bond-hw-eyebrow,
+.bond-hw-title,
+.bond-hw-lede,
+.bond-hw-calls li,
+.bond-hw-note,
+.bond-hw-steps {
+  position: absolute;
+  margin: 0;
+}
+.bond-hw-eyebrow {
+  left: 4.665%;
+  top: 13.82%;
+  font-family: var(--bond-hw-sans);
+  font-size: 0.84cqw;
+  font-weight: 500;
+  letter-spacing: 0.725em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--matte-black);
+}
+.bond-hw-title {
+  left: 4.25%;
+  top: 20.2%;
+  font-family: var(--bond-hw-serif);
+  font-weight: 400;
+  font-size: 5.98cqw;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--bond-hw-ink);
+}
+.bond-hw-title span { display: block; }
+.bond-hw-lede {
+  left: 4.73%;
+  top: 47.4%;
+  font-family: var(--bond-hw-sans);
+  font-size: 1.32cqw;
+  font-weight: 400;
+  line-height: 1.58;
+  letter-spacing: 0.15em;
+  color: var(--matte-black);
+}
+.bond-hw-calls { list-style: none; margin: 0; padding: 0; }
+.bond-hw-calls li {
+  font-family: var(--bond-hw-sans);
+  font-size: 0.72cqw;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: var(--matte-black);
+}
+.bond-hw-calls .bond-hw-core { left: 37.02%; top: 14.24%; letter-spacing: 0.67em; }
+.bond-hw-calls .bond-hw-heat { left: 32.78%; top: 49.31%; letter-spacing: 0.625em; }
+.bond-hw-calls .bond-hw-disp { left: 65.79%; top: 24.66%; letter-spacing: 0.61em; }
+.bond-hw-calls .bond-hw-inh { left: 61.6%; top: 61.85%; font-size: 0.72cqw; letter-spacing: 0.55em; }
+.bond-hw-note {
+  left: 68.06%;
+  top: 44.21%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55cqw;
+  font-family: var(--bond-hw-sans);
+}
+.bond-hw-note-k {
+  font-size: 0.68cqw;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--matte-black);
+}
+.bond-hw-note-v {
+  font-size: 0.72cqw;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--bond-hw-muted);
+}
+.bond-hw-steps {
+  left: 4.665%;
+  top: 79.92%;
+  width: 90.61%;
+  margin: 0;
+  padding: 1.85cqw 0 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--bond-hw-muted);
+}
+.bond-hw-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.55cqw;
+  min-width: 0;
+  padding-left: 1.7cqw;
+  border-left: 1px solid var(--bond-hw-muted);
+}
+.bond-hw-step:first-child { padding-left: 0.25cqw; border-left: 0; }
+.bond-hw-num {
+  font-family: var(--bond-hw-serif);
+  font-weight: 400;
+  font-size: 3.55cqw;
+  line-height: 0.9;
+  color: var(--bond-hw-ink);
+  flex: 0 0 auto;
+}
+.bond-hw-step-body { display: flex; flex-direction: column; gap: 0.72cqw; padding-top: 0.35cqw; min-width: 0; }
+.bond-hw-step-k {
+  font-family: var(--bond-hw-sans);
+  font-size: 0.78cqw;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--matte-black);
+}
+.bond-hw-step-v {
+  font-family: var(--bond-hw-sans);
+  font-size: 0.96cqw;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--matte-black);
+}
+.bond-hw-step-n {
+  font-family: var(--bond-hw-sans);
+  font-size: 0.78cqw;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--bond-hw-muted);
+}
+.bond-hw.bond-hw-armed .bond-hw-rv { opacity: 0; transition: opacity .4s cubic-bezier(0.22,1,0.36,1); }
+.bond-hw.bond-hw-armed .bond-hw-rv.bond-hw-in { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   .bond-hw.bond-hw-armed .bond-hw-rv { transform: none; transition: opacity .2s linear; }
+}
+@media (max-width: 767px) {
+  .bond-hw-frame {
+    aspect-ratio: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    container-type: normal;
+    overflow: hidden;
+    padding: 0 0 40px;
+  }
+  .bond-hw-plate {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: 168px;
+    object-fit: cover;
+    object-position: 12% 40%;
+  }
+  .bond-hw-device {
+    display: block;
+    width: min(210px, 62%);
+    height: auto;
+    margin: 8px auto 8px;
+  }
+  .bond-hw-lines { display: none; }
+  .bond-hw-eyebrow,
+  .bond-hw-title,
+  .bond-hw-lede,
+  .bond-hw-note,
+  .bond-hw-steps,
+  .bond-hw-calls li {
+    position: static;
+    left: auto;
+    top: auto;
+    width: auto;
+  }
+  .bond-hw-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-align: center;
+    margin: 28px 20px 0;
+  }
+  .bond-hw-title {
+    font-size: 40px;
+    line-height: 0.95;
+    letter-spacing: 0;
+    text-align: center;
+    margin: 14px 20px 0;
+  }
+  .bond-hw-lede {
+    font-size: 16px;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    text-align: center;
+    margin: 16px 24px 0;
+  }
+  .bond-hw-calls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  .bond-hw-calls li,
+  .bond-hw-calls .bond-hw-core,
+  .bond-hw-calls .bond-hw-heat,
+  .bond-hw-calls .bond-hw-disp,
+  .bond-hw-calls .bond-hw-inh {
+    position: static;
+    left: auto;
+    top: auto;
+    width: auto;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    line-height: 1.45;
+    text-align: center;
+  }
+  .bond-hw-note {
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    margin: 18px 24px 0;
+  }
+  .bond-hw-note-k { font-size: 12px; letter-spacing: 0.14em; }
+  .bond-hw-note-v { font-size: 13px; line-height: 1.4; }
+  .bond-hw-steps {
+    width: calc(100% - 40px);
+    margin: 28px 20px 0;
+    padding: 22px 0 0;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 22px;
+    box-sizing: border-box;
+  }
+  .bond-hw-step { padding-left: 14px; gap: 10px; }
+  .bond-hw-step:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .bond-hw-num { font-size: 36px; }
+  .bond-hw-step-body { gap: 4px; padding-top: 4px; }
+  .bond-hw-step-k { font-size: 12px; letter-spacing: 0.12em; }
+  .bond-hw-step-v { font-size: 15px; }
+  .bond-hw-step-n { font-size: 12px; }
 }
 </style>
 </helmet>
@@ -451,32 +653,40 @@ input::placeholder { color: #B0A99A; }
   </section>
 
   <section id="hardware" class="bond-hw" data-screen-label="Hardware" aria-labelledby="bond-hw-title">
-    <div class="bond-hw-head">
-      <div class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</div>
-      <div class="bond-hw-rule bond-hw-rv" aria-hidden="true"></div>
-      <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv">Designed around the oil.</h2>
-      <p class="bond-hw-lede bond-hw-rv">Two years of research and development. One device perfected for live rosin.</p>
-    </div>
-    <div class="bond-hw-stage">
-      <ul class="bond-hw-feats bond-hw-feats-l" role="list">
-        <li class="bond-hw-feat bond-hw-rv">POST-FREE CERAMIC CORE</li>
-        <li class="bond-hw-feat bond-hw-rv">THREE CALIBRATED HEAT SETTINGS</li>
+    <div class="bond-hw-frame">
+      <img class="bond-hw-plate" src="media/hardware/bond-hardware-plate.webp" width="1672" height="941" alt="The Bond hardware with its full-function smart display shown active.">
+      <img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="327" height="716" alt="" aria-hidden="true">
+      <p class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</p>
+      <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
+      <p class="bond-hw-lede bond-hw-rv">Two years of research and<br>development. One device<br>perfected for live rosin.</p>
+      <svg class="bond-hw-lines bond-hw-rv" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <g class="bond-hw-leaders" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="802,154 832,154 866,176 876,184"/>
+          <polyline points="1096,243 1052,246 1020,266 1012,274"/>
+          <polyline points="784,468 844,461"/>
+          <polyline points="1026,588 978,592"/>
+        </g>
+        <g class="bond-hw-dots">
+          <circle cx="881" cy="185" r="6.5"/>
+          <circle cx="1006" cy="279" r="6.5"/>
+          <circle cx="850" cy="462" r="6.5"/>
+          <circle cx="970" cy="593" r="6.5"/>
+        </g>
+      </svg>
+      <ul class="bond-hw-calls" role="list">
+        <li class="bond-hw-core bond-hw-rv">POST-FREE<br>CERAMIC CORE</li>
+        <li class="bond-hw-heat bond-hw-rv">THREE CALIBRATED<br>HEAT SETTINGS</li>
+        <li class="bond-hw-disp bond-hw-rv">FULL-FUNCTION<br>SMART DISPLAY</li>
+        <li class="bond-hw-inh bond-hw-rv">INHALE ACTIVATED</li>
       </ul>
-      <figure class="bond-hw-figure bond-hw-rv">
-        <img class="bond-hw-img" src="media/hardware/bond-hardware-device.webp" width="330" height="702" loading="lazy" decoding="async" alt="The Bond hardware with its full-function smart display shown active.">
-        <figcaption class="bond-hw-caption"><span class="bond-hw-caption-k">DISPLAY SHOWN ACTIVE</span><span class="bond-hw-caption-v">Lower indicators illuminate during use.</span></figcaption>
-      </figure>
-      <ul class="bond-hw-feats bond-hw-feats-r" role="list">
-        <li class="bond-hw-feat bond-hw-rv">FULL-FUNCTION SMART DISPLAY</li>
-        <li class="bond-hw-feat bond-hw-rv">INHALE ACTIVATED</li>
-      </ul>
+      <p class="bond-hw-note bond-hw-rv"><span class="bond-hw-note-k">DISPLAY SHOWN ACTIVE</span><span class="bond-hw-note-v">Lower indicators illuminate during use.</span></p>
+      <ol class="bond-hw-steps" role="list">
+        <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">01</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">POWER</span><span class="bond-hw-step-v">Press 5x</span></span></li>
+        <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">02</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">CHOOSE HEAT</span><span class="bond-hw-step-v">Press 3x</span></span></li>
+        <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">03</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">PREHEAT</span><span class="bond-hw-step-v">Press 2x</span></span></li>
+        <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">04</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">INHALE</span><span class="bond-hw-step-v">Draw to activate</span><span class="bond-hw-step-n">Up to 10 seconds</span></span></li>
+      </ol>
     </div>
-    <ol class="bond-hw-steps" role="list">
-      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">01</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">POWER</span><span class="bond-hw-step-v">Press 5x</span></span></li>
-      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">02</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">CHOOSE HEAT</span><span class="bond-hw-step-v">Press 3x</span></span></li>
-      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">03</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">PREHEAT</span><span class="bond-hw-step-v">Press 2x</span></span></li>
-      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">04</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">INHALE</span><span class="bond-hw-step-v">Draw to activate</span><span class="bond-hw-step-n">Up to 10 seconds</span></span></li>
-    </ol>
   </section>
 
   <sc-if value="{{ motionOk }}" hint-placeholder-val="{{ true }}">
