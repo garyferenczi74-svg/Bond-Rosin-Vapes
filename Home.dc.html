@@ -844,13 +844,84 @@ class Component extends DCLogic {
   var started = false, reduced = false, allowReveal = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   var layoutRaf = 0;
+  var layoutAgain = false;
+  // The clip holds the gold wordmark low, then lifts it clear of the copy.
+  // 844x390 is the last required frame to clear, just after 4.7s. 4.85s is past that.
+  var SETTLE_AT = 4.85;
+  var settleWatch = false;
 
-  function reveal(instant) {
+  function stillFrame(v) {
+    if (reduced === true) return true;
+    try { if (navigator.connection && navigator.connection.saveData) return true; } catch (e) {}
+    if (!v) return true;
+    if (v.style.display === 'none') return true;
+    if (v.style.visibility === 'hidden') return true;
+    if (v._bondPlateOn) return true;
+    if (v.error) return true;
+    if (v.style.opacity === '0' && !v.currentSrc && !v.querySelector('source')) return true;
+    return false;
+  }
+
+  function showCopy(instant) {
     if (allowReveal !== true) return;
     var s = document.getElementById(STACK);
     if (s === null) return;
     if (instant === true) s.classList.add('hero-instant');
+    else s.classList.remove('hero-instant');
+    if (s.classList.contains('hero-in')) return;
     s.classList.add('hero-in');
+  }
+
+  function hideCopy() {
+    var s = document.getElementById(STACK);
+    if (s === null) return;
+    s.classList.remove('hero-in');
+    s.classList.remove('hero-instant');
+  }
+
+  function armSettle(v) {
+    if (settleWatch === true || !v) return;
+    settleWatch = true;
+    var last = -1;
+    var stuck = 0;
+    var pinned = false;
+    function poke() {
+      var now = v.currentTime || 0;
+      if (stillFrame(v)) { pinned = false; showCopy(true); return; }
+      if (now >= SETTLE_AT) { pinned = false; showCopy(false); return; }
+      if (pinned === true) {
+        if (v.paused === false && now > 0.05 && now < SETTLE_AT) { pinned = false; hideCopy(); }
+        return;
+      }
+      if (now > 0.05 || v.classList.contains('hero-vis')) hideCopy();
+    }
+    v.addEventListener('timeupdate', poke);
+    v.addEventListener('playing', poke);
+    v.addEventListener('error', function () {
+      if (v.error) { pinned = false; showCopy(true); }
+    });
+    var timer = setInterval(function () {
+      var now = v.currentTime || 0;
+      if (stillFrame(v) || now >= SETTLE_AT) {
+        poke();
+        clearInterval(timer);
+        return;
+      }
+      poke();
+      if (pinned === true) { last = now; return; }
+      if (now > 0.05 && last >= 0 && Math.abs(now - last) < 0.02) stuck += 1;
+      else stuck = 0;
+      last = now;
+      if (stuck >= 8) { pinned = true; showCopy(true); }
+    }, 250);
+  }
+
+  function reveal() {
+    if (allowReveal !== true) return;
+    var v = document.getElementById(VID);
+    if (stillFrame(v)) { showCopy(true); return; }
+    if (v && (v.currentTime || 0) >= SETTLE_AT) { showCopy(false); return; }
+    armSettle(v);
   }
 
   function clearMediaBox(t) {
@@ -884,7 +955,7 @@ class Component extends DCLogic {
       media.style.removeProperty('background-position');
       media.style.removeProperty('background-repeat');
     }
-    reveal(true);
+    reveal();
   }
 
   function readNum(cs, name, fallback) {
@@ -960,7 +1031,7 @@ class Component extends DCLogic {
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
-    reveal(true);
+    reveal();
   }
 
   // Landscape under 1200. Same desktop plate as 1200 and up, pinned so the wordmark cap
@@ -1111,7 +1182,7 @@ class Component extends DCLogic {
       t.style.height = grown + 'px';
       t.style.minHeight = grown + 'px';
     }
-    reveal(true);
+    reveal();
   }
 
   function layoutCopy() {
@@ -1122,6 +1193,9 @@ class Component extends DCLogic {
       if (t === null || s === null) return;
       var hidden = !v || v.style.display === 'none' || reduced === true;
       if (hidden) { flowFallback(); return; }
+      // hero-copy-flow puts the plate in the column, so the video box is short.
+      // Read metrics only after that class is off, or the copy locks to the short box.
+      t.classList.remove('hero-copy-flow');
       if (isWideNow()) { layoutDesktop(t, s, v); return; }
       if (isLandscapeBand()) { layoutBand(t, s, v); return; }
       clearBandTweaks(s);
@@ -1221,17 +1295,21 @@ class Component extends DCLogic {
       }
       t.classList.remove('hero-copy-flow');
       s.style.setProperty('--hero-copy-top', copyTop + 'px');
-      reveal(true);
+      reveal();
     } catch (err) {
       flowFallback();
     }
   }
 
   function requestLayout() {
-    if (layoutRaf) return;
+    if (layoutRaf) { layoutAgain = true; return; }
     layoutRaf = requestAnimationFrame(function () {
       layoutRaf = 0;
       layoutCopy();
+      if (layoutAgain === true) {
+        layoutAgain = false;
+        requestLayout();
+      }
     });
   }
 
@@ -1248,17 +1326,21 @@ class Component extends DCLogic {
       allowReveal = true;
       requestLayout();
       if (reduced === true || v === null) return;
-      v._bondFail = function () { requestLayout(); };
+      v._bondFail = function () { requestLayout(); showCopy(true); };
       v.addEventListener('playing', requestLayout);
       v.addEventListener('loadedmetadata', requestLayout);
+      // Backstop only. A clip that is still inside the rise stays hidden.
       setTimeout(function () {
         var stack = document.getElementById(STACK);
         if (stack && stack.classList.contains('hero-in')) return;
-        reveal(true);
-      }, 4000);
+        var clip = document.getElementById(VID);
+        var now = clip ? (clip.currentTime || 0) : 0;
+        if (clip && now > 0.05 && now < SETTLE_AT && clip.paused === false) return;
+        showCopy(true);
+      }, 6000);
     };
     go();
-    if (document.fonts && document.fonts.status !== 'loaded') {
+    if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(function () { requestLayout(); });
     }
   }
@@ -1270,7 +1352,34 @@ class Component extends DCLogic {
   window.addEventListener('bond-entered', function () { start(); });
   window.addEventListener('resize', requestLayout);
   window.addEventListener('orientationchange', requestLayout);
+  window.addEventListener('pageshow', function (ev) {
+    if (ev.persisted === true) requestLayout();
+  });
   if (window.visualViewport) window.visualViewport.addEventListener('resize', requestLayout);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { requestLayout(); });
+  }
+  var earlyVid = document.getElementById(VID);
+  if (earlyVid) earlyVid.addEventListener('loadedmetadata', requestLayout);
+  if (typeof ResizeObserver === 'function') {
+    var boxStage = document.getElementById(STAGE);
+    var boxVid = document.getElementById(VID);
+    if (boxStage) {
+      var boxKey = '';
+      var boxObserver = new ResizeObserver(function () {
+        var stage = document.getElementById(STAGE);
+        var vid = document.getElementById(VID);
+        if (stage === null) return;
+        var key = stage.clientWidth + 'x' + stage.clientHeight;
+        if (vid) key += '/' + vid.clientWidth + 'x' + vid.clientHeight + '/' + vid.videoWidth + 'x' + vid.videoHeight;
+        if (key === boxKey) return;
+        boxKey = key;
+        requestLayout();
+      });
+      boxObserver.observe(boxStage);
+      if (boxVid) boxObserver.observe(boxVid);
+    }
+  }
   var tries = 0;
   var iv = setInterval(function () {
     tries += 1;
