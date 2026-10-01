@@ -282,7 +282,21 @@ input::placeholder { color: #B0A99A; }
   object-fit: fill;
   display: block;
 }
-.bond-hw-device { display: none; }
+/* Plate and device are both 1672 by 941. The device is a transparent overlay
+   in the same frame, so either artwork is swapped by replacing that file. */
+.bond-hw-device-hold {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bond-hw-device {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: block;
+}
 .bond-hw-lines {
   position: absolute;
   inset: 0;
@@ -445,11 +459,21 @@ input::placeholder { color: #B0A99A; }
     object-fit: cover;
     object-position: 12% 40%;
   }
-  .bond-hw-device {
-    display: block;
+  .bond-hw-device-hold {
+    position: relative;
+    inset: auto;
     width: min(210px, 62%);
-    height: auto;
+    aspect-ratio: 330 / 717;
     margin: 8px auto 8px;
+    overflow: hidden;
+  }
+  .bond-hw-device {
+    inset: auto;
+    width: calc(100% * 1672 / 330);
+    height: calc(100% * 941 / 717);
+    max-width: none;
+    left: calc(100% * -770 / 330);
+    top: calc(100% * -31 / 717);
   }
   .bond-hw-lines { display: none; }
   .bond-hw-eyebrow,
@@ -655,7 +679,7 @@ input::placeholder { color: #B0A99A; }
   <section id="hardware" class="bond-hw" data-screen-label="Hardware" aria-labelledby="bond-hw-title">
     <div class="bond-hw-frame">
       <img class="bond-hw-plate" src="media/hardware/bond-hardware-plate.webp" width="1672" height="941" alt="The Bond hardware with its full-function smart display shown active.">
-      <img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="327" height="716" alt="" aria-hidden="true">
+      <div class="bond-hw-device-hold"><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"></div>
       <p class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</p>
       <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
       <p class="bond-hw-lede bond-hw-rv">Two years of research and<br>development. One device<br>perfected for live rosin.</p>
