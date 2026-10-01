@@ -165,11 +165,20 @@ input::placeholder { color: #B0A99A; }
 .hero-text.hero-in { visibility: visible; }
 .hero-text .hero-row { opacity: 0; transform: translateY(14px); transition: opacity .45s cubic-bezier(0.44,0,0.56,1), transform .45s cubic-bezier(0.44,0,0.56,1); }
 .hero-text.hero-in .hero-row { opacity: 1; transform: translateY(0); }
+/* After the hold releases: tagline with its rules, italic line, body, then both buttons. 0.4s apart. The button fade ends 1.65s later. */
 .hero-text.hero-in .hero-tagline { transition-delay: 0s; }
-.hero-text.hero-in .hero-line2 { transition-delay: .16s; }
-.hero-text.hero-in .hero-subtext { transition-delay: .32s; }
-.hero-text.hero-in .hero-buttons { transition-delay: .48s; }
+.hero-text.hero-in .hero-line2 { transition-delay: 0.4s; }
+.hero-text.hero-in .hero-subtext { transition-delay: 0.8s; }
+.hero-text.hero-in .hero-buttons {
+  visibility: visible;
+  pointer-events: none;
+  transition-property: opacity, transform, visibility;
+  transition-duration: 0.45s, 0.45s, 0s;
+  transition-timing-function: cubic-bezier(0.44,0,0.56,1), cubic-bezier(0.44,0,0.56,1), linear;
+  transition-delay: 1.2s, 1.2s, 1.2s;
+}
 .hero-text.hero-instant .hero-row { transition: none !important; }
+.hero-text.hero-instant .hero-buttons { pointer-events: auto; }
 .hero-tagline { display: flex; align-items: center; justify-content: center; gap: 22px; }
 .hero-tagline h1 { margin: 0; font-family: 'GFS Didot', Didot, serif; font-weight: 500; letter-spacing: 6px; padding-left: 6px; text-transform: uppercase; color: #E1DAD0; white-space: nowrap; font-size: var(--hero-tagline-size); line-height: 1.1; }
 .hero-rule { flex: 0 0 auto; width: 150px; height: 3px; box-shadow: 0 -1px 1px rgba(255,225,166,0.7), 0 1px 1px rgba(39,24,10,0.95), 0 0 8px rgba(214,162,84,0.38); }
@@ -177,7 +186,7 @@ input::placeholder { color: #B0A99A; }
 .hero-rule-r { background: linear-gradient(270deg, rgba(182,133,78,0) 0%, #D5A767 45%, #B6854E 100%); }
 .hero-line2 { font-family: 'GFS Didot', Didot, serif; font-style: italic; font-weight: 400; color: #E1DAD0; font-size: 24px; line-height: 1.25; text-wrap: balance; margin: 0; margin-top: var(--hero-gap-line2); }
 .hero-subtext { font-family: 'GFS Didot', Didot, serif; font-weight: 400; color: #E1DAD0; letter-spacing: 0.3px; font-size: 17px; line-height: 1.45; text-wrap: balance; margin: 0; margin-top: var(--hero-gap-body); }
-.hero-buttons { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; pointer-events: auto; margin-top: var(--hero-gap-cta); margin-left: 0; margin-right: 0; gap: 16px; }
+.hero-buttons { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; width: 100%; visibility: hidden; pointer-events: none; margin-top: var(--hero-gap-cta); margin-left: 0; margin-right: 0; gap: 16px; }
 .hero-btn { font-family: 'GFS Didot', Didot, serif; font-weight: 400; letter-spacing: 3px; line-height: 1; text-transform: uppercase; border-radius: 2px; cursor: pointer; font-size:16px; display: inline-block; box-sizing: border-box; margin: 0; min-height: 44px; transition: transform .28s cubic-bezier(0.23,0.74,0.33,1), background .28s cubic-bezier(0.23,0.74,0.33,1), box-shadow .28s cubic-bezier(0.23,0.74,0.33,1); }
 .hero-btn:hover { transform: translateY(-4px) scale(1.025); }
 .hero-btn:active { transform: translateY(1px) scale(0.985); transition-duration: .12s; }
@@ -243,7 +252,8 @@ input::placeholder { color: #B0A99A; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
   .hero-text .hero-row,
-  .hero-text.hero-in .hero-row { transform: none; transition-property: opacity; }
+  .hero-text.hero-in .hero-row { transform: none; transition-property: opacity; transition-delay: 0s; }
+  .hero-text.hero-in .hero-buttons { visibility: visible; pointer-events: auto; }
 }
 #top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
 </style>
@@ -849,6 +859,8 @@ class Component extends DCLogic {
   // 844x390 is the last required frame to clear, just after 4.7s. 4.85s is past that.
   var SETTLE_AT = 4.85;
   var settleWatch = false;
+  var btnTimer = 0;
+  // Matches the hero-in button delay. The buttons stay inert until that step.
 
   function stillFrame(v) {
     if (reduced === true) return true;
@@ -866,15 +878,34 @@ class Component extends DCLogic {
     if (allowReveal !== true) return;
     var s = document.getElementById(STACK);
     if (s === null) return;
+    // The staggered fade is the hero-in delays. instant drops them so fallbacks show every line at once.
+    // A fallback reveal stays instant. A later settle must not restart the stagger.
+    if (instant === false && s.classList.contains('hero-instant') && s.classList.contains('hero-in')) return;
     if (instant === true) s.classList.add('hero-instant');
     else s.classList.remove('hero-instant');
-    if (s.classList.contains('hero-in')) return;
+    var buttons = s.querySelector('.hero-buttons');
+    if (s.classList.contains('hero-in')) {
+      if (instant === true && buttons) buttons.style.removeProperty('pointer-events');
+      return;
+    }
     s.classList.add('hero-in');
+    if (btnTimer) { clearTimeout(btnTimer); btnTimer = 0; }
+    if (instant === true || buttons === null) return;
+    buttons.style.pointerEvents = 'none';
+    btnTimer = setTimeout(function () {
+      btnTimer = 0;
+      if (s.classList.contains('hero-in') === false) return;
+      if (s.classList.contains('hero-instant') === true) return;
+      buttons.style.pointerEvents = 'auto';
+    }, 1200);
   }
 
   function hideCopy() {
     var s = document.getElementById(STACK);
     if (s === null) return;
+    if (btnTimer) { clearTimeout(btnTimer); btnTimer = 0; }
+    var buttons = s.querySelector('.hero-buttons');
+    if (buttons) buttons.style.removeProperty('pointer-events');
     s.classList.remove('hero-in');
     s.classList.remove('hero-instant');
   }
@@ -893,7 +924,13 @@ class Component extends DCLogic {
         if (v.paused === false && now > 0.05 && now < SETTLE_AT) { pinned = false; hideCopy(); }
         return;
       }
-      if (now > 0.05 || v.classList.contains('hero-vis')) hideCopy();
+      if (now > 0.05 || v.classList.contains('hero-vis')) {
+        // hero-vis is set on the first frame. Hiding then would undo the 6s backstop
+        // while the playhead is still sitting at the start.
+        var shown = document.getElementById(STACK);
+        if (shown && shown.classList.contains('hero-instant') && (v.paused === true || now <= 0.05)) return;
+        hideCopy();
+      }
     }
     v.addEventListener('timeupdate', poke);
     v.addEventListener('playing', poke);
