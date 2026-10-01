@@ -260,13 +260,10 @@ input::placeholder { color: #B0A99A; }
 <style id="bond-hardware-css">
 /* Hardware section. Every rule is scoped under .bond-hw. */
 .bond-hw {
-  --bond-hw-ink: #141210;
-  --bond-hw-soft: #3F3730;
-  --bond-hw-line: #39352F;
   --bond-hw-sans: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
   --bond-hw-serif: "GFS Didot", Didot, serif;
-  background: #F0E6D9;
-  color: var(--bond-hw-ink);
+  background: var(--bond-hw-field);
+  color: var(--matte-black);
   margin: 0;
 }
 .bond-hw-frame {
@@ -275,7 +272,7 @@ input::placeholder { color: #B0A99A; }
   aspect-ratio: 1672 / 941;
   container-type: inline-size;
   overflow: hidden;
-  background: #F0E6D9;
+  background: var(--bond-hw-field);
 }
 .bond-hw-plate {
   position: absolute;
@@ -293,6 +290,8 @@ input::placeholder { color: #B0A99A; }
   height: 100%;
   pointer-events: none;
 }
+.bond-hw-leaders { stroke: var(--bond-hw-leader); }
+.bond-hw-dots { fill: var(--bond-hw-dot); }
 .bond-hw-eyebrow,
 .bond-hw-title,
 .bond-hw-lede,
@@ -311,7 +310,7 @@ input::placeholder { color: #B0A99A; }
   letter-spacing: 0.725em;
   line-height: 1;
   text-transform: uppercase;
-  color: var(--bond-hw-ink);
+  color: var(--matte-black);
 }
 .bond-hw-title {
   left: 4.25%;
@@ -321,7 +320,7 @@ input::placeholder { color: #B0A99A; }
   font-size: 5.98cqw;
   line-height: 1.08;
   letter-spacing: -0.02em;
-  color: #050404;
+  color: var(--bond-hw-ink);
 }
 .bond-hw-title span { display: block; }
 .bond-hw-lede {
@@ -332,7 +331,7 @@ input::placeholder { color: #B0A99A; }
   font-weight: 400;
   line-height: 1.58;
   letter-spacing: 0.15em;
-  color: #121110;
+  color: var(--matte-black);
 }
 .bond-hw-calls { list-style: none; margin: 0; padding: 0; }
 .bond-hw-calls li {
@@ -342,7 +341,7 @@ input::placeholder { color: #B0A99A; }
   letter-spacing: 0.16em;
   line-height: 1.45;
   text-transform: uppercase;
-  color: var(--bond-hw-ink);
+  color: var(--matte-black);
 }
 .bond-hw-calls .bond-hw-core { left: 37.02%; top: 14.24%; letter-spacing: 0.67em; }
 .bond-hw-calls .bond-hw-heat { left: 32.78%; top: 49.31%; letter-spacing: 0.625em; }
@@ -362,14 +361,14 @@ input::placeholder { color: #B0A99A; }
   letter-spacing: 0.38em;
   line-height: 1;
   text-transform: uppercase;
-  color: var(--bond-hw-ink);
+  color: var(--matte-black);
 }
 .bond-hw-note-v {
   font-size: 0.72cqw;
   font-weight: 400;
   letter-spacing: 0.01em;
   line-height: 1.2;
-  color: var(--bond-hw-soft);
+  color: var(--bond-hw-muted);
 }
 .bond-hw-steps {
   left: 4.665%;
@@ -380,7 +379,7 @@ input::placeholder { color: #B0A99A; }
   list-style: none;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid var(--bond-hw-line);
+  border-top: 1px solid var(--bond-hw-muted);
 }
 .bond-hw-step {
   display: flex;
@@ -388,7 +387,7 @@ input::placeholder { color: #B0A99A; }
   gap: 1.55cqw;
   min-width: 0;
   padding-left: 1.7cqw;
-  border-left: 1px solid var(--bond-hw-line);
+  border-left: 1px solid var(--bond-hw-muted);
 }
 .bond-hw-step:first-child { padding-left: 0.25cqw; border-left: 0; }
 .bond-hw-num {
@@ -396,7 +395,7 @@ input::placeholder { color: #B0A99A; }
   font-weight: 400;
   font-size: 3.55cqw;
   line-height: 0.9;
-  color: #050404;
+  color: var(--bond-hw-ink);
   flex: 0 0 auto;
 }
 .bond-hw-step-body { display: flex; flex-direction: column; gap: 0.72cqw; padding-top: 0.35cqw; min-width: 0; }
@@ -407,21 +406,21 @@ input::placeholder { color: #B0A99A; }
   letter-spacing: 0.28em;
   line-height: 1;
   text-transform: uppercase;
-  color: var(--bond-hw-ink);
+  color: var(--matte-black);
 }
 .bond-hw-step-v {
   font-family: var(--bond-hw-sans);
   font-size: 0.96cqw;
   font-weight: 400;
   line-height: 1.15;
-  color: #121110;
+  color: var(--matte-black);
 }
 .bond-hw-step-n {
   font-family: var(--bond-hw-sans);
   font-size: 0.78cqw;
   font-weight: 400;
   line-height: 1.2;
-  color: var(--bond-hw-soft);
+  color: var(--bond-hw-muted);
 }
 .bond-hw.bond-hw-armed .bond-hw-rv { opacity: 0; transition: opacity .4s cubic-bezier(0.22,1,0.36,1); }
 .bond-hw.bond-hw-armed .bond-hw-rv.bond-hw-in { opacity: 1; }
@@ -661,13 +660,13 @@ input::placeholder { color: #B0A99A; }
       <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
       <p class="bond-hw-lede bond-hw-rv">Two years of research and<br>development. One device<br>perfected for live rosin.</p>
       <svg class="bond-hw-lines bond-hw-rv" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <g fill="none" stroke="#2C2925" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <g class="bond-hw-leaders" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="802,154 832,154 866,176 876,184"/>
           <polyline points="1096,243 1052,246 1020,266 1012,274"/>
           <polyline points="784,468 844,461"/>
           <polyline points="1026,588 978,592"/>
         </g>
-        <g fill="#4FEC2E">
+        <g class="bond-hw-dots">
           <circle cx="881" cy="185" r="6.5"/>
           <circle cx="1006" cy="279" r="6.5"/>
           <circle cx="850" cy="462" r="6.5"/>
