@@ -257,6 +257,79 @@ input::placeholder { color: #B0A99A; }
 }
 #top.hero-hold, #top.hero-hold * { animation-play-state: paused !important; }
 </style>
+<style id="bond-hardware-css">
+/* Hardware section. Every rule is scoped under .bond-hw. Colours come from bond-tokens.css, plus two page values named once here. */
+.bond-hw {
+  --bond-hw-bg: var(--bone);
+  --bond-hw-ink: var(--matte-black);
+  --bond-hw-muted: #5B564C;
+  --bond-hw-gold: #C29A45;
+  --bond-hw-line: color-mix(in srgb, var(--matte-black) 22%, transparent);
+  position: relative;
+  background: var(--bond-hw-bg);
+  color: var(--bond-hw-ink);
+  padding: clamp(80px, 10vw, 140px) clamp(20px, 4vw, 56px);
+  overflow: hidden;
+}
+.bond-hw::before { content: ""; position: absolute; top: 0; left: 50%; width: min(1180px, calc(100% - 40px)); height: 1px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, var(--bond-hw-gold), transparent); }
+.bond-hw-head { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 760px; margin: 0 auto; }
+.bond-hw-eyebrow { font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--bond-hw-muted); padding-left: 0.32em; }
+.bond-hw-rule { width: 1px; height: 36px; background: linear-gradient(180deg, var(--bond-hw-gold), transparent); margin: 22px auto; }
+.bond-hw-title { font-family: 'GFS Didot', Didot, serif; font-weight: 400; font-size: clamp(36px, 5.2vw, 72px); line-height: 1.08; letter-spacing: 0.01em; color: var(--bond-hw-ink); margin: 0; text-wrap: balance; }
+.bond-hw-lede { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.6; color: var(--bond-hw-ink); max-width: 30ch; margin: 24px auto 0; text-wrap: balance; }
+.bond-hw-stage { display: grid; grid-template-columns: 1fr minmax(200px, 300px) 1fr; align-items: center; gap: clamp(24px, 4vw, 64px); max-width: 1180px; margin: clamp(48px, 6vw, 80px) auto 0; }
+.bond-hw-feats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: clamp(40px, 7vw, 120px); }
+.bond-hw-feat { position: relative; font-size: 13px; line-height: 1.5; letter-spacing: 0.2em; color: var(--bond-hw-ink); }
+.bond-hw-feat::after { content: ""; display: block; width: 56px; height: 1px; margin-top: 14px; background: linear-gradient(90deg, var(--bond-hw-gold), transparent); }
+.bond-hw-feats-l .bond-hw-feat { text-align: right; padding-right: 2px; }
+.bond-hw-feats-l .bond-hw-feat::after { margin-left: auto; background: linear-gradient(270deg, var(--bond-hw-gold), transparent); }
+.bond-hw-feats-l .bond-hw-feat:first-child { margin-top: -8%; }
+.bond-hw-feats-r .bond-hw-feat:first-child { margin-top: -18%; }
+.bond-hw-figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
+.bond-hw-img { display: block; width: 100%; max-width: 300px; height: auto; aspect-ratio: 330 / 702; }
+.bond-hw-caption { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 18px; text-align: center; }
+.bond-hw-caption-k { font-size: 12px; letter-spacing: 0.2em; color: var(--bond-hw-ink); }
+.bond-hw-caption-v { font-size: 13px; line-height: 1.5; color: var(--bond-hw-muted); }
+.bond-hw-steps { list-style: none; margin: clamp(56px, 7vw, 96px) auto 0; padding: 32px 0 0; max-width: 1180px; border-top: 1px solid var(--bond-hw-line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bond-hw-step { display: flex; align-items: flex-start; gap: 16px; padding: 4px clamp(12px, 2vw, 32px); border-left: 1px solid var(--bond-hw-line); }
+.bond-hw-step:first-child { border-left: 0; padding-left: 0; }
+.bond-hw-num { font-family: 'GFS Didot', Didot, serif; font-size: clamp(40px, 3.6vw, 56px); line-height: 0.9; color: var(--bond-hw-ink); flex: 0 0 auto; }
+.bond-hw-step-body { display: flex; flex-direction: column; gap: 6px; padding-top: 2px; min-width: 0; }
+.bond-hw-step-k { font-size: 12px; letter-spacing: 0.2em; color: var(--bond-hw-ink); font-weight: 600; }
+.bond-hw-step-v { font-size: 16px; line-height: 1.4; color: var(--bond-hw-ink); }
+.bond-hw-step-n { font-size: 13px; line-height: 1.4; color: var(--bond-hw-muted); }
+/* Tablet: device beside the features, steps in two rows. */
+@media (max-width: 1023px) {
+  .bond-hw-stage { grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); grid-template-areas: "fig l" "fig r"; column-gap: clamp(32px, 6vw, 64px); row-gap: 40px; align-items: center; max-width: 640px; }
+  .bond-hw-figure { grid-area: fig; }
+  .bond-hw-feats-l { grid-area: l; align-self: end; }
+  .bond-hw-feats-r { grid-area: r; align-self: start; }
+  .bond-hw-feats { gap: 40px; }
+  .bond-hw-feats-l .bond-hw-feat { text-align: left; padding-right: 0; }
+  .bond-hw-feats-l .bond-hw-feat::after { margin-left: 0; background: linear-gradient(90deg, var(--bond-hw-gold), transparent); }
+  .bond-hw-feats-l .bond-hw-feat:first-child, .bond-hw-feats-r .bond-hw-feat:first-child { margin-top: 0; }
+  .bond-hw-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 32px; max-width: 640px; }
+  .bond-hw-step:nth-child(3) { border-left: 0; padding-left: 0; }
+}
+/* Phone: one column. Device first, then features, then steps. */
+@media (max-width: 599px) {
+  .bond-hw-stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "fig" "l" "r"; row-gap: 28px; max-width: 420px; }
+  .bond-hw-img { max-width: 220px; }
+  .bond-hw-feats { gap: 28px; }
+  .bond-hw-feats-l { align-self: auto; }
+  .bond-hw-feat, .bond-hw-feats-l .bond-hw-feat { text-align: center; }
+  .bond-hw-feat::after, .bond-hw-feats-l .bond-hw-feat::after { margin: 14px auto 0; background: linear-gradient(90deg, transparent, var(--bond-hw-gold), transparent); }
+  .bond-hw-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 0; row-gap: 28px; padding-top: 28px; }
+  .bond-hw-step { flex-direction: column; gap: 10px; padding: 0 0 0 16px; }
+  .bond-hw-step:nth-child(odd) { border-left: 0; padding-left: 0; }
+}
+/* Reveal. Only armed once the script runs, so content never hides without it. */
+.bond-hw.bond-hw-armed .bond-hw-rv { opacity: 0; transform: translateY(12px); transition: opacity .4s cubic-bezier(0.22,1,0.36,1), transform .4s cubic-bezier(0.22,1,0.36,1); }
+.bond-hw.bond-hw-armed .bond-hw-rv.bond-hw-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .bond-hw.bond-hw-armed .bond-hw-rv { transform: none; transition: opacity .2s linear; }
+}
+</style>
 </helmet>
 <div style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;background:#1B1D1C;color:#E1DAD0">
 
@@ -375,6 +448,35 @@ input::placeholder { color: #B0A99A; }
         <p style="text-align:center;font-size:13px;letter-spacing:0.06em;color:#5B564C;margin:14px 0 0">Reserve Edition. Solventless live rosin.</p>
       </a>
     </div>
+  </section>
+
+  <section id="hardware" class="bond-hw" data-screen-label="Hardware" aria-labelledby="bond-hw-title">
+    <div class="bond-hw-head">
+      <div class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</div>
+      <div class="bond-hw-rule bond-hw-rv" aria-hidden="true"></div>
+      <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv">Designed around the oil.</h2>
+      <p class="bond-hw-lede bond-hw-rv">Two years of research and development. One device perfected for live rosin.</p>
+    </div>
+    <div class="bond-hw-stage">
+      <ul class="bond-hw-feats bond-hw-feats-l" role="list">
+        <li class="bond-hw-feat bond-hw-rv">POST-FREE CERAMIC CORE</li>
+        <li class="bond-hw-feat bond-hw-rv">THREE CALIBRATED HEAT SETTINGS</li>
+      </ul>
+      <figure class="bond-hw-figure bond-hw-rv">
+        <img class="bond-hw-img" src="media/hardware/bond-hardware-device.webp" width="330" height="702" loading="lazy" decoding="async" alt="The Bond hardware with its full-function smart display shown active.">
+        <figcaption class="bond-hw-caption"><span class="bond-hw-caption-k">DISPLAY SHOWN ACTIVE</span><span class="bond-hw-caption-v">Lower indicators illuminate during use.</span></figcaption>
+      </figure>
+      <ul class="bond-hw-feats bond-hw-feats-r" role="list">
+        <li class="bond-hw-feat bond-hw-rv">FULL-FUNCTION SMART DISPLAY</li>
+        <li class="bond-hw-feat bond-hw-rv">INHALE ACTIVATED</li>
+      </ul>
+    </div>
+    <ol class="bond-hw-steps" role="list">
+      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">01</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">POWER</span><span class="bond-hw-step-v">Press 5x</span></span></li>
+      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">02</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">CHOOSE HEAT</span><span class="bond-hw-step-v">Press 3x</span></span></li>
+      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">03</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">PREHEAT</span><span class="bond-hw-step-v">Press 2x</span></span></li>
+      <li class="bond-hw-step bond-hw-rv"><span class="bond-hw-num" aria-hidden="true">04</span><span class="bond-hw-step-body"><span class="bond-hw-step-k">INHALE</span><span class="bond-hw-step-v">Draw to activate</span><span class="bond-hw-step-n">Up to 10 seconds</span></span></li>
+    </ol>
   </section>
 
   <sc-if value="{{ motionOk }}" hint-placeholder-val="{{ true }}">
@@ -1424,6 +1526,46 @@ class Component extends DCLogic {
     else if (tries > 600) { clearInterval(iv); start(); }
   }, 100);
   requestLayout();
+})();
+</script>
+<script id="bond-hardware-reveal">
+// Hardware section reveal only. It adds classes inside #hardware and no other element.
+(function () {
+  var reduce = false;
+  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  function arm(sec) {
+    if (!('IntersectionObserver' in window)) return;
+    var items = sec.querySelectorAll('.bond-hw-rv');
+    sec.classList.add('bond-hw-armed');
+    var io = new IntersectionObserver(function (entries) {
+      var hit = entries.some(function (e) { return e.isIntersecting; });
+      if (!hit) return;
+      // Show every item now in view or already scrolled past, so a fast scroll never leaves one hidden.
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var n = 0;
+      Array.prototype.forEach.call(items, function (el) {
+        if (el.classList.contains('bond-hw-in')) return;
+        if (el.getBoundingClientRect().top > vh * 0.9) return;
+        el.style.transitionDelay = reduce ? '0s' : (Math.min(n, 5) * 0.08) + 's';
+        n += 1;
+        el.classList.add('bond-hw-in');
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
+  }
+  // The page template renders after load. Arm only the live section, never the inert template copy.
+  function check() {
+    var sec = document.getElementById('hardware');
+    if (!sec || sec.closest('x-dc') || sec.bondHwArmed) return;
+    if (!sec.querySelector('.bond-hw-rv')) return;
+    sec.bondHwArmed = true;
+    arm(sec);
+  }
+  var mo = new MutationObserver(check);
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+  check();
+  setTimeout(function () { mo.disconnect(); }, 30000);
 })();
 </script>
 </body>
