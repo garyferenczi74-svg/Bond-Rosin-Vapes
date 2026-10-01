@@ -44,6 +44,18 @@ export function bondAgeDecision(month: string, year: string, now: Date): "wait" 
   return "decline";
 }
 
+// Month, year, and the unchecked-by-default affirmation are all required.
+// A date under 21 still declines when the box is checked.
+export function bondAgeEntry(
+  month: string,
+  year: string,
+  affirmed: boolean,
+  now: Date,
+): "wait" | "enter" | "decline" {
+  if (affirmed !== true) return "wait";
+  return bondAgeDecision(month, year, now);
+}
+
 export function hausRouteShowsAgeGate(pathname: string, stored: string | null): boolean {
   if (pathname !== HAUS_DOOR_PATH && !pathname.startsWith(`${HAUS_DOOR_PATH}/`)) return false;
   return hausShowsAgeGate(stored);
@@ -75,7 +87,7 @@ html[data-bond-age="ok"] .bond-age-gate { display: none; }
 .bond-age-gate{position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;flex-direction:column;align-items:center}
 .bond-age-gate .bond-age-ask .bond-age-body{font-family:Arial,"Segoe UI",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
 .bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:Georgia,"Times New Roman",serif;font-weight:400}
-@media (max-height:640px){html:not([data-bond-age="ok"]),html:not([data-bond-age="ok"]) body{overflow:hidden}.bond-age-gate{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;justify-content:flex-start}.bond-age-gate .bond-age-panel{margin-top:0;margin-bottom:0;flex-shrink:0}.bond-age-dc{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;align-items:flex-start !important;justify-content:center !important}}.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}`;
+@media (max-height:640px){html:not([data-bond-age="ok"]),html:not([data-bond-age="ok"]) body{overflow:hidden}.bond-age-gate{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;justify-content:flex-start}.bond-age-gate .bond-age-panel{margin-top:0;margin-bottom:0;flex-shrink:0}.bond-age-dc{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;align-items:flex-start !important;justify-content:center !important}}@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}`;
 
 function webFace(family: string, weight: string, file: string): string {
   return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:swap;src:url("${file}") format("woff2");unicode-range:${LATIN_RANGE}}`;

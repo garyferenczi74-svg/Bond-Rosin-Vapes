@@ -39,7 +39,8 @@
   var monthEl = document.getElementById("bond-age-month");
   var yearEl = document.getElementById("bond-age-year");
   var enterEl = document.getElementById("bond-age-enter");
-  if (!monthEl || !yearEl || !enterEl) return;
+  var affirmEl = document.getElementById("bond-age-affirm");
+  if (monthEl == null || yearEl == null || enterEl == null || affirmEl == null) return;
 
   var nowYear = new Date().getFullYear();
   var y;
@@ -57,14 +58,16 @@
   }
 
   function syncReady() {
-    var ready = monthEl.value !== "" && yearEl.value !== "";
+    var ready = monthEl.value !== "" && yearEl.value !== "" && affirmEl.checked === true;
     enterEl.setAttribute("data-ready", ready ? "true" : "false");
   }
 
   monthEl.addEventListener("change", syncReady);
   yearEl.addEventListener("change", syncReady);
+  affirmEl.addEventListener("change", syncReady);
 
   enterEl.addEventListener("click", function () {
+    if (affirmEl.checked !== true) return;
     var decision = bondAgeDecision(monthEl.value, yearEl.value, new Date());
     if (decision === "wait") return;
     if (decision === "enter") {

@@ -1,5 +1,6 @@
 .bond-age-gate,
-.bond-age-off {
+.bond-age-off,
+.bond-age-dc {
   --bone: #E1DAD0;
   --muted: #8E887C;
   --line: #3A3C3B;
@@ -70,6 +71,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 
 .bond-age-no { max-width: 520px; }
 .bond-age-ask { max-width: 560px; }
+.bond-age-ask:has(.bond-age-affirm) { max-width: 760px; }
 
 .bond-age-mark {
   font-family: var(--font-didot), "GFS Didot", Didot, serif;
@@ -158,6 +160,38 @@ html[data-bond-age="ok"] .bond-age-gate {
 .bond-age-month { width: min(160px, 100%); }
 .bond-age-year { width: min(140px, 100%); }
 
+.bond-age-affirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--bone);
+  font-family: Aptos, "Segoe UI Variable", "Segoe UI", Inter, "Inter Fallback", sans-serif;
+  font-size: 15px;
+  line-height: 1.2;
+  padding: 14px 20px;
+  box-sizing: border-box;
+  cursor: pointer;
+  max-width: 100%;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.bond-age-affirm label {
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.bond-age-affirm-input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--age-gold);
+  flex: 0 0 auto;
+}
+
 .bond-age-select option { color: var(--matte-black); }
 
 .bond-age-enter {
@@ -196,13 +230,15 @@ html[data-bond-age="ok"] .bond-age-gate {
   background: var(--bond-warning-yellow);
   color: var(--matte-black);
   border: 1px solid var(--matte-black);
-  padding: 12px 14px;
+  padding: 9px 11px;
   text-align: left;
 }
 
 /* 3px gold ring outside the 1px black border. The mask keeps the gradient off the yellow fill. */
 /* Outline and box-shadow cannot paint a gradient token, so the fallback clips the same token to a 3px ring. */
+/* If neither mask-composite nor evenodd clip-path is supported, ::before is not painted and the yellow box with its black border stays. */
 
+@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))) {
 .bond-age-gate .bond-warn-box::before,
 .bond-age-dc .bond-warn-box::before,
 .bond-age-off .bond-warn-box::before,
@@ -214,6 +250,7 @@ html[data-bond-age="ok"] .bond-age-gate {
   pointer-events: none;
   -webkit-clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 3px 3px, 3px calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 3px, 3px 3px);
   clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, 3px 3px, 3px calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) 3px, 3px 3px);
+}
 }
 
 @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
@@ -245,7 +282,7 @@ html[data-bond-age="ok"] .bond-age-gate {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #0D0F0E;
+  background: var(--age-ink);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -264,11 +301,13 @@ html[data-bond-age="ok"] .bond-age-gate {
 
 .bond-warn-box p {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 9px;
   line-height: 1.5;
   color: var(--matte-black);
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   letter-spacing: 0;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 .bond-warn-box p:last-child {
@@ -279,16 +318,18 @@ html[data-bond-age="ok"] .bond-age-gate {
 .bond-warn-hope a,
 .bond-warn-license {
   font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-size: 9px;
   line-height: 1.5;
   letter-spacing: 0;
   color: var(--bond-warn-meta);
   background: var(--bond-warn-panel);
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 .bond-warn-hope {
-  margin: 12px 0 0;
-  padding: 10px 12px 4px;
+  margin: 9px 0 0;
+  padding: 8px 9px 3px;
 }
 
 .bond-warn-hope a {
@@ -297,7 +338,7 @@ html[data-bond-age="ok"] .bond-age-gate {
 
 .bond-warn-license {
   margin: 0;
-  padding: 4px 12px 10px;
+  padding: 3px 9px 8px;
 }
 
 @media (max-width: 420px) {
@@ -316,9 +357,18 @@ html[data-bond-age="ok"] .bond-age-gate {
 }
 
 .bond-age-select:focus-visible,
-.bond-age-enter:focus-visible {
+.bond-age-enter:focus-visible,
+.bond-age-affirm-input:focus-visible {
   outline: 2px solid var(--age-gold-light);
   outline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+  .bond-age-affirm {
+    flex: 1 1 100%;
+    justify-content: center;
+    white-space: normal;
+  }
 }
 
 @keyframes bond-age-in {

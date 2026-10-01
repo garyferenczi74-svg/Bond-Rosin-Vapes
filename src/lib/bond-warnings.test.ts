@@ -43,7 +43,8 @@ test("gate and footer share one warning block and one css rule", () => {
   assert.match(css, /\.bond-warn-box \{[^}]*color: var\(--matte-black\)/);
   assert.match(css, /\.bond-warn-box \{[^}]*border: 1px solid var\(--matte-black\)/);
   assert.match(css, /\.bond-warn-box p \{[^}]*font-family: Arial, Helvetica, sans-serif/);
-  assert.match(css, /\.bond-warn-box p \{[^}]*font-size: 12px/);
+  assert.match(css, /\.bond-warn-box p \{[^}]*font-size: 9px/);
+  assert.match(css, /\.bond-warn-hope,\s*\.bond-warn-hope a,\s*\.bond-warn-license \{[^}]*font-size: 9px/);
   assert.match(css, /\.bond-warn-box p \{[^}]*color: var\(--matte-black\)/);
   assert.equal(css.includes(".bond-age-health"), false);
 

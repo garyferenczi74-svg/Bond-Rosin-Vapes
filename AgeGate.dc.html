@@ -20,7 +20,7 @@
 </style>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
-<style id="bond-age-ring">.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}</style>
+<style id="bond-age-ring">@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}</style>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -87,12 +87,12 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
     </div>
   </sc-if>
   <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
-    <div style="position:relative;text-align:center;padding:32px;max-width:560px;width:100%;box-sizing:border-box;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
+    <div style="position:relative;text-align:center;padding:32px;max-width:760px;width:100%;box-sizing:border-box;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
       <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(52px,8vw,84px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;transform-origin:center;animation:bondBreathe 6.5s ease-in-out infinite,breatheScale 3.6s ease-in-out infinite">BOND</div>
       <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(18px,2.6vw,28px);letter-spacing:0.03em;color:#E1DAD0;margin:24px 0 0">Please confirm your age.</p>
       <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>
       <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:16px;line-height:1.7;color:#B0A99A;max-width:440px;margin:26px auto 26px">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px;max-width:100%">
+      <div class="bond-age-fields" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px;max-width:100%">
         <select aria-label="Birth month" value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(160px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
           <option value="" style="color:#1B1D1C">Birth month</option>
           <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
@@ -105,6 +105,10 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
             <option value="{{ y }}" style="color:#1B1D1C">{{ y }}</option>
           </sc-for>
         </select>
+        <div class="bond-age-affirm">
+          <input type="checkbox" id="bond-age-affirm" class="bond-age-affirm-input" checked="{{ ofAge }}" onChange="{{ setOfAge }}">
+          <label for="bond-age-affirm">I am 21 years of age or older</label>
+        </div>
       </div>
       <button onClick="{{ enter }}" style="background:{{ enterBg }};color:{{ enterColor }};border:1px solid {{ enterBorder }};border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 56px;cursor:pointer;transition:background .4s,color .4s,border-color .4s,box-shadow .4s;box-shadow:{{ enterShadow }}">Enter</button>
       <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>{{ warn }}</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
@@ -115,7 +119,7 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:600},&quot;bypass&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { verified: false, declined: false, month: '', year: '', checked: false };
+  state = { verified: false, declined: false, month: '', year: '', checked: false, ofAge: false };
   componentDidMount() {
     // One time cleanup of the pre session localStorage key so it does not linger.
     try { localStorage.removeItem('bond_age_ok'); } catch (e) {}
@@ -135,15 +139,15 @@ class Component extends DCLogic {
   }
   renderVals() {
     const bypass = this.props.bypass ?? false;
-    const { verified, declined, month, year, checked } = this.state;
+    const { verified, declined, month, year, checked, ofAge } = this.state;
     const standalone = /AgeGate\.dc\.html/i.test(location.pathname);
     const visible = standalone ? true : (checked && !verified && !bypass);
-    const ready = month !== '' && year !== '';
+    const ready = month !== '' && year !== '' && ofAge === true;
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const years = []; const now = new Date().getFullYear();
     for (let y = now; y >= now - 100; y--) years.push(String(y));
     return {
-      visible, declined, asking: !declined, months, years, month, year,
+      visible, declined, asking: !declined, months, years, month, year, ofAge,
       warn: this.props.warn || "Cannabis can be addictive.",
       enterBg: ready ? 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%)' : 'transparent',
       enterColor: ready ? '#141109' : '#8E887C',
@@ -151,8 +155,9 @@ class Component extends DCLogic {
       enterShadow: ready ? '0 8px 40px rgba(194,154,69,0.4)' : 'none',
       setMonth: (e) => this.setState({ month: e.target.value }),
       setYear: (e) => this.setState({ year: e.target.value }),
+      setOfAge: (e) => this.setState({ ofAge: e.target.checked === true }),
       enter: () => {
-        if (!ready) return;
+        if (month === '' || year === '' || ofAge !== true) return;
         const b = new Date(parseInt(year, 10), parseInt(month, 10), 1);
         const nowD = new Date();
         let age = nowD.getFullYear() - b.getFullYear();
