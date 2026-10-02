@@ -295,13 +295,21 @@ input::placeholder { color: #B0A99A; }
   inset: 0;
   pointer-events: none;
 }
-.bond-hw-device {
+.bond-hw-device,
+.bond-hw-pills {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: fill;
   display: block;
+}
+.bond-hw-device { object-fit: fill; }
+.bond-hw-pills { pointer-events: none; }
+.bond-hw-pill-num {
+  font-family: var(--bond-hw-sans);
+  font-weight: 700;
+  font-size: 15px;
+  fill: var(--bond-hw-pill-ink);
 }
 .bond-hw-shadow {
   position: absolute;
@@ -375,7 +383,7 @@ input::placeholder { color: #B0A99A; }
   color: var(--matte-black);
 }
 .bond-hw-calls .bond-hw-core { left: 37.02%; top: 14.24%; letter-spacing: min(0.67em, 0.482cqw); }
-.bond-hw-calls .bond-hw-heat { left: calc(32.78% - 8px); top: 49.31%; letter-spacing: min(0.625em, 0.45cqw); }
+.bond-hw-calls .bond-hw-heat { left: calc(32.78% - 28px); top: 49.31%; letter-spacing: min(0.625em, 0.45cqw); }
 .bond-hw-calls .bond-hw-disp { left: 65.79%; top: 24.66%; letter-spacing: min(0.61em, 0.439cqw); }
 .bond-hw-calls .bond-hw-inh { left: 61.6%; top: 61.85%; font-size: max(12px, 0.72cqw); letter-spacing: min(0.55em, 0.396cqw); }
 .bond-hw-note {
@@ -467,11 +475,11 @@ input::placeholder { color: #B0A99A; }
   }
   .bond-hw-core::after {
     top: 1.746cqw;
-    width: calc(13.638cqw - 100% - 8px);
+    width: calc(14.535cqw - 100% - 8px);
   }
   .bond-hw-heat::after {
-    top: 0.24cqw;
-    width: calc(17.669cqw - 100%);
+    top: -0.166cqw;
+    width: calc(18.057cqw - 100% + 20px);
   }
 }
 .bond-hw.bond-hw-armed .bond-hw-rv { opacity: 0; transition: opacity .4s cubic-bezier(0.22,1,0.36,1); }
@@ -492,10 +500,12 @@ input::placeholder { color: #B0A99A; }
   .bond-hw-plate {
     position: relative;
     inset: auto;
-    width: 100%;
+    width: 294%;
+    max-width: none;
     height: 168px;
     object-fit: cover;
-    object-position: 12% 40%;
+    object-position: right 58%;
+    left: -194%;
   }
   .bond-hw-device-hold {
     position: relative;
@@ -506,6 +516,7 @@ input::placeholder { color: #B0A99A; }
     overflow: hidden;
   }
   .bond-hw-device,
+  .bond-hw-pills,
   .bond-hw-shadow {
     inset: auto;
     width: calc(100% * 1672 / 557);
@@ -720,7 +731,7 @@ input::placeholder { color: #B0A99A; }
   <section id="hardware" class="bond-hw" data-screen-label="Hardware" aria-labelledby="bond-hw-title">
     <div class="bond-hw-frame">
       <img class="bond-hw-plate" src="media/hardware/bond-hardware-plate.webp" width="1672" height="941" alt="The Bond hardware with its full-function smart display shown active.">
-      <div class="bond-hw-device-hold"><div class="bond-hw-shadow" aria-hidden="true"></div><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"></div>
+      <div class="bond-hw-device-hold"><div class="bond-hw-shadow" aria-hidden="true"></div><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"><svg class="bond-hw-pills" viewBox="0 0 1672 941" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bond-hw-g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-1)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-1b)"/></linearGradient><linearGradient id="bond-hw-g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-2)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-2b)"/></linearGradient><linearGradient id="bond-hw-g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-3)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-3b)"/></linearGradient></defs><rect x="867" y="429" width="89" height="33" rx="16.5" fill="url(#bond-hw-g1)"/><rect x="865" y="453" width="88" height="28" rx="14" fill="url(#bond-hw-g2)"/><rect x="861.5" y="471.5" width="91" height="37" rx="18.5" fill="url(#bond-hw-g3)"/><text class="bond-hw-pill-num" x="911" y="445" text-anchor="middle" dominant-baseline="central">1</text><text class="bond-hw-pill-num" x="909" y="467" text-anchor="middle" dominant-baseline="central">2</text><text class="bond-hw-pill-num" x="907" y="490" text-anchor="middle" dominant-baseline="central">3</text></svg></div>
       <p class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</p>
       <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
       <p class="bond-hw-lede bond-hw-rv">
@@ -729,9 +740,9 @@ input::placeholder { color: #B0A99A; }
       </p>
       <svg class="bond-hw-lines bond-hw-rv" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <g class="bond-hw-leaders" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="847,164 866,176 876,184"/>
-          <polyline points="1088,243 1052,246 1020,266 1012,274"/>
-          <polyline points="1018,588 978,592"/>
+          <polyline points="860,164 870,176 881,185"/>
+          <polyline points="1088,243 1052,246 1020,266 1006,279"/>
+          <polyline points="1018,588 978,592 970,593"/>
         </g>
         <g class="bond-hw-dots">
           <circle cx="881" cy="185" r="6.5"/>
