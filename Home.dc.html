@@ -262,9 +262,15 @@ input::placeholder { color: #B0A99A; }
 .bond-hw {
   --bond-hw-sans: Aptos, "Segoe UI Variable", "Segoe UI", Inter, sans-serif;
   --bond-hw-serif: "GFS Didot", Didot, serif;
-  background: var(--bond-hw-field);
+  /* Matches the fixed nav: 88px hamburger below 1024, 67px with links above. */
+  --bond-hw-nav-band: 88px;
+  background: var(--matte-black);
   color: var(--matte-black);
   margin: 0;
+  padding-block: var(--bond-hw-nav-band);
+}
+@media (min-width: 1024px) {
+  .bond-hw { --bond-hw-nav-band: 67px; }
 }
 .bond-hw-frame {
   position: relative;
