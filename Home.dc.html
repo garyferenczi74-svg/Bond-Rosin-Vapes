@@ -340,6 +340,7 @@ input::placeholder { color: #B0A99A; }
 .bond-hw-lede {
   left: 4.73%;
   top: 47.4%;
+  width: 22%;
   font-family: var(--bond-hw-sans);
   font-size: 1.32cqw;
   font-weight: 400;
@@ -347,6 +348,8 @@ input::placeholder { color: #B0A99A; }
   letter-spacing: 0.15em;
   color: var(--matte-black);
 }
+.bond-hw-years,
+.bond-hw-built { display: block; }
 .bond-hw-calls { list-style: none; margin: 0; padding: 0; }
 .bond-hw-calls li {
   font-family: var(--bond-hw-sans);
@@ -501,6 +504,8 @@ input::placeholder { color: #B0A99A; }
     margin: 14px 20px 0;
   }
   .bond-hw-lede {
+    width: auto;
+    max-width: 280px;
     font-size: 16px;
     line-height: 1.45;
     letter-spacing: 0.01em;
@@ -682,7 +687,10 @@ input::placeholder { color: #B0A99A; }
       <div class="bond-hw-device-hold"><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"></div>
       <p class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</p>
       <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
-      <p class="bond-hw-lede bond-hw-rv">Two years of research and<br>development. One device<br>perfected for live rosin.</p>
+      <p class="bond-hw-lede bond-hw-rv">
+        <span class="bond-hw-years">Two years of research and development.</span>
+        <span class="bond-hw-built">One device built for live rosin.</span>
+      </p>
       <svg class="bond-hw-lines bond-hw-rv" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <g class="bond-hw-leaders" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="802,154 832,154 866,176 876,184"/>
