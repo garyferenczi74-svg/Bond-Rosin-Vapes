@@ -303,6 +303,13 @@ input::placeholder { color: #B0A99A; }
   object-fit: fill;
   display: block;
 }
+.bond-hw-shadow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 12% 5.5% at 58.4% 74.3%, var(--matte-black), transparent 70%);
+  opacity: 0.38;
+  pointer-events: none;
+}
 .bond-hw-lines {
   position: absolute;
   inset: 0;
@@ -368,7 +375,7 @@ input::placeholder { color: #B0A99A; }
   color: var(--matte-black);
 }
 .bond-hw-calls .bond-hw-core { left: 37.02%; top: 14.24%; letter-spacing: min(0.67em, 0.482cqw); }
-.bond-hw-calls .bond-hw-heat { left: 32.78%; top: 49.31%; letter-spacing: min(0.625em, 0.45cqw); }
+.bond-hw-calls .bond-hw-heat { left: calc(32.78% - 8px); top: 49.31%; letter-spacing: min(0.625em, 0.45cqw); }
 .bond-hw-calls .bond-hw-disp { left: 65.79%; top: 24.66%; letter-spacing: min(0.61em, 0.439cqw); }
 .bond-hw-calls .bond-hw-inh { left: 61.6%; top: 61.85%; font-size: max(12px, 0.72cqw); letter-spacing: min(0.55em, 0.396cqw); }
 .bond-hw-note {
@@ -446,6 +453,27 @@ input::placeholder { color: #B0A99A; }
   line-height: 1.2;
   color: var(--bond-hw-ink);
 }
+/* Leaders start 8px outside the callout and run to the fixed tail beside the device.
+   Length is the callout's own width, so the gap holds when the 12px floor widens the words. */
+@media (min-width: 1200px) {
+  .bond-hw-core::after,
+  .bond-hw-heat::after {
+    content: "";
+    position: absolute;
+    left: calc(100% + 8px);
+    height: 0.096cqw;
+    background: var(--bond-hw-leader);
+    pointer-events: none;
+  }
+  .bond-hw-core::after {
+    top: 1.746cqw;
+    width: calc(13.638cqw - 100% - 8px);
+  }
+  .bond-hw-heat::after {
+    top: 0.24cqw;
+    width: calc(17.669cqw - 100%);
+  }
+}
 .bond-hw.bond-hw-armed .bond-hw-rv { opacity: 0; transition: opacity .4s cubic-bezier(0.22,1,0.36,1); }
 .bond-hw.bond-hw-armed .bond-hw-rv.bond-hw-in { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
@@ -477,7 +505,8 @@ input::placeholder { color: #B0A99A; }
     margin: 8px auto 8px;
     overflow: hidden;
   }
-  .bond-hw-device {
+  .bond-hw-device,
+  .bond-hw-shadow {
     inset: auto;
     width: calc(100% * 1672 / 557);
     height: calc(100% * 941 / 807);
@@ -691,7 +720,7 @@ input::placeholder { color: #B0A99A; }
   <section id="hardware" class="bond-hw" data-screen-label="Hardware" aria-labelledby="bond-hw-title">
     <div class="bond-hw-frame">
       <img class="bond-hw-plate" src="media/hardware/bond-hardware-plate.webp" width="1672" height="941" alt="The Bond hardware with its full-function smart display shown active.">
-      <div class="bond-hw-device-hold"><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"></div>
+      <div class="bond-hw-device-hold"><div class="bond-hw-shadow" aria-hidden="true"></div><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"></div>
       <p class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</p>
       <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
       <p class="bond-hw-lede bond-hw-rv">
@@ -700,10 +729,9 @@ input::placeholder { color: #B0A99A; }
       </p>
       <svg class="bond-hw-lines bond-hw-rv" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <g class="bond-hw-leaders" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="802,154 832,154 866,176 876,184"/>
-          <polyline points="1096,243 1052,246 1020,266 1012,274"/>
-          <polyline points="784,468 844,461"/>
-          <polyline points="1026,588 978,592"/>
+          <polyline points="847,164 866,176 876,184"/>
+          <polyline points="1088,243 1052,246 1020,266 1012,274"/>
+          <polyline points="1018,588 978,592"/>
         </g>
         <g class="bond-hw-dots">
           <circle cx="881" cy="185" r="6.5"/>
