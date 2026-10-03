@@ -287,6 +287,9 @@ input::placeholder { color: #B0A99A; }
   height: 100%;
   object-fit: fill;
   display: block;
+  /* 1048/1672 to 1466/1672. The ramp is 418px, a quarter of the frame. */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 62.679%, var(--matte-black) 87.679%, var(--matte-black) 100%);
+  mask-image: linear-gradient(to right, transparent 0%, transparent 62.679%, var(--matte-black) 87.679%, var(--matte-black) 100%);
 }
 /* Plate and device are both 1672 by 941. The device is a transparent overlay
    in the same frame, so either artwork is swapped by replacing that file. */
@@ -308,7 +311,7 @@ input::placeholder { color: #B0A99A; }
 .bond-hw-pill-num {
   font-family: var(--bond-hw-sans);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 9px;
   fill: var(--bond-hw-pill-ink);
 }
 .bond-hw-shadow {
@@ -499,13 +502,16 @@ input::placeholder { color: #B0A99A; }
   }
   .bond-hw-plate {
     position: relative;
+    align-self: flex-start;
     inset: auto;
-    width: 294%;
+    width: calc(100% * 1672 / 624);
     max-width: none;
     height: 168px;
     object-fit: cover;
-    object-position: right 58%;
-    left: -194%;
+    object-position: right 60%;
+    left: calc(100% - 100% * 1672 / 624);
+    -webkit-mask-image: none;
+    mask-image: none;
   }
   .bond-hw-device-hold {
     position: relative;
@@ -731,7 +737,7 @@ input::placeholder { color: #B0A99A; }
   <section id="hardware" class="bond-hw" data-screen-label="Hardware" aria-labelledby="bond-hw-title">
     <div class="bond-hw-frame">
       <img class="bond-hw-plate" src="media/hardware/bond-hardware-plate.webp" width="1672" height="941" alt="The Bond hardware with its full-function smart display shown active.">
-      <div class="bond-hw-device-hold"><div class="bond-hw-shadow" aria-hidden="true"></div><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"><svg class="bond-hw-pills" viewBox="0 0 1672 941" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bond-hw-g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-1)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-1b)"/></linearGradient><linearGradient id="bond-hw-g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-2)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-2b)"/></linearGradient><linearGradient id="bond-hw-g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-3)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-3b)"/></linearGradient></defs><rect x="867" y="429" width="89" height="33" rx="16.5" fill="url(#bond-hw-g1)"/><rect x="865" y="453" width="88" height="28" rx="14" fill="url(#bond-hw-g2)"/><rect x="861.5" y="471.5" width="91" height="37" rx="18.5" fill="url(#bond-hw-g3)"/><text class="bond-hw-pill-num" x="911" y="445" text-anchor="middle" dominant-baseline="central">1</text><text class="bond-hw-pill-num" x="909" y="467" text-anchor="middle" dominant-baseline="central">2</text><text class="bond-hw-pill-num" x="907" y="490" text-anchor="middle" dominant-baseline="central">3</text></svg></div>
+      <div class="bond-hw-device-hold"><div class="bond-hw-shadow" aria-hidden="true"></div><img class="bond-hw-device" src="media/hardware/bond-hardware-device.webp" width="1672" height="941" alt="" aria-hidden="true"><svg class="bond-hw-pills" viewBox="0 0 1672 941" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="bond-hw-g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-1)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-1b)"/></linearGradient><linearGradient id="bond-hw-g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-2)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-2b)"/></linearGradient><linearGradient id="bond-hw-g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bond-hw-pill-3)"/><stop offset="1" style="stop-color:var(--bond-hw-pill-3b)"/></linearGradient></defs><g transform="rotate(7.4 911.5 447.4)"><rect x="873" y="438.65" width="77" height="17.5" rx="8.75" fill="url(#bond-hw-g1)"/></g><g transform="rotate(7.1 908.7 468.6)"><rect x="870.2" y="459.35" width="77" height="18.5" rx="9.25" fill="url(#bond-hw-g2)"/></g><g transform="rotate(6.9 905.6 488.5)"><rect x="867.1" y="479.5" width="77" height="18" rx="9" fill="url(#bond-hw-g3)"/></g><text class="bond-hw-pill-num" x="911.5" y="447.4" text-anchor="middle" dominant-baseline="central">1</text><text class="bond-hw-pill-num" x="908.7" y="468.6" text-anchor="middle" dominant-baseline="central">2</text><text class="bond-hw-pill-num" x="905.6" y="488.5" text-anchor="middle" dominant-baseline="central">3</text></svg></div>
       <p class="bond-hw-eyebrow bond-hw-rv">THE BOND HARDWARE</p>
       <h2 id="bond-hw-title" class="bond-hw-title bond-hw-rv"><span>Designed</span><span>around the oil.</span></h2>
       <p class="bond-hw-lede bond-hw-rv">
