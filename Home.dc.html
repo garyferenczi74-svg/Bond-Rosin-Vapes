@@ -150,17 +150,35 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   }
 }
 .hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(12px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
-/* Full nav from 849. Measured in Chromium: six nowrap labels clear the logo by 10px
-   at 11.5px type and 10px gaps. 848 does not. From 849 to 936 the type and gap
-   grow into the base clamp, so 937 matches live (12px, 2.2vw gap). Phone landscape
-   is under 500px tall, so it keeps the live link styles. */
-@media (min-width: 849px) and (max-width: 936px) and (min-aspect-ratio: 1/1) and (min-height: 500px) {
-  .hero-nav-links {
-    flex: 0 0 auto;
-    gap: clamp(10px, calc(10px + (100vw - 849px) * 0.1206136), 38px);
-    font-size: clamp(11.5px, calc(11.5px + (100vw - 849px) * 0.00568182), 13px);
+/* Full nav from a layout width of 849. 100vw includes a classic scrollbar, so on
+   Chromium the row was wider than the padding box: the logo gap collapsed and the
+   links ran into the right padding. Size from the nav box (cqw) instead. From 849
+   to 936 the type and gap grow into the live clamp, so 937 matches live (12px,
+   2.2vw gap). Phone landscape is under 500px tall, so it keeps the live link styles. */
+nav { container-type: inline-size; container-name: bondnav; }
+@media (min-aspect-ratio: 1/1) and (min-height: 500px) {
+  @container bondnav (min-width: 849px) and (max-width: 936px) {
+    nav > div:nth-child(2) {
+      padding-left: clamp(20px, 4cqw, 56px) !important;
+      padding-right: clamp(20px, 4cqw, 56px) !important;
+    }
+    .hero-nav-links {
+      flex: 0 0 auto;
+      gap: clamp(10px, calc(10px + (100cqw - 849px) * 0.1206136), 38px);
+      font-size: clamp(11.5px, calc(11.5px + (100cqw - 849px) * 0.00568182), 13px);
+    }
+    .hero-nav-links a { white-space: nowrap; }
   }
-  .hero-nav-links a { white-space: nowrap; }
+  @container bondnav (min-width: 937px) and (max-width: 1023px) {
+    nav > div:nth-child(2) {
+      padding-left: clamp(20px, 4cqw, 56px) !important;
+      padding-right: clamp(20px, 4cqw, 56px) !important;
+    }
+    .hero-nav-links {
+      gap: clamp(12px, calc(100cqw * 0.022), 38px);
+      font-size: clamp(12px, calc(100cqw * 0.0105), 13px);
+    }
+  }
 }
 input::placeholder { color: #B0A99A; }
 .hero-text {
@@ -656,14 +674,23 @@ class Component extends DCLogic {
 
   componentDidMount() {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const navBox = () => {
+      const nav = document.querySelector('nav');
+      if (nav && nav.clientWidth > 0) return nav.clientWidth;
+      const doc = document.documentElement;
+      const w = doc && doc.clientWidth;
+      return w > 0 ? w : (innerWidth || 0);
+    };
     const navIsNarrow = () => {
-      const w = innerWidth || 0;
+      const w = navBox();
       const h = innerHeight || 0;
       if (!(h > 0)) return w < 1024;
       // Under 500px tall is a phone, including landscape. Match live: hamburger below 1024.
       if (h < 500) return w < 1024;
-      // 849 is the measured landscape width where six links fit on one row
-      // at 11.5px with 10px gaps and 10px clear of the logo. Below that, hamburger.
+      // 849 is the layout width, scrollbar excluded, where six links clear the
+      // logo by 10px at 11.5px with 10px gaps and stay inside the right padding.
+      // Below that, hamburger. innerWidth is wider than this box when a classic
+      // scrollbar is showing, so it is not the fit test.
       if (w < 849) return true;
       return w < 1024 && h >= w;
     };
@@ -1014,32 +1041,6 @@ class Component extends DCLogic {
     clearCopyScale(s);
   }
 
-  function readCopyFonts(s) {
-    var h1 = s.querySelector('.hero-tagline h1');
-    var line2 = s.querySelector('.hero-line2');
-    var sub = s.querySelector('.hero-subtext');
-    var btn = s.querySelector('.hero-btn');
-    function px(el, fallback) {
-      if (!el) return fallback;
-      var n = parseFloat(window.getComputedStyle(el).fontSize);
-      return (n > 0) ? n : fallback;
-    }
-    return { h1: px(h1, 28), line2: px(line2, 24), sub: px(sub, 17), btn: px(btn, 16) };
-  }
-
-  function applyCopyFonts(s, base, scale) {
-    var h1 = s.querySelector('.hero-tagline h1');
-    var line2 = s.querySelector('.hero-line2');
-    var sub = s.querySelector('.hero-subtext');
-    var btns = s.querySelectorAll('.hero-btn');
-    var i;
-    if (!(scale < 0.999)) { clearCopyScale(s); return; }
-    if (h1) h1.style.fontSize = (base.h1 * scale).toFixed(2) + 'px';
-    if (line2) line2.style.fontSize = (base.line2 * scale).toFixed(2) + 'px';
-    if (sub) sub.style.fontSize = (base.sub * scale).toFixed(2) + 'px';
-    for (i = 0; i < btns.length; i++) btns[i].style.fontSize = (base.btn * scale).toFixed(2) + 'px';
-  }
-
   function flowFallback() {
     var t = document.getElementById(STAGE);
     var s = document.getElementById(STACK);
@@ -1311,20 +1312,49 @@ class Component extends DCLogic {
     } catch (e) { return false; }
   }
 
+  // Document Y of the border box, ignoring transforms. The hero reveal parks
+  // each row 14px low until the transition ends. getBoundingClientRect during
+  // that rise trims gaps that 44.8 would have held once the rows settle.
+  function layoutTop(node) {
+    var y = 0;
+    var n = node;
+    var guard = 0;
+    while (n && guard < 24) {
+      y += n.offsetTop || 0;
+      n = n.offsetParent;
+      guard += 1;
+    }
+    return y - (window.pageYOffset || window.scrollY || 0);
+  }
+
   // Short landscape laptop only. Live's layoutDesktop / layoutBand already ran.
   // This adds nothing when that layout already fits: CTA at least 12px inside
   // the viewport, wordmark clear of the nav, plate covering the hero width.
-  // When it does not fit, move the block first, then trim the gap down to 24,
-  // then scale the copy font down to 0.82. The plate stays at least as wide
-  // as the hero. Tall desktop and phones never call this.
+  // When it does not fit, move the block first, then trim the gap down to 24.
+  // Copy size stays at 1. If the gap and the move still cannot fit the CTAs,
+  // the live layout is put back. Tall desktop and phones never call this.
   function relaxShort(t, s, v) {
     if (!isShortLaptop()) return;
     var el = document.getElementById(VID);
     if (!el || el.clientWidth < 2 || el.clientHeight < 2) return;
     var CTA_PAD = 12;
     var GAP_FLOOR = 24;
-    var FONT_FLOOR = 0.82;
     var changed = false;
+    var mediaEl = document.querySelector('.hero-media');
+    var snapT = t.getAttribute('style');
+    var snapS = s.getAttribute('style');
+    var snapM = mediaEl ? mediaEl.getAttribute('style') : null;
+    function restoreLive() {
+      if (snapT == null) t.removeAttribute('style');
+      else t.setAttribute('style', snapT);
+      if (snapS == null) s.removeAttribute('style');
+      else s.setAttribute('style', snapS);
+      if (mediaEl) {
+        if (snapM == null) mediaEl.removeAttribute('style');
+        else mediaEl.setAttribute('style', snapM);
+      }
+      clearCopyScale(s);
+    }
 
     function imagePlate() {
       var r = el.getBoundingClientRect();
@@ -1375,7 +1405,7 @@ class Component extends DCLogic {
       var nav = document.querySelector('nav');
       var navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
       var btn = s.querySelector('.hero-buttons');
-      var ctaBottom = btn ? btn.getBoundingClientRect().bottom : 0;
+      var ctaBottom = btn ? (layoutTop(btn) + btn.offsetHeight) : 0;
       var plate = imagePlate();
       var stage = t.getBoundingClientRect();
       var bars = plate.contentLeft > stage.left + 0.5 || plate.contentRight < stage.right - 0.5;
@@ -1402,7 +1432,7 @@ class Component extends DCLogic {
       if (!(gapLine > 0)) gapLine = 44.8;
       var gapWord = gapLine;
       if (tag) {
-        var gw = tag.getBoundingClientRect().top - plate.wordBottom;
+        var gw = layoutTop(tag) - plate.wordBottom;
         if (gw > 0) gapWord = gw;
       }
       return {
@@ -1514,7 +1544,7 @@ class Component extends DCLogic {
       var tag = s.querySelector('.hero-tagline');
       var gapWord = 44.8;
       if (tag) {
-        var gw = tag.getBoundingClientRect().top - plate.wordBottom;
+        var gw = layoutTop(tag) - plate.wordBottom;
         if (gw > 0) gapWord = gw;
       }
       var copyTop = top + feet * scale + gapWord;
@@ -1559,31 +1589,8 @@ class Component extends DCLogic {
       changed = true;
     }
     if (!heroState().pass) {
-      var baseFonts = readCopyFonts(s);
-      var lo = FONT_FLOOR;
-      var hi = 1;
-      var best = -1;
-      var i;
-      for (i = 0; i < 12; i++) {
-        var mid = (lo + hi) / 2;
-        applyCopyFonts(s, baseFonts, mid);
-        if (heroState().pass) { best = mid; lo = mid; }
-        else hi = mid;
-      }
-      if (best >= FONT_FLOOR) {
-        applyCopyFonts(s, baseFonts, best);
-        if (best < 0.999) {
-          t.style.setProperty('--hero-copy-scale', best.toFixed(3));
-          changed = true;
-        } else {
-          t.style.removeProperty('--hero-copy-scale');
-        }
-      } else {
-        applyCopyFonts(s, baseFonts, FONT_FLOOR);
-        t.style.setProperty('--hero-copy-scale', FONT_FLOOR.toFixed(3));
-        changed = true;
-      }
-      if (solveOnce()) changed = true;
+      restoreLive();
+      return;
     }
     if (changed) t.style.setProperty('--hero-relax', '1');
   }
