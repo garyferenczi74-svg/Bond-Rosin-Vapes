@@ -150,8 +150,9 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   }
 }
 .hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(12px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
-/* Six labels crowd from 768 through 939. Smaller gap and type, one line. 940 and up keeps the base clamp. */
-@media (min-width: 768px) and (max-width: 939px) and (min-aspect-ratio: 1/1) {
+/* Six labels crowd from 768 through 939. Smaller gap and type, one line. 940 and up keeps the base clamp.
+   Phone landscape is under 500px tall, so it keeps the live link styles. */
+@media (min-width: 768px) and (max-width: 939px) and (min-aspect-ratio: 1/1) and (min-height: 500px) {
   .hero-nav-links { flex: 0 0 auto; gap: clamp(5px, 0.9vw, 11px); font-size: clamp(10px, 1.18vw, 12px); }
   .hero-nav-links a { white-space: nowrap; }
 }
@@ -248,7 +249,8 @@ input::placeholder { color: #B0A99A; }
 @media (min-width: 768px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (min-height: 500px) {
   .hero-text { --hero-tagline-gap: max(calc(1.6 * 28px), calc(1.6 * var(--hero-tagline-size))); }
 }
-/* Short laptop windows. Tall desktop (height > 800) and phones (height < 500 or width < 768) do not match. */
+/* Short laptop windows. Tall desktop (height > 800) and phones (height < 500 or width < 768) do not match.
+   Phone landscape stays under 500px tall, so it keeps the live hero. */
 @media (min-width: 768px) and (min-height: 500px) and (max-height: 800px) and (min-aspect-ratio: 1/1) {
   #top { --hero-short-laptop: 1; }
 }
@@ -652,6 +654,8 @@ class Component extends DCLogic {
       const w = innerWidth || 0;
       const h = innerHeight || 0;
       if (!(h > 0)) return w < 1024;
+      // Under 500px tall is a phone, including landscape. Match live: hamburger below 1024.
+      if (h < 500) return w < 1024;
       if (w < 768) return true;
       return w < 1024 && h >= w;
     };
@@ -988,10 +992,44 @@ class Component extends DCLogic {
     for (i = 0; i < MEDIA_VARS.length; i++) t.style.removeProperty(MEDIA_VARS[i]);
   }
 
+  function clearCopyScale(s) {
+    if (!s) return;
+    var nodes = s.querySelectorAll('h1, .hero-line2, .hero-subtext, .hero-btn');
+    var i;
+    for (i = 0; i < nodes.length; i++) nodes[i].style.removeProperty('font-size');
+  }
+
   function clearBandTweaks(s) {
     if (!s) return;
     s.style.removeProperty('--hero-gap-line2');
     s.style.removeProperty('padding-bottom');
+    clearCopyScale(s);
+  }
+
+  function readCopyFonts(s) {
+    var h1 = s.querySelector('.hero-tagline h1');
+    var line2 = s.querySelector('.hero-line2');
+    var sub = s.querySelector('.hero-subtext');
+    var btn = s.querySelector('.hero-btn');
+    function px(el, fallback) {
+      if (!el) return fallback;
+      var n = parseFloat(window.getComputedStyle(el).fontSize);
+      return (n > 0) ? n : fallback;
+    }
+    return { h1: px(h1, 28), line2: px(line2, 24), sub: px(sub, 17), btn: px(btn, 16) };
+  }
+
+  function applyCopyFonts(s, base, scale) {
+    var h1 = s.querySelector('.hero-tagline h1');
+    var line2 = s.querySelector('.hero-line2');
+    var sub = s.querySelector('.hero-subtext');
+    var btns = s.querySelectorAll('.hero-btn');
+    var i;
+    if (!(scale < 0.995)) { clearCopyScale(s); return; }
+    if (h1) h1.style.fontSize = (base.h1 * scale).toFixed(2) + 'px';
+    if (line2) line2.style.fontSize = (base.line2 * scale).toFixed(2) + 'px';
+    if (sub) sub.style.fontSize = (base.sub * scale).toFixed(2) + 'px';
+    for (i = 0; i < btns.length; i++) btns[i].style.fontSize = (base.btn * scale).toFixed(2) + 'px';
   }
 
   function flowFallback() {
@@ -1265,9 +1303,9 @@ class Component extends DCLogic {
     } catch (e) { return false; }
   }
 
-  // Short landscape laptop only (CSS --hero-short-laptop). Pins the wordmark under the
-  // nav and scales the plate so the tagline, subtext, and both CTAs stay in the viewport.
-  // Does not grow the hero. Tall desktop and phones never call this.
+  // Short landscape laptop only (CSS --hero-short-laptop). The plate stays at cover
+  // so it is never narrower than the hero. Room for the copy comes from the gaps,
+  // then the copy size, then a small scroll. Tall desktop and phones never call this.
   function layoutShortLaptop(t, s, v) {
     clearMediaBox(t);
     clearBandTweaks(s);
@@ -1279,9 +1317,9 @@ class Component extends DCLogic {
       media.style.removeProperty('background-position');
       media.style.removeProperty('background-repeat');
     }
-    var ch = t.clientHeight;
+    var viewH = t.clientHeight;
     var cw = t.clientWidth || window.innerWidth || 0;
-    if (ch < 2 || cw < 2) { flowFallback(); return; }
+    if (viewH < 2 || cw < 2) { flowFallback(); return; }
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
     var cap = DESK_CAP * (srcH / 1080);
@@ -1307,54 +1345,88 @@ class Component extends DCLogic {
     }
     var tcs = window.getComputedStyle(t);
     var gapNav = readNum(tcs, '--hero-band-gap', 16);
-    var cover = Math.max(cw / srcW, ch / srcH);
-    var wordL = 204 * (srcW / 1920);
-    var wordR = 1686 * (srcW / 1920);
-    var midSrc = srcW / 2;
-    var edgePad = 8;
-    var halfW = cw / 2;
-    var fitL = (halfW - edgePad) / (midSrc - wordL);
-    var fitR = (halfW - edgePad) / (wordR - midSrc);
-    var wordFit = Math.min(fitL, fitR);
-    var scaleCap = cover;
-    if (wordFit > 0) scaleCap = Math.min(cover, wordFit);
-    var tail = 8;
-    var minGap = 36;
-    var gap = naturalGap;
-    var scale = scaleCap;
-    var copyH = 280;
-    var guard;
-    for (guard = 0; guard < 8; guard++) {
-      if (gap + 0.4 < naturalGap) s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
-      else s.style.removeProperty('--hero-gap-line2');
-      copyH = measureCopy(s);
-      var room = ch - navBottom - gapNav - gap - copyH - tail;
-      var scaleV = room / wordSrc;
-      if (scaleV >= 0.2 || gap <= minGap + 0.4) {
-        scale = Math.min(scaleCap, scaleV);
-        break;
-      }
-      gap = Math.max(minGap, gap - 4);
-    }
-    if (!(scale > 0.08)) { flowFallback(); return; }
-    if (gap + 0.4 < naturalGap) s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
-    copyH = measureCopy(s);
+    // Cover fills the hero. Do not go under it: a smaller scale is what leaves side bars.
+    var scale = Math.max(cw / srcW, viewH / srcH);
+    if (!(scale > 0)) { flowFallback(); return; }
     var vidW = srcW * scale;
     var vidH = srcH * scale;
+    if (vidW < cw) { scale = cw / srcW; vidW = cw; vidH = srcH * scale; }
     var left = (cw - vidW) / 2;
-    var top = (navBottom + gapNav) - (cap * scale);
-    var copyTop = Math.ceil(top + (feet * scale) + gap);
-    var spare = ch - (copyTop + copyH);
-    if (spare > 4) {
-      var bonus = Math.min(spare * 0.35, 28);
-      var top2 = top + bonus;
-      var navOk = (top2 + (cap * scale)) >= (navBottom + gapNav - 0.5);
-      var copyOk = (Math.ceil(top2 + (feet * scale) + gap) + copyH) <= (ch - tail + 0.5);
-      if (navOk && copyOk) {
-        top = top2;
-        copyTop = Math.ceil(top + (feet * scale) + gap);
+    if (left > 0) left = 0;
+    var topWant = (navBottom + gapNav) - (cap * scale);
+    var topLow = viewH - vidH;
+    if (topLow > 0) topLow = 0;
+    var top = topWant;
+    if (top > 0) top = 0;
+    if (top < topLow) top = topLow;
+    var tail = 8;
+    var minGap = 24;
+    var minFont = 0.82;
+    var baseFonts = readCopyFonts(s);
+    var pad0 = parseFloat(window.getComputedStyle(s).paddingBottom) || 0;
+    function wordBottom() { return top + (feet * scale); }
+    function paintCopy(gap, fontScale) {
+      if (gap + 0.4 < naturalGap) s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
+      else s.style.removeProperty('--hero-gap-line2');
+      var pad = pad0;
+      if (gap + 0.4 < naturalGap && naturalGap > 0) pad = Math.max(8, pad0 * (gap / naturalGap));
+      if (Math.abs(pad - pad0) > 0.4) s.style.paddingBottom = pad.toFixed(2) + 'px';
+      else s.style.removeProperty('padding-bottom');
+      applyCopyFonts(s, baseFonts, fontScale);
+      var copyH = measureCopy(s);
+      return { copyH: copyH, overflow: wordBottom() + gap + copyH + tail - viewH };
+    }
+    var chosenGap = naturalGap;
+    var chosenFont = 1;
+    var box = paintCopy(naturalGap, 1);
+    var i;
+    if (box.overflow > 0.5) {
+      var lo = minGap;
+      var hi = naturalGap;
+      var gapFits = false;
+      for (i = 0; i < 12; i++) {
+        var mid = (lo + hi) / 2;
+        var trial = paintCopy(mid, 1);
+        if (trial.overflow > 0.5) hi = mid;
+        else { lo = mid; gapFits = true; }
+      }
+      if (gapFits) {
+        chosenGap = lo;
+        box = paintCopy(chosenGap, 1);
+      } else {
+        chosenGap = minGap;
+        var flo = minFont;
+        var fhi = 1;
+        var fontFits = false;
+        for (i = 0; i < 10; i++) {
+          var fmid = (flo + fhi) / 2;
+          var trialF = paintCopy(minGap, fmid);
+          if (trialF.overflow > 0.5) fhi = fmid;
+          else { flo = fmid; fontFits = true; }
+        }
+        if (fontFits) {
+          chosenFont = flo;
+          box = paintCopy(chosenGap, chosenFont);
+        } else {
+          chosenFont = minFont;
+          box = paintCopy(minGap, minFont);
+          if (box.overflow > 0.5) {
+            var grown = Math.ceil(viewH + box.overflow + 2);
+            t.style.height = grown + 'px';
+            t.style.minHeight = grown + 'px';
+          }
+        }
       }
     }
+    if (box.overflow < -4) {
+      var bonus = Math.min((-box.overflow) * 0.35, 28);
+      var top2 = top + bonus;
+      var capOk = (top2 + (cap * scale)) >= (navBottom + gapNav - 0.5);
+      var covers = top2 <= 0.5 && (top2 + vidH) >= (viewH - 0.5);
+      var copyOk = (top2 + (feet * scale) + chosenGap + box.copyH + tail) <= (viewH + 0.5);
+      if (capOk && covers && copyOk) top = top2;
+    }
+    var copyTop = Math.ceil(wordBottom() + chosenGap);
     t.style.setProperty('--hero-media-width', vidW + 'px');
     t.style.setProperty('--hero-media-height', vidH + 'px');
     t.style.setProperty('--hero-media-left', left + 'px');
@@ -1370,28 +1442,6 @@ class Component extends DCLogic {
     if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
     t.classList.remove('hero-copy-flow');
     s.style.setProperty('--hero-copy-top', copyTop + 'px');
-    var sR = s.getBoundingClientRect();
-    var tR2 = t.getBoundingClientRect();
-    var overflow = sR.bottom - tR2.bottom;
-    if (overflow > 1 && wordSrc > 1) {
-      scale = scale - ((overflow + 2) / wordSrc);
-      if (scale > 0.08) {
-        vidW = srcW * scale;
-        vidH = srcH * scale;
-        left = (cw - vidW) / 2;
-        top = (navBottom + gapNav) - (cap * scale);
-        copyTop = Math.ceil(top + (feet * scale) + gap);
-        t.style.setProperty('--hero-media-width', vidW + 'px');
-        t.style.setProperty('--hero-media-height', vidH + 'px');
-        t.style.setProperty('--hero-media-left', left + 'px');
-        t.style.setProperty('--hero-media-top', top + 'px');
-        if (media) {
-          media.style.backgroundSize = vidW + 'px ' + vidH + 'px';
-          media.style.backgroundPosition = left + 'px ' + top + 'px';
-        }
-        s.style.setProperty('--hero-copy-top', copyTop + 'px');
-      }
-    }
     reveal();
   }
 
