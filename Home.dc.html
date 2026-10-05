@@ -150,10 +150,16 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   }
 }
 .hero-nav-links { display: flex; gap: clamp(12px, 2.2vw, 38px); font-family: 'GFS Didot', Didot, serif; font-size: clamp(12px, 1.05vw, 13px); letter-spacing: 0.16em; text-transform: uppercase; }
-/* Six labels crowd from 768 through 939. Smaller gap and type, one line. 940 and up keeps the base clamp.
-   Phone landscape is under 500px tall, so it keeps the live link styles. */
-@media (min-width: 768px) and (max-width: 939px) and (min-aspect-ratio: 1/1) and (min-height: 500px) {
-  .hero-nav-links { flex: 0 0 auto; gap: clamp(5px, 0.9vw, 11px); font-size: clamp(10px, 1.18vw, 12px); }
+/* Full nav from 849. Measured in Chromium: six nowrap labels clear the logo by 10px
+   at 11.5px type and 10px gaps. 848 does not. From 849 to 936 the type and gap
+   grow into the base clamp, so 937 matches live (12px, 2.2vw gap). Phone landscape
+   is under 500px tall, so it keeps the live link styles. */
+@media (min-width: 849px) and (max-width: 936px) and (min-aspect-ratio: 1/1) and (min-height: 500px) {
+  .hero-nav-links {
+    flex: 0 0 auto;
+    gap: clamp(10px, calc(10px + (100vw - 849px) * 0.1206136), 38px);
+    font-size: clamp(11.5px, calc(11.5px + (100vw - 849px) * 0.00568182), 13px);
+  }
   .hero-nav-links a { white-space: nowrap; }
 }
 input::placeholder { color: #B0A99A; }
@@ -656,7 +662,9 @@ class Component extends DCLogic {
       if (!(h > 0)) return w < 1024;
       // Under 500px tall is a phone, including landscape. Match live: hamburger below 1024.
       if (h < 500) return w < 1024;
-      if (w < 768) return true;
+      // 849 is the measured landscape width where six links fit on one row
+      // at 11.5px with 10px gaps and 10px clear of the logo. Below that, hamburger.
+      if (w < 849) return true;
       return w < 1024 && h >= w;
     };
     this.setState({ reduced, narrow: navIsNarrow() });
@@ -1025,7 +1033,7 @@ class Component extends DCLogic {
     var sub = s.querySelector('.hero-subtext');
     var btns = s.querySelectorAll('.hero-btn');
     var i;
-    if (!(scale < 0.995)) { clearCopyScale(s); return; }
+    if (!(scale < 0.999)) { clearCopyScale(s); return; }
     if (h1) h1.style.fontSize = (base.h1 * scale).toFixed(2) + 'px';
     if (line2) line2.style.fontSize = (base.line2 * scale).toFixed(2) + 'px';
     if (sub) sub.style.fontSize = (base.sub * scale).toFixed(2) + 'px';
@@ -1303,182 +1311,281 @@ class Component extends DCLogic {
     } catch (e) { return false; }
   }
 
-  // Short landscape laptop only (CSS --hero-short-laptop). The plate is never
-  // narrower than the hero. Below about 1.42:1 the scale also keeps the wordmark
-  // 8px inside each edge; the spare is vertical, in the bottom fade. Room for the
-  // copy comes from a slightly smaller copy size, then the gaps, then a small scroll.
-  // Tall desktop and phones never call this.
-  function layoutShortLaptop(t, s, v) {
-    clearMediaBox(t);
-    clearBandTweaks(s);
-    t.style.removeProperty('height');
-    t.style.removeProperty('min-height');
-    var media = document.querySelector('.hero-media');
-    if (media) {
-      media.style.removeProperty('background-size');
-      media.style.removeProperty('background-position');
-      media.style.removeProperty('background-repeat');
-    }
-    var viewH = t.clientHeight;
-    var cw = t.clientWidth || window.innerWidth || 0;
-    if (viewH < 2 || cw < 2) { flowFallback(); return; }
-    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
-    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
-    var cap = DESK_CAP * (srcH / 1080);
-    var feet = DESK_FEET * (srcH / 1080);
-    var wordSrc = feet - cap;
-    if (!(wordSrc > 1)) { flowFallback(); return; }
-    var nav = document.querySelector('nav');
-    var navR = nav ? nav.getBoundingClientRect() : { bottom: 64 };
-    var tR = t.getBoundingClientRect();
-    var navBottom = Math.max(0, navR.bottom - tR.top);
-    var h1 = s.querySelector('.hero-tagline h1');
-    var fs = 28;
-    if (h1) {
-      var parsed = parseFloat(window.getComputedStyle(h1).fontSize);
-      if (parsed > 0) fs = parsed;
-    }
-    var naturalGap = 1.6 * fs;
-    if (naturalGap < 0.75 * fs) naturalGap = 0.75 * fs;
-    var line2el = s.querySelector('.hero-line2');
-    if (line2el) {
-      var usedGap = parseFloat(window.getComputedStyle(line2el).marginTop);
-      if (usedGap > naturalGap) naturalGap = usedGap;
-    }
-    var tcs = window.getComputedStyle(t);
-    var gapNav = readNum(tcs, '--hero-band-gap', 16);
-    // Cover fills the hero. Width-fit of the gold BOND (x 204-1686 of 1920, 8px inset)
-    // meets that cover near aspect 1.42. Below that, cap the scale so B and D stay
-    // inside. The cap is still wider than the viewport, so the spare is top/bottom.
-    var cover = Math.max(cw / srcW, viewH / srcH);
-    var wordL = 204 * (srcW / 1920);
-    var wordR = 1686 * (srcW / 1920);
-    var midSrc = srcW / 2;
-    var edgePad = 8;
-    var halfW = cw / 2;
-    var fitL = (halfW - edgePad) / (midSrc - wordL);
-    var fitR = (halfW - edgePad) / (wordR - midSrc);
-    var wordFit = Math.min(fitL, fitR);
-    var scale = cover;
-    if (wordFit > 0) scale = Math.min(cover, wordFit);
-    var fillW = cw / srcW;
-    if (!(scale > 0)) { flowFallback(); return; }
-    if (scale < fillW) scale = fillW;
-    var vidW = srcW * scale;
-    var vidH = srcH * scale;
-    if (vidW < cw) { scale = fillW; vidW = cw; vidH = srcH * scale; }
-    var left = (cw - vidW) / 2;
-    if (left > 0) left = 0;
-    var topWant = (navBottom + gapNav) - (cap * scale);
-    var top = topWant;
-    if (top > 0) top = 0;
-    // A plate at least as tall as the hero must keep covering it. A shorter plate
-    // (wordmark cap below 1.42:1) leaves the spare in the bottom fade.
-    if (vidH >= viewH - 0.5) {
-      var topLow = viewH - vidH;
-      if (top < topLow) top = topLow;
-    }
-    var tail = 8;
-    var minGap = 24;
-    var minFont = 0.82;
-    var baseFonts = readCopyFonts(s);
-    var pad0 = parseFloat(window.getComputedStyle(s).paddingBottom) || 0;
-    function wordBottom() { return top + (feet * scale); }
-    function paintCopy(gap, fontScale) {
-      if (gap + 0.4 < naturalGap) s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
-      else s.style.removeProperty('--hero-gap-line2');
-      var pad = pad0;
-      if (gap + 0.4 < naturalGap && naturalGap > 0) pad = Math.max(8, pad0 * (gap / naturalGap));
-      if (Math.abs(pad - pad0) > 0.4) s.style.paddingBottom = pad.toFixed(2) + 'px';
-      else s.style.removeProperty('padding-bottom');
-      applyCopyFonts(s, baseFonts, fontScale);
-      var copyH = measureCopy(s);
-      return { copyH: copyH, overflow: wordBottom() + gap + copyH + tail - viewH };
-    }
-    var chosenGap = naturalGap;
-    var chosenFont = 1;
-    var box = paintCopy(naturalGap, 1);
-    var i;
-    if (box.overflow > 0.5) {
-      // Keep the live 1.6x gap when a small copy scale still fits the CTAs.
-      var keepLo = 0.82;
-      var keepHi = 1;
-      var keepGap = false;
-      for (i = 0; i < 10; i++) {
-        var keepMid = (keepLo + keepHi) / 2;
-        var keepTrial = paintCopy(naturalGap, keepMid);
-        if (keepTrial.overflow > 0.5) keepHi = keepMid;
-        else { keepLo = keepMid; keepGap = true; }
-      }
-      if (keepGap) {
-        chosenFont = keepLo;
-        chosenGap = naturalGap;
-        box = paintCopy(chosenGap, chosenFont);
-      }
-    }
-    if (box.overflow > 0.5) {
-      var lo = minGap;
-      var hi = naturalGap;
-      var gapFits = false;
-      for (i = 0; i < 12; i++) {
-        var mid = (lo + hi) / 2;
-        var trial = paintCopy(mid, 1);
-        if (trial.overflow > 0.5) hi = mid;
-        else { lo = mid; gapFits = true; }
-      }
-      if (gapFits) {
-        chosenGap = lo;
-        box = paintCopy(chosenGap, 1);
+  // Short landscape laptop only. Live's layoutDesktop / layoutBand already ran.
+  // This adds nothing when that layout already fits: CTA at least 12px inside
+  // the viewport, wordmark clear of the nav, plate covering the hero width.
+  // When it does not fit, move the block first, then trim the gap down to 24,
+  // then scale the copy font down to 0.82. The plate stays at least as wide
+  // as the hero. Tall desktop and phones never call this.
+  function relaxShort(t, s, v) {
+    if (!isShortLaptop()) return;
+    var el = document.getElementById(VID);
+    if (!el || el.clientWidth < 2 || el.clientHeight < 2) return;
+    var CTA_PAD = 12;
+    var GAP_FLOOR = 24;
+    var FONT_FLOOR = 0.82;
+    var changed = false;
+
+    function imagePlate() {
+      var r = el.getBoundingClientRect();
+      var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+      var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+      var fit = 'cover';
+      try {
+        var declared = window.getComputedStyle(el).objectFit;
+        if (declared) fit = declared;
+      } catch (e) {}
+      var capSrc = DESK_CAP * (srcH / 1080);
+      var feetSrc = DESK_FEET * (srcH / 1080);
+      var wordLx = 204 * (srcW / 1920);
+      var wordRx = 1686 * (srcW / 1920);
+      var scaleX, scaleY, offX, offY;
+      if (fit === 'fill') {
+        scaleX = (srcW > 0) ? r.width / srcW : 1;
+        scaleY = (srcH > 0) ? r.height / srcH : 1;
+        offX = 0;
+        offY = 0;
       } else {
-        chosenGap = minGap;
-        var flo = minFont;
-        var fhi = 1;
-        var fontFits = false;
-        for (i = 0; i < 10; i++) {
-          var fmid = (flo + fhi) / 2;
-          var trialF = paintCopy(minGap, fmid);
-          if (trialF.overflow > 0.5) fhi = fmid;
-          else { flo = fmid; fontFits = true; }
+        var scale = Math.max(r.width / srcW, r.height / srcH);
+        scaleX = scale;
+        scaleY = scale;
+        offX = (r.width - srcW * scale) / 2;
+        offY = (r.height - srcH * scale) / 2;
+      }
+      return {
+        contentLeft: r.left + offX,
+        contentRight: r.left + offX + srcW * scaleX,
+        contentTop: r.top + offY,
+        contentBottom: r.top + offY + srcH * scaleY,
+        wordTop: r.top + offY + capSrc * scaleY,
+        wordBottom: r.top + offY + feetSrc * scaleY,
+        wordLeft: r.left + offX + wordLx * scaleX,
+        wordRight: r.left + offX + wordRx * scaleX,
+        scaleX: scaleX,
+        scaleY: scaleY,
+        fit: fit,
+        srcW: srcW,
+        srcH: srcH
+      };
+    }
+
+    function heroState() {
+      var iw = window.innerWidth || 0;
+      var ih = window.innerHeight || 0;
+      var nav = document.querySelector('nav');
+      var navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+      var btn = s.querySelector('.hero-buttons');
+      var ctaBottom = btn ? btn.getBoundingClientRect().bottom : 0;
+      var plate = imagePlate();
+      var stage = t.getBoundingClientRect();
+      var bars = plate.contentLeft > stage.left + 0.5 || plate.contentRight < stage.right - 0.5;
+      var ctaSlack = (ih - CTA_PAD) - ctaBottom;
+      var wordSlack = plate.wordTop - navBottom;
+      var pass = ctaSlack >= -0.5 && wordSlack >= -0.5 && !bars;
+      return {
+        ih: ih,
+        navBottom: navBottom,
+        ctaBottom: ctaBottom,
+        ctaSlack: ctaSlack,
+        wordSlack: wordSlack,
+        bars: bars,
+        pass: pass,
+        plate: plate,
+        stage: stage
+      };
+    }
+
+    function gapRooms(plate) {
+      var line2 = s.querySelector('.hero-line2');
+      var tag = s.querySelector('.hero-tagline');
+      var gapLine = line2 ? parseFloat(window.getComputedStyle(line2).marginTop) : 44.8;
+      if (!(gapLine > 0)) gapLine = 44.8;
+      var gapWord = gapLine;
+      if (tag) {
+        var gw = tag.getBoundingClientRect().top - plate.wordBottom;
+        if (gw > 0) gapWord = gw;
+      }
+      return {
+        gapLine: gapLine,
+        gapWord: gapWord,
+        roomLine: Math.max(0, gapLine - GAP_FLOOR),
+        roomWord: Math.max(0, gapWord - GAP_FLOOR)
+      };
+    }
+
+    function gapSave(d, roomWord, roomLine) {
+      var dw = Math.min(Math.max(d, 0), roomWord);
+      var dl = Math.min(Math.max(d, 0), roomLine);
+      return dw + 3 * dl;
+    }
+
+    function planNudge(wordSlack, ctaSlack, roomWord, roomLine) {
+      var excess = Math.max(0, -(wordSlack + ctaSlack));
+      var dHi = Math.max(roomWord, roomLine);
+      var d = 0;
+      var i;
+      if (excess > 0.4 && dHi > 0) {
+        if (gapSave(dHi, roomWord, roomLine) <= excess + 0.01) d = dHi;
+        else {
+          var lo = 0;
+          var hi = dHi;
+          for (i = 0; i < 18; i++) {
+            var mid = (lo + hi) / 2;
+            if (gapSave(mid, roomWord, roomLine) >= excess) hi = mid;
+            else lo = mid;
+          }
+          d = hi;
         }
-        if (fontFits) {
-          chosenFont = flo;
-          box = paintCopy(chosenGap, chosenFont);
-        } else {
-          chosenFont = minFont;
-          box = paintCopy(minGap, minFont);
-          if (box.overflow > 0.5) {
-            var grown = Math.ceil(viewH + box.overflow + 2);
-            t.style.height = grown + 'px';
-            t.style.minHeight = grown + 'px';
+      }
+      var saved = gapSave(d, roomWord, roomLine);
+      var cta2 = ctaSlack + saved;
+      var dyLo = -wordSlack;
+      var dyHi = cta2;
+      var dy = 0;
+      if (dyLo <= dyHi + 0.01) {
+        if (dyHi < -0.05) dy = dyHi;
+        else if (dyLo > 0.05) dy = dyLo;
+      } else {
+        dy = dyLo;
+      }
+      return { dy: dy, dWord: Math.min(d, roomWord), dLine: Math.min(d, roomLine) };
+    }
+
+    function applyNudge(dy, dWord, dLine) {
+      var did = false;
+      if (Math.abs(dy) > 0.05) {
+        var mediaTop = parseFloat(window.getComputedStyle(t).getPropertyValue('--hero-media-top'));
+        if (mediaTop !== mediaTop) mediaTop = 0;
+        t.style.setProperty('--hero-media-top', (mediaTop + dy) + 'px');
+        var media = document.querySelector('.hero-media');
+        if (media && media.style.backgroundPosition) {
+          var bits = media.style.backgroundPosition.trim().split(/\s+/);
+          if (bits.length >= 2) {
+            var by = parseFloat(bits[1]);
+            if (by === by) media.style.backgroundPosition = bits[0] + ' ' + (by + dy) + 'px';
           }
         }
+        did = true;
       }
+      if (Math.abs(dy) > 0.05 || dWord > 0.05) {
+        var copyTop = parseFloat(window.getComputedStyle(s).getPropertyValue('--hero-copy-top'));
+        if (copyTop === copyTop) {
+          s.style.setProperty('--hero-copy-top', (copyTop + dy - dWord) + 'px');
+          did = true;
+        }
+      }
+      if (dLine > 0.05) {
+        var line2 = s.querySelector('.hero-line2');
+        var gapLine = line2 ? parseFloat(window.getComputedStyle(line2).marginTop) : 44.8;
+        var next = gapLine - dLine;
+        if (next < GAP_FLOOR) next = GAP_FLOOR;
+        s.style.setProperty('--hero-gap-line2', next.toFixed(2) + 'px');
+        did = true;
+      }
+      return did;
     }
-    if (box.overflow < -4) {
-      var bonus = Math.min((-box.overflow) * 0.35, 28);
-      var top2 = top + bonus;
-      var capOk = (top2 + (cap * scale)) >= (navBottom + gapNav - 0.5);
-      var covers = top2 <= 0.5 && (top2 + vidH) >= (viewH - 0.5);
-      var copyOk = (top2 + (feet * scale) + chosenGap + box.copyH + tail) <= (viewH + 0.5);
-      if (capOk && covers && copyOk) top = top2;
+
+    function widenPlate(plate) {
+      if (plate.fit !== 'fill') return false;
+      var cw = t.clientWidth || window.innerWidth || 0;
+      if (!(cw > 2)) return false;
+      var fill = cw / plate.srcW;
+      var scale = Math.max(plate.scaleX, plate.scaleY, fill);
+      var wordL = 204 * (plate.srcW / 1920);
+      var wordR = 1686 * (plate.srcW / 1920);
+      var mid = plate.srcW / 2;
+      var half = cw / 2;
+      var fitL = (half - 8) / (mid - wordL);
+      var fitR = (half - 8) / (wordR - mid);
+      var wordFit = Math.min(fitL, fitR);
+      var inset = Math.min(plate.wordLeft - t.getBoundingClientRect().left, t.getBoundingClientRect().right - plate.wordRight);
+      if (inset >= 7.5 && wordFit > 0 && scale > wordFit) scale = wordFit;
+      if (scale < fill) scale = fill;
+      if (!(scale > plate.scaleY + 0.0005)) return false;
+      var cap = DESK_CAP * (plate.srcH / 1080);
+      var feet = DESK_FEET * (plate.srcH / 1080);
+      var vidW = plate.srcW * scale;
+      var vidH = plate.srcH * scale;
+      var left = (cw - vidW) / 2;
+      if (left > 0) left = 0;
+      var stageTop = t.getBoundingClientRect().top;
+      var capStage = plate.wordTop - stageTop;
+      var top = capStage - cap * scale;
+      var tag = s.querySelector('.hero-tagline');
+      var gapWord = 44.8;
+      if (tag) {
+        var gw = tag.getBoundingClientRect().top - plate.wordBottom;
+        if (gw > 0) gapWord = gw;
+      }
+      var copyTop = top + feet * scale + gapWord;
+      var media = document.querySelector('.hero-media');
+      t.style.setProperty('--hero-media-width', vidW + 'px');
+      t.style.setProperty('--hero-media-height', vidH + 'px');
+      t.style.setProperty('--hero-media-left', left + 'px');
+      t.style.setProperty('--hero-media-top', top + 'px');
+      t.style.setProperty('--hero-media-max-width', 'none');
+      t.style.setProperty('--hero-media-min-height', '0px');
+      t.style.setProperty('--hero-media-object-fit', 'fill');
+      if (media) {
+        media.style.backgroundSize = vidW + 'px ' + vidH + 'px';
+        media.style.backgroundPosition = left + 'px ' + top + 'px';
+        media.style.backgroundRepeat = 'no-repeat';
+      }
+      if (copyTop > 0) s.style.setProperty('--hero-copy-top', copyTop + 'px');
+      return true;
     }
-    var copyTop = Math.ceil(wordBottom() + chosenGap);
-    t.style.setProperty('--hero-media-width', vidW + 'px');
-    t.style.setProperty('--hero-media-height', vidH + 'px');
-    t.style.setProperty('--hero-media-left', left + 'px');
-    t.style.setProperty('--hero-media-top', top + 'px');
-    t.style.setProperty('--hero-media-max-width', 'none');
-    t.style.setProperty('--hero-media-min-height', '0px');
-    t.style.setProperty('--hero-media-object-fit', 'fill');
-    if (media) {
-      media.style.backgroundSize = vidW + 'px ' + vidH + 'px';
-      media.style.backgroundPosition = left + 'px ' + top + 'px';
-      media.style.backgroundRepeat = 'no-repeat';
+
+    function solveOnce() {
+      var m = heroState();
+      if (m.pass) return false;
+      var rooms = gapRooms(m.plate);
+      var plan = planNudge(m.wordSlack, m.ctaSlack, rooms.roomWord, rooms.roomLine);
+      if (Math.abs(plan.dy) <= 0.05 && plan.dWord <= 0.05 && plan.dLine <= 0.05) return false;
+      return applyNudge(plan.dy, plan.dWord, plan.dLine);
     }
-    if (!(copyTop > 0) || copyTop !== copyTop) { flowFallback(); return; }
-    t.classList.remove('hero-copy-flow');
-    s.style.setProperty('--hero-copy-top', copyTop + 'px');
-    reveal();
+
+    var first = heroState();
+    if (first.pass) return;
+    if (first.bars && widenPlate(first.plate)) changed = true;
+    if (t.style.height) {
+      t.style.removeProperty('height');
+      t.style.removeProperty('min-height');
+      changed = true;
+    }
+    var n;
+    for (n = 0; n < 3; n++) {
+      if (heroState().pass) break;
+      if (!solveOnce()) break;
+      changed = true;
+    }
+    if (!heroState().pass) {
+      var baseFonts = readCopyFonts(s);
+      var lo = FONT_FLOOR;
+      var hi = 1;
+      var best = -1;
+      var i;
+      for (i = 0; i < 12; i++) {
+        var mid = (lo + hi) / 2;
+        applyCopyFonts(s, baseFonts, mid);
+        if (heroState().pass) { best = mid; lo = mid; }
+        else hi = mid;
+      }
+      if (best >= FONT_FLOOR) {
+        applyCopyFonts(s, baseFonts, best);
+        if (best < 0.999) {
+          t.style.setProperty('--hero-copy-scale', best.toFixed(3));
+          changed = true;
+        } else {
+          t.style.removeProperty('--hero-copy-scale');
+        }
+      } else {
+        applyCopyFonts(s, baseFonts, FONT_FLOOR);
+        t.style.setProperty('--hero-copy-scale', FONT_FLOOR.toFixed(3));
+        changed = true;
+      }
+      if (solveOnce()) changed = true;
+    }
+    if (changed) t.style.setProperty('--hero-relax', '1');
   }
 
   function layoutCopy() {
@@ -1493,13 +1600,13 @@ class Component extends DCLogic {
       // Read metrics only after that class is off, or the copy locks to the short box.
       t.classList.remove('hero-copy-flow');
       if (isWideNow()) {
-        if (isShortLaptop()) layoutShortLaptop(t, s, v);
-        else layoutDesktop(t, s, v);
+        layoutDesktop(t, s, v);
+        relaxShort(t, s, v);
         return;
       }
       if (isLandscapeBand()) {
-        if (isShortLaptop()) layoutShortLaptop(t, s, v);
-        else layoutBand(t, s, v);
+        layoutBand(t, s, v);
+        relaxShort(t, s, v);
         return;
       }
       clearBandTweaks(s);
