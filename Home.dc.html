@@ -1303,9 +1303,11 @@ class Component extends DCLogic {
     } catch (e) { return false; }
   }
 
-  // Short landscape laptop only (CSS --hero-short-laptop). The plate stays at cover
-  // so it is never narrower than the hero. Room for the copy comes from the gaps,
-  // then the copy size, then a small scroll. Tall desktop and phones never call this.
+  // Short landscape laptop only (CSS --hero-short-laptop). The plate is never
+  // narrower than the hero. Below about 1.42:1 the scale also keeps the wordmark
+  // 8px inside each edge; the spare is vertical, in the bottom fade. Room for the
+  // copy comes from a slightly smaller copy size, then the gaps, then a small scroll.
+  // Tall desktop and phones never call this.
   function layoutShortLaptop(t, s, v) {
     clearMediaBox(t);
     clearBandTweaks(s);
@@ -1345,20 +1347,37 @@ class Component extends DCLogic {
     }
     var tcs = window.getComputedStyle(t);
     var gapNav = readNum(tcs, '--hero-band-gap', 16);
-    // Cover fills the hero. Do not go under it: a smaller scale is what leaves side bars.
-    var scale = Math.max(cw / srcW, viewH / srcH);
+    // Cover fills the hero. Width-fit of the gold BOND (x 204-1686 of 1920, 8px inset)
+    // meets that cover near aspect 1.42. Below that, cap the scale so B and D stay
+    // inside. The cap is still wider than the viewport, so the spare is top/bottom.
+    var cover = Math.max(cw / srcW, viewH / srcH);
+    var wordL = 204 * (srcW / 1920);
+    var wordR = 1686 * (srcW / 1920);
+    var midSrc = srcW / 2;
+    var edgePad = 8;
+    var halfW = cw / 2;
+    var fitL = (halfW - edgePad) / (midSrc - wordL);
+    var fitR = (halfW - edgePad) / (wordR - midSrc);
+    var wordFit = Math.min(fitL, fitR);
+    var scale = cover;
+    if (wordFit > 0) scale = Math.min(cover, wordFit);
+    var fillW = cw / srcW;
     if (!(scale > 0)) { flowFallback(); return; }
+    if (scale < fillW) scale = fillW;
     var vidW = srcW * scale;
     var vidH = srcH * scale;
-    if (vidW < cw) { scale = cw / srcW; vidW = cw; vidH = srcH * scale; }
+    if (vidW < cw) { scale = fillW; vidW = cw; vidH = srcH * scale; }
     var left = (cw - vidW) / 2;
     if (left > 0) left = 0;
     var topWant = (navBottom + gapNav) - (cap * scale);
-    var topLow = viewH - vidH;
-    if (topLow > 0) topLow = 0;
     var top = topWant;
     if (top > 0) top = 0;
-    if (top < topLow) top = topLow;
+    // A plate at least as tall as the hero must keep covering it. A shorter plate
+    // (wordmark cap below 1.42:1) leaves the spare in the bottom fade.
+    if (vidH >= viewH - 0.5) {
+      var topLow = viewH - vidH;
+      if (top < topLow) top = topLow;
+    }
     var tail = 8;
     var minGap = 24;
     var minFont = 0.82;
@@ -1380,6 +1399,23 @@ class Component extends DCLogic {
     var chosenFont = 1;
     var box = paintCopy(naturalGap, 1);
     var i;
+    if (box.overflow > 0.5) {
+      // Keep the live 1.6x gap when a small copy scale still fits the CTAs.
+      var keepLo = 0.82;
+      var keepHi = 1;
+      var keepGap = false;
+      for (i = 0; i < 10; i++) {
+        var keepMid = (keepLo + keepHi) / 2;
+        var keepTrial = paintCopy(naturalGap, keepMid);
+        if (keepTrial.overflow > 0.5) keepHi = keepMid;
+        else { keepLo = keepMid; keepGap = true; }
+      }
+      if (keepGap) {
+        chosenFont = keepLo;
+        chosenGap = naturalGap;
+        box = paintCopy(chosenGap, chosenFont);
+      }
+    }
     if (box.overflow > 0.5) {
       var lo = minGap;
       var hi = naturalGap;
