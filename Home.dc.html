@@ -1601,6 +1601,9 @@ class Component extends DCLogic {
       var s = document.getElementById(STACK);
       var v = document.getElementById(VID);
       if (t === null || s === null) return;
+      // Drop a flag left by a previous size. A resize from a short window
+      // onto one that already fits must not keep the old marker.
+      t.style.removeProperty('--hero-relax');
       var hidden = !v || v.style.display === 'none' || reduced === true;
       if (hidden) { flowFallback(); return; }
       // hero-copy-flow puts the plate in the column, so the video box is short.
