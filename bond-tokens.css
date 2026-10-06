@@ -5,4 +5,16 @@
   --bond-warning-yellow: #FFFF00;
   --bond-warn-panel: var(--matte-black);
   --bond-warn-meta: var(--bone);
+  --bond-hw-field: #F0E6D9;
+  --bond-hw-ink: #050404;
+  --bond-hw-muted: #3F3730;
+  --bond-hw-leader: #2C2925;
+  --bond-hw-dot: #4FEC2E;
+  --bond-hw-pill-1: #74F04A;
+  --bond-hw-pill-1b: #EAF662;
+  --bond-hw-pill-2: #4647E8;
+  --bond-hw-pill-2b: #38EDEC;
+  --bond-hw-pill-3: #E43A55;
+  --bond-hw-pill-3b: #F36DEA;
+  --bond-hw-pill-ink: #F7F4EE;
 }
