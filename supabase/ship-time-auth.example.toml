@@ -1,0 +1,12 @@
+# Ship-time note for M. This file is not applied by the app and must not be
+# pushed at the live project ziruzhhkkndgmdouithb from this PR.
+#
+# Leaked-password protection is a Supabase Auth project setting, not SQL.
+# Dashboard → Authentication → Sign In / Providers → Email → Password security
+# (Dashboard → Auth → password security). Turn on leaked-password protection
+# when M ships. Do not toggle it before that gate.
+#
+# Config equivalent, if M applies a local config.toml at ship time:
+
+[auth.password]
+hibp_enabled = true

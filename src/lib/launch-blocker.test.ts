@@ -84,7 +84,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /Bond does not sell member data\./);
   assert.match(
     privacy,
-    /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\. Signing out does not clear that cookie\./,
+    /On the Next door the confirmation, with a note that you have seen the welcome, is stored by Bond in Supabase\. Signing out does not delete that row\./,
   );
   assert.match(privacy, /\[PRIVACY EMAIL\]/);
   assert.match(privacy, /optional notes on a batch you shelve/);
@@ -93,7 +93,9 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /which chapter of The Number Guide you last opened/);
   assert.equal(privacy.includes("Experience Guide"), false);
   assert.equal(privacy.includes("email delivery"), false);
-  assert.match(privacy, /\(hosting, analytics\)/);
+  assert.equal(privacy.includes("(hosting, analytics)"), false);
+  assert.equal(privacy.includes("Site analytics:"), false);
+  assert.match(privacy, /This site does not use analytics/);
   assert.equal(privacy.includes("Correspondence preference"), false);
   assert.match(privacy, /Bond does not store a Haus correspondence preference/);
   assert.match(privacy, /There is no Bond Haus email list/);

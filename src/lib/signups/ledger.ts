@@ -1,0 +1,57 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createSupabaseServer } from "@/lib/supabase/server";
+import { getSignupStore, signupBackend } from "./index.ts";
+import { MemorySignupStore } from "./memory.ts";
+import type { SignupLedger } from "./types.ts";
+
+export async function readOwnerSignupLedger(role: string): Promise<SignupLedger | null> {
+  if (role !== "owner") return null;
+  if (signupBackend() === "memory") {
+    const store = getSignupStore();
+    if (store instanceof MemorySignupStore) return store.ledger();
+  }
+
+  try {
+    const supabase = (await createSupabaseServer()) as unknown as SupabaseClient;
+    const accounts = await supabase
+      .from("dispensary_accounts")
+      .select("id, dispensary_name, email, ocm_license, status, created_at")
+      .order("created_at", { ascending: false });
+    const orders = await supabase
+      .from("order_requests")
+      .select("id, dispensary_account_id, promised_on, lines, created_at")
+      .order("created_at", { ascending: false });
+    const haus = await supabase
+      .from("haus_signups")
+      .select("id, email, age21_ack_at")
+      .order("created_at", { ascending: false });
+    if (accounts.error || orders.error || haus.error) {
+      return { source: "supabase", dispensaries: [], orders: [], haus: [], unavailable: true };
+    }
+    return {
+      source: "supabase",
+      dispensaries: ((accounts.data ?? []) as Array<Record<string, string>>).map((row) => ({
+        id: row.id,
+        dispensaryName: row.dispensary_name,
+        email: row.email,
+        ocmLicense: row.ocm_license,
+        status: row.status as SignupLedger["dispensaries"][number]["status"],
+        createdAt: row.created_at,
+      })),
+      orders: ((orders.data ?? []) as Array<Record<string, unknown>>).map((row) => ({
+        id: String(row.id),
+        dispensaryAccountId: String(row.dispensary_account_id),
+        promisedOn: String(row.promised_on ?? ""),
+        lineCount: Array.isArray(row.lines) ? row.lines.length : 0,
+        createdAt: String(row.created_at ?? ""),
+      })),
+      haus: ((haus.data ?? []) as Array<Record<string, string>>).map((row) => ({
+        id: row.id,
+        email: row.email,
+        age21AckAt: row.age21_ack_at,
+      })),
+    };
+  } catch {
+    return { source: "supabase", dispensaries: [], orders: [], haus: [], unavailable: true };
+  }
+}

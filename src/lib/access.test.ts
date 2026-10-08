@@ -224,7 +224,7 @@ test("Privacy Dispensary Login collection lists every field the door collects", 
   assert.equal(privacy.includes("if member accounts launch"), false);
   assert.match(
     privacy,
-    /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\./,
+    /On the Next door the confirmation, with a note that you have seen the welcome, is stored by Bond in Supabase\./,
   );
 });
 

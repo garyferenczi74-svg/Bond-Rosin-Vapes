@@ -1,6 +1,5 @@
 import { OrderClient } from "@/app/order/order-client";
-import { findPartnerAccount, isPartnerElevated } from "@/lib/order/door";
-import { readPartnerAccountBook, readPartnerSession } from "@/lib/order/session";
+import { readPartnerSession, readSessionPartnerAccount } from "@/lib/order/session";
 import { getVauxhallStore } from "@/lib/vauxhall/store";
 
 export const dynamic = "force-dynamic";
@@ -12,17 +11,12 @@ export const metadata = {
 
 export default async function OrderPage() {
   const session = await readPartnerSession();
-  if (!session) {
+  const account = await readSessionPartnerAccount();
+  if (!session || !account) {
     return <OrderClient />;
   }
 
-  const book = await readPartnerAccountBook();
-  const account = findPartnerAccount({ email: session.email, license: session.license }, book);
-  if (!account) {
-    return <OrderClient />;
-  }
-
-  const elevated = isPartnerElevated({ email: session.email, license: session.license }, book);
+  const elevated = account.elevated;
   const sessionView = {
     email: session.email,
     accountId: session.accountId,
