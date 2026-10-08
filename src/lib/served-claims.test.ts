@@ -189,7 +189,8 @@ test("staff page view records role and an unconfirmed factor is reused", () => {
   assert.match(actions, /factorId: unverified\[0\]\.id/);
   assert.match(actions, /qr: null as string \| null/);
   const audit = read("src/lib/audit.ts");
-  assert.match(audit, /ip: payload\.meta\.ip/);
+  assert.match(audit, /hashLockoutIp\(payload\.meta\.ip\)/);
+  assert.equal(audit.includes("ip: payload.meta.ip"), false);
   assert.match(audit, /user_agent: payload\.meta\.userAgent/);
   assert.match(audit, /path: payload\.meta\.path/);
 });
