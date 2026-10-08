@@ -102,6 +102,7 @@ export class RemoteSignupStore {
   }
 
   async openDispensarySession(accountId: string): Promise<string> {
+    await this.touchDispensary(accountId);
     const expires = new Date(Date.now() + DAY_SECONDS * 1000).toISOString();
     const { data, error } = await client()
       .from("dispensary_sessions")
@@ -154,6 +155,7 @@ export class RemoteSignupStore {
       .select("id, dispensary_account_id, lines, promised_on, notes, created_at")
       .single();
     if (error || !data) throw new Error("Order request was not stored.");
+    await this.touchDispensary(input.dispensaryAccountId);
     const row = data as {
       id: string;
       dispensary_account_id: string;
@@ -238,6 +240,15 @@ export class RemoteSignupStore {
       .single();
     if (error || !data) throw new Error("Haus request was not stored.");
     return mapHaus(data as HausRow);
+  }
+
+  private async touchDispensary(accountId: string): Promise<void> {
+    const stamped = new Date().toISOString();
+    const { error } = await client()
+      .from("dispensary_accounts")
+      .update({ last_active_at: stamped, updated_at: stamped })
+      .eq("id", accountId);
+    if (error) throw new Error("Dispensary activity was not stored.");
   }
 
   private async accountById(id: string): Promise<DispensaryRecord | null> {

@@ -35,6 +35,8 @@ function seedRecords(): DispensaryRecord[] {
     status: row.elevated ? "approved" : "pending",
     createdAt: stamped,
     updatedAt: stamped,
+    lastActiveAt: stamped,
+    closedAt: null,
   }));
 }
 
@@ -71,6 +73,8 @@ export class MemorySignupStore {
       status: "pending",
       createdAt: stamped,
       updatedAt: stamped,
+      lastActiveAt: stamped,
+      closedAt: null,
     };
     this.accounts.set(row.id, row);
     return { ...row };
@@ -79,13 +83,19 @@ export class MemorySignupStore {
   setStatus(id: string, status: DispensaryStatus): DispensaryRecord | null {
     const row = this.accounts.get(id);
     if (!row) return null;
+    if (status === "rejected" && row.status !== "rejected" && !row.closedAt) {
+      row.closedAt = nowIso();
+    }
     row.status = status;
     row.updatedAt = nowIso();
     return { ...row };
   }
 
   openDispensarySession(accountId: string): string {
-    if (!this.accounts.has(accountId)) throw new Error("Account not found.");
+    const account = this.accounts.get(accountId);
+    if (!account) throw new Error("Account not found.");
+    account.lastActiveAt = nowIso();
+    account.updatedAt = account.lastActiveAt;
     const id = randomUUID();
     this.dispensarySessions.set(id, { id, accountId, expiresAt: Date.now() + DAY_MS });
     return id;
@@ -119,6 +129,8 @@ export class MemorySignupStore {
       notes: input.notes,
       createdAt: nowIso(),
     };
+    account.lastActiveAt = row.createdAt;
+    account.updatedAt = row.createdAt;
     this.orders.unshift(row);
     return { ...row, lines: row.lines.map((line) => ({ ...line })) };
   }

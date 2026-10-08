@@ -1,13 +1,28 @@
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
 import { createSupabaseServiceRole } from "./supabase/service.ts";
 
-// Same pattern as the email hash in record_auth_attempt: sha256 of
-// lower(trim(value)), hex, no salt and no pepper. The SQL function stores
-// this digest and also hashes a raw address if one is sent.
-export function hashLockoutIp(ip: string | null | undefined): string {
-  const value = (ip ?? "").trim().toLowerCase();
-  if (!value) return "";
-  return createHash("sha256").update(value).digest("hex");
+const DEV_HASH_KEY = "bond-dev-hash-key";
+
+// Server-only. Separate from BOND_SESSION_SECRET. Never NEXT_PUBLIC_, never logged.
+export function hashKey(): string {
+  const set = process.env.BOND_HASH_KEY?.trim() ?? "";
+  if (set) return set;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("BOND_HASH_KEY is not configured");
+  }
+  return DEV_HASH_KEY;
+}
+
+// HMAC-SHA256 of lower(trim(value)), hex. The same input and key always
+// produce the same digest, so lockout still matches on the email digest.
+export function hashLockoutValue(value: string | null | undefined, key = hashKey()): string {
+  const normalized = (value ?? "").trim().toLowerCase();
+  if (!normalized) return "";
+  return createHmac("sha256", key).update(normalized).digest("hex");
+}
+
+export function hashLockoutIp(ip: string | null | undefined, key = hashKey()): string {
+  return hashLockoutValue(ip, key);
 }
 
 export type LockoutState = {
@@ -37,11 +52,21 @@ export async function recordAuthAttempt(
   ip: string | null,
   outcome: LockoutOutcome,
 ): Promise<LockoutState> {
+  let emailHash = "";
+  let ipHash = "";
+  try {
+    emailHash = hashLockoutValue(email);
+    ipHash = hashLockoutValue(ip);
+  } catch {
+    // Production with no BOND_HASH_KEY. Do not store the raw email or IP, and do not allow the attempt.
+    return { allowed: false, locked: true };
+  }
+
   try {
     const client = createSupabaseServiceRole();
     const { data, error } = await client.rpc("record_auth_attempt", {
-      p_email: email,
-      p_ip: hashLockoutIp(ip),
+      p_email: emailHash,
+      p_ip: ipHash,
       p_outcome: outcome,
     });
     if (error || !data) {

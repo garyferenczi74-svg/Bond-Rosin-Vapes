@@ -119,6 +119,21 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.equal(privacy.includes("factor id"), false);
   assert.match(privacy, /Effective date: September 27, 2026\./);
   assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
+  assert.match(privacy, /load React and ReactDOM from unpkg\.com/);
+  assert.equal(privacy.includes("Babel"), false);
+  assert.match(privacy, /An older bond_haus_ack cookie is cleared and is not read\./);
+  assert.match(privacy, /Bond clears the contact name, the email, the phone, the address, and the password hash 24 months after the account is closed/);
+  assert.match(privacy, /The dispensary name and the New York OCM license number stay as the business record/);
+  assert.equal(privacy.includes("not deleted on the 24 month schedule"), false);
+  const memberSession = read("src/lib/member-session.ts");
+  assert.match(memberSession, /MEMBER_ACK_COOKIE, "", \{[\s\S]*maxAge: 0/);
+  assert.equal(read("src/lib/member-session.ts").includes("jar.get(MEMBER_ACK_COOKIE)"), false);
+  for (const name of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html", "AgeGate.dc.html"]) {
+    const html = read(name);
+    assert.match(html, /unpkg\.com\/react@18\.3\.1\/umd\/react\.production\.min\.js/, name);
+    assert.match(html, /unpkg\.com\/react-dom@18\.3\.1\/umd\/react-dom\.production\.min\.js/, name);
+    assert.equal(/babel/i.test(html), false, name);
+  }
 });
 
 test("order portal says nothing is sent to the state tracking system", () => {

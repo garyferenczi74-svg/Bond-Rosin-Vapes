@@ -14,6 +14,8 @@ export type DispensaryRecord = {
   status: DispensaryStatus;
   createdAt: string;
   updatedAt: string;
+  lastActiveAt?: string;
+  closedAt?: string | null;
 };
 
 export type OrderLineRecord = {

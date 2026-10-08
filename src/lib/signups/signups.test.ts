@@ -94,6 +94,30 @@ test("an approved server row can file an order and Haus membership is the sign-u
   assert.equal((await store.ledger()).haus.some((row) => row.email === "member@bond.test"), true);
 });
 
+test("sign-in and a filed request mark last active, and a rejection marks closed", async () => {
+  const store = new MemorySignupStore();
+  const north = (await store.listAccounts()).find((row) => row.email === "north.buyer@example.test");
+  assert.ok(north);
+  const before = north.lastActiveAt ?? "";
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  await store.openDispensarySession(north.id);
+  const signedIn = (await store.listAccounts()).find((row) => row.id === north.id);
+  assert.ok(signedIn?.lastActiveAt);
+  assert.ok(signedIn.lastActiveAt > before);
+  const filed = await store.insertOrder({
+    dispensaryAccountId: north.id,
+    lines: [{ skuId: "no-2", format: "1g", qty: 1 }],
+    promisedOn: "2026-10-20",
+    notes: "",
+  });
+  const active = (await store.listAccounts()).find((row) => row.id === north.id);
+  assert.equal(active?.lastActiveAt, filed.createdAt);
+  const closed = store.setStatus(north.id, "rejected");
+  assert.ok(closed?.closedAt);
+  assert.equal(closed.dispensaryName, north.dispensaryName);
+  assert.equal(closed.ocmLicense, north.ocmLicense);
+});
+
 test("the Vauxhall signup list is owner only", () => {
   const ledger = readFileSync(fileURLToPath(new URL("./ledger.ts", import.meta.url)), "utf8");
   assert.match(ledger, /if \(role !== "owner"\) return null/);
