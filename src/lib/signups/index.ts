@@ -5,7 +5,11 @@ import type { SignupLedger } from "./types.ts";
 
 export type SignupStore = MemorySignupStore | RemoteSignupStore;
 
-let memory: MemorySignupStore | null = null;
+// Next dev bundles the page and the server actions apart. One process-wide store
+// keeps a session written by an action visible to the next render.
+const memoryGlobal = globalThis as typeof globalThis & {
+  __bondSignupMemory?: MemorySignupStore;
+};
 
 export function signupBackend(): "memory" | "supabase" {
   return readServiceRoleConfig().ok ? "supabase" : "memory";
@@ -13,13 +17,14 @@ export function signupBackend(): "memory" | "supabase" {
 
 export function getSignupStore(): SignupStore {
   if (signupBackend() === "supabase") return new RemoteSignupStore();
-  if (!memory) memory = new MemorySignupStore();
-  return memory;
+  if (!memoryGlobal.__bondSignupMemory) memoryGlobal.__bondSignupMemory = new MemorySignupStore();
+  return memoryGlobal.__bondSignupMemory;
 }
 
 export function resetSignupStoreForTests(): MemorySignupStore {
-  memory = new MemorySignupStore();
-  return memory;
+  const next = new MemorySignupStore();
+  memoryGlobal.__bondSignupMemory = next;
+  return next;
 }
 
 export async function readSignupLedger(): Promise<SignupLedger> {
