@@ -10,3 +10,9 @@
 
 [auth.password]
 hibp_enabled = true
+
+# pg_cron is not created by the app. Enable the pg_cron extension on the
+# live project before applying 20261008201000_felix_request_retention.sql.
+# That migration schedules four jobs. If the extension is still missing, the
+# migration records a notice and skips the schedules. Enable the extension,
+# then run the schedule statements again. Do not enable it from this PR.

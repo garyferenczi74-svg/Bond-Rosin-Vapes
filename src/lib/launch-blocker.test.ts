@@ -102,7 +102,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /Haus members are not asked for an authenticator code/);
   assert.match(
     privacy,
-    /Each staff sign-in, and each staff page a staff member opens, creates a record of the staff member's account id and role, the IP address, browser and page used, and the time\. Sign-in records also note that the code step was skipped\. These records are kept until Bond has a deletion process in place\./,
+    /Each staff sign-in, and each staff page a staff member opens, creates a record of the staff member's account id and role, the IP address, browser and page used, and the time\. Sign-in records also note that the code step was skipped\. The staff audit log is deleted after 24 months\./,
   );
   assert.match(
     privacy,

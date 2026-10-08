@@ -80,10 +80,12 @@ test("an approved server row can file an order and Haus membership is the sign-u
 
   const hausId = await store.openHausSession("member@bond.test");
   assert.equal((await store.readHausSession(hausId))?.signup, null);
-  const signup = await store.recordHausSignup("member@bond.test");
+  const signup = await store.recordHausSignup("member@bond.test", "Harbor House");
   const view = await store.readHausSession(hausId);
   assert.equal(view?.email, "member@bond.test");
   assert.equal(view?.signup?.id, signup.id);
+  assert.equal(view?.signup?.age21Ack, true);
+  assert.equal(view?.signup?.requestedDispensary, "Harbor House");
   assert.ok(view?.signup?.age21AckAt);
   await store.closeHausSession(hausId);
   assert.equal(await store.readHausSession(hausId), null);

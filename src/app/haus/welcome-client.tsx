@@ -81,20 +81,33 @@ export function WelcomeClient({
         />
         <form action={onEnter} style={{ marginTop: 26 }}>
           {needsAge ? (
-            <label
-              style={{
-                display: "flex",
-                gap: 10,
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 13,
-                color: "#B0A99A",
-                cursor: "pointer",
-              }}
-            >
-              <input type="checkbox" name="age21" value="1" />
-              For adults 21 and over.
-            </label>
+            <>
+              <label
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 13,
+                  color: "#B0A99A",
+                  cursor: "pointer",
+                }}
+              >
+                <input type="checkbox" name="age21" value="1" />
+                <span>
+                  I confirm I am 21 or older.
+                  <span style={{ display: "block" }}>This is a self-attestation.</span>
+                </span>
+              </label>
+              <input
+                className="field"
+                name="requestedDispensary"
+                autoComplete="organization"
+                placeholder="Requested dispensary"
+                required
+                style={{ marginTop: 16 }}
+              />
+            </>
           ) : null}
           <button
             className="btn"

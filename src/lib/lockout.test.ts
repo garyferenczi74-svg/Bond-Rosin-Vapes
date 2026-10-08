@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { lockoutFallback, readLockoutState, recordAuthAttempt } from "./lockout.ts";
+import { hashLockoutIp, lockoutFallback, readLockoutState, recordAuthAttempt } from "./lockout.ts";
 import {
   assertServiceRoleServerOnly,
   createSupabaseServiceRole,
@@ -131,9 +131,11 @@ test("recordAuthAttempt posts record_auth_attempt with the service role key", as
     const payload = JSON.parse(rpc.body) as { p_email: string; p_ip: string; p_outcome: string };
     assert.deepEqual(payload, {
       p_email: "ops@bond.test",
-      p_ip: "203.0.113.9",
+      p_ip: hashLockoutIp("203.0.113.9"),
       p_outcome: "check",
     });
+    assert.notEqual(payload.p_ip, "203.0.113.9");
+    assert.equal(payload.p_ip.length, 64);
     assert.deepEqual(result, { allowed: false, locked: true });
   } finally {
     globalThis.fetch = prevFetch;

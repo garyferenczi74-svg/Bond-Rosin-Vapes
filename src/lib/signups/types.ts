@@ -34,7 +34,9 @@ export type OrderRequestRecord = {
 export type HausSignupRecord = {
   id: string;
   email: string;
+  age21Ack: boolean;
   age21AckAt: string;
+  requestedDispensary: string;
   createdAt: string;
 };
 
@@ -57,7 +59,9 @@ export type SignupLedger = {
   haus: Array<{
     id: string;
     email: string;
+    age21Ack: boolean;
     age21AckAt: string;
+    requestedDispensary: string;
   }>;
   source: "memory" | "supabase";
   unavailable?: boolean;

@@ -355,7 +355,14 @@ test("order surface copy stays neutral and off Metrc claims", () => {
   assert.equal(portal.includes("no Metrc write"), false);
   assert.match(portal, /Nothing is sent to the state tracking system from this page/);
   assert.equal(ORDER_COPY.doorTitle, "Dispensary Login");
-  assert.equal(ORDER_COPY.formTitle, "Order reservation");
+  assert.equal(ORDER_COPY.formTitle, "Product request");
+  assert.equal(ORDER_COPY.age21, "I confirm I am 21 or older.");
+  assert.equal(ORDER_COPY.age21Note, "This is a self-attestation.");
+  for (const line of Object.values(ORDER_COPY)) {
+    assert.equal(/\b(reserve|reservation|hold|order)\b/i.test(line), false, line);
+    assert.equal(line.includes("Place Order"), false, line);
+    assert.equal(line.includes("!"), false, line);
+  }
   assert.equal(ORDER_COPY.signUpTab, "Sign up");
   assert.equal(ORDER_COPY.signInTab, "Sign in");
   assert.equal(ORDER_COPY.signUp, "Continue");

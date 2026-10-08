@@ -45,6 +45,26 @@ function mapAccount(row: AccountRow): DispensaryRecord {
   };
 }
 
+type HausRow = {
+  id: string;
+  email: string;
+  age21_ack: boolean;
+  age21_ack_at: string;
+  requested_dispensary: string;
+  created_at: string;
+};
+
+function mapHaus(row: HausRow): HausSignupRecord {
+  return {
+    id: row.id,
+    email: row.email,
+    age21Ack: row.age21_ack,
+    age21AckAt: row.age21_ack_at,
+    requestedDispensary: row.requested_dispensary,
+    createdAt: row.created_at,
+  };
+}
+
 function client(): SupabaseClient {
   return createSupabaseServiceRole() as unknown as SupabaseClient;
 }
@@ -173,22 +193,15 @@ export class RemoteSignupStore {
     const session = data as { email: string; expires_at: string };
     if (Date.parse(session.expires_at) <= Date.now()) return null;
     const { data: signup } = await client()
-      .from("haus_signups")
-      .select("id, email, age21_ack_at, created_at")
+      .from("haus_requests")
+      .select("id, email, age21_ack, age21_ack_at, requested_dispensary, created_at")
       .eq("email", session.email)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
     return {
       email: session.email,
-      signup: signup
-        ? {
-            id: (signup as HausSignupRecord & { age21_ack_at: string; created_at: string }).id,
-            email: (signup as { email: string }).email,
-            age21AckAt: (signup as { age21_ack_at: string }).age21_ack_at,
-            createdAt: (signup as { created_at: string }).created_at,
-          }
-        : null,
+      signup: signup ? mapHaus(signup as HausRow) : null,
     };
   }
 
@@ -196,26 +209,35 @@ export class RemoteSignupStore {
     await client().from("haus_sessions").delete().eq("id", sessionId);
   }
 
-  async recordHausSignup(email: string): Promise<HausSignupRecord> {
+  async recordHausSignup(email: string, requestedDispensary = ""): Promise<HausSignupRecord> {
     const mark = email.trim().toLowerCase();
+    const dispensary = requestedDispensary.trim().replace(/\s+/g, " ");
     const { data: existing } = await client()
-      .from("haus_signups")
-      .select("id, email, age21_ack_at, created_at")
+      .from("haus_requests")
+      .select("id, email, age21_ack, age21_ack_at, requested_dispensary, created_at")
       .eq("email", mark)
       .limit(1)
       .maybeSingle();
     if (existing) {
-      const row = existing as { id: string; email: string; age21_ack_at: string; created_at: string };
-      return { id: row.id, email: row.email, age21AckAt: row.age21_ack_at, createdAt: row.created_at };
+      const row = mapHaus(existing as HausRow);
+      if (!row.requestedDispensary && dispensary) {
+        await client().from("haus_requests").update({ requested_dispensary: dispensary }).eq("id", row.id);
+        row.requestedDispensary = dispensary;
+      }
+      return row;
     }
     const { data, error } = await client()
-      .from("haus_signups")
-      .insert({ email: mark, age21_ack_at: new Date().toISOString() })
-      .select("id, email, age21_ack_at, created_at")
+      .from("haus_requests")
+      .insert({
+        email: mark,
+        age21_ack: true,
+        age21_ack_at: new Date().toISOString(),
+        requested_dispensary: dispensary,
+      })
+      .select("id, email, age21_ack, age21_ack_at, requested_dispensary, created_at")
       .single();
-    if (error || !data) throw new Error("Haus sign-up was not stored.");
-    const row = data as { id: string; email: string; age21_ack_at: string; created_at: string };
-    return { id: row.id, email: row.email, age21AckAt: row.age21_ack_at, createdAt: row.created_at };
+    if (error || !data) throw new Error("Haus request was not stored.");
+    return mapHaus(data as HausRow);
   }
 
   private async accountById(id: string): Promise<DispensaryRecord | null> {

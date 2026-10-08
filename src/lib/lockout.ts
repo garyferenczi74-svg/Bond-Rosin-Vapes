@@ -1,4 +1,14 @@
+import { createHash } from "node:crypto";
 import { createSupabaseServiceRole } from "./supabase/service.ts";
+
+// Same pattern as the email hash in record_auth_attempt: sha256 of
+// lower(trim(value)), hex, no salt and no pepper. The SQL function stores
+// this digest and also hashes a raw address if one is sent.
+export function hashLockoutIp(ip: string | null | undefined): string {
+  const value = (ip ?? "").trim().toLowerCase();
+  if (!value) return "";
+  return createHash("sha256").update(value).digest("hex");
+}
 
 export type LockoutState = {
   allowed: boolean;
@@ -31,7 +41,7 @@ export async function recordAuthAttempt(
     const client = createSupabaseServiceRole();
     const { data, error } = await client.rpc("record_auth_attempt", {
       p_email: email,
-      p_ip: ip ?? "",
+      p_ip: hashLockoutIp(ip),
       p_outcome: outcome,
     });
     if (error || !data) {

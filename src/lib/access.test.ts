@@ -216,7 +216,8 @@ test("Privacy Dispensary Login collection lists every field the door collects", 
   assert.match(sentence, /account status/);
   assert.match(sentence, /never sent to Metrc/);
   assert.match(sentence, /never logged in plaintext/);
-  assert.match(sentence, /does not grant order rights until Bond operations elevates the account/);
+  assert.match(sentence, /does not grant request rights until Bond operations elevates the account/);
+  assert.match(sentence, /self-attestation/);
   assert.match(privacy, /the Home Haus form stores nothing and sends nothing/);
   assert.match(privacy, /sessionStorage for this browser session/);
   assert.match(privacy, /under the name bond_age_ok/);

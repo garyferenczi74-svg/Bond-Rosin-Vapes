@@ -234,15 +234,22 @@ export async function enterHausAction(formData: FormData) {
   const ack = await readMemberAck();
   const already = ack?.email === session.email && ack.age21;
   const checked = String(formData.get("age21") ?? "") === "1";
+  const requestedDispensary = String(formData.get("requestedDispensary") ?? "").trim().replace(/\s+/g, " ");
   if (!already && !checked) {
-    return { ok: false as const, message: "Please confirm you are 21 and over." };
+    return { ok: false as const, message: "Please confirm you are 21 or older. This is a self-attestation." };
+  }
+  if (!already && requestedDispensary.length < 2) {
+    return { ok: false as const, message: "Name the dispensary you are requesting." };
   }
 
-  await writeMemberAck({
-    email: session.email,
-    welcomeSeen: true,
-    age21: true,
-  });
+  await writeMemberAck(
+    {
+      email: session.email,
+      welcomeSeen: true,
+      age21: true,
+    },
+    requestedDispensary,
+  );
   redirect("/haus/salon");
 }
 

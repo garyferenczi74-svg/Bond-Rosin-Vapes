@@ -3,15 +3,15 @@ import type { SignupLedger } from "@/lib/signups/types";
 
 export function SignupLedger({ ledger }: { ledger: SignupLedger }) {
   return (
-    <section aria-label="Sign-ups" style={{ padding: "20px 24px 0", color: "#E1DAD0" }}>
+    <section aria-label="Requests" style={{ padding: "20px 24px 0", color: "#E1DAD0" }}>
       <h2 style={{ fontFamily: "GFS Didot, Didot, serif", fontWeight: 400, fontSize: 22, margin: "0 0 8px" }}>
-        Sign-ups
+        Requests
       </h2>
       <p style={{ color: "#B0A99A", fontSize: 14, margin: "0 0 16px" }}>
-        Owner read. Stored by Bond. Not sent to the state tracking system.
+        Stored by Bond. Not sent to the state tracking system.
       </p>
       {ledger.unavailable ? (
-        <p style={{ color: "#B0A99A" }}>Sign-up tables are not on this database yet.</p>
+        <p style={{ color: "#B0A99A" }}>Request tables are not on this database yet.</p>
       ) : (
         <div style={{ display: "grid", gap: 18 }}>
           <LedgerBlock title="Dispensary accounts">
@@ -22,7 +22,7 @@ export function SignupLedger({ ledger }: { ledger: SignupLedger }) {
               </p>
             ))}
           </LedgerBlock>
-          <LedgerBlock title="Order requests">
+          <LedgerBlock title="Wholesale requests">
             {ledger.orders.length === 0 ? <Empty /> : null}
             {ledger.orders.map((row) => (
               <p key={row.id} style={{ margin: "0 0 6px" }}>
@@ -30,11 +30,11 @@ export function SignupLedger({ ledger }: { ledger: SignupLedger }) {
               </p>
             ))}
           </LedgerBlock>
-          <LedgerBlock title="Haus sign-ups">
+          <LedgerBlock title="Haus requests">
             {ledger.haus.length === 0 ? <Empty /> : null}
             {ledger.haus.map((row) => (
               <p key={row.id} style={{ margin: "0 0 6px" }}>
-                {row.email} · {row.age21AckAt}
+                {row.email} · {row.requestedDispensary} · {row.age21Ack ? "21+ self-attestation" : "no attestation"} · {row.age21AckAt}
               </p>
             ))}
           </LedgerBlock>

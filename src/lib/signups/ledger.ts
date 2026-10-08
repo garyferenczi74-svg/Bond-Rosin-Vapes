@@ -5,7 +5,7 @@ import { MemorySignupStore } from "./memory.ts";
 import type { SignupLedger } from "./types.ts";
 
 export async function readOwnerSignupLedger(role: string): Promise<SignupLedger | null> {
-  if (role !== "owner") return null;
+  if (role !== "owner" && role !== "operator" && role !== "admin") return null;
   if (signupBackend() === "memory") {
     const store = getSignupStore();
     if (store instanceof MemorySignupStore) return store.ledger();
@@ -22,8 +22,8 @@ export async function readOwnerSignupLedger(role: string): Promise<SignupLedger 
       .select("id, dispensary_account_id, promised_on, lines, created_at")
       .order("created_at", { ascending: false });
     const haus = await supabase
-      .from("haus_signups")
-      .select("id, email, age21_ack_at")
+      .from("haus_requests")
+      .select("id, email, age21_ack, age21_ack_at, requested_dispensary")
       .order("created_at", { ascending: false });
     if (accounts.error || orders.error || haus.error) {
       return { source: "supabase", dispensaries: [], orders: [], haus: [], unavailable: true };
@@ -45,10 +45,12 @@ export async function readOwnerSignupLedger(role: string): Promise<SignupLedger 
         lineCount: Array.isArray(row.lines) ? row.lines.length : 0,
         createdAt: String(row.created_at ?? ""),
       })),
-      haus: ((haus.data ?? []) as Array<Record<string, string>>).map((row) => ({
-        id: row.id,
-        email: row.email,
-        age21AckAt: row.age21_ack_at,
+      haus: ((haus.data ?? []) as Array<Record<string, string | boolean>>).map((row) => ({
+        id: String(row.id),
+        email: String(row.email),
+        age21Ack: row.age21_ack === true,
+        age21AckAt: String(row.age21_ack_at),
+        requestedDispensary: String(row.requested_dispensary ?? ""),
       })),
     };
   } catch {

@@ -140,15 +140,22 @@ export class MemorySignupStore {
     this.hausSessions.delete(sessionId);
   }
 
-  recordHausSignup(email: string): HausSignupRecord {
+  recordHausSignup(email: string, requestedDispensary = ""): HausSignupRecord {
     const mark = email.trim().toLowerCase();
+    const dispensary = requestedDispensary.trim().replace(/\s+/g, " ");
     const existing = this.haus.find((row) => row.email === mark);
-    if (existing) return { ...existing };
+    if (existing) {
+      if (!existing.requestedDispensary && dispensary) existing.requestedDispensary = dispensary;
+      return { ...existing };
+    }
+    const stamped = nowIso();
     const row: HausSignupRecord = {
       id: randomUUID(),
       email: mark,
-      age21AckAt: nowIso(),
-      createdAt: nowIso(),
+      age21Ack: true,
+      age21AckAt: stamped,
+      requestedDispensary: dispensary,
+      createdAt: stamped,
     };
     this.haus.unshift(row);
     return { ...row };
@@ -172,7 +179,13 @@ export class MemorySignupStore {
         lineCount: row.lines.length,
         createdAt: row.createdAt,
       })),
-      haus: this.haus.map((row) => ({ id: row.id, email: row.email, age21AckAt: row.age21AckAt })),
+      haus: this.haus.map((row) => ({
+        id: row.id,
+        email: row.email,
+        age21Ack: row.age21Ack,
+        age21AckAt: row.age21AckAt,
+        requestedDispensary: row.requestedDispensary,
+      })),
     };
   }
 }

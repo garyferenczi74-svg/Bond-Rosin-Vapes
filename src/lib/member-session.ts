@@ -56,8 +56,8 @@ export async function writeMemberSession(session: MemberSession = seedMemberSess
   });
 }
 
-export async function writeMemberAck(ack: MemberAck): Promise<void> {
-  if (ack.age21) await getSignupStore().recordHausSignup(ack.email);
+export async function writeMemberAck(ack: MemberAck, requestedDispensary = ""): Promise<void> {
+  if (ack.age21) await getSignupStore().recordHausSignup(ack.email, requestedDispensary);
   const jar = await cookies();
   jar.set(MEMBER_ACK_COOKIE, "", {
     ...cookieBase(),
