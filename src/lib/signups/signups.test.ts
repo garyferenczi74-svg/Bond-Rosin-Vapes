@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 import { registerPartnerDoor } from "../order/door.ts";
 import { clonePartnerAccounts, SEED_PARTNER_PASSWORD } from "../order/seed.ts";
 import { openSessionId, sealSessionId } from "./cookie.ts";
@@ -90,4 +92,11 @@ test("an approved server row can file an order and Haus membership is the sign-u
   await store.closeHausSession(hausId);
   assert.equal(await store.readHausSession(hausId), null);
   assert.equal((await store.ledger()).haus.some((row) => row.email === "member@bond.test"), true);
+});
+
+test("the Vauxhall signup list is owner only", () => {
+  const ledger = readFileSync(fileURLToPath(new URL("./ledger.ts", import.meta.url)), "utf8");
+  assert.match(ledger, /if \(role !== "owner"\) return null/);
+  assert.equal(ledger.includes('role !== "operator"'), false);
+  assert.equal(ledger.includes('role !== "admin"'), false);
 });

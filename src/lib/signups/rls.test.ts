@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const migration = fileURLToPath(new URL("../../../supabase/migrations/20261008193000_server_side_signups.sql", import.meta.url));
 const felix = fileURLToPath(new URL("../../../supabase/migrations/20261008201000_felix_request_retention.sql", import.meta.url));
+const ownerOnly = fileURLToPath(new URL("../../../supabase/migrations/20261008213000_owner_only_signup_reads.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -35,6 +36,10 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.match(felixSql, /cron\.schedule\(\s*'bond_purge_auth_attempts'/);
   assert.match(felixSql, /cron\.schedule\(\s*'bond_purge_audit_log'/);
   assert.equal(felixSql.includes("CREATE OR REPLACE FUNCTION public.is_admin"), false);
+  const ownerSql = readFileSync(ownerOnly, "utf8");
+  assert.match(ownerSql, /CREATE OR REPLACE FUNCTION public\.is_owner\(\)/);
+  assert.equal(ownerSql.includes("CREATE OR REPLACE FUNCTION public.is_admin"), false);
+  assert.equal(ownerSql.includes("is_admin()"), false);
 
   const dir = mkdtempSync(join(tmpdir(), "bond-signup-rls-"));
   chmodSync(dir, 0o755);
@@ -137,6 +142,8 @@ VALUES ('plain-ip-row', '203.0.113.9', 'fail');
 
 \\i ${felix}
 
+\\i ${ownerOnly}
+
 GRANT USAGE ON SCHEMA public, auth TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION auth.jwt() TO anon, authenticated;
@@ -232,6 +239,17 @@ SELECT COUNT(*) AS owner_seen FROM public.dispensary_accounts;
 SELECT COUNT(*) AS owner_haus FROM public.haus_requests;
 RESET ROLE;
 
+SELECT (position('is_owner' in pg_get_expr(p.polqual, p.polrelid)) > 0) AS haus_policy_owner
+FROM pg_policy p
+JOIN pg_class c ON c.oid = p.polrelid
+WHERE c.relname = 'haus_requests' AND p.polname = 'haus_requests_member_or_owner_select';
+
+SELECT COUNT(*) AS haus_policy_admin
+FROM pg_policy p
+JOIN pg_class c ON c.oid = p.polrelid
+WHERE c.relname = 'haus_requests'
+  AND pg_get_expr(p.polqual, p.polrelid) LIKE '%is_admin%';
+
 SELECT public.bond_purge_haus_requests() AS haus_purged;
 SELECT public.bond_purge_order_requests() AS orders_purged;
 SELECT public.bond_purge_auth_attempts() AS attempts_purged;
@@ -265,12 +283,14 @@ SELECT COUNT(*) AS account_kept FROM public.dispensary_accounts WHERE email = 'n
   saw("stranger_seen", "0");
   saw("stranger_haus", "0");
   saw("operator_seen", "0");
-  saw("operator_haus", "4");
+  saw("operator_haus", "0");
   saw("operator_requests", "0");
   saw("member_own", "1");
   saw("member_other", "0");
   saw("owner_seen", "2");
   saw("owner_haus", "4");
+  saw("haus_policy_owner", "t");
+  saw("haus_policy_admin", "0");
   saw("haus_old_left", "0");
   saw("haus_new_left", "1");
   saw("orders_old_left", "0");

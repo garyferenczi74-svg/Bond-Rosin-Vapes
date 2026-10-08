@@ -5,7 +5,7 @@ import { MemorySignupStore } from "./memory.ts";
 import type { SignupLedger } from "./types.ts";
 
 export async function readOwnerSignupLedger(role: string): Promise<SignupLedger | null> {
-  if (role !== "owner" && role !== "operator" && role !== "admin") return null;
+  if (role !== "owner") return null;
   if (signupBackend() === "memory") {
     const store = getSignupStore();
     if (store instanceof MemorySignupStore) return store.ledger();
