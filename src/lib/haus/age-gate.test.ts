@@ -773,7 +773,7 @@ test("one click replaces the birth date form and keeps the warning box", () => {
   assert.ok(scripted.includes(full));
 
   const css = read("bond-age-gate.css");
-  assert.match(css, /font-size: 9px/);
+  assert.match(css, /#bond-gate-cover \.bond-warn-license \{\s*font-size: 12\.5px;/);
   const boxRule = css.slice(css.indexOf(".bond-warn-box p {"), css.indexOf("}", css.indexOf(".bond-warn-box p {")));
   assert.equal(boxRule.includes("scale("), false);
   assert.equal(boxRule.includes("zoom"), false);

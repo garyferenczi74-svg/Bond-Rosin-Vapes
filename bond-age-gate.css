@@ -281,6 +281,25 @@ html[data-bond-age="ok"] .bond-age-dc {
   padding: 3px 9px 8px;
 }
 
+.bond-age-gate .bond-warn-box p,
+.bond-age-dc .bond-warn-box p,
+.bond-age-off .bond-warn-box p,
+#bond-gate-cover .bond-warn-box p,
+.bond-age-gate .bond-warn-hope,
+.bond-age-gate .bond-warn-hope a,
+.bond-age-gate .bond-warn-license,
+.bond-age-dc .bond-warn-hope,
+.bond-age-dc .bond-warn-hope a,
+.bond-age-dc .bond-warn-license,
+.bond-age-off .bond-warn-hope,
+.bond-age-off .bond-warn-hope a,
+.bond-age-off .bond-warn-license,
+#bond-gate-cover .bond-warn-hope,
+#bond-gate-cover .bond-warn-hope a,
+#bond-gate-cover .bond-warn-license {
+  font-size: 12.5px;
+}
+
 .bond-age-yes:focus-visible,
 .bond-age-no-btn:focus-visible,
 .bond-age-gate :focus-visible,
@@ -319,6 +338,30 @@ html[data-bond-age="ok"] .bond-age-dc {
   .bond-age-box {
     padding-top: 20px;
     padding-bottom: 20px;
+  }
+}
+
+@media (max-height: 768px), (max-width: 420px) {
+  .bond-age-box {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .bond-age-logo {
+    margin-bottom: 12px;
+  }
+
+  .bond-age-actions {
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
+
+  .bond-age-legal {
+    margin-top: 10px;
+  }
+
+  .bond-age-box .bond-warn {
+    margin-top: 12px;
   }
 }
 
