@@ -18,6 +18,7 @@ const tokenExpiry = fileURLToPath(new URL("../../../supabase/migrations/20261009
 const hasUpdate = fileURLToPath(new URL("../../../supabase/migrations/20261009233000_bond_has_haus_update.sql", import.meta.url));
 const reopt = fileURLToPath(new URL("../../../supabase/migrations/20261009234000_haus_update_reopt.sql", import.meta.url));
 const sessionBind = fileURLToPath(new URL("../../../supabase/migrations/20261009235000_session_grants_and_reopt_bind.sql", import.meta.url));
+const sessionPurge = fileURLToPath(new URL("../../../supabase/migrations/20261010001000_purge_expired_sessions.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -137,6 +138,15 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.equal(/GRANT .* ON TABLE public\.haus_sessions TO authenticated/.test(bindSql), false);
   assert.equal(/GRANT .* ON TABLE public\.dispensary_sessions TO anon/.test(bindSql), false);
   assert.equal(/GRANT .* ON TABLE public\.dispensary_sessions TO authenticated/.test(bindSql), false);
+  const purgeSql = readFileSync(sessionPurge, "utf8");
+  assert.match(purgeSql, /ALTER FUNCTION public\.bond_purge_expired_sessions\(\) OWNER TO bond_retention/);
+  assert.match(purgeSql, /GRANT DELETE ON TABLE public\.haus_sessions TO bond_retention/);
+  assert.match(purgeSql, /GRANT DELETE ON TABLE public\.dispensary_sessions TO bond_retention/);
+  assert.match(purgeSql, /'50 4 \* \* \*'/);
+  assert.match(purgeSql, /expires_at <= now\(\)/);
+  assert.equal(purgeSql.includes("GRANT SELECT"), false);
+  assert.equal(purgeSql.includes("GRANT INSERT"), false);
+  assert.equal(purgeSql.includes("GRANT UPDATE"), false);
 
   const database = `bond_signup_rls_${process.pid}_${Date.now()}`;
   try {
@@ -263,6 +273,8 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 \\i ${reopt}
 
 \\i ${sessionBind}
+
+\\i ${sessionPurge}
 
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
@@ -1255,6 +1267,84 @@ WHERE a.id = s.account_id AND a.email = 'harbor.buyer@example.test';
       assert.notEqual(deniedSession.status, 0, `${role} ${sql}`);
       assert.match(deniedSession.stderr, /permission denied/i, `${role} ${sql}`);
     }
+  }
+
+  const sessionPurgePrep = psqlSql(
+    database,
+    `
+INSERT INTO public.haus_sessions (email, email_hmac, expires_at)
+VALUES
+  ('expired@bond.test', repeat('e1', 32), now() - interval '1 hour'),
+  ('live@bond.test', repeat('e2', 32), now() + interval '1 day');
+INSERT INTO public.dispensary_sessions (account_id, expires_at)
+SELECT id, now() - interval '1 hour'
+FROM public.dispensary_accounts WHERE email = 'harbor.buyer@example.test';
+INSERT INTO public.dispensary_sessions (account_id, expires_at)
+SELECT id, now() + interval '1 day'
+FROM public.dispensary_accounts WHERE email = 'harbor.buyer@example.test';
+SELECT public.bond_purge_expired_sessions() AS purged_sessions;
+SELECT count(*) AS haus_expired FROM public.haus_sessions WHERE email = 'expired@bond.test';
+SELECT count(*) AS haus_live FROM public.haus_sessions WHERE email = 'live@bond.test';
+SELECT count(*) AS disp_expired FROM public.dispensary_sessions WHERE expires_at <= now();
+SELECT count(*) AS disp_live FROM public.dispensary_sessions s
+JOIN public.dispensary_accounts a ON a.id = s.account_id
+WHERE a.email = 'harbor.buyer@example.test' AND s.expires_at > now();
+SELECT r.rolname AS purge_owner
+FROM pg_proc p
+JOIN pg_roles r ON r.oid = p.proowner
+WHERE p.proname = 'bond_purge_expired_sessions';
+`,
+  );
+  console.log("SESSION_PURGE", sessionPurgePrep.stdout.trim());
+  if (sessionPurgePrep.status !== 0) console.log("SESSION_PURGE_ERR", sessionPurgePrep.stderr.trim());
+  assert.equal(sessionPurgePrep.status, 0, `${sessionPurgePrep.stdout}\n${sessionPurgePrep.stderr}`);
+  assert.match(sessionPurgePrep.stdout, /haus_expired[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(sessionPurgePrep.stdout, /haus_live[\s\S]{0,40}\n-+\n\s*1/);
+  assert.match(sessionPurgePrep.stdout, /disp_expired[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(sessionPurgePrep.stdout, /disp_live[\s\S]{0,40}\n-+\n\s*1/);
+  assert.match(sessionPurgePrep.stdout, /purge_owner[\s\S]{0,40}\n-+\n\s*bond_retention/);
+
+  const retentionPrivs = psqlSql(
+    database,
+    `
+SELECT has_table_privilege('bond_retention', 'public.haus_sessions', 'SELECT') AS ret_haus_select;
+SELECT has_table_privilege('bond_retention', 'public.haus_sessions', 'INSERT') AS ret_haus_insert;
+SELECT has_table_privilege('bond_retention', 'public.haus_sessions', 'UPDATE') AS ret_haus_update;
+SELECT has_table_privilege('bond_retention', 'public.haus_sessions', 'DELETE') AS ret_haus_delete;
+SELECT has_table_privilege('bond_retention', 'public.dispensary_sessions', 'SELECT') AS ret_disp_select;
+SELECT has_table_privilege('bond_retention', 'public.dispensary_sessions', 'INSERT') AS ret_disp_insert;
+SELECT has_table_privilege('bond_retention', 'public.dispensary_sessions', 'UPDATE') AS ret_disp_update;
+SELECT has_table_privilege('bond_retention', 'public.dispensary_sessions', 'DELETE') AS ret_disp_delete;
+`,
+  );
+  console.log("RETENTION_PRIVS", retentionPrivs.stdout.trim());
+  if (retentionPrivs.status !== 0) console.log("RETENTION_PRIVS_ERR", retentionPrivs.stderr.trim());
+  assert.equal(retentionPrivs.status, 0, `${retentionPrivs.stdout}\n${retentionPrivs.stderr}`);
+  for (const name of [
+    "ret_haus_select",
+    "ret_haus_insert",
+    "ret_haus_update",
+    "ret_disp_select",
+    "ret_disp_insert",
+    "ret_disp_update",
+  ]) {
+    assert.match(retentionPrivs.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*f`), name);
+  }
+  for (const name of ["ret_haus_delete", "ret_disp_delete"]) {
+    assert.match(retentionPrivs.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*t`), name);
+  }
+
+  for (const sql of [
+    "SELECT email FROM public.haus_sessions",
+    "INSERT INTO public.haus_sessions (email, email_hmac, expires_at) VALUES ('nope@bond.test', repeat('e3', 32), now() + interval '1 day')",
+    "UPDATE public.haus_sessions SET expires_at = now()",
+    "SELECT id FROM public.dispensary_sessions",
+    "UPDATE public.dispensary_sessions SET expires_at = now()",
+  ]) {
+    const deniedRetention = psqlSql(database, `SET ROLE bond_retention; ${sql};`);
+    console.log("DENIED_RETENTION", sql, deniedRetention.stderr.trim());
+    assert.notEqual(deniedRetention.status, 0, sql);
+    assert.match(deniedRetention.stderr, /permission denied/i, sql);
   }
   } finally {
     spawnSync(
