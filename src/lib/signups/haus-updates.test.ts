@@ -9,10 +9,9 @@ import {
   confirmHausUpdate,
   hausUpdateOptInAccepted,
   hausUpdatesDoubleOptInEnabled,
-  openHausMailToken,
+  isOpaqueHausToken,
   recordHausUpdateOptIn,
   rfc8058OneClick,
-  sealHausMailToken,
 } from "./haus-updates.ts";
 import { deliverHausUpdateConfirmation } from "./haus-updates-mail.ts";
 import { MemorySignupStore } from "./memory.ts";
@@ -91,7 +90,7 @@ test("a suppressed email is rejected and a repeat opt-in stays one row", async (
   assert.equal(store.listHausUpdates()[0]?.source, "haus_door");
 
   const hmac = hashLockoutValue(door.email);
-  await store.unsubscribeHausUpdate(door.email, hmac);
+  await store.unsubscribeHausUpdate(hmac);
   const again = await recordHausUpdateOptIn({ ...door, store, env: {} });
   assert.equal(again.ok, false);
   assert.equal(again.reason, "suppressed");
@@ -100,15 +99,23 @@ test("a suppressed email is rejected and a repeat opt-in stays one row", async (
 
 test("unsubscribe deletes the row, adds suppression, and rejects an invalid token", async () => {
   const store = new MemorySignupStore();
-  await recordHausUpdateOptIn({ ...door, store, env: {} });
-  const token = sealHausMailToken(door.email, "unsub");
-  assert.equal(openHausMailToken(token, "unsub"), door.email);
-  assert.equal(openHausMailToken(token, "confirm"), null);
-  assert.equal(openHausMailToken(`${token}tamper`, "unsub"), null);
-  assert.equal(openHausMailToken("hm1.unsub.aaaa.bbbb", "unsub"), null);
+  const recorded = await recordHausUpdateOptIn({ ...door, store, env: {} });
+  const token = recorded.unsubscribeToken ?? "";
+  assert.equal(isOpaqueHausToken(token), true);
+  assert.equal(token.includes("@"), false);
+  assert.equal(token.toLowerCase().includes("member"), false);
+  assert.equal(Buffer.from(token, "base64url").toString("utf8").includes(door.email), false);
+  assert.equal(store.readHausUpdateToken(token)?.purpose, "unsub");
+  assert.equal(store.listHausUpdates().length, 1);
 
   const invalid = await applyUnsubscribe("not-a-token", {
     recordHausUpdate() {
+      throw new Error("should not write");
+    },
+    issueHausUpdateToken() {
+      throw new Error("should not write");
+    },
+    readHausUpdateToken() {
       throw new Error("should not write");
     },
     unsubscribeHausUpdate() {
@@ -128,9 +135,23 @@ test("unsubscribe deletes the row, adds suppression, and rejects an invalid toke
   const ledger = store.ledger();
   assert.equal(ledger.updates.length, 0);
 
-  const confirmToken = sealHausMailToken(door.email, "confirm");
-  const wrong = await applyUnsubscribe(confirmToken, store);
+  const confirmOnly = new MemorySignupStore();
+  const withConfirm = await recordHausUpdateOptIn({
+    ...door,
+    store: confirmOnly,
+    env: { BOND_HAUS_UPDATES_DOUBLE_OPT_IN: "on" },
+    deliver: async (delivery) => {
+      assert.equal(delivery.confirmUrl.includes(door.email), false);
+      assert.equal(delivery.confirmUrl.includes("@"), false);
+      assert.match(delivery.confirmUrl, /token=[0-9a-f-]{36}/i);
+      return { attempted: false };
+    },
+  });
+  assert.equal(isOpaqueHausToken(withConfirm.confirmToken), true);
+  assert.equal((withConfirm.confirmToken ?? "").includes(door.email), false);
+  const wrong = await applyUnsubscribe(withConfirm.confirmToken, confirmOnly);
   assert.equal(wrong.ok, false);
+  assert.equal(confirmOnly.listHausUpdates().length, 1);
 });
 
 test("the double opt-in flag is off, so no send is attempted", async () => {
@@ -154,9 +175,16 @@ test("the double opt-in flag is off, so no send is attempted", async () => {
     assert.equal(store.listHausUpdates()[0]?.confirmedAt, null);
 
     let confirmWrites = 0;
-    const confirm = await confirmHausUpdate(sealHausMailToken(door.email, "confirm"), {
+    const confirm = await confirmHausUpdate("11111111-1111-4111-8111-111111111111", {
       recordHausUpdate() {
         return { ok: true };
+      },
+      issueHausUpdateToken() {
+        return { id: "11111111-1111-4111-8111-111111111111" };
+      },
+      readHausUpdateToken() {
+        confirmWrites += 1;
+        return { emailHmac: "ab".repeat(32), purpose: "confirm" };
       },
       unsubscribeHausUpdate() {
         return { ok: true };
@@ -197,15 +225,26 @@ test("the double opt-in flag is off, so no send is attempted", async () => {
   }
 
   const route = read("src/app/haus/unsubscribe/route.ts");
+  const unsubGet = route.slice(route.indexOf("export async function GET"), route.indexOf("export async function POST"));
   assert.match(route, /export async function GET/);
   assert.match(route, /export async function POST/);
   assert.match(route, /List-Unsubscribe=One-Click/);
   assert.match(route, /applyUnsubscribe/);
+  assert.equal(unsubGet.includes("applyUnsubscribe"), false);
+  assert.match(unsubGet, /confirmPage\(token\)/);
+  assert.match(route, /method="post"/);
   assert.equal(rfc8058OneClick("List-Unsubscribe=One-Click", null), true);
   assert.equal(rfc8058OneClick("", "List-Unsubscribe=One-Click"), true);
   assert.equal(rfc8058OneClick("token=1", null), false);
   const confirmRoute = read("src/app/haus/updates/confirm/route.ts");
+  const confirmGet = confirmRoute.slice(
+    confirmRoute.indexOf("export async function GET"),
+    confirmRoute.indexOf("export async function POST"),
+  );
   assert.match(confirmRoute, /confirmHausUpdate/);
+  assert.equal(confirmGet.includes("confirmHausUpdate("), false);
+  assert.match(confirmGet, /confirmPage\(token\)/);
+  assert.match(confirmRoute, /method="post"/);
   assert.equal(/\bfetch\s*\(/.test(confirmRoute), false);
   assert.equal(/\bfetch\s*\(/.test(route), false);
 });
@@ -223,22 +262,28 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   const terms = read("Terms.dc.html");
   assert.equal(privacy.includes("There is no Bond Haus email list"), false);
   assert.equal(terms.includes("There is no Bond Haus email list"), false);
-  assert.match(privacy, /Bond does not store a Haus correspondence preference/);
+  assert.equal(privacy.includes("Bond does not store a Haus correspondence preference"), false);
+  assert.equal(privacy.includes("unsubscribe page"), false);
+  assert.equal(privacy.includes("consented_at"), false);
   assert.match(
     privacy,
-    /If you opt in on the Haus door, Bond keeps your email, the time you consented, and the source, so Bond can send Bond Haus updates\. That opt in is separate from a product request and it starts unticked\./,
+    /If you opt in on the Haus door, Bond keeps your email, the consent time \(consent_at\), and the source, so Bond can send Bond Haus updates\. That opt in is separate from a product request and it starts unticked\. The Haus door form sends whether the age gate flag is present on this browser\./,
   );
   assert.match(
     privacy,
-    /Bond Haus updates are opt in\. You can unsubscribe from a link in every email, or from the unsubscribe page\. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again\./,
+    /Bond Haus updates are opt in\. You can unsubscribe from the link in any email\. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again\. Bond keeps that hash for as long as it needs to honor the unsubscribe\./,
   );
-  assert.match(privacy, /Bond keeps that email, the consent time, and the source until you unsubscribe\./);
+  assert.match(
+    privacy,
+    /If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later\. When you unsubscribe, Bond deletes the email sooner\. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe\./,
+  );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);
+  assert.match(privacy, /The Home Haus form stores nothing and sends nothing\. Nothing else\./);
   for (const sentence of [
-    "If you opt in on the Haus door, Bond keeps your email, the time you consented, and the source, so Bond can send Bond Haus updates. That opt in is separate from a product request and it starts unticked.",
-    "Bond Haus updates are opt in. You can unsubscribe from a link in every email, or from the unsubscribe page. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again.",
-    "Bond keeps that email, the consent time, and the source until you unsubscribe. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
+    "If you opt in on the Haus door, Bond keeps your email, the consent time (consent_at), and the source, so Bond can send Bond Haus updates. That opt in is separate from a product request and it starts unticked. The Haus door form sends whether the age gate flag is present on this browser.",
+    "Bond Haus updates are opt in. You can unsubscribe from the link in any email. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again. Bond keeps that hash for as long as it needs to honor the unsubscribe.",
+    "If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
   ]) {
     assert.equal(sentence.includes("!"), false);
     assert.equal(sentence.includes(String.fromCharCode(0x2013)), false);
@@ -256,11 +301,22 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   assert.match(migration, /email_hmac text PRIMARY KEY/);
   assert.match(migration, /created_at timestamptz NOT NULL/);
   assert.match(migration, /USING \(public\.is_owner\(\)\)/);
-  assert.match(migration, /FOR INSERT\s+TO anon/);
   assert.match(migration, /haus_updates_suppression suppressed/);
-  assert.equal(migration.includes("GRANT UPDATE"), false);
-  assert.equal(migration.includes("GRANT DELETE"), false);
   assert.equal(migration.includes("is_admin()"), false);
+  const hold = read("supabase/migrations/20261009203000_haus_updates_hold.sql");
+  assert.match(hold, /DROP POLICY IF EXISTS haus_updates_anon_insert/);
+  assert.match(hold, /REVOKE ALL ON TABLE public\.haus_updates FROM anon/);
+  assert.match(hold, /REVOKE ALL ON TABLE public\.haus_updates FROM service_role/);
+  assert.match(hold, /REVOKE ALL ON TABLE public\.haus_updates_suppression FROM service_role/);
+  assert.match(hold, /bond\.haus_update_via_function/);
+  assert.match(hold, /bond_purge_haus_updates/);
+  assert.match(hold, /GREATEST\(consent_at, COALESCE\(confirmed_at, consent_at\)\)/);
+  assert.match(hold, /'45 4 \* \* \*'/);
+  assert.match(hold, /CREATE TABLE public\.haus_update_tokens/);
+  assert.match(hold, /email_hmac text NOT NULL/);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_updates TO anon/.test(hold), false);
+  assert.equal(hold.includes("is_admin()"), false);
+  assert.equal(hold.includes("consented_at"), false);
 });
 
 test("a missing hash key in production does not store the update", async () => {

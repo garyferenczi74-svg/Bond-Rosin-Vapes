@@ -257,18 +257,40 @@ export class RemoteSignupStore {
     return { ok: true };
   }
 
-  async unsubscribeHausUpdate(email: string, emailHmac: string): Promise<{ ok: boolean }> {
+  async issueHausUpdateToken(
+    emailHmac: string,
+    purpose: "unsub" | "confirm",
+  ): Promise<{ id: string }> {
+    const { data, error } = await client().rpc("bond_issue_haus_update_token", {
+      p_email_hmac: emailHmac,
+      p_purpose: purpose,
+    });
+    if (error || typeof data !== "string" || !data) throw new Error("Haus update token was not stored.");
+    return { id: data };
+  }
+
+  async readHausUpdateToken(
+    id: string,
+  ): Promise<{ emailHmac: string; purpose: "unsub" | "confirm" } | null> {
+    const { data, error } = await client().rpc("bond_read_haus_update_token", { p_id: id });
+    if (error || !data || typeof data !== "object") return null;
+    const row = data as { email_hmac?: unknown; purpose?: unknown };
+    if (row.purpose !== "unsub" && row.purpose !== "confirm") return null;
+    if (typeof row.email_hmac !== "string") return null;
+    return { emailHmac: row.email_hmac, purpose: row.purpose };
+  }
+
+  async unsubscribeHausUpdate(emailHmac: string): Promise<{ ok: boolean }> {
     const { data, error } = await client().rpc("bond_unsubscribe_haus_update", {
-      p_email: email,
       p_email_hmac: emailHmac,
     });
     if (error || data !== true) throw new Error("Unsubscribe was not stored.");
     return { ok: true };
   }
 
-  async confirmHausUpdate(email: string): Promise<{ ok: boolean }> {
+  async confirmHausUpdate(emailHmac: string): Promise<{ ok: boolean }> {
     const { data, error } = await client().rpc("bond_confirm_haus_update", {
-      p_email: email,
+      p_email_hmac: emailHmac,
     });
     if (error || data !== true) return { ok: false };
     return { ok: true };

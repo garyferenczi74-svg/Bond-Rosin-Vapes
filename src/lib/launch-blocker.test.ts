@@ -97,17 +97,22 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.equal(privacy.includes("Site analytics:"), false);
   assert.match(privacy, /This site does not use analytics/);
   assert.equal(privacy.includes("Correspondence preference"), false);
-  assert.match(privacy, /Bond does not store a Haus correspondence preference/);
+  assert.equal(privacy.includes("Bond does not store a Haus correspondence preference"), false);
+  assert.equal(privacy.includes("unsubscribe page"), false);
+  assert.equal(privacy.includes("consented_at"), false);
   assert.equal(privacy.includes("There is no Bond Haus email list"), false);
   assert.match(
     privacy,
-    /If you opt in on the Haus door, Bond keeps your email, the time you consented, and the source, so Bond can send Bond Haus updates\./,
+    /If you opt in on the Haus door, Bond keeps your email, the consent time \(consent_at\), and the source, so Bond can send Bond Haus updates\. That opt in is separate from a product request and it starts unticked\. The Haus door form sends whether the age gate flag is present on this browser\./,
   );
   assert.match(
     privacy,
-    /You can unsubscribe from a link in every email, or from the unsubscribe page\. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again\./,
+    /You can unsubscribe from the link in any email\. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again\. Bond keeps that hash for as long as it needs to honor the unsubscribe\./,
   );
-  assert.match(privacy, /Bond keeps that email, the consent time, and the source until you unsubscribe\./);
+  assert.match(
+    privacy,
+    /If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later\./,
+  );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);
   assert.equal(read("Terms.dc.html").includes("There is no Bond Haus email list"), false);

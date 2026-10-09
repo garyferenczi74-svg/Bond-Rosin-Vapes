@@ -36,9 +36,13 @@ hibp_enabled = true
 # The keyed-hash migration deletes pre-existing auth_attempts rows. It does
 # not backfill them. SQL cannot compute the HMAC without this key.
 #
-# Bond Haus updates. Apply 20261009190000_haus_updates_optin.sql in the same
-# window, after the owner read migration, and before or with the Privacy
-# deploy. Never after. Do not apply it from this PR.
+# Bond Haus updates. Apply 20261009190000_haus_updates_optin.sql and then
+# 20261009203000_haus_updates_hold.sql in the same window, after the owner
+# read migration, and before or with the Privacy deploy. Never after. Do not
+# apply them from this PR. The hold migration drops the anon insert, stores
+# email_hmac, and schedules bond_purge_haus_updates at 45 4 * * *. That job
+# deletes haus_updates rows 24 months after consent_at, or after confirmed_at
+# when that is later. It does not delete haus_updates_suppression.
 # Leave BOND_HAUS_UPDATES_DOUBLE_OPT_IN unset. Confirmation mail stays off
 # until a provider is named on the Privacy page. BOND_HASH_KEY is also the
 # key for haus_updates_suppression. Do not send from a preview.

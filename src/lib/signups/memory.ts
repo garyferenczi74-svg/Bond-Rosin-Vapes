@@ -49,7 +49,9 @@ export class MemorySignupStore {
   private haus: HausSignupRecord[] = [];
   private hausSessions = new Map<string, HausSessionRow>();
   private updates = new Map<string, HausUpdateRecord>();
+  private updateHmac = new Map<string, string>();
   private updateSuppression = new Set<string>();
+  private updateTokens = new Map<string, { emailHmac: string; purpose: "unsub" | "confirm" }>();
 
   constructor() {
     for (const row of seedRecords()) this.accounts.set(row.id, row);
@@ -192,21 +194,42 @@ export class MemorySignupStore {
         source: origin,
         confirmedAt: null,
       });
+      this.updateHmac.set(mark, emailHmac);
     }
     return { ok: true };
   }
 
-  unsubscribeHausUpdate(email: string, emailHmac: string): { ok: boolean } {
-    this.updates.delete(email.trim().toLowerCase());
+  issueHausUpdateToken(emailHmac: string, purpose: "unsub" | "confirm"): { id: string } {
+    const id = randomUUID();
+    this.updateTokens.set(id, { emailHmac, purpose });
+    return { id };
+  }
+
+  readHausUpdateToken(id: string): { emailHmac: string; purpose: "unsub" | "confirm" } | null {
+    const row = this.updateTokens.get(id);
+    return row ? { ...row } : null;
+  }
+
+  unsubscribeHausUpdate(emailHmac: string): { ok: boolean } {
+    for (const [email, hmac] of this.updateHmac) {
+      if (hmac === emailHmac) {
+        this.updates.delete(email);
+        this.updateHmac.delete(email);
+      }
+    }
     if (emailHmac) this.updateSuppression.add(emailHmac);
     return { ok: true };
   }
 
-  confirmHausUpdate(email: string): { ok: boolean } {
-    const row = this.updates.get(email.trim().toLowerCase());
-    if (!row) return { ok: false };
-    if (!row.confirmedAt) row.confirmedAt = nowIso();
-    return { ok: true };
+  confirmHausUpdate(emailHmac: string): { ok: boolean } {
+    for (const [email, hmac] of this.updateHmac) {
+      if (hmac !== emailHmac) continue;
+      const row = this.updates.get(email);
+      if (!row) return { ok: false };
+      if (!row.confirmedAt) row.confirmedAt = nowIso();
+      return { ok: true };
+    }
+    return { ok: false };
   }
 
   listHausUpdates(): HausUpdateRecord[] {
