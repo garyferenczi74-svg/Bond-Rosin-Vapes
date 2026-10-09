@@ -1,22 +1,36 @@
-// In-page age gate for static pages. Same session key and age rule as AgeGate.dc.html.
+// In-page age gate for static pages. Same localStorage key as AgeGate.dc.html.
 // This file stays on the site origin. It does not load a third party script.
 (function () {
   var KEY = "bond_age_ok";
-  var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var MAX = 30 * 24 * 60 * 60 * 1000;
 
-  function bondAgeDecision(month, year, now) {
-    if (month === "" || year === "") return "wait";
-    var born = new Date(parseInt(year, 10), parseInt(month, 10), 1);
-    var age = now.getFullYear() - born.getFullYear();
-    if (now.getMonth() < born.getMonth()) age = age - 1;
-    if (age >= 21) return "enter";
-    return "decline";
+  function readStore(store) {
+    try { return store.getItem(KEY); } catch (e) { return null; }
   }
 
-  try { localStorage.removeItem(KEY); } catch (e) {}
+  function freshTime(raw, now) {
+    if (raw == null || raw === "") return null;
+    var t = null;
+    try {
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        if (parsed.ok === true && typeof parsed.t === "number" && isFinite(parsed.t)) t = parsed.t;
+        else return null;
+      }
+    } catch (e) {}
+    if (t == null && /^\d+$/.test(String(raw))) t = Number(raw);
+    if (t == null || !isFinite(t)) return null;
+    var age = now - t;
+    if (age < 0 || age >= MAX) return null;
+    return t;
+  }
 
-  function readAge() {
-    try { return sessionStorage.getItem(KEY); } catch (e) { return null; }
+  function stamp(t) {
+    return JSON.stringify({ ok: true, t: t });
+  }
+
+  function drop(store) {
+    try { store.removeItem(KEY); } catch (e) {}
   }
 
   var floor = document.querySelector(".bond-floor");
@@ -28,53 +42,102 @@
     try { window.dispatchEvent(new CustomEvent("bond-entered")); } catch (e) {}
   }
 
-  var stored = readAge();
-  if (stored != null && stored !== "") {
+  var now = Date.now();
+  var localRaw = readStore(localStorage);
+  var sessionRaw = readStore(sessionStorage);
+  var localT = freshTime(localRaw, now);
+  var sessionT = freshTime(sessionRaw, now);
+
+  if (localT != null) {
+    if (localRaw !== stamp(localT)) {
+      try { localStorage.setItem(KEY, stamp(localT)); } catch (e) {}
+    }
+    if (sessionRaw != null) drop(sessionStorage);
     openFloor();
     return;
   }
+  if (sessionT != null) {
+    try { localStorage.setItem(KEY, stamp(sessionT)); } catch (e) {}
+    drop(sessionStorage);
+    openFloor();
+    return;
+  }
+  if (localRaw) drop(localStorage);
+  if (sessionRaw) drop(sessionStorage);
 
   if (!root) return;
 
-  var monthEl = document.getElementById("bond-age-month");
-  var yearEl = document.getElementById("bond-age-year");
-  var enterEl = document.getElementById("bond-age-enter");
-  var affirmEl = document.getElementById("bond-age-affirm");
-  if (monthEl == null || yearEl == null || enterEl == null || affirmEl == null) return;
+  var yesEl = document.getElementById("bond-age-yes");
+  var noEl = document.getElementById("bond-age-no");
+  var deniedEl = document.getElementById("bond-gate-denied-h");
+  if (yesEl == null || noEl == null) return;
 
-  var nowYear = new Date().getFullYear();
-  var y;
-  for (var i = 0; i < MONTHS.length; i++) {
-    var monthOpt = document.createElement("option");
-    monthOpt.value = String(i);
-    monthOpt.textContent = MONTHS[i];
-    monthEl.appendChild(monthOpt);
-  }
-  for (y = nowYear; y >= nowYear - 100; y--) {
-    var yearOpt = document.createElement("option");
-    yearOpt.value = String(y);
-    yearOpt.textContent = String(y);
-    yearEl.appendChild(yearOpt);
-  }
-
-  function syncReady() {
-    var ready = monthEl.value !== "" && yearEl.value !== "" && affirmEl.checked === true;
-    enterEl.setAttribute("data-ready", ready ? "true" : "false");
+  function controlsIn(node) {
+    var out = [];
+    if (!node || !node.querySelectorAll) return out;
+    var list = node.querySelectorAll("a[href], button, input, select, textarea");
+    for (var i = 0; i < list.length; i++) {
+      var el = list[i];
+      if (el.disabled) continue;
+      if (el.tabIndex < 0) continue;
+      var st = window.getComputedStyle(el);
+      if (st.display === "none" || st.visibility === "hidden") continue;
+      if (!el.getClientRects || el.getClientRects().length === 0) continue;
+      out.push(el);
+    }
+    return out;
   }
 
-  monthEl.addEventListener("change", syncReady);
-  yearEl.addEventListener("change", syncReady);
-  affirmEl.addEventListener("change", syncReady);
-
-  enterEl.addEventListener("click", function () {
-    if (affirmEl.checked !== true) return;
-    var decision = bondAgeDecision(monthEl.value, yearEl.value, new Date());
-    if (decision === "wait") return;
-    if (decision === "enter") {
-      try { sessionStorage.setItem(KEY, String(Date.now())); } catch (e) {}
-      openFloor();
+  function onTab(ev) {
+    if (ev.key !== "Tab") return;
+    if (document.documentElement.getAttribute("data-bond-age") === "ok") return;
+    var controls = controlsIn(root);
+    if (!controls.length) {
+      ev.preventDefault();
       return;
     }
+    var idx = -1;
+    for (var i = 0; i < controls.length; i++) {
+      if (controls[i] === document.activeElement) { idx = i; break; }
+    }
+    var next;
+    if (idx === -1) next = ev.shiftKey ? controls.length - 1 : 0;
+    else if (ev.shiftKey) next = idx === 0 ? controls.length - 1 : idx - 1;
+    else next = idx === controls.length - 1 ? 0 : idx + 1;
+    ev.preventDefault();
+    controls[next].focus();
+  }
+
+  function onFocusIn(ev) {
+    if (document.documentElement.getAttribute("data-bond-age") === "ok") return;
+    var t = ev.target;
+    if (!t || t === document.body || t === document.documentElement) return;
+    if (t === root || (root.contains && root.contains(t))) return;
+    var controls = controlsIn(root);
+    if (controls.length && document.activeElement !== controls[0]) controls[0].focus();
+  }
+
+  document.addEventListener("keydown", onTab, true);
+  document.addEventListener("focusin", onFocusIn, true);
+
+  var tries = 0;
+  function focusYes() {
+    if (yesEl) yesEl.focus({ preventScroll: true });
+    tries += 1;
+    if (document.activeElement === yesEl || tries >= 20) return;
+    setTimeout(focusYes, 60);
+  }
+  setTimeout(focusYes, 60);
+
+  yesEl.addEventListener("click", function () {
+    var t = Date.now();
+    try { localStorage.setItem(KEY, stamp(t)); } catch (e) {}
+    openFloor();
+  });
+
+  noEl.addEventListener("click", function () {
     root.setAttribute("data-declined", "true");
+    root.setAttribute("aria-labelledby", "bond-gate-denied-h");
+    if (deniedEl) deniedEl.focus();
   });
 })();

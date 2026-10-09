@@ -8,10 +8,10 @@ import {
   HAUS_FONT_LATE,
   HAUS_FONT_LATE_CSS,
   BOND_AGE_KEY,
-  BOND_AGE_MONTHS,
+  BOND_AGE_MS,
   HAUS_AGE_BOOT,
-  bondAgeDecision,
-  bondAgeEntry,
+  bondAgeStamp,
+  bondAgeTimestamp,
   hausRouteShowsAgeGate,
   hausShowsAgeGate,
   markBondAgePassed,
@@ -49,22 +49,36 @@ function bootMark(stored: string | null, blocked = false): string | null {
 }
 
 test("AgeGate shows on an unverified Haus door or floor and skips when the session is already verified", () => {
-  assert.equal(hausShowsAgeGate(null), true);
-  assert.equal(hausShowsAgeGate(""), true);
-  assert.equal(hausShowsAgeGate("1710000000000"), false);
+  const now = Date.now();
+  const fresh = String(now);
+  const freshJson = bondAgeStamp(now);
+  const expired = "1710000000000";
+
+  assert.equal(hausShowsAgeGate(null, now), true);
+  assert.equal(hausShowsAgeGate("", now), true);
+  assert.equal(hausShowsAgeGate(expired, now), true);
+  assert.equal(hausShowsAgeGate("nope", now), true);
+  assert.equal(hausShowsAgeGate(fresh, now), false);
+  assert.equal(hausShowsAgeGate(freshJson, now), false);
+  assert.equal(bondAgeTimestamp(fresh, now), now);
+  assert.equal(bondAgeTimestamp(expired, now), null);
+  assert.equal(bondAgeTimestamp('{"ok":false,"t":1}', now), null);
+  assert.equal(bondAgeTimestamp(String(now + 60_000), now), null);
 
   assert.equal(hausRouteShowsAgeGate("/haus", null), true);
-  assert.equal(hausRouteShowsAgeGate("/haus", "1710000000000"), false);
+  assert.equal(hausRouteShowsAgeGate("/haus", fresh), false);
+  assert.equal(hausRouteShowsAgeGate("/haus", expired), true);
   assert.equal(hausRouteShowsAgeGate("/haus/welcome", null), true);
-  assert.equal(hausRouteShowsAgeGate("/haus/welcome", "1710000000000"), false);
+  assert.equal(hausRouteShowsAgeGate("/haus/welcome", fresh), false);
   assert.equal(hausRouteShowsAgeGate("/haus/salon", null), true);
-  assert.equal(hausRouteShowsAgeGate("/haus/salon", "1710000000000"), false);
+  assert.equal(hausRouteShowsAgeGate("/haus/salon", fresh), false);
   assert.equal(hausRouteShowsAgeGate("/vauxhall/haus", null), false);
 
   for (const path of ["/faq", "/privacy", "/terms", "/order", "/haus", "/haus/welcome"]) {
     assert.equal(routeShowsAgeGate(path, null), true, path);
     assert.equal(routeShowsAgeGate(path, ""), true, path);
-    assert.equal(routeShowsAgeGate(path, "1710000000000"), false, path);
+    assert.equal(routeShowsAgeGate(path, fresh), false, path);
+    assert.equal(routeShowsAgeGate(path, expired), true, path);
   }
   assert.equal(routeShowsAgeGate("/faq/", null), true);
   assert.equal(routeShowsAgeGate("/", null), false);
@@ -72,8 +86,12 @@ test("AgeGate shows on an unverified Haus door or floor and skips when the sessi
 
   assert.equal(bootMark(null), null);
   assert.equal(bootMark(""), null);
-  assert.equal(bootMark("1710000000000"), "ok");
+  assert.equal(bootMark(expired), null);
+  assert.equal(bootMark("nope"), null);
+  assert.equal(bootMark(fresh), "ok");
+  assert.equal(bootMark(freshJson), "ok");
   assert.equal(bootMark(null, true), null);
+  assert.equal(BOND_AGE_MS, 30 * 24 * 60 * 60 * 1000);
 });
 
 test("Haus and order render the native gate and the old host stays unpublished", () => {
@@ -128,8 +146,9 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.equal(AGE_GATE_CRITICAL.includes("var(--matte-black,"), false);
   assert.equal(AGE_GATE_CRITICAL.includes("var(--bone,"), false);
   assert.match(AGE_GATE_CRITICAL, /\.bond-age-gate \.bond-age-ask \.bond-age-body/);
-  assert.match(gate, /aria-label="Birth month"/);
-  assert.match(gate, /aria-label="Birth year"/);
+  assert.match(gate, /role="dialog"/);
+  assert.match(gate, /aria-modal="true"/);
+  assert.match(gate, /aria-labelledby="\{\{ headingId \}\}"/);
   assert.equal(AGE_GATE_CRITICAL.includes("woff2"), false);
   assert.equal(AGE_GATE_CRITICAL.includes("font-display"), false);
   assert.match(HAUS_FONT_LATE_CSS, /font-display:swap/);
@@ -152,7 +171,11 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.equal(filesBlock.includes("haus-age-host.dc.html"), false);
   assert.match(blockedBlock, /haus-age-host\.dc\.html/);
   assert.match(gate, /sessionStorage\.getItem\('bond_age_ok'\)/);
-  assert.match(gate, /sessionStorage\.setItem\('bond_age_ok'/);
+  assert.match(gate, /localStorage\.setItem\('bond_age_ok'/);
+  assert.equal(gate.includes("sessionStorage.setItem('bond_age_ok'"), false);
+  assert.match(gate, /Yes, I am 21 or older/);
+  assert.equal(gate.includes("Yes, enter"), false);
+  assert.equal(gate.includes("Birth month"), false);
   assert.match(read("bond-age-gate.css"), /var\(--font-didot\)/);
   assert.equal(read("src/app/haus/haus-client.tsx").includes("AgeGate"), false);
   assert.equal(read("src/components/haus-frame.tsx").includes("AgeGate"), false);
@@ -188,9 +211,12 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
     assert.match(html, /src="\/bond-age-gate\.js"/, name);
     assert.match(html, /sessionStorage\.getItem\("bond_age_ok"\)/, name);
     assert.match(html, /class="bond-floor" inert/, name);
-    assert.match(html, /Please confirm your age\./, name);
-    assert.match(html, /Birth month/, name);
-    assert.match(html, /Not yet/, name);
+    assert.match(html, /Are you 21 or older\?/, name);
+    assert.match(html, /Yes, I am 21 or older/, name);
+    assert.match(html, />No</, name);
+    assert.equal(html.includes("Birth month"), false, name);
+    assert.equal(html.includes("Not yet"), false, name);
+    assert.equal(html.includes("Please confirm your age."), false, name);
     assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-floor \{ visibility: hidden; \}/, name);
     assert.equal(html.includes("haus-age-host"), false, name);
     assert.equal(html.includes("<iframe"), false, name);
@@ -200,36 +226,26 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
     assert.equal(html.includes("sessionStorage.setItem('bond_age_ok'"), false, name);
   }
 
-  assert.match(gateJs, /sessionStorage\.setItem\(KEY, String\(Date\.now\(\)\)\)/);
-  assert.match(gateJs, /localStorage\.removeItem\(KEY\)/);
+  assert.match(gateJs, /localStorage\.setItem\(KEY, stamp\(t\)\)/);
+  assert.equal(gateJs.includes("sessionStorage.setItem"), false);
+  assert.match(gateJs, /removeItem\(KEY\)/);
   assert.match(gateJs, /data-declined", "true"/);
-  assert.match(gateView, /sessionStorage\.setItem\(BOND_AGE_KEY, String\(Date\.now\(\)\)\)/);
-  assert.match(gateView, /Please confirm your age\./);
-  assert.match(gateView, /Not yet/);
+  assert.match(gateView, /localStorage\.setItem\(BOND_AGE_KEY, bondAgeStamp\(t\)\)/);
+  assert.equal(gateView.includes("sessionStorage.setItem"), false);
+  assert.match(gateView, /Are you 21 or older\?/);
+  assert.match(gateView, /Come back when you&apos;re 21\./);
+  assert.equal(gateView.includes("Not yet"), false);
+  assert.equal(gateView.includes("Birth month"), false);
   assert.match(gateCss, /transition-property: opacity/);
   const reduced = gateCss.slice(gateCss.indexOf("@media (prefers-reduced-motion: reduce)"));
   assert.equal(reduced.includes("translate"), false);
   assert.equal(reduced.includes("scale"), false);
   assert.match(reduced, /transform: none/);
 
-  const fnMatch = gateJs.match(/function bondAgeDecision\(month, year, now\) \{[\s\S]*?\n  \}/);
-  assert.ok(fnMatch);
-  const bondAgeDecisionJs = new Function(`return (${fnMatch[1] ?? fnMatch[0]})`)() as typeof bondAgeDecision;
-  const monthList = gateJs.match(/var MONTHS = (\[[\s\S]*?\]);/);
-  assert.ok(monthList);
-  assert.deepEqual(JSON.parse(monthList[1].replace(/'/g, '"')), [...BOND_AGE_MONTHS]);
-  const samples = [
-    ["", "1990", new Date(2026, 8, 27), "wait"],
-    ["0", "", new Date(2026, 8, 27), "wait"],
-    ["0", "1990", new Date(2026, 8, 27), "enter"],
-    ["8", "2005", new Date(2026, 8, 27), "enter"],
-    ["9", "2005", new Date(2026, 8, 27), "decline"],
-    ["0", "2006", new Date(2026, 8, 27), "decline"],
-  ] as const;
-  for (const [month, year, now, expected] of samples) {
-    assert.equal(bondAgeDecision(month, year, now), expected);
-    assert.equal(bondAgeDecisionJs(month, year, now), expected);
-  }
+  assert.equal(gateJs.includes("bondAgeDecision"), false);
+  assert.equal(gateJs.includes("document.cookie"), false);
+  assert.match(gateJs, /getElementById\("bond-age-yes"\)/);
+  assert.match(gateJs, /getElementById\("bond-age-no"\)/);
 
   const band = read("src/components/compliance-band.tsx");
   const warnings = read("src/lib/bond-warnings.ts");
@@ -268,42 +284,49 @@ test("the shared bond_age_ok key clears the gate both ways and under 21 writes n
   const marketing = read("AgeGate.dc.html");
   const view = read("src/components/bond-age-gate.tsx");
   const gateJs = read("bond-age-gate.js");
-  const stored = "1710000000000";
+  const now = Date.now();
+  const stored = bondAgeStamp(now);
+  const expired = "1710000000000";
 
-  assert.match(marketing, /sessionStorage\.setItem\('bond_age_ok'/);
+  assert.match(marketing, /localStorage\.setItem\('bond_age_ok'/);
+  assert.equal(marketing.includes("sessionStorage.setItem('bond_age_ok'"), false);
   assert.match(marketing, /sessionStorage\.getItem\('bond_age_ok'\)/);
-  assert.match(marketing, /if \(raw\)/);
+  assert.match(marketing, /if \(localRaw\)/);
   assert.equal(BOND_AGE_KEY, "bond_age_ok");
 
   for (const path of ["/haus", "/faq", "/privacy", "/terms", "/order"]) {
     assert.equal(routeShowsAgeGate(path, stored), false, path);
+    assert.equal(routeShowsAgeGate(path, expired), true, path);
     assert.equal(routeShowsAgeGate(path, null), true, path);
   }
-  assert.equal(hausShowsAgeGate(stored), false);
-  assert.equal(bootMark(stored), "ok");
+  assert.equal(hausShowsAgeGate(stored, now), false);
+  assert.equal(hausShowsAgeGate(expired, now), true);
+  assert.equal(bootMark(String(now)), "ok");
+  assert.equal(bootMark(expired), null);
   assert.equal(bootMark(null), null);
 
-  const enterAt = gateJs.indexOf('if (decision === "enter")');
-  const setAt = gateJs.indexOf("sessionStorage.setItem");
+  const yesAt = gateJs.indexOf('yesEl.addEventListener("click"');
+  const setAt = gateJs.indexOf("localStorage.setItem(KEY, stamp(t))");
   const declineAt = gateJs.indexOf('root.setAttribute("data-declined", "true")');
-  assert.ok(enterAt > 0 && setAt > enterAt && declineAt > setAt);
+  assert.ok(yesAt > 0 && setAt > yesAt && declineAt > setAt);
+  const noHandler = gateJs.slice(declineAt, declineAt + 220);
+  assert.equal(noHandler.includes("setItem"), false);
+  assert.equal(noHandler.includes("cookie"), false);
 
-  const viewDecline = view.indexOf('if (decision === "decline")');
-  const viewSet = view.indexOf("sessionStorage.setItem");
-  assert.ok(viewDecline > 0 && viewDecline < viewSet);
-  assert.match(view, /setDeclined\(true\)/);
-  assert.equal(bondAgeDecision("0", "2006", new Date(2026, 8, 27)), "decline");
-  assert.equal(bondAgeDecision("0", "1990", new Date(2026, 8, 27)), "enter");
+  const viewNo = view.indexOf("setDeclined(true)");
+  const viewSet = view.indexOf("localStorage.setItem(BOND_AGE_KEY, bondAgeStamp(t))");
+  assert.ok(viewNo > 0 && viewSet > 0);
+  assert.match(view, /onClick=\{\(\) => setDeclined\(true\)\}/);
   assert.match(gateJs, /document\.documentElement\.dataset\.bondAge = "ok"/);
   assert.match(view, /markBondAgePassed\(document\.documentElement\)/);
   assert.equal(HAUS_FONT_LATE_CSS.includes("Didot Fallback"), false);
   assert.match(HAUS_FONT_LATE_CSS, /font-family:"GFS Didot",Didot,serif/);
 });
 
-function marketingEnterSource(): string {
+function methodSource(marker: string): string {
   const source = read("AgeGate.dc.html");
-  const start = source.indexOf("enter: () => {");
-  assert.ok(start > 0);
+  const start = source.indexOf(marker);
+  assert.ok(start > 0, marker);
   const bodyStart = source.indexOf("{", start);
   let depth = 0;
   let end = bodyStart;
@@ -338,7 +361,7 @@ function mainDisplayed(html: string, ageOk: boolean): boolean {
   return ageOk && html.includes('html[data-bond-age="ok"] #bond-gate-cover{display:none}');
 }
 
-function runGate(html: string, month: string, year: string, ofAge = true) {
+function runGate(html: string, choice: "yes" | "no") {
   const dataset: { bondAge?: string } = {};
   const store = new Map<string, string>();
   const scripts: string[] = [];
@@ -361,6 +384,9 @@ function runGate(html: string, month: string, year: string, ofAge = true) {
         scripts.push(el.src);
       },
     },
+    getElementById() {
+      return null;
+    },
   };
   const window = {
     addEventListener(type: string, fn: (ev: Event) => void) {
@@ -373,7 +399,7 @@ function runGate(html: string, month: string, year: string, ofAge = true) {
       return true;
     },
   };
-  const sessionStorage = {
+  const localStorage = {
     setItem(key: string, value: string) {
       store.set(key, value);
     },
@@ -382,46 +408,178 @@ function runGate(html: string, month: string, year: string, ofAge = true) {
     },
   };
   const self = {
-    setState(next: { declined?: boolean }) {
+    setState(next: { declined?: boolean; verified?: boolean }) {
       if (next.declined) declined = true;
     },
   };
   const arm = new Function("document", "window", slotScript(html));
   arm(document, window);
-  const enter = new Function(
-    "month",
-    "year",
-    "ofAge",
-    "document",
-    "sessionStorage",
-    "window",
-    "CustomEvent",
-    marketingEnterSource(),
-  );
-  enter.call(self, month, year, ofAge, document, sessionStorage, window, CustomEvent);
+  const body = choice === "yes" ? methodSource("enter: () => {") : methodSource("decline: () => {");
+  const fn = new Function("document", "localStorage", "window", "CustomEvent", "setTimeout", body);
+  fn.call(self, document, localStorage, window, CustomEvent, () => 0);
   return { dataset, store, scripts, declined };
+}
+
+type GateEl = {
+  id: string;
+  disabled: boolean;
+  tabIndex: number;
+  focus: () => void;
+  getClientRects: () => number[];
+};
+
+function loadStaticGate(localSeed: Map<string, string>, sessionSeed: Map<string, string>) {
+  const localMap = new Map(localSeed);
+  const sessionMap = new Map(sessionSeed);
+  const clicks = new Map<string, () => void>();
+  const keydowns: Array<(ev: { key: string; shiftKey: boolean; preventDefault: () => void }) => void> = [];
+  const focusins: Array<(ev: { target: unknown }) => void> = [];
+  const timers: Array<() => void> = [];
+  let active: GateEl | null = null;
+  const dataset: { bondAge?: string } = {};
+  const attrs: Record<string, string> = {};
+  function make(id: string, tabIndex = 0): GateEl {
+    const el: GateEl = {
+      id,
+      disabled: false,
+      tabIndex,
+      focus() {
+        active = el;
+      },
+      getClientRects() {
+        return [1];
+      },
+    };
+    return el;
+  }
+  const yes = make("bond-age-yes");
+  const no = make("bond-age-no");
+  const denied = make("bond-gate-denied-h", -1);
+  const hope = make("hope");
+  const root = {
+    setAttribute(name: string, value: string) {
+      attrs[name] = value;
+    },
+    contains(node: unknown) {
+      return node === yes || node === no || node === denied || node === hope;
+    },
+    querySelectorAll() {
+      return [yes, no, denied, hope];
+    },
+  };
+  const document = {
+    getElementById(id: string) {
+      if (id === "bond-age-gate") return root;
+      if (id === "bond-age-yes") return yes;
+      if (id === "bond-age-no") return no;
+      if (id === "bond-gate-denied-h") return denied;
+      return null;
+    },
+    querySelector(sel: string) {
+      if (sel === ".bond-floor") return { removeAttribute() {} };
+      return null;
+    },
+    documentElement: {
+      dataset,
+      getAttribute(name: string) {
+        if (name === "data-bond-age") return dataset.bondAge ?? null;
+        return null;
+      },
+    },
+    get activeElement() {
+      return active;
+    },
+    body: { tag: "body" },
+    addEventListener(type: string, fn: (ev: never) => void) {
+      if (type === "keydown") keydowns.push(fn);
+      if (type === "focusin") focusins.push(fn);
+    },
+  };
+  const yesClick = {
+    addEventListener(type: string, fn: () => void) {
+      if (type === "click") clicks.set("yes", fn);
+    },
+    focus: yes.focus,
+  };
+  const noClick = {
+    addEventListener(type: string, fn: () => void) {
+      if (type === "click") clicks.set("no", fn);
+    },
+  };
+  const realGet = document.getElementById.bind(document);
+  document.getElementById = (id: string) => {
+    if (id === "bond-age-yes") return Object.assign(yes, yesClick);
+    if (id === "bond-age-no") return Object.assign(no, noClick);
+    return realGet(id);
+  };
+  const localStorage = {
+    getItem(key: string) {
+      return localMap.get(key) ?? null;
+    },
+    setItem(key: string, value: string) {
+      localMap.set(key, value);
+    },
+    removeItem(key: string) {
+      localMap.delete(key);
+    },
+  };
+  const sessionStorage = {
+    getItem(key: string) {
+      return sessionMap.get(key) ?? null;
+    },
+    setItem(key: string, value: string) {
+      sessionMap.set(key, value);
+    },
+    removeItem(key: string) {
+      sessionMap.delete(key);
+    },
+  };
+  const windowObj = {
+    getComputedStyle() {
+      return { display: "block", visibility: "visible" };
+    },
+    dispatchEvent() {
+      return true;
+    },
+  };
+  const run = new Function(
+    "document",
+    "window",
+    "localStorage",
+    "sessionStorage",
+    "CustomEvent",
+    "setTimeout",
+    read("bond-age-gate.js"),
+  );
+  run(document, windowObj, localStorage, sessionStorage, CustomEvent, (fn: () => void) => {
+    timers.push(fn);
+    return 0;
+  });
+  for (const fn of timers) fn();
+  return { localMap, sessionMap, dataset, attrs, active: () => active, clicks, keydowns, focusins, yes, no, denied, hope };
 }
 
 test("a first pass stamps the age attribute and shows Home and the product pages", () => {
   const pages = ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"];
   for (const name of pages) {
     const html = read(name);
-    const passed = runGate(html, "0", "1990");
+    const before = runGate(html, "no");
+    assert.equal(before.store.size, 0, name);
+    assert.equal(before.dataset.bondAge, undefined, name);
+    assert.equal(before.declined, true, name);
+    assert.deepEqual(before.scripts, [], name);
+
+    const passed = runGate(html, "yes");
+    const raw = passed.store.get("bond_age_ok");
+    assert.ok(raw, name);
+    const parsed = JSON.parse(raw) as { ok: boolean; t: number };
+    assert.equal(parsed.ok, true, name);
+    assert.equal(typeof parsed.t, "number", name);
+    assert.ok(Date.now() - parsed.t < 5000, name);
     assert.equal(passed.dataset.bondAge, "ok", name);
-    assert.equal(passed.store.get("bond_age_ok") != null, true, name);
     assert.equal(passed.declined, false, name);
     assert.equal(mainDisplayed(html, passed.dataset.bondAge === "ok"), true, name);
     assert.deepEqual(passed.scripts, ["./image-slot.js"], name);
-
-    const refused = runGate(html, "0", "2010", true);
-    assert.equal(refused.dataset.bondAge, undefined, name);
-    assert.equal(refused.store.size, 0, name);
-    assert.equal(refused.declined, true, name);
-    const unchecked = runGate(html, "0", "1990", false);
-    assert.equal(unchecked.dataset.bondAge, undefined, name);
-    assert.equal(unchecked.store.size, 0, name);
-    assert.equal(unchecked.declined, false, name);
-    assert.deepEqual(refused.scripts, [], name);
     if (html.includes('body>*:not(#bond-gate-cover){visibility:hidden}')) {
       assert.equal(mainDisplayed(html, false), false, name);
     }
@@ -432,76 +590,115 @@ test("a first pass stamps the age attribute and shows Home and the product pages
   assert.equal(root.dataset.bondAge, "ok");
 });
 
-test("entry needs a valid month, a year of 21 or older, and the affirmation box", () => {
-  const now = new Date(2026, 8, 27);
-  const samples = [
-    ["", "1990", true, "wait"],
-    ["0", "", true, "wait"],
-    ["0", "1990", false, "wait"],
-    ["8", "2005", false, "wait"],
-    ["0", "2010", true, "decline"],
-    ["0", "2006", true, "decline"],
-    ["9", "2005", true, "decline"],
-    ["0", "1990", true, "enter"],
-    ["8", "2005", true, "enter"],
-  ] as const;
-  for (const [month, year, affirmed, expected] of samples) {
-    assert.equal(bondAgeEntry(month, year, affirmed, now), expected, `${month}|${year}|${affirmed}`);
-  }
-  assert.equal(bondAgeDecision("0", "1990", now), "enter");
-  assert.equal(bondAgeEntry("0", "1990", false, now), "wait");
+test("yes stores a flag and timestamp, no stores nothing, and a bad flag re-gates", () => {
+  const blank = loadStaticGate(new Map(), new Map());
+  assert.equal(blank.localMap.size, 0);
+  assert.equal(blank.sessionMap.size, 0);
+  assert.equal(blank.dataset.bondAge, undefined);
+  assert.equal(blank.active(), blank.yes);
+
+  const outside = { tag: "outside" };
+  blank.focusins[0]({ target: outside });
+  assert.equal(blank.active(), blank.yes);
+  blank.no.focus();
+  blank.focusins[0]({ target: blank.no });
+  assert.equal(blank.active(), blank.no);
+
+  const tab = { key: "Tab", shiftKey: false, prevented: false, preventDefault() { this.prevented = true; } };
+  blank.yes.focus();
+  blank.keydowns[0](tab);
+  assert.equal(tab.prevented, true);
+  assert.equal(blank.active(), blank.no);
+  const back = { key: "Tab", shiftKey: true, prevented: false, preventDefault() { this.prevented = true; } };
+  blank.keydowns[0](back);
+  assert.equal(blank.active(), blank.yes);
+  const wrap = { key: "Tab", shiftKey: true, prevented: false, preventDefault() { this.prevented = true; } };
+  blank.keydowns[0](wrap);
+  assert.equal(blank.active(), blank.hope);
+
+  blank.clicks.get("no")?.();
+  assert.equal(blank.localMap.size, 0);
+  assert.equal(blank.sessionMap.size, 0);
+  assert.equal(blank.dataset.bondAge, undefined);
+  assert.equal(blank.attrs["data-declined"], "true");
+  assert.equal(blank.active(), blank.denied);
+
+  const yesGate = loadStaticGate(new Map(), new Map());
+  yesGate.clicks.get("yes")?.();
+  const saved = JSON.parse(yesGate.localMap.get("bond_age_ok") ?? "") as { ok: boolean; t: number };
+  assert.equal(saved.ok, true);
+  assert.equal(typeof saved.t, "number");
+  assert.equal(yesGate.sessionMap.size, 0);
+  assert.equal(yesGate.dataset.bondAge, "ok");
+
+  const expired = loadStaticGate(new Map([["bond_age_ok", "1710000000000"]]), new Map());
+  assert.equal(expired.localMap.has("bond_age_ok"), false);
+  assert.equal(expired.dataset.bondAge, undefined);
+  assert.equal(expired.active(), expired.yes);
+
+  const junk = loadStaticGate(new Map([["bond_age_ok", "nope"]]), new Map([["bond_age_ok", '{"ok":false}']]));
+  assert.equal(junk.localMap.has("bond_age_ok"), false);
+  assert.equal(junk.sessionMap.has("bond_age_ok"), false);
+  assert.equal(junk.dataset.bondAge, undefined);
+
+  const migrated = loadStaticGate(new Map(), new Map([["bond_age_ok", String(Date.now())]]));
+  assert.equal(migrated.sessionMap.size, 0);
+  assert.equal(JSON.parse(migrated.localMap.get("bond_age_ok") ?? "").ok, true);
+  assert.equal(migrated.dataset.bondAge, "ok");
+  assert.equal(migrated.clicks.size, 0);
+});
+
+test("one click replaces the birth date form and keeps the warning box", () => {
+  const consent = "By entering you confirm you are 21 or older and consent to view cannabis-related material.";
+  const remember = "We remember your answer on this device for 30 days.";
+  const full =
+    "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
+  const denied =
+    "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
+  const noJs = "This site is intended for adults 21 and older. Please enable JavaScript to verify your age.";
 
   const gateJs = read("bond-age-gate.js");
-  const affirmAt = gateJs.indexOf("if (affirmEl.checked !== true) return;");
-  const decisionAt = gateJs.indexOf("var decision = bondAgeDecision");
-  const setAt = gateJs.indexOf("sessionStorage.setItem");
-  assert.ok(affirmAt > 0 && decisionAt > affirmAt && setAt > decisionAt);
-  assert.match(gateJs, /getElementById\("bond-age-affirm"\)/);
-  assert.match(gateJs, /affirmEl\.addEventListener\("change", syncReady\)/);
+  assert.match(gateJs, /yesEl\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(gateJs, /ev\.key !== "Tab"/);
+  assert.match(gateJs, /controls\[next\]\.focus\(\)/);
   assert.equal(gateJs.includes("document.cookie"), false);
   assert.equal(gateJs.includes("location.search"), false);
   assert.equal(gateJs.includes("URLSearchParams"), false);
+  assert.equal(gateJs.includes("fetch("), false);
 
   const view = read("src/components/bond-age-gate.tsx");
-  assert.match(view, /const \[affirmed, setAffirmed\] = useState\(false\)/);
-  assert.match(view, /bondAgeEntry\(month, year, affirmed, new Date\(\)\)/);
-  assert.match(view, /<label htmlFor="bond-age-affirm">I am 21 years of age or older<\/label>/);
-  assert.match(view, /type="checkbox"/);
-  assert.match(view, /checked=\{affirmed\}/);
-  assert.match(view, /I am 21 years of age or older/);
-  assert.match(view, /aria-label="Birth month"/);
-  assert.match(view, /aria-label="Birth year"/);
+  assert.match(view, /role="dialog"/);
+  assert.match(view, /aria-modal="true"/);
+  assert.match(view, /aria-labelledby=/);
+  assert.match(view, /yesRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(view, /ev\.key !== "Tab"/);
+  assert.equal(view.includes("type=\"checkbox\""), false);
+  assert.equal(view.includes("Birth month"), false);
   assert.equal(view.includes("document.cookie"), false);
-  assert.equal(view.includes("location.search"), false);
-  assert.equal(view.includes("URLSearchParams"), false);
-  assert.equal(view.includes('tabindex="-1"'), false);
+  assert.equal(view.includes("fetch("), false);
+  assert.match(view, /Come back when you&apos;re 21\./);
+  assert.ok(view.includes(consent));
+  assert.ok(view.includes(remember));
+  assert.ok(view.includes(full));
+  assert.ok(view.includes(denied));
 
   const gate = read("AgeGate.dc.html");
   const noscript = gate.slice(gate.indexOf("<noscript>"), gate.indexOf("</noscript>"));
   const scripted = gate.slice(gate.indexOf("<x-dc>"));
-  assert.equal(noscript.includes("I am 21 years of age or older"), false);
-  assert.match(noscript, /aria-label="Birth month"/);
-  assert.match(noscript, /aria-label="Birth year"/);
-  assert.match(scripted, /ofAge: false/);
-  assert.match(scripted, /aria-label="Birth month"/);
-  assert.match(scripted, /aria-label="Birth year"/);
-  const row = scripted.match(/<div class="bond-age-affirm">[\s\S]*?<\/div>/);
-  assert.ok(row);
-  assert.match(row[0], /<label for="bond-age-affirm">I am 21 years of age or older<\/label>/);
-  assert.match(row[0], /type="checkbox"/);
-  assert.equal(row[0].includes("disabled"), false);
-  assert.equal(row[0].includes("tabindex"), false);
-  assert.match(row[0], /checked="\{\{ ofAge \}\}"/);
-  assert.match(scripted, /month, year, ofAge/);
-  const mount = scripted.slice(scripted.indexOf("componentDidMount"), scripted.indexOf("renderVals"));
-  assert.equal(mount.includes("ofAge"), false);
+  assert.match(noscript, /This site is intended for adults 21 and older\. Please enable JavaScript to verify your age\./);
+  assert.equal(noscript.includes("Birth month"), false);
+  assert.equal(noscript.includes("type=\"checkbox\""), false);
+  assert.match(scripted, /role="dialog"/);
+  assert.match(scripted, /getElementById\('bond-age-yes'\)/);
+  assert.match(scripted, /document\.addEventListener\('keydown', trap, true\)/);
+  assert.equal(scripted.includes("Birth month"), false);
+  assert.equal(scripted.includes("type=\"checkbox\""), false);
   assert.equal(scripted.includes("document.cookie"), false);
-  assert.equal(scripted.includes("location.search"), false);
-  assert.equal(scripted.includes("URLSearchParams"), false);
-  assert.match(scripted, /if \(month === '' \|\| year === '' \|\| ofAge !== true\) return;/);
+  assert.ok(scripted.includes(consent));
+  assert.ok(scripted.includes(remember));
+  assert.ok(scripted.includes(full));
 
   const css = read("bond-age-gate.css");
-  assert.match(css, /\.bond-age-affirm-input:focus-visible/);
   assert.match(css, /font-size: 9px/);
   const boxRule = css.slice(css.indexOf(".bond-warn-box p {"), css.indexOf("}", css.indexOf(".bond-warn-box p {")));
   assert.equal(boxRule.includes("scale("), false);
@@ -511,19 +708,17 @@ test("entry needs a valid month, a year of 21 or older, and the affirmation box"
 
   for (const name of ["FAQ.dc.html", "Privacy.dc.html", "Terms.dc.html", "Finder.dc.html"]) {
     const html = read(name);
-    const fieldsStart = html.indexOf('class="bond-age-fields"');
-    const fields = html.slice(fieldsStart, html.indexOf("bond-age-enter", fieldsStart));
-    const monthAt = fields.indexOf("Birth month");
-    const yearAt = fields.indexOf("Birth year");
-    const boxAt = fields.indexOf("I am 21 years of age or older");
-    assert.ok(monthAt >= 0 && yearAt > monthAt && boxAt > yearAt, name);
-    const row = fields.match(/<div class="bond-age-affirm">[\s\S]*?<\/div>/);
-    assert.ok(row, name);
-    assert.match(row[0], /<input type="checkbox" id="bond-age-affirm" class="bond-age-affirm-input">/, name);
-    assert.match(row[0], /<label for="bond-age-affirm">I am 21 years of age or older<\/label>/, name);
-    assert.equal(row[0].includes("checked"), false, name);
-    assert.equal(row[0].includes("disabled"), false, name);
-    assert.equal(row[0].includes("tabindex"), false, name);
+    assert.match(html, /id="bond-age-yes"/, name);
+    assert.match(html, /id="bond-age-no"/, name);
+    assert.match(html, /role="dialog"/, name);
+    assert.match(html, /aria-modal="true"/, name);
+    assert.ok(html.includes(consent), name);
+    assert.ok(html.includes(remember), name);
+    assert.ok(html.includes(full), name);
+    assert.ok(html.includes(denied), name);
+    const gateBlock = html.slice(html.indexOf('id="bond-age-gate"'), html.indexOf('class="bond-floor"'));
+    assert.equal(gateBlock.includes("Birth month"), false, name);
+    assert.equal(gateBlock.includes("type=\"checkbox\""), false, name);
     assert.equal(html.includes("document.cookie"), false, name);
     assert.equal(html.includes("URLSearchParams"), false, name);
   }
@@ -531,9 +726,12 @@ test("entry needs a valid month, a year of 21 or older, and the affirmation box"
   for (const name of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
     const html = read(name);
     assert.match(html, /dc-import name="AgeGate"/, name);
+    assert.ok(html.includes(noJs), name);
     const coverStart = html.indexOf('<div id="bond-gate-cover">');
     const cover = html.slice(coverStart, html.indexOf("</div></div></div>", coverStart));
     assert.equal(cover.includes("I am 21 years of age or older"), false, name);
     assert.match(cover, /class="bond-warn-box"/, name);
+    assert.match(html, /attributeFilter: \["inert", "aria-hidden"\]/, name);
+    assert.match(html, /new MutationObserver/, name);
   }
 });

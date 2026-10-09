@@ -1,121 +1,207 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BondWarn } from "@/components/bond-warn";
 import type { WarningRoute } from "@/lib/bond-warnings";
 import {
   BOND_AGE_KEY,
-  BOND_AGE_MONTHS,
-  bondAgeEntry,
-  bondBirthYears,
-  hausShowsAgeGate,
+  bondAgeStamp,
+  bondAgeTimestamp,
   markBondAgePassed,
 } from "@/lib/haus/age-gate";
 
-function readStoredAge(): string | null {
+const CONSENT = "By entering you confirm you are 21 or older and consent to view cannabis-related material.";
+const REMEMBER = "We remember your answer on this device for 30 days.";
+const FULL_WARN =
+  "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
+const DENIED =
+  "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
+
+function readRaw(store: Storage): string | null {
   try {
-    return sessionStorage.getItem(BOND_AGE_KEY);
-  } catch (e) {
+    return store.getItem(BOND_AGE_KEY);
+  } catch {
     return null;
   }
+}
+
+function drop(store: Storage) {
+  try {
+    store.removeItem(BOND_AGE_KEY);
+  } catch {
+    /* private mode */
+  }
+}
+
+function controlsIn(root: HTMLElement | null): HTMLElement[] {
+  if (!root) return [];
+  return Array.from(root.querySelectorAll<HTMLElement>("a[href], button, input, select, textarea")).filter((el) => {
+    if ((el as HTMLButtonElement).disabled) return false;
+    if (el.tabIndex < 0) return false;
+    const st = window.getComputedStyle(el);
+    if (st.display === "none" || st.visibility === "hidden") return false;
+    return el.getClientRects().length > 0;
+  });
 }
 
 export function BondAgeGate({ route, children }: { route: WarningRoute; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [declined, setDeclined] = useState(false);
-  const [month, setMonth] = useState("");
-  const [year, setYear] = useState("");
-  const [affirmed, setAffirmed] = useState(false);
-  const [years] = useState(() => bondBirthYears(new Date()));
+  const gateRef = useRef<HTMLDivElement>(null);
+  const yesRef = useRef<HTMLButtonElement>(null);
+  const deniedRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    try {
-      localStorage.removeItem(BOND_AGE_KEY);
-    } catch (e) {}
-    if (!hausShowsAgeGate(readStoredAge())) {
+    const now = Date.now();
+    const localRaw = readRaw(localStorage);
+    const sessionRaw = readRaw(sessionStorage);
+    const localHit = bondAgeTimestamp(localRaw, now);
+    const sessionHit = bondAgeTimestamp(sessionRaw, now);
+    if (localHit != null) {
+      if (localRaw !== bondAgeStamp(localHit)) {
+        try {
+          localStorage.setItem(BOND_AGE_KEY, bondAgeStamp(localHit));
+        } catch {
+          /* private mode */
+        }
+      }
+      if (sessionRaw != null) drop(sessionStorage);
       markBondAgePassed(document.documentElement);
       setOpen(true);
-    }
-  }, []);
-
-  function enter() {
-    const decision = bondAgeEntry(month, year, affirmed, new Date());
-    if (decision === "wait") return;
-    if (decision === "decline") {
-      setDeclined(true);
+      try {
+        window.dispatchEvent(new CustomEvent("bond-entered"));
+      } catch {
+        /* ignore */
+      }
       return;
     }
+    if (sessionHit != null) {
+      try {
+        localStorage.setItem(BOND_AGE_KEY, bondAgeStamp(sessionHit));
+      } catch {
+        /* private mode */
+      }
+      drop(sessionStorage);
+      markBondAgePassed(document.documentElement);
+      setOpen(true);
+      try {
+        window.dispatchEvent(new CustomEvent("bond-entered"));
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+    if (localRaw) drop(localStorage);
+    if (sessionRaw) drop(sessionStorage);
+    let tries = 0;
+    let id = 0;
+    const focusYes = () => {
+      yesRef.current?.focus({ preventScroll: true });
+      tries += 1;
+      if (document.activeElement === yesRef.current || tries >= 20) return;
+      id = window.setTimeout(focusYes, 60);
+    };
+    id = window.setTimeout(focusYes, 60);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
+    if (open) return;
+    function onTab(ev: KeyboardEvent) {
+      if (ev.key !== "Tab") return;
+      const controls = controlsIn(gateRef.current);
+      if (!controls.length) {
+        ev.preventDefault();
+        return;
+      }
+      const idx = controls.indexOf(document.activeElement as HTMLElement);
+      const next =
+        idx === -1
+          ? ev.shiftKey
+            ? controls.length - 1
+            : 0
+          : ev.shiftKey
+            ? idx === 0
+              ? controls.length - 1
+              : idx - 1
+            : idx === controls.length - 1
+              ? 0
+              : idx + 1;
+      ev.preventDefault();
+      controls[next].focus();
+    }
+    function onFocusIn(ev: FocusEvent) {
+      const gate = gateRef.current;
+      const target = ev.target as Node | null;
+      if (!target || target === document.body || target === document.documentElement) return;
+      if (gate && (target === gate || gate.contains(target))) return;
+      const controls = controlsIn(gate);
+      if (controls.length && document.activeElement !== controls[0]) controls[0].focus();
+    }
+    document.addEventListener("keydown", onTab, true);
+    document.addEventListener("focusin", onFocusIn, true);
+    return () => {
+      document.removeEventListener("keydown", onTab, true);
+      document.removeEventListener("focusin", onFocusIn, true);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (declined) deniedRef.current?.focus();
+  }, [declined]);
+
+  function yes() {
+    const t = Date.now();
     try {
-      sessionStorage.setItem(BOND_AGE_KEY, String(Date.now()));
-    } catch (e) {}
+      localStorage.setItem(BOND_AGE_KEY, bondAgeStamp(t));
+    } catch {
+      /* private mode */
+    }
     markBondAgePassed(document.documentElement);
     setOpen(true);
     try {
       window.dispatchEvent(new CustomEvent("bond-entered"));
-    } catch (e) {}
+    } catch {
+      /* ignore */
+    }
   }
-
-  const ready = month !== "" && year !== "" && affirmed;
 
   return (
     <>
-      <div id="bond-age-gate" className="bond-age-gate" data-declined={declined ? "true" : "false"}>
-        <div className="bond-age-veil"></div>
-        <div className="bond-age-veil-soft"></div>
-        <div className="bond-age-panel bond-age-no">
-          <div className="bond-age-mark">BOND</div>
-          <p className="bond-age-title">Not yet</p>
-          <p className="bond-age-body">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
-          <div className="bond-age-rule"></div>
-        </div>
-        <div className="bond-age-panel bond-age-ask">
-          <div className="bond-age-mark">BOND</div>
-          <p className="bond-age-lead">Please confirm your age.</p>
-          <div className="bond-age-rule bond-age-rule-wide"></div>
-          <p className="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
-          <div className="bond-age-fields">
-            <select
-              id="bond-age-month"
-              className="bond-age-select bond-age-month"
-              aria-label="Birth month"
-              value={month}
-              onChange={(event) => setMonth(event.target.value)}
-            >
-              <option value="">Birth month</option>
-              {BOND_AGE_MONTHS.map((name, index) => (
-                <option key={name} value={String(index)}>
-                  {name}
-                </option>
-              ))}
-            </select>
-            <select
-              id="bond-age-year"
-              className="bond-age-select bond-age-year"
-              aria-label="Birth year"
-              value={year}
-              onChange={(event) => setYear(event.target.value)}
-            >
-              <option value="">Birth year</option>
-              {years.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
-            <div className="bond-age-affirm">
-              <input
-                id="bond-age-affirm"
-                className="bond-age-affirm-input"
-                type="checkbox"
-                checked={affirmed}
-                onChange={(event) => setAffirmed(event.target.checked)}
-              />
-              <label htmlFor="bond-age-affirm">I am 21 years of age or older</label>
+      <div
+        id="bond-age-gate"
+        ref={gateRef}
+        className="bond-age-gate"
+        data-declined={declined ? "true" : "false"}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={declined ? "bond-gate-denied-h" : "bond-gate-h"}
+      >
+        <div className="bond-age-box">
+          <img className="bond-age-logo" src="/media/gate/bond-logo-bone-600.png" alt="Bond" width={170} height={41} />
+          <div className="bond-age-panel bond-age-ask">
+            <h2 id="bond-gate-h" className="bond-age-lead">
+              Are you 21 or older?
+            </h2>
+            <p className="bond-age-body">Bond is a cannabis product for adults 21 and older.</p>
+            <div className="bond-age-actions">
+              <button type="button" id="bond-age-yes" ref={yesRef} className="bond-age-yes" onClick={yes}>
+                Yes, I am 21 or older
+              </button>
+              <button type="button" id="bond-age-no" className="bond-age-no-btn" onClick={() => setDeclined(true)}>
+                No
+              </button>
             </div>
+            <p className="bond-age-legal">
+              {CONSENT} {REMEMBER} {FULL_WARN}
+            </p>
           </div>
-          <button type="button" id="bond-age-enter" className="bond-age-enter" data-ready={ready ? "true" : "false"} onClick={enter}>
-            Enter
-          </button>
+          <div className="bond-age-panel bond-age-no">
+            <h2 id="bond-gate-denied-h" ref={deniedRef} className="bond-age-title" tabIndex={-1}>
+              Come back when you&apos;re 21.
+            </h2>
+            <p className="bond-age-body">{DENIED}</p>
+          </div>
           <BondWarn route={route} />
         </div>
       </div>

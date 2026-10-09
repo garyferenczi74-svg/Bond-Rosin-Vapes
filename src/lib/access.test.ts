@@ -218,8 +218,10 @@ test("Privacy Dispensary Login collection lists every field the door collects", 
   assert.match(sentence, /never logged in plaintext/);
   assert.match(sentence, /does not grant order rights until Bond operations elevates the account/);
   assert.match(privacy, /the Home Haus form stores nothing and sends nothing/);
-  assert.match(privacy, /sessionStorage for this browser session/);
+  assert.match(privacy, /kept in localStorage on this device for 30 days/);
   assert.match(privacy, /under the name bond_age_ok/);
+  assert.equal(privacy.includes("sessionStorage for this browser session"), false);
+  assert.equal(privacy.includes("a cookie on your device for 30 days"), false);
   assert.equal(privacy.includes("we store a verification flag in a cookie"), false);
   assert.equal(privacy.includes("if member accounts launch"), false);
   assert.match(

@@ -111,7 +111,7 @@ function assertCoverFirst(name: string, html: string) {
   assert.equal(head.includes("--matte-black:#"), false, name);
   assert.equal(head.includes("var(--matte-black,"), false, name);
   assert.match(head, /body>\*:not\(#bond-gate-cover\)\{display:none !important\}/, name);
-  assert.match(html, /Bond requires JavaScript to confirm your age\./, name);
+  assert.match(html, /This site is intended for adults 21 and older\. Please enable JavaScript to verify your age\./, name);
   assert.match(head, /pointer-events:auto/, name);
   assert.match(html, /id="bond-gate-hold"/, name);
   assert.match(html, /<x-dc inert>/, name);
