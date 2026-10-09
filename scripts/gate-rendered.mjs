@@ -245,7 +245,12 @@ async function main() {
       }
     }
   } finally {
-    if (child) child.kill("SIGTERM");
+    if (child) {
+      child.kill("SIGTERM");
+      child.stdout.destroy();
+      child.stderr.destroy();
+      child.unref();
+    }
   }
 
   const byEngine = {};
@@ -280,7 +285,7 @@ async function main() {
   for (const item of coverage) {
     console.log(item.engine + " " + item.route + " " + item.passed + "/" + item.checks);
   }
-  if (wins !== total) process.exit(1);
+  process.exit(wins === total ? 0 : 1);
 }
 
 main().catch((err) => {
