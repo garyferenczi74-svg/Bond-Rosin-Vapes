@@ -1552,7 +1552,18 @@ class Component extends DCLogic {
     if (!s) return;
     var nodes = s.querySelectorAll('h1, .hero-line2, .hero-subtext, .hero-btn');
     var i;
-    for (i = 0; i < nodes.length; i++) nodes[i].style.removeProperty('font-size');
+    for (i = 0; i < nodes.length; i++) {
+      nodes[i].style.removeProperty('font-size');
+      nodes[i].style.removeProperty('letter-spacing');
+      nodes[i].style.removeProperty('padding-left');
+      nodes[i].style.removeProperty('padding-top');
+      nodes[i].style.removeProperty('padding-bottom');
+      nodes[i].style.removeProperty('min-height');
+    }
+    var rules = s.querySelectorAll('.hero-rule');
+    for (i = 0; i < rules.length; i++) rules[i].style.removeProperty('width');
+    var tag = s.querySelector('.hero-tagline');
+    if (tag) tag.style.removeProperty('gap');
   }
 
   function clearBandTweaks(s) {
@@ -1924,40 +1935,168 @@ class Component extends DCLogic {
     if (nextCopy > 0) s.style.setProperty('--hero-copy-top', nextCopy + 'px');
   }
 
-  // Scale the copy so the tagline, italic, paragraph, and both buttons stay
-  // inside the viewport. The plate is not scaled: it keeps the full-bleed
-  // cover from layoutBand. Writes nothing when the unscaled stack already
-  // fits, so 1200-wide desktops that fit are untouched.
+  // The plate stays full-bleed. When the desktop stack would leave the fold,
+  // hold the type at the 12px / 14px floor and spend the spare on the gaps.
+  // A uniform scale crushed the paragraph to about 8px. Writes nothing when
+  // the desktop stack already fits, so 1200-wide desktops stay untouched.
   function fitLandscape(t, s, v) {
     if (!isDeskLandscape()) return;
     if (t.classList.contains('hero-copy-flow')) return;
     var btn = s.querySelector('.hero-buttons');
     var tag = s.querySelector('.hero-tagline');
-    if (!btn) return;
+    var h1 = s.querySelector('.hero-tagline h1');
+    var line2 = s.querySelector('.hero-line2');
+    var sub = s.querySelector('.hero-subtext');
+    var btns = s.querySelectorAll('.hero-btn');
+    var rules = s.querySelectorAll('.hero-rule');
+    if (!btn || !h1 || !line2 || !sub) return;
     var ih = window.innerHeight || 0;
     var iw = t.clientWidth || window.innerWidth || 0;
     var pad = 28;
-    function measure() {
-      var stackTop = layoutTop(s);
-      var ctaBottom = layoutTop(btn) + btn.offsetHeight;
-      return { stackTop: stackTop, ctaBottom: ctaBottom, span: ctaBottom - stackTop };
-    }
-    var m = measure();
-    var tagW = tag ? tag.offsetWidth : 0;
-    if (!(m.ctaBottom > ih - pad) && !(tagW > iw - 16)) return;
+    var FLOOR = 0.75;
+    var GAP_FLOOR = 8;
+    var GAP_DESK = 44.8;
+    function ctaBottom() { return layoutTop(btn) + btn.offsetHeight; }
+    function tagWidth() { return tag ? tag.offsetWidth : 0; }
+    function overflows() { return ctaBottom() > ih - pad + 0.5 || tagWidth() > iw - 16; }
+    if (!overflows()) return;
     if (v) bleedPlate(t, s, v);
-    m = measure();
-    tagW = tag ? tag.offsetWidth : 0;
-    var room = (ih - pad) - m.stackTop;
-    var vScale = 1;
-    if (m.ctaBottom > ih - pad && m.span > 1 && room > 40) vScale = room / m.span;
-    var hScale = 1;
-    if (tagW > iw - 16) hScale = (iw - 16) / tagW;
-    var scale = vScale < hScale ? vScale : hScale;
-    if (!(scale < 0.999)) return;
-    if (!(scale > 0.4)) scale = 0.4;
-    s.style.transformOrigin = 'center top';
-    s.style.transform = 'translateX(-50%) scale(' + scale.toFixed(4) + ')';
+    if (!overflows()) return;
+    function applyType(fs) {
+      h1.style.fontSize = (28 * fs).toFixed(2) + 'px';
+      h1.style.letterSpacing = (6 * fs).toFixed(2) + 'px';
+      h1.style.paddingLeft = (6 * fs).toFixed(2) + 'px';
+      var i;
+      for (i = 0; i < rules.length; i++) rules[i].style.width = (150 * fs).toFixed(2) + 'px';
+      if (tag) tag.style.gap = Math.max(8, 22 * fs).toFixed(2) + 'px';
+      line2.style.fontSize = (24 * fs).toFixed(2) + 'px';
+      sub.style.fontSize = (17 * fs).toFixed(2) + 'px';
+      for (i = 0; i < btns.length; i++) {
+        var font = 16 * fs;
+        var box = Math.max(36, 44 * fs);
+        var padY = (box - font) / 2;
+        if (padY < 8) padY = 8;
+        btns[i].style.fontSize = font.toFixed(2) + 'px';
+        btns[i].style.letterSpacing = (3 * fs).toFixed(2) + 'px';
+        btns[i].style.minHeight = box.toFixed(2) + 'px';
+        btns[i].style.paddingTop = padY.toFixed(2) + 'px';
+        btns[i].style.paddingBottom = padY.toFixed(2) + 'px';
+      }
+    }
+    function applyGap(gap) {
+      s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
+    }
+    // Largest type from the floor up to desktop, then the largest gap that
+    // still leaves the buttons 28px above the fold.
+    var fsLo = FLOOR;
+    var fsHi = 1;
+    var fs = FLOOR;
+    var step;
+    applyType(1);
+    applyGap(GAP_DESK);
+    if (!overflows()) {
+      clearCopyScale(s);
+      s.style.removeProperty('--hero-gap-line2');
+      return;
+    }
+    for (step = 0; step < 12; step++) {
+      var mid = (fsLo + fsHi) / 2;
+      applyType(mid);
+      applyGap(GAP_FLOOR);
+      if (overflows()) fsHi = mid;
+      else { fs = mid; fsLo = mid; }
+    }
+    applyType(fs);
+    var gapLo = GAP_FLOOR;
+    var gapHi = GAP_DESK;
+    var gap = GAP_FLOOR;
+    for (step = 0; step < 12; step++) {
+      var g = (gapLo + gapHi) / 2;
+      applyGap(g);
+      if (overflows()) gapHi = g;
+      else { gap = g; gapLo = g; }
+    }
+    applyType(fs);
+    applyGap(gap);
+    // Floor type still leaves the fold. Raise the wordmark crop so the copy
+    // keeps the floor and the plate stays full-bleed.
+    if (overflows() && v) {
+      shrinkWordmark(t, s, v, ctaBottom() - (ih - pad));
+      applyType(fs);
+      applyGap(gap);
+    }
+  }
+
+  // Pull the wordmark up by lowering the plate scale, never under a cover
+  // crop. Cap stays under the nav when the cover window allows it.
+  function shrinkWordmark(t, s, v, need) {
+    if (!(need > 0.5)) return;
+    var cw = t.clientWidth || window.innerWidth || 0;
+    var ch = t.clientHeight || window.innerHeight || 0;
+    var cs = window.getComputedStyle(t);
+    var left = parseFloat(cs.getPropertyValue('--hero-media-left'));
+    var top = parseFloat(cs.getPropertyValue('--hero-media-top'));
+    var vidW = parseFloat(cs.getPropertyValue('--hero-media-width'));
+    var vidH = parseFloat(cs.getPropertyValue('--hero-media-height'));
+    if (!(vidW > 2) || !(vidH > 2)) return;
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var cap = DESK_CAP * (srcH / 1080);
+    var feet = DESK_FEET * (srcH / 1080);
+    var scale = vidW / srcW;
+    var cover = Math.max(cw / srcW, ch / srcH);
+    var wordSrc = feet - cap;
+    if (!(wordSrc > 1)) return;
+    var next = scale - (need / wordSrc);
+    if (next < cover) next = cover;
+    if (!(next < scale - 0.0005)) {
+      // Already at cover. Slide the crop up as far as the stage still covers.
+      var topLo = ch - vidH;
+      if (topLo > 0) topLo = 0;
+      if (top <= topLo + 0.4) return;
+      var lifted = top - need;
+      if (lifted < topLo) lifted = topLo;
+      if (!(lifted < top - 0.4)) return;
+      t.style.setProperty('--hero-media-top', lifted.toFixed(2) + 'px');
+      var scs = window.getComputedStyle(s);
+      var copyTop = parseFloat(scs.getPropertyValue('--hero-copy-top'));
+      if (copyTop === copyTop) s.style.setProperty('--hero-copy-top', Math.ceil(copyTop + (lifted - top)) + 'px');
+      var media = document.querySelector('.hero-media');
+      if (media && media.style.backgroundPosition) {
+        var bits = media.style.backgroundPosition.trim().split(/\s+/);
+        if (bits.length >= 2) media.style.backgroundPosition = bits[0] + ' ' + lifted.toFixed(2) + 'px';
+      }
+      return;
+    }
+    var nav = document.querySelector('nav');
+    var stageTop = t.getBoundingClientRect().top;
+    var navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom - stageTop) : 64;
+    var nextW = srcW * next;
+    var nextH = srcH * next;
+    var nextLeft = (cw - nextW) / 2;
+    if (nextLeft > 0) nextLeft = 0;
+    var nextTop = (navBottom + 8) - (cap * next);
+    var topLo2 = ch - nextH;
+    if (topLo2 > 0) topLo2 = 0;
+    if (nextTop < topLo2) nextTop = topLo2;
+    if (nextTop > 0) nextTop = 0;
+    var oldScale = scale;
+    var scs2 = window.getComputedStyle(s);
+    var copyTop2 = parseFloat(scs2.getPropertyValue('--hero-copy-top'));
+    var gapWord = copyTop2 - (top + feet * oldScale);
+    if (!(gapWord > 8)) gapWord = 16;
+    t.style.setProperty('--hero-media-width', nextW.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-height', nextH.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-left', nextLeft.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-top', nextTop.toFixed(2) + 'px');
+    var media2 = document.querySelector('.hero-media');
+    if (media2) {
+      media2.style.backgroundSize = nextW.toFixed(2) + 'px ' + nextH.toFixed(2) + 'px';
+      media2.style.backgroundPosition = nextLeft.toFixed(2) + 'px ' + nextTop.toFixed(2) + 'px';
+      media2.style.backgroundRepeat = 'no-repeat';
+    }
+    var nextCopy = Math.ceil(nextTop + (feet * next) + gapWord);
+    if (nextCopy > 0) s.style.setProperty('--hero-copy-top', nextCopy + 'px');
   }
 
   function isShortLaptop() {
