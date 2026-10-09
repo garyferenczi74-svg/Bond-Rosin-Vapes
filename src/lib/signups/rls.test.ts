@@ -14,6 +14,7 @@ const updates = fileURLToPath(new URL("../../../supabase/migrations/202610091900
 const hold = fileURLToPath(new URL("../../../supabase/migrations/20261009203000_haus_updates_hold.sql", import.meta.url));
 const revokeInserts = fileURLToPath(new URL("../../../supabase/migrations/20261009210000_revoke_anon_signup_inserts.sql", import.meta.url));
 const tokenCleanup = fileURLToPath(new URL("../../../supabase/migrations/20261009220000_haus_update_token_cleanup.sql", import.meta.url));
+const tokenExpiry = fileURLToPath(new URL("../../../supabase/migrations/20261009230000_haus_confirm_token_expiry.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -75,6 +76,15 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.equal(/GRANT INSERT ON TABLE public\.haus_update_tokens TO anon/.test(tokenSql), false);
   assert.equal(/GRANT INSERT ON TABLE public\.haus_update_tokens TO authenticated/.test(tokenSql), false);
   assert.equal(tokenSql.includes("is_admin()"), false);
+  const expirySql = readFileSync(tokenExpiry, "utf8");
+  assert.match(expirySql, /interval '7 days'/);
+  assert.match(expirySql, /purpose = 'unsub' AND expires_at IS NULL/);
+  assert.match(expirySql, /purpose = 'confirm' AND expires_at IS NOT NULL/);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_update_tokens TO anon/.test(expirySql), false);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_update_tokens TO authenticated/.test(expirySql), false);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_updates TO anon/.test(expirySql), false);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_updates TO authenticated/.test(expirySql), false);
+  assert.equal(expirySql.includes("is_admin()"), false);
 
   const dir = mkdtempSync(join(tmpdir(), "bond-signup-rls-"));
   chmodSync(dir, 0o755);
@@ -191,6 +201,8 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 \\i ${revokeInserts}
 
 \\i ${tokenCleanup}
+
+\\i ${tokenExpiry}
 
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
@@ -428,11 +440,22 @@ WHERE table_schema = 'public' AND table_name = 'haus_update_tokens' AND column_n
 SELECT COUNT(*) AS token_cols
 FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'haus_update_tokens'
-  AND column_name IN ('id', 'email_hmac', 'purpose', 'created_at');
+  AND column_name IN ('id', 'email_hmac', 'purpose', 'created_at', 'expires_at');
 SELECT COUNT(*) AS token_extra
 FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'haus_update_tokens'
-  AND column_name NOT IN ('id', 'email_hmac', 'purpose', 'created_at');
+  AND column_name NOT IN ('id', 'email_hmac', 'purpose', 'created_at', 'expires_at');
+SELECT public.bond_issue_haus_update_token(repeat('12', 32), 'confirm') IS NOT NULL AS confirm_issued;
+SELECT (
+  expires_at > now() + interval '6 days'
+  AND expires_at < now() + interval '8 days'
+) AS confirm_expires_7
+FROM public.haus_update_tokens
+WHERE email_hmac = repeat('12', 32) AND purpose = 'confirm';
+SELECT (expires_at IS NULL) AS unsub_no_expiry
+FROM public.haus_update_tokens
+WHERE purpose = 'unsub'
+LIMIT 1;
 
 SELECT COUNT(*) AS updates_columns
 FROM information_schema.columns
@@ -574,8 +597,11 @@ RESET ROLE;
   saw("suppression_after_purge", "2");
   saw("token_opaque", "t");
   saw("token_email_cols", "0");
-  saw("token_cols", "4");
+  saw("token_cols", "5");
   saw("token_extra", "0");
+  saw("confirm_issued", "t");
+  saw("confirm_expires_7", "t");
+  saw("unsub_no_expiry", "t");
   saw("updates_columns", "5");
   saw("updates_extra", "0");
   saw("suppression_columns", "2");

@@ -211,6 +211,18 @@ export class RemoteSignupStore {
     await client().from("haus_sessions").delete().eq("id", sessionId);
   }
 
+  async hasHausAge21Ack(email: string): Promise<boolean> {
+    const { data, error } = await client()
+      .from("haus_requests")
+      .select("age21_ack")
+      .eq("email", email.trim().toLowerCase())
+      .eq("age21_ack", true)
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return false;
+    return (data as { age21_ack?: boolean }).age21_ack === true;
+  }
+
   async recordHausSignup(email: string, requestedDispensary = ""): Promise<HausSignupRecord> {
     const mark = email.trim().toLowerCase();
     const dispensary = requestedDispensary.trim().replace(/\s+/g, " ");
@@ -271,13 +283,14 @@ export class RemoteSignupStore {
 
   async readHausUpdateToken(
     id: string,
-  ): Promise<{ emailHmac: string; purpose: "unsub" | "confirm" } | null> {
+  ): Promise<{ emailHmac: string; purpose: "unsub" | "confirm"; expiresAt: string | null } | null> {
     const { data, error } = await client().rpc("bond_read_haus_update_token", { p_id: id });
     if (error || !data || typeof data !== "object") return null;
-    const row = data as { email_hmac?: unknown; purpose?: unknown };
+    const row = data as { email_hmac?: unknown; purpose?: unknown; expires_at?: unknown };
     if (row.purpose !== "unsub" && row.purpose !== "confirm") return null;
     if (typeof row.email_hmac !== "string") return null;
-    return { emailHmac: row.email_hmac, purpose: row.purpose };
+    const expiresAt = typeof row.expires_at === "string" && row.expires_at ? row.expires_at : null;
+    return { emailHmac: row.email_hmac, purpose: row.purpose, expiresAt };
   }
 
   async unsubscribeHausUpdate(emailHmac: string): Promise<{ ok: boolean }> {

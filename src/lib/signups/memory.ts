@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { HAUS_CONFIRM_TOKEN_MS } from "./haus-updates.ts";
 import { SEED_PARTNER_ACCOUNTS } from "../order/seed.ts";
 import type {
   DispensaryRecord,
@@ -51,7 +52,7 @@ export class MemorySignupStore {
   private updates = new Map<string, HausUpdateRecord>();
   private updateHmac = new Map<string, string>();
   private updateSuppression = new Set<string>();
-  private updateTokens = new Map<string, { emailHmac: string; purpose: "unsub" | "confirm" }>();
+  private updateTokens = new Map<string, { emailHmac: string; purpose: "unsub" | "confirm"; expiresAt: string | null }>();
 
   constructor() {
     for (const row of seedRecords()) this.accounts.set(row.id, row);
@@ -157,6 +158,11 @@ export class MemorySignupStore {
     this.hausSessions.delete(sessionId);
   }
 
+  hasHausAge21Ack(email: string): boolean {
+    const mark = email.trim().toLowerCase();
+    return this.haus.some((row) => row.email === mark && row.age21Ack === true);
+  }
+
   recordHausSignup(email: string, requestedDispensary = ""): HausSignupRecord {
     const mark = email.trim().toLowerCase();
     const dispensary = requestedDispensary.trim().replace(/\s+/g, " ");
@@ -201,13 +207,20 @@ export class MemorySignupStore {
 
   issueHausUpdateToken(emailHmac: string, purpose: "unsub" | "confirm"): { id: string } {
     const id = randomUUID();
-    this.updateTokens.set(id, { emailHmac, purpose });
+    const expiresAt = purpose === "confirm" ? new Date(Date.now() + HAUS_CONFIRM_TOKEN_MS).toISOString() : null;
+    this.updateTokens.set(id, { emailHmac, purpose, expiresAt });
     return { id };
   }
 
-  readHausUpdateToken(id: string): { emailHmac: string; purpose: "unsub" | "confirm" } | null {
+  readHausUpdateToken(id: string): { emailHmac: string; purpose: "unsub" | "confirm"; expiresAt: string | null } | null {
     const row = this.updateTokens.get(id);
     return row ? { ...row } : null;
+  }
+
+  setHausUpdateTokenExpiry(id: string, expiresAt: string | null): void {
+    const row = this.updateTokens.get(id);
+    if (!row) return;
+    row.expiresAt = expiresAt;
   }
 
   unsubscribeHausUpdate(emailHmac: string): { ok: boolean } {

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { HausUpdatesOptIn } from "@/app/haus/updates-opt-in";
 import { HausWritesStrip } from "@/components/haus-writes-strip";
 import { HausFrame } from "@/components/haus-frame";
 import { requireMemberSession } from "@/lib/haus-gate";
@@ -19,6 +20,7 @@ export default async function HausSalonPage() {
 
   return (
     <HausFrame title="Salon">
+      <HausUpdatesOptIn />
       <HausWritesStrip />
     </HausFrame>
   );

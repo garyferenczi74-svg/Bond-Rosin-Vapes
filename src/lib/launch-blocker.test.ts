@@ -103,7 +103,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.equal(privacy.includes("There is no Bond Haus email list"), false);
   assert.match(
     privacy,
-    /If you opt in on the Haus door, Bond keeps your email, the consent time \(consent_at\), and the source, so Bond can send Bond Haus updates\. That opt in is separate from a product request and it starts unticked\. The Haus door form sends whether the age gate flag is present on this browser\./,
+    /If you opt in on the Haus door or on your Haus page, Bond keeps your email, the time you opted in, and the source, so Bond can send Bond Haus updates\. That opt in is separate from a product request and it starts unticked\. Bond accepts that opt in only when this server has your 21 or older attestation for that email\./,
   );
   assert.match(
     privacy,
@@ -111,11 +111,11 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   );
   assert.match(
     privacy,
-    /If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later\./,
+    /If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later\./,
   );
   assert.match(
     privacy,
-    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email, and those ids are deleted with the record or when you unsubscribe\./,
+    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email\. A confirmation id expires after 7 days\. An unsubscribe id does not expire\. Those ids are deleted with the record, when you unsubscribe, or when an unsubscribe id has no record and is older than 30 days\./,
   );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);

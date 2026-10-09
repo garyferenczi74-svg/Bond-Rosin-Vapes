@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { enterHausAction } from "@/app/haus/actions";
+import { hausCheckInputStyle, hausCheckRowStyle } from "@/app/haus/check-row";
 import { ComplianceBand } from "@/components/compliance-band";
 import { BOND_AGE_KEY } from "@/lib/haus/age-gate";
 import { tokens } from "@/lib/tokens";
@@ -85,18 +86,8 @@ export function WelcomeClient({
         <form action={onEnter} style={{ marginTop: 26 }}>
           {needsAge ? (
             <>
-              <label
-                style={{
-                  display: "flex",
-                  gap: 10,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 13,
-                  color: "#B0A99A",
-                  cursor: "pointer",
-                }}
-              >
-                <input type="checkbox" name="age21" value="1" />
+              <label style={hausCheckRowStyle}>
+                <input type="checkbox" name="age21" value="1" style={hausCheckInputStyle} />
                 <span>
                   I confirm I am 21 or older.
                   <span style={{ display: "block" }}>This is a self-attestation.</span>
@@ -112,19 +103,8 @@ export function WelcomeClient({
               />
             </>
           ) : null}
-          <label
-            style={{
-              display: "flex",
-              gap: 10,
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              color: "#B0A99A",
-              cursor: "pointer",
-              marginTop: 16,
-            }}
-          >
-            <input type="checkbox" name="hausUpdates" value="1" />
+          <label style={{ ...hausCheckRowStyle, marginTop: 16 }}>
+            <input type="checkbox" name="hausUpdates" value="1" style={hausCheckInputStyle} />
             <span>Send me Bond Haus updates by email. I can unsubscribe at any time.</span>
           </label>
           <button

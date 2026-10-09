@@ -3,11 +3,14 @@ import { deliverHausUpdateConfirmation, type HausUpdateDelivery } from "./haus-u
 
 export type HausMailPurpose = "unsub" | "confirm";
 
+export const HAUS_CONFIRM_TOKEN_MS = 7 * 24 * 60 * 60 * 1000;
+
 const OPAQUE_HAUS_TOKEN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type HausUpdateToken = {
   emailHmac: string;
   purpose: HausMailPurpose;
+  expiresAt: string | null;
 };
 
 export type HausUpdateWrite = {
@@ -23,6 +26,7 @@ export type HausUpdateWrite = {
   readHausUpdateToken(
     id: string,
   ): Promise<HausUpdateToken | null> | HausUpdateToken | null;
+  hasHausAge21Ack(email: string): Promise<boolean> | boolean;
   unsubscribeHausUpdate(emailHmac: string): Promise<{ ok: boolean }> | { ok: boolean };
   confirmHausUpdate(emailHmac: string): Promise<{ ok: boolean }> | { ok: boolean };
 };
@@ -33,14 +37,24 @@ export function hausUpdatesDoubleOptInEnabled(env: NodeJS.ProcessEnv = process.e
 
 export function hausUpdateOptInAccepted(input: {
   optedIn: boolean;
-  attested21: boolean;
-  ageVerified: boolean;
+  serverAge21Ack: boolean;
+  ageVerified?: boolean;
 }): boolean {
-  return input.optedIn && input.attested21 && input.ageVerified;
+  return input.optedIn && input.serverAge21Ack;
 }
 
 export function isOpaqueHausToken(token: string | null | undefined): token is string {
   return typeof token === "string" && OPAQUE_HAUS_TOKEN.test(token);
+}
+
+export function hausConfirmTokenExpired(
+  row: { purpose: HausMailPurpose; expiresAt: string | null },
+  now = Date.now(),
+): boolean {
+  if (row.purpose !== "confirm") return false;
+  if (!row.expiresAt) return true;
+  const at = Date.parse(row.expiresAt);
+  return Number.isNaN(at) || at <= now;
 }
 
 export function rfc8058OneClick(body: string, header: string | null): boolean {
@@ -51,8 +65,7 @@ export async function recordHausUpdateOptIn(input: {
   email: string;
   source: string;
   optedIn: boolean;
-  attested21: boolean;
-  ageVerified: boolean;
+  ageVerified?: boolean;
   store: HausUpdateWrite;
   env?: NodeJS.ProcessEnv;
   deliver?: (delivery: HausUpdateDelivery) => Promise<{ attempted: false }>;
@@ -64,7 +77,12 @@ export async function recordHausUpdateOptIn(input: {
   unsubscribeToken?: string;
   confirmToken?: string;
 }> {
-  if (!hausUpdateOptInAccepted(input)) {
+  const serverAge21Ack = await input.store.hasHausAge21Ack(input.email);
+  if (!hausUpdateOptInAccepted({
+    optedIn: input.optedIn,
+    serverAge21Ack,
+    ageVerified: input.ageVerified,
+  })) {
     return { ok: true, recorded: false, confirmationAttempted: false };
   }
 
@@ -139,6 +157,9 @@ export async function confirmHausUpdate(
   const row = await store.readHausUpdateToken(token);
   if (!row || row.purpose !== "confirm" || !/^[0-9a-f]{64}$/.test(row.emailHmac)) {
     return { ok: false, reason: "token", sent: false };
+  }
+  if (hausConfirmTokenExpired(row)) {
+    return { ok: false, reason: "expired", sent: false };
   }
   const confirmed = await store.confirmHausUpdate(row.emailHmac);
   if (!confirmed.ok) return { ok: false, reason: "missing", sent: false };

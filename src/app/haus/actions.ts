@@ -257,7 +257,6 @@ export async function enterHausAction(formData: FormData) {
       email: session.email,
       source: "haus_door",
       optedIn: String(formData.get("hausUpdates") ?? "") === "1",
-      attested21: true,
       ageVerified: String(formData.get("ageGate") ?? "") === "1",
       store: getSignupStore(),
     });
@@ -265,6 +264,40 @@ export async function enterHausAction(formData: FormData) {
     // The product request still stands if the update list cannot be written.
   }
   redirect("/haus/salon");
+}
+
+export async function optInHausUpdatesAction(formData: FormData) {
+  const session = await readMemberSession();
+  if (!session) {
+    redirect("/haus");
+  }
+  const ack = await readMemberAck();
+  if (!ack || ack.email !== session.email || !ack.age21) {
+    redirect("/haus/welcome");
+  }
+  const optedIn = String(formData.get("hausUpdates") ?? "") === "1";
+  if (!optedIn) {
+    return { ok: true as const, recorded: false, message: "" };
+  }
+  try {
+    const result = await recordHausUpdateOptIn({
+      email: session.email,
+      source: "haus_page",
+      optedIn: true,
+      ageVerified: String(formData.get("ageGate") ?? "") === "1",
+      store: getSignupStore(),
+    });
+    if (!result.recorded) {
+      return {
+        ok: false as const,
+        recorded: false,
+        message: "Bond accepts Haus updates only with your 21 or older attestation.",
+      };
+    }
+    return { ok: true as const, recorded: true, message: "Bond Haus updates are on for this email." };
+  } catch {
+    return { ok: false as const, recorded: false, message: "Bond could not save that opt in." };
+  }
 }
 
 export async function signOutAction() {
