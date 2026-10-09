@@ -1,14 +1,13 @@
 import { cookies } from "next/headers";
-import { accountsToPersist, mergePartnerAccounts } from "./door.ts";
+import { openSessionId, sealSessionId } from "@/lib/signups/cookie";
+import { getSignupStore } from "@/lib/signups";
+import type { DispensaryRecord } from "@/lib/signups/types";
 import { mergePartnerDraftBundle, parsePartnerDraftBundle, serializePartnerDraftBundle } from "./persist.ts";
-import { clonePartnerAccounts, SEED_PARTNER_ACCOUNTS } from "./seed.ts";
 import {
   PARTNER_ACCOUNT_COOKIE,
   PARTNER_DRAFT_COOKIE,
   PARTNER_SESSION_COOKIE,
-  parsePartnerAccounts,
   parsePartnerSession,
-  serializePartnerAccounts,
   type PartnerAccount,
   type PartnerDraftBundle,
   type PartnerSession,
@@ -25,22 +24,77 @@ function cookieBase() {
   };
 }
 
-export async function readPartnerSession(): Promise<PartnerSession | null> {
-  const store = await cookies();
-  return parsePartnerSession(store.get(PARTNER_SESSION_COOKIE)?.value);
+function partnerFromRecord(row: DispensaryRecord): PartnerAccount {
+  return {
+    email: row.email,
+    license: row.ocmLicense,
+    accountId: row.id,
+    elevated: row.status === "approved",
+    passwordSalt: row.passwordSalt,
+    passwordHash: row.passwordHash,
+    dispensaryName: row.dispensaryName,
+    address: row.address,
+    contactName: row.contactName,
+    phone: row.phone,
+  };
 }
 
-export async function writePartnerSession(session: PartnerSession): Promise<void> {
-  const store = await cookies();
-  store.set(PARTNER_SESSION_COOKIE, JSON.stringify(session), {
+function sessionFromRecord(row: DispensaryRecord): PartnerSession {
+  return {
+    email: row.email,
+    accountId: row.id,
+    license: row.ocmLicense,
+    age21: true,
+    role: "partner",
+  };
+}
+
+function readSeal(raw: string | undefined): string | null {
+  try {
+    return openSessionId(raw);
+  } catch {
+    return null;
+  }
+}
+
+export async function readPartnerSession(): Promise<PartnerSession | null> {
+  const account = await readSessionPartnerRecord();
+  return account ? sessionFromRecord(account) : null;
+}
+
+export async function readSessionPartnerAccount(): Promise<PartnerAccount | null> {
+  const account = await readSessionPartnerRecord();
+  return account ? partnerFromRecord(account) : null;
+}
+
+async function readSessionPartnerRecord(): Promise<DispensaryRecord | null> {
+  const jar = await cookies();
+  const id = readSeal(jar.get(PARTNER_SESSION_COOKIE)?.value);
+  if (!id) return null;
+  return getSignupStore().accountForDispensarySession(id);
+}
+
+export async function writePartnerSessionId(sessionId: string): Promise<void> {
+  const jar = await cookies();
+  jar.set(PARTNER_SESSION_COOKIE, sealSessionId(sessionId), {
     ...cookieBase(),
     maxAge: 60 * 60 * 24,
+  });
+  jar.set(PARTNER_ACCOUNT_COOKIE, "", {
+    ...cookieBase(),
+    maxAge: 0,
   });
 }
 
 export async function clearPartnerSession(): Promise<void> {
-  const store = await cookies();
-  store.set(PARTNER_SESSION_COOKIE, "", {
+  const jar = await cookies();
+  const id = readSeal(jar.get(PARTNER_SESSION_COOKIE)?.value);
+  if (id) await getSignupStore().closeDispensarySession(id);
+  jar.set(PARTNER_SESSION_COOKIE, "", {
+    ...cookieBase(),
+    maxAge: 0,
+  });
+  jar.set(PARTNER_ACCOUNT_COOKIE, "", {
     ...cookieBase(),
     maxAge: 0,
   });
@@ -60,20 +114,7 @@ export async function writePartnerDraftPersist(bundle: PartnerDraftBundle): Prom
   });
 }
 
-export async function readPersistedPartnerAccounts(): Promise<PartnerAccount[]> {
-  const store = await cookies();
-  return parsePartnerAccounts(store.get(PARTNER_ACCOUNT_COOKIE)?.value);
-}
-
 export async function readPartnerAccountBook(): Promise<PartnerAccount[]> {
-  const persisted = await readPersistedPartnerAccounts();
-  return mergePartnerAccounts(clonePartnerAccounts(), persisted);
-}
-
-export async function writePartnerAccountBook(rows: PartnerAccount[]): Promise<void> {
-  const store = await cookies();
-  store.set(PARTNER_ACCOUNT_COOKIE, serializePartnerAccounts(accountsToPersist(rows, SEED_PARTNER_ACCOUNTS)), {
-    ...cookieBase(),
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  const rows = await getSignupStore().listAccounts();
+  return rows.map(partnerFromRecord);
 }

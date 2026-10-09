@@ -2,16 +2,16 @@
 
 import { GENERIC_DOOR } from "@/lib/access";
 import { ORDER_COPY } from "@/lib/order/copy";
-import { findPartnerAccount, isPartnerElevated, openPartnerDoor, registerPartnerDoor } from "@/lib/order/door";
+import { isPartnerElevated, openPartnerDoor, registerPartnerDoor } from "@/lib/order/door";
 import { bundleFromStoreParts } from "@/lib/order/persist";
 import {
   clearPartnerSession,
   readPartnerAccountBook,
-  readPartnerSession,
-  writePartnerAccountBook,
+  readSessionPartnerAccount,
   writePartnerDraftPersist,
-  writePartnerSession,
+  writePartnerSessionId,
 } from "@/lib/order/session";
+import { getSignupStore } from "@/lib/signups";
 import { getVauxhallStore } from "@/lib/vauxhall/store";
 
 function fail(message = GENERIC_DOOR) {
@@ -36,8 +36,26 @@ export async function registerPartnerAction(formData: FormData) {
   );
   if (!bound.ok) return fail(bound.message);
 
-  await writePartnerAccountBook(rows);
-  await writePartnerSession(bound.session);
+  const created = rows[rows.length - 1];
+  if (!created) return fail();
+  try {
+    const store = getSignupStore();
+    const stored = await store.insertDispensary({
+      dispensaryName: created.dispensaryName,
+      address: created.address,
+      contactName: created.contactName,
+      phone: created.phone,
+      ocmLicense: created.license,
+      email: created.email,
+      passwordHash: created.passwordHash,
+      passwordSalt: created.passwordSalt,
+      age21AckAt: new Date().toISOString(),
+    });
+    const sessionId = await store.openDispensarySession(stored.id);
+    await writePartnerSessionId(sessionId);
+  } catch {
+    return fail();
+  }
   return { ok: true as const };
 }
 
@@ -49,7 +67,12 @@ export async function openPartnerDoorAction(formData: FormData) {
   const bound = openPartnerDoor({ email, password }, rows);
   if (!bound.ok) return fail(bound.message);
 
-  await writePartnerSession(bound.session);
+  try {
+    const sessionId = await getSignupStore().openDispensarySession(bound.session.accountId);
+    await writePartnerSessionId(sessionId);
+  } catch {
+    return fail();
+  }
   return { ok: true as const };
 }
 
@@ -63,25 +86,37 @@ export async function submitPartnerRequestAction(input: {
   promisedOn: string;
   notes?: string;
 }) {
-  const session = await readPartnerSession();
-  if (!session) return fail();
-
-  const rows = await readPartnerAccountBook();
-  const account = findPartnerAccount({ email: session.email, license: session.license }, rows);
-  if (!account || account.accountId !== session.accountId) return fail();
-  if (!isPartnerElevated({ email: session.email, license: session.license }, rows)) {
+  const account = await readSessionPartnerAccount();
+  if (!account) return fail();
+  if (!isPartnerElevated({ email: account.email, license: account.license }, [account])) {
     return fail(ORDER_COPY.pendingBlock);
   }
 
+  const lines = input.lines.map((line) => ({
+    skuId: line.skuId,
+    format: line.format,
+    qty: line.qty,
+  }));
   const store = getVauxhallStore();
   const result = store.createOrderRequest({
-    accountId: session.accountId,
-    lines: input.lines,
+    accountId: account.accountId,
+    lines,
     promisedOn: input.promisedOn,
     notes: input.notes,
-    actor: session.email,
+    actor: account.email,
   });
   if (!result.ok) return fail(result.reason);
+
+  try {
+    await getSignupStore().insertOrder({
+      dispensaryAccountId: account.accountId,
+      lines,
+      promisedOn: input.promisedOn,
+      notes: input.notes ?? "",
+    });
+  } catch {
+    return fail();
+  }
 
   const order = store.listOrders().find((row) => row.id === result.id);
   const event = store.listEvents().find((row) => row.summary === "ORDER_REQUEST" && row.sub.startsWith(result.id));

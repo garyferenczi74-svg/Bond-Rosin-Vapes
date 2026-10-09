@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { lockoutFallback, readLockoutState, recordAuthAttempt } from "./lockout.ts";
+import { hashKey, hashLockoutIp, hashLockoutValue, lockoutFallback, readLockoutState, recordAuthAttempt } from "./lockout.ts";
 import {
   assertServiceRoleServerOnly,
   createSupabaseServiceRole,
@@ -96,12 +96,74 @@ test("recordAuthAttempt fail-opens when service role env is missing", async () =
   }
 });
 
+test("HMAC digest is stable for one key and changes with another", () => {
+  const email = hashLockoutValue("  Ops@Bond.test ", "key-one");
+  assert.equal(email, hashLockoutValue("ops@bond.test", "key-one"));
+  assert.notEqual(email, hashLockoutValue("ops@bond.test", "key-two"));
+  assert.equal(email.length, 64);
+  assert.equal(/^[0-9a-f]{64}$/.test(email), true);
+
+  const ip = hashLockoutIp("203.0.113.9", "key-one");
+  assert.equal(ip, hashLockoutValue("203.0.113.9", "key-one"));
+  assert.notEqual(ip, hashLockoutIp("203.0.113.9", "key-two"));
+  assert.notEqual(ip, "203.0.113.9");
+  assert.notEqual(email, "ops@bond.test");
+});
+
+test("hash key is separate from the session secret and fails closed in production", async () => {
+  const prevNode = process.env.NODE_ENV;
+  const prevHash = process.env.BOND_HASH_KEY;
+  const prevSession = process.env.BOND_SESSION_SECRET;
+  const prevFetch = globalThis.fetch;
+  let fetched = false;
+  globalThis.fetch = (async () => {
+    fetched = true;
+    return new Response("no", { status: 500 });
+  }) as typeof fetch;
+
+  try {
+    process.env.NODE_ENV = "development";
+    process.env.BOND_SESSION_SECRET = "session-only-secret";
+    delete process.env.BOND_HASH_KEY;
+    const devDigest = hashLockoutValue("ops@bond.test");
+    assert.notEqual(devDigest, hashLockoutValue("ops@bond.test", "session-only-secret"));
+    assert.equal(hashKey().includes("session-only-secret"), false);
+
+    process.env.NODE_ENV = "production";
+    delete process.env.BOND_HASH_KEY;
+    assert.throws(
+      () => hashLockoutValue("ops@bond.test"),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(error.message, /BOND_HASH_KEY is not configured/);
+        assert.equal(error.message.includes("session-only-secret"), false);
+        return true;
+      },
+    );
+    assert.deepEqual(await recordAuthAttempt("ops@bond.test", "203.0.113.9", "check"), {
+      allowed: false,
+      locked: true,
+    });
+    assert.equal(fetched, false);
+  } finally {
+    globalThis.fetch = prevFetch;
+    if (prevNode === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = prevNode;
+    if (prevHash === undefined) delete process.env.BOND_HASH_KEY;
+    else process.env.BOND_HASH_KEY = prevHash;
+    if (prevSession === undefined) delete process.env.BOND_SESSION_SECRET;
+    else process.env.BOND_SESSION_SECRET = prevSession;
+  }
+});
+
 test("recordAuthAttempt posts record_auth_attempt with the service role key", async () => {
   const prevUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const prevKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const prevHash = process.env.BOND_HASH_KEY;
   const prevFetch = globalThis.fetch;
   process.env.NEXT_PUBLIC_SUPABASE_URL = sampleEnv.NEXT_PUBLIC_SUPABASE_URL;
   process.env.SUPABASE_SERVICE_ROLE_KEY = sampleEnv.SUPABASE_SERVICE_ROLE_KEY;
+  process.env.BOND_HASH_KEY = "test-hash-key";
 
   const calls: Array<{ url: string; headers: Record<string, string>; body: string }> = [];
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -130,10 +192,17 @@ test("recordAuthAttempt posts record_auth_attempt with the service role key", as
     assert.equal(rpc.headers.apikey.includes("anon"), false);
     const payload = JSON.parse(rpc.body) as { p_email: string; p_ip: string; p_outcome: string };
     assert.deepEqual(payload, {
-      p_email: "ops@bond.test",
-      p_ip: "203.0.113.9",
+      p_email: hashLockoutValue("ops@bond.test", "test-hash-key"),
+      p_ip: hashLockoutIp("203.0.113.9", "test-hash-key"),
       p_outcome: "check",
     });
+    assert.equal(rpc.body.includes("ops@bond.test"), false);
+    assert.equal(rpc.body.includes("203.0.113.9"), false);
+    assert.equal(rpc.body.includes("test-hash-key"), false);
+    assert.notEqual(payload.p_ip, "203.0.113.9");
+    assert.notEqual(payload.p_email, "ops@bond.test");
+    assert.equal(payload.p_ip.length, 64);
+    assert.equal(payload.p_email.length, 64);
     assert.deepEqual(result, { allowed: false, locked: true });
   } finally {
     globalThis.fetch = prevFetch;
@@ -141,6 +210,8 @@ test("recordAuthAttempt posts record_auth_attempt with the service role key", as
     else process.env.NEXT_PUBLIC_SUPABASE_URL = prevUrl;
     if (prevKey === undefined) delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     else process.env.SUPABASE_SERVICE_ROLE_KEY = prevKey;
+    if (prevHash === undefined) delete process.env.BOND_HASH_KEY;
+    else process.env.BOND_HASH_KEY = prevHash;
   }
 });
 
@@ -169,6 +240,11 @@ test("/haus lockout writes use the service role client only", () => {
 
   assert.match(lockout, /createSupabaseServiceRole/);
   assert.match(lockout, /record_auth_attempt/);
+  assert.match(lockout, /createHmac/);
+  assert.match(lockout, /BOND_HASH_KEY/);
+  assert.equal(lockout.includes("createHash"), false);
+  assert.equal(lockout.includes("NEXT_PUBLIC_BOND_HASH"), false);
+  assert.equal(lockout.includes("console."), false);
   assert.equal(lockout.includes("createSupabaseServer"), false);
   assert.equal(lockout.includes("NEXT_PUBLIC_SUPABASE_ANON_KEY"), false);
 
@@ -201,6 +277,8 @@ test("service role key never lands in browser or NEXT_PUBLIC_ surfaces", () => {
   });
   const envExample = read(".env.example");
   assert.match(envExample, /# SUPABASE_SERVICE_ROLE_KEY=/);
+  assert.match(envExample, /# BOND_HASH_KEY=/);
+  assert.equal(envExample.includes("NEXT_PUBLIC_BOND_HASH"), false);
   assert.equal(envExample.includes("NEXT_PUBLIC_SUPABASE_SERVICE"), false);
   assert.deepEqual(hits, []);
 });

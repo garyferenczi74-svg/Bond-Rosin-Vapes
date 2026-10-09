@@ -159,7 +159,7 @@ export function OrderClient({
               metrcUid: "",
             })),
             documents:
-              "Partner reservation. Draft only. Nothing is sent to the state tracking system from this page.",
+              "Partner request. Draft only. Nothing is sent to the state tracking system from this page.",
             notes,
             source: "partner",
           },
@@ -341,7 +341,10 @@ export function OrderClient({
                   }}
                 >
                   <input type="checkbox" name="age21" value="1" />
-                  {ORDER_COPY.age21}
+                  <span>
+                    {ORDER_COPY.age21}
+                    <span style={{ display: "block" }}>{ORDER_COPY.age21Note}</span>
+                  </span>
                 </label>
                 <button className="btn" type="submit" disabled={pending} style={{ marginTop: 6 }}>
                   {ORDER_COPY.signUp}
