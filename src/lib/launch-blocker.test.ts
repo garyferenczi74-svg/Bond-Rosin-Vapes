@@ -111,6 +111,10 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   );
   assert.match(
     privacy,
+    /The audit log also records a member opting back in, and that record keeps only a keyed hash of the email\./,
+  );
+  assert.match(
+    privacy,
     /If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later\./,
   );
   assert.match(

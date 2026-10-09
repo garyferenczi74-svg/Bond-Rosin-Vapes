@@ -176,10 +176,13 @@ export class RemoteSignupStore {
   }
 
   async openHausSession(email: string): Promise<string> {
+    const mark = email.trim().toLowerCase();
+    const emailHmac = hashLockoutValue(mark);
+    if (!emailHmac) throw new Error("Haus session was not stored.");
     const expires = new Date(Date.now() + DAY_SECONDS * 1000).toISOString();
     const { data, error } = await client()
       .from("haus_sessions")
-      .insert({ email: email.trim().toLowerCase(), expires_at: expires })
+      .insert({ email: mark, email_hmac: emailHmac, expires_at: expires })
       .select("id")
       .single();
     if (error || !data) throw new Error("Haus session was not stored.");

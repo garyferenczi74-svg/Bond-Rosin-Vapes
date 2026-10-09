@@ -346,6 +346,10 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   );
   assert.match(
     privacy,
+    /The audit log also records a member opting back in, and that record keeps only a keyed hash of the email\./,
+  );
+  assert.match(
+    privacy,
     /If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later\. When you unsubscribe, Bond deletes the email sooner\. Bond then keeps only a keyed hash of the address, and Bond keeps that hash for as long as it needs to honor the unsubscribe\./,
   );
   assert.match(
@@ -358,6 +362,7 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   for (const sentence of [
     "If you opt in on the Haus door or on your Haus page, Bond keeps your email, the time you opted in, and the source, so Bond can send Bond Haus updates. That opt in is separate from a product request and it starts unticked. Bond accepts that opt in only when this server has your 21 or older attestation for that email.",
     "You can unsubscribe from the email link or by unticking the box on your Haus page. After you unsubscribe, Bond will not add that email again unless you opt back in yourself on your Haus page while signed in.",
+    "The audit log also records a member opting back in, and that record keeps only a keyed hash of the email.",
     "If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email. A confirmation id expires after 7 days. An unsubscribe id does not expire. Those ids are deleted with the record or when you unsubscribe. Unused confirmation and unsubscribe ids with no record are deleted after 30 days. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
   ]) {
     assert.equal(sentence.includes("!"), false);
@@ -485,12 +490,63 @@ test("a thrown Haus update read or unsubscribe shows the could not save message"
   assert.equal(unsub.message, "Bond could not save that opt in.");
   assert.equal(failing.listHausUpdates().length, 1);
 
+  const ticking = withAck(new MemorySignupStore());
+  ticking.recordHausUpdate = () => {
+    throw new Error("permission denied");
+  };
+  const boom = await saveHausSalonOptIn({ email: door.email, optedIn: true, store: ticking, env: {} });
+  assert.equal(boom.ok, false);
+  assert.equal(boom.subscribed, false);
+  assert.equal(boom.message, "Bond could not save that opt in.");
+  assert.equal(ticking.listHausUpdates().length, 0);
+
   const remote = read("src/lib/signups/remote.ts");
   const reader = remote.slice(remote.indexOf("async hasHausUpdate"), remote.indexOf("async hasHausAge21Ack"));
   assert.match(reader, /bond_has_haus_update/);
   assert.match(reader, /throw new Error\("Haus update was not read\."\)/);
   assert.equal(reader.includes("return false"), false);
   assert.equal(reader.includes('.from("haus_updates")'), false);
+  const opener = remote.slice(remote.indexOf("async openHausSession"), remote.indexOf("async readHausSession"));
+  assert.match(opener, /hashLockoutValue\(mark\)/);
+  assert.match(opener, /email_hmac: emailHmac/);
+});
+
+test("a token failure after opt in keeps the subscribed state", async () => {
+  const errors: unknown[][] = [];
+  const original = console.error;
+  console.error = (...args: unknown[]) => {
+    errors.push(args);
+  };
+  try {
+    const first = withAck(new MemorySignupStore());
+    first.openHausSession(door.email);
+    first.issueHausUpdateToken = () => {
+      throw new Error("token store down");
+    };
+    const on = await saveHausSalonOptIn({ email: door.email, optedIn: true, store: first, env: {} });
+    assert.equal(on.ok, true);
+    assert.equal(on.subscribed, true);
+    assert.equal(on.message, "Bond Haus updates are on for this email.");
+    assert.equal(first.hasHausUpdate(door.email), true);
+    assert.equal(errors.some((row) => String(row[0]).includes(door.email)), false);
+    assert.match(String(errors[0]?.[0]), /Haus update token was not issued/);
+
+    const again = withAck(new MemorySignupStore());
+    again.openHausSession(door.email);
+    await recordHausUpdateOptIn({ ...door, store: again, env: {} });
+    await again.unsubscribeHausUpdate(hashLockoutValue(door.email));
+    again.issueHausUpdateToken = () => {
+      throw new Error("token store down");
+    };
+    const back = await saveHausSalonOptIn({ email: door.email, optedIn: true, store: again, env: {} });
+    assert.equal(back.ok, true);
+    assert.equal(back.subscribed, true);
+    assert.equal(back.message, "Bond Haus updates are on for this email.");
+    assert.equal(again.hasHausUpdate(door.email), true);
+    assert.equal(again.listHausUpdates()[0]?.source, "salon");
+  } finally {
+    console.error = original;
+  }
 });
 
 test("a salon re-tick clears suppression and the door does not", async () => {

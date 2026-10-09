@@ -17,6 +17,7 @@ const tokenCleanup = fileURLToPath(new URL("../../../supabase/migrations/2026100
 const tokenExpiry = fileURLToPath(new URL("../../../supabase/migrations/20261009230000_haus_confirm_token_expiry.sql", import.meta.url));
 const hasUpdate = fileURLToPath(new URL("../../../supabase/migrations/20261009233000_bond_has_haus_update.sql", import.meta.url));
 const reopt = fileURLToPath(new URL("../../../supabase/migrations/20261009234000_haus_update_reopt.sql", import.meta.url));
+const sessionBind = fileURLToPath(new URL("../../../supabase/migrations/20261009235000_session_grants_and_reopt_bind.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -117,6 +118,25 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.ok(auditLift);
   assert.equal(auditLift[0].replaceAll("p_email_hmac", "").includes("p_email"), false);
   assert.match(auditLift[0], /p_email_hmac/);
+  const bindSql = readFileSync(sessionBind, "utf8");
+  assert.match(bindSql, /ADD COLUMN email_hmac text/);
+  assert.match(bindSql, /sess\.email_hmac = p_email_hmac/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.haus_sessions FROM PUBLIC/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.haus_sessions FROM anon/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.haus_sessions FROM authenticated/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.haus_sessions FROM service_role/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.dispensary_sessions FROM PUBLIC/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.dispensary_sessions FROM anon/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.dispensary_sessions FROM authenticated/);
+  assert.match(bindSql, /REVOKE ALL ON TABLE public\.dispensary_sessions FROM service_role/);
+  assert.match(bindSql, /GRANT SELECT, INSERT, DELETE ON TABLE public\.haus_sessions TO service_role/);
+  assert.match(bindSql, /GRANT SELECT, INSERT, DELETE ON TABLE public\.dispensary_sessions TO service_role/);
+  assert.equal(/GRANT UPDATE ON TABLE public\.haus_sessions/.test(bindSql), false);
+  assert.equal(/GRANT UPDATE ON TABLE public\.dispensary_sessions/.test(bindSql), false);
+  assert.equal(/GRANT .* ON TABLE public\.haus_sessions TO anon/.test(bindSql), false);
+  assert.equal(/GRANT .* ON TABLE public\.haus_sessions TO authenticated/.test(bindSql), false);
+  assert.equal(/GRANT .* ON TABLE public\.dispensary_sessions TO anon/.test(bindSql), false);
+  assert.equal(/GRANT .* ON TABLE public\.dispensary_sessions TO authenticated/.test(bindSql), false);
 
   const database = `bond_signup_rls_${process.pid}_${Date.now()}`;
   try {
@@ -241,6 +261,8 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 \\i ${hasUpdate}
 
 \\i ${reopt}
+
+\\i ${sessionBind}
 
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
@@ -901,8 +923,8 @@ SELECT COUNT(*) AS service_haus FROM public.haus_requests WHERE email = 'service
     `
 INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
 VALUES ('listed@bond.test', true, now(), 'Harbor House');
-INSERT INTO public.haus_sessions (email, expires_at)
-VALUES ('listed@bond.test', now() + interval '1 day');
+INSERT INTO public.haus_sessions (email, email_hmac, expires_at)
+VALUES ('listed@bond.test', repeat('d4', 32), now() + interval '1 day');
 SELECT public.bond_record_haus_update('listed@bond.test', 'haus_page', repeat('d4', 32)) AS listed_recorded;
 UPDATE public.haus_updates SET consent_at = now() - interval '2 days' WHERE email = 'listed@bond.test';
 SELECT public.bond_issue_haus_update_token(repeat('d4', 32), 'unsub') AS unsub_token;
@@ -1028,14 +1050,46 @@ SELECT public.bond_record_haus_update('listed@bond.test', 'haus_door', repeat('d
   assert.equal(doorStill.status, 0, doorStill.stderr);
   assert.match(doorStill.stdout, /still_suppressed[\s\S]{0,40}\n-+\n\s*1/);
 
+  const mismatchPrep = psqlSql(
+    database,
+    `
+SELECT public.bond_record_haus_update('side@bond.test', 'haus_page', repeat('d8', 32)) AS side_recorded;
+SELECT public.bond_unsubscribe_haus_update(repeat('d8', 32)) AS side_unsub;
+`,
+  );
+  assert.equal(mismatchPrep.status, 0, `${mismatchPrep.stdout}\n${mismatchPrep.stderr}`);
+  const mismatch = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_reopt_haus_update('listed@bond.test', repeat('d8', 32)) AS mismatch;
+`,
+  );
+  console.log("MISMATCH", mismatch.stdout.trim());
+  if (mismatch.status !== 0) console.log("MISMATCH_ERR", mismatch.stderr.trim());
+  assert.equal(mismatch.status, 0, `${mismatch.stdout}\n${mismatch.stderr}`);
+  assert.match(mismatch.stdout, /mismatch[\s\S]{0,40}\n-+\n\s*f/);
+  const mismatchStays = psqlSql(
+    database,
+    `
+SELECT count(*) AS side_still FROM public.haus_updates_suppression WHERE email_hmac = repeat('d8', 32);
+SELECT count(*) AS listed_still_mismatch FROM public.haus_updates_suppression WHERE email_hmac = repeat('d4', 32);
+SELECT count(*) AS listed_rows_mismatch FROM public.haus_updates WHERE email = 'listed@bond.test';
+`,
+  );
+  assert.equal(mismatchStays.status, 0, `${mismatchStays.stdout}\n${mismatchStays.stderr}`);
+  assert.match(mismatchStays.stdout, /side_still[\s\S]{0,40}\n-+\n\s*1/);
+  assert.match(mismatchStays.stdout, /listed_still_mismatch[\s\S]{0,40}\n-+\n\s*1/);
+  assert.match(mismatchStays.stdout, /listed_rows_mismatch[\s\S]{0,40}\n-+\n\s*0/);
+
   const otherSession = psqlSql(
     database,
     `
 DELETE FROM public.haus_sessions WHERE lower(email) = 'listed@bond.test';
 INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
 VALUES ('other@bond.test', true, now(), 'Other House');
-INSERT INTO public.haus_sessions (email, expires_at)
-VALUES ('other@bond.test', now() + interval '1 day');
+INSERT INTO public.haus_sessions (email, email_hmac, expires_at)
+VALUES ('other@bond.test', repeat('d6', 32), now() + interval '1 day');
 `,
   );
   assert.equal(otherSession.status, 0, `${otherSession.stdout}\n${otherSession.stderr}`);
@@ -1062,8 +1116,8 @@ SELECT public.bond_reopt_haus_update('other@bond.test', repeat('d6', 32)) AS oth
   const noAck = psqlSql(
     database,
     `
-INSERT INTO public.haus_sessions (email, expires_at)
-VALUES ('bare@bond.test', now() + interval '1 day');
+INSERT INTO public.haus_sessions (email, email_hmac, expires_at)
+VALUES ('bare@bond.test', repeat('d7', 32), now() + interval '1 day');
 SELECT public.bond_record_haus_update('bare@bond.test', 'haus_page', repeat('d7', 32)) AS bare_recorded;
 SELECT public.bond_unsubscribe_haus_update(repeat('d7', 32)) AS bare_unsub;
 `,
@@ -1106,6 +1160,100 @@ SELECT public.bond_reopt_haus_update('bare@bond.test', repeat('d7', 32)) AS no_a
       console.log(`DENIED_${role.toUpperCase()}`, sql, deniedFn.stderr.trim());
       assert.notEqual(deniedFn.status, 0, `${role} ${sql}`);
       assert.match(deniedFn.stderr, /permission denied/i, `${role} ${sql}`);
+    }
+  }
+
+  const sessionGrants = psqlSql(
+    database,
+    `
+SELECT has_table_privilege('anon', 'public.haus_sessions', 'SELECT') AS anon_haus_select;
+SELECT has_table_privilege('anon', 'public.haus_sessions', 'INSERT') AS anon_haus_insert;
+SELECT has_table_privilege('anon', 'public.haus_sessions', 'UPDATE') AS anon_haus_update;
+SELECT has_table_privilege('anon', 'public.haus_sessions', 'DELETE') AS anon_haus_delete;
+SELECT has_table_privilege('authenticated', 'public.haus_sessions', 'SELECT') AS auth_haus_select;
+SELECT has_table_privilege('authenticated', 'public.haus_sessions', 'INSERT') AS auth_haus_insert;
+SELECT has_table_privilege('authenticated', 'public.haus_sessions', 'UPDATE') AS auth_haus_update;
+SELECT has_table_privilege('authenticated', 'public.haus_sessions', 'DELETE') AS auth_haus_delete;
+SELECT has_table_privilege('anon', 'public.dispensary_sessions', 'SELECT') AS anon_disp_select;
+SELECT has_table_privilege('authenticated', 'public.dispensary_sessions', 'SELECT') AS auth_disp_select;
+SELECT has_table_privilege('authenticated', 'public.dispensary_sessions', 'INSERT') AS auth_disp_insert;
+SELECT has_table_privilege('authenticated', 'public.dispensary_sessions', 'DELETE') AS auth_disp_delete;
+SELECT has_table_privilege('service_role', 'public.haus_sessions', 'SELECT') AS service_haus_select;
+SELECT has_table_privilege('service_role', 'public.haus_sessions', 'INSERT') AS service_haus_insert;
+SELECT has_table_privilege('service_role', 'public.haus_sessions', 'DELETE') AS service_haus_delete;
+SELECT has_table_privilege('service_role', 'public.haus_sessions', 'UPDATE') AS service_haus_update;
+SELECT has_table_privilege('service_role', 'public.dispensary_sessions', 'SELECT') AS service_disp_select;
+SELECT has_table_privilege('service_role', 'public.dispensary_sessions', 'INSERT') AS service_disp_insert;
+SELECT has_table_privilege('service_role', 'public.dispensary_sessions', 'DELETE') AS service_disp_delete;
+SELECT has_table_privilege('service_role', 'public.dispensary_sessions', 'UPDATE') AS service_disp_update;
+`,
+  );
+  console.log("SESSION_GRANTS", sessionGrants.stdout.trim());
+  if (sessionGrants.status !== 0) console.log("SESSION_GRANTS_ERR", sessionGrants.stderr.trim());
+  assert.equal(sessionGrants.status, 0, `${sessionGrants.stdout}\n${sessionGrants.stderr}`);
+  for (const name of [
+    "anon_haus_select",
+    "anon_haus_insert",
+    "anon_haus_update",
+    "anon_haus_delete",
+    "auth_haus_select",
+    "auth_haus_insert",
+    "auth_haus_update",
+    "auth_haus_delete",
+    "anon_disp_select",
+    "auth_disp_select",
+    "auth_disp_insert",
+    "auth_disp_delete",
+    "service_haus_update",
+    "service_disp_update",
+  ]) {
+    assert.match(sessionGrants.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*f`), name);
+  }
+  for (const name of [
+    "service_haus_select",
+    "service_haus_insert",
+    "service_haus_delete",
+    "service_disp_select",
+    "service_disp_insert",
+    "service_disp_delete",
+  ]) {
+    assert.match(sessionGrants.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*t`), name);
+  }
+
+  const serviceSessions = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+INSERT INTO public.haus_sessions (email, email_hmac, expires_at)
+VALUES ('grant@bond.test', repeat('ab', 32), now() + interval '1 day');
+SELECT count(*) AS grant_haus FROM public.haus_sessions WHERE email = 'grant@bond.test';
+DELETE FROM public.haus_sessions WHERE email = 'grant@bond.test';
+INSERT INTO public.dispensary_sessions (account_id, expires_at)
+SELECT id, now() + interval '1 day'
+FROM public.dispensary_accounts WHERE email = 'harbor.buyer@example.test';
+SELECT count(*) AS grant_disp FROM public.dispensary_sessions s
+JOIN public.dispensary_accounts a ON a.id = s.account_id
+WHERE a.email = 'harbor.buyer@example.test';
+DELETE FROM public.dispensary_sessions s
+USING public.dispensary_accounts a
+WHERE a.id = s.account_id AND a.email = 'harbor.buyer@example.test';
+`,
+  );
+  console.log("SERVICE_SESSIONS", serviceSessions.stdout.trim());
+  if (serviceSessions.status !== 0) console.log("SERVICE_SESSIONS_ERR", serviceSessions.stderr.trim());
+  assert.equal(serviceSessions.status, 0, `${serviceSessions.stdout}\n${serviceSessions.stderr}`);
+  assert.match(serviceSessions.stdout, /grant_haus[\s\S]{0,40}\n-+\n\s*1/);
+  assert.match(serviceSessions.stdout, /grant_disp[\s\S]{0,40}\n-+\n\s*1/);
+
+  for (const role of ["anon", "authenticated"]) {
+    for (const sql of [
+      "SELECT email FROM public.haus_sessions",
+      "SELECT id FROM public.dispensary_sessions",
+    ]) {
+      const deniedSession = psqlSql(database, `SET ROLE ${role}; ${sql};`);
+      console.log(`DENIED_SESSION_${role.toUpperCase()}`, sql, deniedSession.stderr.trim());
+      assert.notEqual(deniedSession.status, 0, `${role} ${sql}`);
+      assert.match(deniedSession.stderr, /permission denied/i, `${role} ${sql}`);
     }
   }
   } finally {

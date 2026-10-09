@@ -48,6 +48,20 @@ export type HausSalonOptInResult = {
   message: string;
 };
 
+async function issuedHausToken(
+  store: HausUpdateWrite,
+  emailHmac: string,
+  purpose: HausMailPurpose,
+): Promise<string | undefined> {
+  try {
+    const issued = await store.issueHausUpdateToken(emailHmac, purpose);
+    return issued.id;
+  } catch {
+    console.error("Haus update token was not issued.", purpose);
+    return undefined;
+  }
+}
+
 export function hausUpdatesDoubleOptInEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.BOND_HAUS_UPDATES_DOUBLE_OPT_IN === "on";
 }
@@ -120,29 +134,37 @@ export async function recordHausUpdateOptIn(input: {
     };
   }
 
-  const unsub = await input.store.issueHausUpdateToken(emailHmac, "unsub");
+  const unsubId = await issuedHausToken(input.store, emailHmac, "unsub");
   const env = input.env ?? process.env;
   if (!hausUpdatesDoubleOptInEnabled(env)) {
     return {
       ok: true,
       recorded: true,
       confirmationAttempted: false,
-      unsubscribeToken: unsub.id,
+      unsubscribeToken: unsubId,
     };
   }
 
-  const confirm = await input.store.issueHausUpdateToken(emailHmac, "confirm");
+  const confirmId = await issuedHausToken(input.store, emailHmac, "confirm");
+  if (!confirmId) {
+    return {
+      ok: true,
+      recorded: true,
+      confirmationAttempted: false,
+      unsubscribeToken: unsubId,
+    };
+  }
   const deliver = input.deliver ?? deliverHausUpdateConfirmation;
   await deliver({
     email: input.email.trim().toLowerCase(),
-    confirmUrl: `/haus/updates/confirm?token=${confirm.id}`,
+    confirmUrl: `/haus/updates/confirm?token=${confirmId}`,
   });
   return {
     ok: true,
     recorded: true,
     confirmationAttempted: true,
-    unsubscribeToken: unsub.id,
-    confirmToken: confirm.id,
+    unsubscribeToken: unsubId,
+    confirmToken: confirmId,
   };
 }
 
@@ -183,7 +205,11 @@ export async function saveHausSalonOptIn(input: {
       if (!lifted) {
         return { ok: false, recorded: false, subscribed: false, message: HAUS_COULD_NOT_SAVE };
       }
-      await input.store.issueHausUpdateToken(hashLockoutValue(input.email), "unsub");
+      try {
+        await issuedHausToken(input.store, hashLockoutValue(input.email), "unsub");
+      } catch {
+        console.error("Haus update token was not issued.", "unsub");
+      }
       return { ok: true, recorded: true, subscribed: true, message: HAUS_UPDATES_ON };
     }
     if (!result.recorded) {

@@ -16,7 +16,7 @@ import type {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 type DispensarySessionRow = { id: string; accountId: string; expiresAt: number };
-type HausSessionRow = { id: string; email: string; expiresAt: number };
+type HausSessionRow = { id: string; email: string; expiresAt: number; emailHmac: string };
 
 function nowIso() {
   return new Date().toISOString();
@@ -143,8 +143,11 @@ export class MemorySignupStore {
   }
 
   openHausSession(email: string): string {
+    const mark = email.trim().toLowerCase();
+    const emailHmac = hashLockoutValue(mark);
+    if (!mark || !emailHmac) throw new Error("Haus session was not stored.");
     const id = randomUUID();
-    this.hausSessions.set(id, { id, email: email.trim().toLowerCase(), expiresAt: Date.now() + DAY_MS });
+    this.hausSessions.set(id, { id, email: mark, expiresAt: Date.now() + DAY_MS, emailHmac });
     return id;
   }
 
@@ -170,12 +173,11 @@ export class MemorySignupStore {
 
   reoptHausUpdate(email: string): boolean {
     const mark = email.trim().toLowerCase();
-    const sessionOpen = [...this.hausSessions.values()].some(
-      (row) => row.email === mark && row.expiresAt > Date.now(),
-    );
-    if (!mark || !sessionOpen || !this.hasHausAge21Ack(mark)) return false;
     const emailHmac = hashLockoutValue(mark);
-    if (!emailHmac) return false;
+    const sessionOpen = [...this.hausSessions.values()].some(
+      (row) => row.email === mark && row.expiresAt > Date.now() && row.emailHmac === emailHmac,
+    );
+    if (!mark || !emailHmac || !sessionOpen || !this.hasHausAge21Ack(mark)) return false;
     this.updateSuppression.delete(emailHmac);
     this.updates.set(mark, {
       email: mark,
