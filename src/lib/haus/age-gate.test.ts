@@ -733,5 +733,9 @@ test("one click replaces the birth date form and keeps the warning box", () => {
     assert.match(cover, /class="bond-warn-box"/, name);
     assert.match(html, /attributeFilter: \["inert", "aria-hidden"\]/, name);
     assert.match(html, /new MutationObserver/, name);
+    if (html.includes('body>*:not(#bond-gate-cover){visibility:hidden}')) {
+      assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-age-dc,/, name);
+      assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-age-dc \*,/, name);
+    }
   }
 });
