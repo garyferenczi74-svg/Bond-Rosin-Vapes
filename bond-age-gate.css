@@ -64,7 +64,7 @@ html[data-bond-age="ok"] .bond-age-dc {
   display: block;
   font-family: "GFS Didot", Didot, serif;
   font-weight: 400;
-  font-size: 32px;
+  font-size: clamp(44px, 6.4vw, 64px);
   letter-spacing: 0.35em;
   padding-left: 0.35em;
   line-height: 1.15;
@@ -92,6 +92,10 @@ html[data-bond-age="ok"] .bond-age-dc {
   font-size: clamp(30px, 4vw, 40px);
 }
 
+.bond-age-ask .bond-age-lead {
+  font-size: clamp(22px, calc(19px + 0.7vw), 26px);
+}
+
 .bond-age-title {
   font-size: clamp(30px, 4vw, 40px);
 }
@@ -102,6 +106,10 @@ html[data-bond-age="ok"] .bond-age-dc {
   line-height: 1.6;
   color: var(--age-copy);
   margin: 0;
+}
+
+.bond-age-ask .bond-age-body {
+  font-size: 13px;
 }
 
 .bond-age-actions {
@@ -283,6 +291,11 @@ html[data-bond-age="ok"] .bond-age-dc {
   border-radius: 1px;
 }
 
+[data-bond-age-target]:focus,
+[data-bond-age-target]:focus-visible {
+  outline: none;
+}
+
 .bond-js-note {
   font-family: var(--font-didot), "GFS Didot", Didot, Georgia, "Times New Roman", serif;
   font-size: 22px;
@@ -299,6 +312,13 @@ html[data-bond-age="ok"] .bond-age-dc {
   .bond-age-yes {
     font-size: 13px;
     letter-spacing: 0.08em;
+  }
+}
+
+@media (max-height: 730px) {
+  .bond-age-box {
+    padding-top: 20px;
+    padding-bottom: 20px;
   }
 }
 

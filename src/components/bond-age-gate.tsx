@@ -147,6 +147,16 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
       }
       if (target) {
         if (target.tabIndex < 0) target.setAttribute("tabindex", "-1");
+        if (!target.hasAttribute("data-bond-age-target")) {
+          target.setAttribute("data-bond-age-target", "");
+          target.addEventListener(
+            "blur",
+            () => {
+              target.removeAttribute("data-bond-age-target");
+            },
+            { once: true },
+          );
+        }
         target.focus({ preventScroll: true });
         if (document.activeElement === target) return;
       }

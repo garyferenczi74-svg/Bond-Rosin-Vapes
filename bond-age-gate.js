@@ -140,14 +140,27 @@
     return null;
   }
 
+  function quiet(target) {
+    if (typeof target.setAttribute !== "function") return;
+    if (typeof target.tabIndex === "number" && target.tabIndex < 0) {
+      target.setAttribute("tabindex", "-1");
+    }
+    if (target.getAttribute("data-bond-age-target") == null) {
+      target.setAttribute("data-bond-age-target", "");
+      if (typeof target.addEventListener === "function") {
+        target.addEventListener("blur", function () {
+          target.removeAttribute("data-bond-age-target");
+        }, { once: true });
+      }
+    }
+  }
+
   function focusMain() {
     var tries = 0;
     function attempt() {
       var target = pageTarget();
       if (!target || typeof target.focus !== "function") return;
-      if (typeof target.tabIndex === "number" && target.tabIndex < 0 && typeof target.setAttribute === "function") {
-        target.setAttribute("tabindex", "-1");
-      }
+      quiet(target);
       try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
       if (document.activeElement === target || tries >= 160) return;
       tries += 1;
