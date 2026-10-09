@@ -216,7 +216,8 @@ test("Privacy Dispensary Login collection lists every field the door collects", 
   assert.match(sentence, /account status/);
   assert.match(sentence, /never sent to Metrc/);
   assert.match(sentence, /never logged in plaintext/);
-  assert.match(sentence, /does not grant order rights until Bond operations elevates the account/);
+  assert.match(sentence, /does not grant request rights until Bond operations elevates the account/);
+  assert.match(sentence, /self-attestation/);
   assert.match(privacy, /the Home Haus form stores nothing and sends nothing/);
   assert.match(privacy, /kept in localStorage on this device for 30 days/);
   assert.match(privacy, /under the name bond_age_ok/);
@@ -226,7 +227,7 @@ test("Privacy Dispensary Login collection lists every field the door collects", 
   assert.equal(privacy.includes("if member accounts launch"), false);
   assert.match(
     privacy,
-    /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\./,
+    /On the Next door the confirmation, with a note that you have seen the welcome, is stored by Bond in Supabase\./,
   );
 });
 

@@ -21,6 +21,8 @@ import {
   readMemberSession,
 } from "@/lib/member-session";
 import { readRequestMeta } from "@/lib/request-meta";
+import { getSignupStore } from "@/lib/signups";
+import { recordHausUpdateOptIn, saveHausSalonOptIn } from "@/lib/signups/haus-updates";
 
 function fail(message = GENERIC_DOOR) {
   return { ok: false as const, message, next: "credentials" as const };
@@ -234,16 +236,51 @@ export async function enterHausAction(formData: FormData) {
   const ack = await readMemberAck();
   const already = ack?.email === session.email && ack.age21;
   const checked = String(formData.get("age21") ?? "") === "1";
+  const requestedDispensary = String(formData.get("requestedDispensary") ?? "").trim().replace(/\s+/g, " ");
   if (!already && !checked) {
-    return { ok: false as const, message: "Please confirm you are 21 and over." };
+    return { ok: false as const, message: "Please confirm you are 21 or older. This is a self-attestation." };
+  }
+  if (!already && requestedDispensary.length < 2) {
+    return { ok: false as const, message: "Name the dispensary you are requesting." };
   }
 
-  await writeMemberAck({
-    email: session.email,
-    welcomeSeen: true,
-    age21: true,
-  });
+  await writeMemberAck(
+    {
+      email: session.email,
+      welcomeSeen: true,
+      age21: true,
+    },
+    requestedDispensary,
+  );
+  try {
+    await recordHausUpdateOptIn({
+      email: session.email,
+      source: "haus_door",
+      optedIn: String(formData.get("hausUpdates") ?? "") === "1",
+      store: getSignupStore(),
+    });
+  } catch {
+    // The product request still stands if the update list cannot be written.
+  }
   redirect("/haus/salon");
+}
+
+export async function optInHausUpdatesAction(formData: FormData) {
+  const session = await readMemberSession();
+  if (!session) {
+    redirect("/haus");
+  }
+  const ack = await readMemberAck();
+  if (!ack || ack.email !== session.email || !ack.age21) {
+    redirect("/haus/welcome");
+  }
+  const store = getSignupStore();
+  const optedIn = String(formData.get("hausUpdates") ?? "") === "1";
+  return saveHausSalonOptIn({
+    email: session.email,
+    optedIn,
+    store,
+  });
 }
 
 export async function signOutAction() {

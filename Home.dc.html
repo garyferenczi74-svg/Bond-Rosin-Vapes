@@ -180,6 +180,33 @@ nav { container-type: inline-size; container-name: bondnav; }
     }
   }
 }
+/* Same link scale for a short laptop window. 1280 at 150% is 853 wide.
+   Phone landscape (844x390, 896x414, 932x430) is under 450 tall, so it misses this. */
+@media (min-width: 853px) and (max-width: 1023px) and (min-height: 450px) and (max-height: 499px) and (min-aspect-ratio: 1/1) {
+  @container bondnav (min-width: 849px) and (max-width: 936px) {
+    nav > div:nth-child(2) {
+      padding-left: clamp(20px, 4cqw, 56px) !important;
+      padding-right: clamp(20px, 4cqw, 56px) !important;
+    }
+    .hero-nav-links {
+      flex: 0 0 auto;
+      gap: clamp(10px, calc(10px + (100cqw - 849px) * 0.1206136), 38px);
+      font-size: clamp(11.5px, calc(11.5px + (100cqw - 849px) * 0.00568182), 13px);
+    }
+    .hero-nav-links a { white-space: nowrap; }
+  }
+  @container bondnav (min-width: 937px) and (max-width: 1023px) {
+    nav > div:nth-child(2) {
+      padding-left: clamp(20px, 4cqw, 56px) !important;
+      padding-right: clamp(20px, 4cqw, 56px) !important;
+    }
+    .hero-nav-links {
+      gap: clamp(12px, calc(100cqw * 0.022), 38px);
+      font-size: clamp(12px, calc(100cqw * 0.0105), 13px);
+    }
+    .hero-nav-links a { white-space: nowrap; }
+  }
+}
 input::placeholder { color: #B0A99A; }
 .hero-text {
   --hero-tagline-size: 28px;
@@ -277,6 +304,18 @@ input::placeholder { color: #B0A99A; }
    Phone landscape stays under 500px tall, so it keeps the live hero. */
 @media (min-width: 768px) and (min-height: 500px) and (max-height: 800px) and (min-aspect-ratio: 1/1) {
   #top { --hero-short-laptop: 1; }
+}
+/* Landscape laptop and tablet from 853 wide and 450 tall. Desktop type, rules, and gaps.
+   The 819 rule above is the compact scale. Phone landscape is under 450 tall.
+   Fit, when the stack would leave the viewport, is the hero-fit scale in the layout script. */
+@media (min-width: 853px) and (max-width: 1199px) and (min-height: 450px) and (min-aspect-ratio: 1/1) {
+  .hero-text { --hero-tagline-size: 28px; --hero-tagline-gap: calc(1.6 * 28px); }
+  .hero-tagline { gap: 22px; }
+  .hero-tagline h1 { letter-spacing: 6px; padding-left: 6px; line-height: 1.1; }
+  .hero-rule { width: 150px; }
+  .hero-line2 { font-size: 24px; line-height: 1.25; }
+  .hero-subtext { font-size: 17px; line-height: 1.45; }
+  .hero-btn { font-size: 16px; letter-spacing: 3px; }
 }
 /* Below 819. Phone landscape keeps the 16:9 plate, and the type meets the 819 rule at 818px so the step is zero. 2.078vw of 818 is 17px. */
 @media (max-width: 818px) and (min-aspect-ratio: 1/1) {
@@ -1185,6 +1224,9 @@ class Component extends DCLogic {
     const navIsNarrow = () => {
       const w = navBox();
       const h = innerHeight || 0;
+      // Landscape laptop from 853 wide, including a short window under 500 tall.
+      // Phone landscape is under 450 tall, so 932x430 keeps the hamburger.
+      if (w >= 853 && h >= 450 && w >= h) return false;
       if (!(h > 0)) return w < 1024;
       // Under 500px tall is a phone, including landscape. Match live: hamburger below 1024.
       if (h < 500) return w < 1024;
@@ -1643,7 +1685,7 @@ class Component extends DCLogic {
   // Landscape under 1200. Same desktop plate as 1200 and up, pinned so the wordmark cap
   // clears the measured nav. Gaps tighten, then the plate scale, only when the copy would leave the hero.
   // 1200 and up does not call this. The feet lock in layoutDesktop stays as it is.
-  function layoutBand(t, s, v) {
+  function layoutBand(t, s, v, lockGap) {
     clearMediaBox(t);
     clearBandTweaks(s);
     t.style.removeProperty('height');
@@ -1713,7 +1755,9 @@ class Component extends DCLogic {
     var scale = cover;
     var gap = naturalGap;
     var pad = padB;
-    if (needAt(scale, gap, pad) > ch) {
+    // lockGap keeps the desktop 1.6em rhythm. fitLandscape scales the stack
+    // instead of tightening the gaps. Phone landscape never sets lockGap.
+    if (!lockGap && needAt(scale, gap, pad) > ch) {
       if (needAt(cover, floorGap, floorPad) <= ch) {
         var lo = floorGap;
         var hi = naturalGap;
@@ -1791,7 +1835,7 @@ class Component extends DCLogic {
     var sR = s.getBoundingClientRect();
     var tR2 = t.getBoundingClientRect();
     var overflow = sR.bottom - tR2.bottom;
-    if (overflow > 0.5) {
+    if (!lockGap && overflow > 0.5) {
       var grown = Math.ceil(ch + overflow + 2);
       t.style.height = grown + 'px';
       t.style.minHeight = grown + 'px';
@@ -1803,6 +1847,68 @@ class Component extends DCLogic {
     try {
       return window.matchMedia('(min-width: 768px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (min-height: 500px)').matches;
     } catch (e) { return false; }
+  }
+
+  // Landscape laptop or tablet from 853 wide and 450 tall. Phone landscape is
+  // under 450 tall (844x390, 896x414, 932x430). Portrait never matches.
+  // 1200 and up is the same test and already uses layoutDesktop.
+  function isDeskLandscape() {
+    try {
+      return window.matchMedia('(min-width: 853px) and (min-height: 450px) and (min-aspect-ratio: 1/1)').matches;
+    } catch (e) {
+      var w = window.innerWidth || 0;
+      var h = window.innerHeight || 0;
+      return w >= 853 && h >= 450 && w >= h;
+    }
+  }
+
+  function clearFitScale() {
+    var media = document.querySelector('.hero-media');
+    var stack = document.getElementById(STACK);
+    if (media && media.style.transform) {
+      media.style.removeProperty('transform');
+      media.style.removeProperty('transform-origin');
+    }
+    if (stack && stack.style.transform) {
+      stack.style.removeProperty('transform');
+      stack.style.removeProperty('transform-origin');
+    }
+  }
+
+  // Scale the desktop composition around the nav line so the tagline, italic,
+  // paragraph, and both buttons stay inside the viewport. Writes nothing when
+  // the unscaled stack already fits, so 1200-wide desktops that fit are untouched.
+  function fitLandscape(t, s) {
+    if (!isDeskLandscape()) return;
+    if (t.classList.contains('hero-copy-flow')) return;
+    var btn = s.querySelector('.hero-buttons');
+    var tag = s.querySelector('.hero-tagline');
+    var media = document.querySelector('.hero-media');
+    if (!btn || !media) return;
+    var nav = document.querySelector('nav');
+    var navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+    var ctaBottom = layoutTop(btn) + btn.offsetHeight;
+    var ih = window.innerHeight || 0;
+    var iw = t.clientWidth || window.innerWidth || 0;
+    var pad = 28;
+    var vScale = 1;
+    var span = ctaBottom - navBottom;
+    var room = (ih - pad) - navBottom;
+    if (ctaBottom > ih - pad && span > 1 && room > 40) vScale = room / span;
+    var hScale = 1;
+    if (tag && tag.offsetWidth > iw - 16) hScale = (iw - 16) / tag.offsetWidth;
+    var scale = vScale < hScale ? vScale : hScale;
+    if (!(scale < 0.999)) return;
+    if (!(scale > 0.4)) scale = 0.4;
+    var stageTop = t.getBoundingClientRect().top;
+    var anchor = navBottom - stageTop;
+    if (!(anchor >= 0)) anchor = 0;
+    var textTop = s.getBoundingClientRect().top;
+    var mediaTop = media.getBoundingClientRect().top;
+    media.style.transformOrigin = 'center ' + (anchor - (mediaTop - stageTop)).toFixed(2) + 'px';
+    media.style.transform = 'scale(' + scale.toFixed(4) + ')';
+    s.style.transformOrigin = 'center ' + (anchor - (textTop - stageTop)).toFixed(2) + 'px';
+    s.style.transform = 'translateX(-50%) scale(' + scale.toFixed(4) + ')';
   }
 
   function isShortLaptop() {
@@ -2105,6 +2211,7 @@ class Component extends DCLogic {
       // Drop a flag left by a previous size. A resize from a short window
       // onto one that already fits must not keep the old marker.
       t.style.removeProperty('--hero-relax');
+      clearFitScale();
       var hidden = !v || v.style.display === 'none' || reduced === true;
       if (hidden) { flowFallback(); return; }
       // hero-copy-flow puts the plate in the column, so the video box is short.
@@ -2113,9 +2220,17 @@ class Component extends DCLogic {
       if (isWideNow()) {
         layoutDesktop(t, s, v);
         relaxShort(t, s, v);
+        fitLandscape(t, s);
         return;
       }
       if (isLandscapeBand()) {
+        // 853 and up, landscape, 450 tall and up: the desktop composition.
+        // Shorter windows scale to fit. Phone landscape stays on layoutBand.
+        if (isDeskLandscape()) {
+          layoutBand(t, s, v, true);
+          fitLandscape(t, s);
+          return;
+        }
         layoutBand(t, s, v);
         relaxShort(t, s, v);
         return;
