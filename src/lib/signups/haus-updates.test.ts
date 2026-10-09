@@ -27,7 +27,6 @@ const door = {
   email: "member@bond.test",
   source: "haus_door",
   optedIn: true,
-  ageVerified: true,
 };
 
 function withAck(store: MemorySignupStore) {
@@ -48,28 +47,37 @@ test("the Bond Haus updates checkbox is unticked and separate from the request",
   const actions = read("src/app/haus/actions.ts");
   assert.match(actions, /recordHausUpdateOptIn/);
   assert.match(actions, /hausUpdates/);
-  assert.match(actions, /ageGate/);
+  assert.equal(actions.includes("ageGate"), false);
+  assert.equal(welcome.includes("ageGate"), false);
   assert.match(actions, /source: "haus_door"/);
   assert.match(actions, /source: "haus_page"/);
   assert.equal(actions.includes("attested21"), false);
-  assert.match(read("src/app/haus/welcome-client.tsx"), /hausCheckRowStyle/);
-  assert.match(read("src/app/haus/updates-opt-in.tsx"), /hausCheckRowStyle/);
-  assert.match(read("src/app/haus/salon/page.tsx"), /HausUpdatesOptIn/);
-  const optInTag = read("src/app/haus/updates-opt-in.tsx").match(/<input[^>]*name="hausUpdates"[^>]*>/);
+  assert.match(welcome, /hausCheckRowStyle/);
+  const optIn = read("src/app/haus/updates-opt-in.tsx");
+  assert.match(optIn, /hausCheckRowStyle/);
+  assert.match(optIn, /checked=\{on\}/);
+  assert.match(optIn, /preventDefault\(\)/);
+  assert.equal(optIn.includes("action={onSave}"), false);
+  assert.match(read("src/app/haus/salon/page.tsx"), /subscribed=\{subscribed\}/);
+  const salon = actions.slice(actions.indexOf("export async function optInHausUpdatesAction"));
+  assert.match(salon, /This email unsubscribed from Bond Haus updates, so Bond will not add it again\./);
+  assert.match(salon, /unsubscribeHausUpdate/);
+  assert.match(salon, /session\.email/);
+  assert.equal(salon.includes('formData.get("email")'), false);
+  assert.equal(read("src/app/haus/unsubscribe/route.ts").includes("This email unsubscribed from Bond Haus updates"), false);
+  const optInTag = optIn.match(/<input[^>]*name="hausUpdates"[^>]*>/);
   assert.ok(optInTag);
   assert.equal(optInTag[0].includes("defaultChecked"), false);
-  assert.equal(/\schecked\b/.test(optInTag[0]), false);
 });
 
-test("ageGate=1 without a server-side 21+ ack is rejected", async () => {
-  assert.equal(hausUpdateOptInAccepted({ optedIn: true, serverAge21Ack: true, ageVerified: false }), true);
-  assert.equal(hausUpdateOptInAccepted({ optedIn: true, serverAge21Ack: false, ageVerified: true }), false);
-  assert.equal(hausUpdateOptInAccepted({ optedIn: false, serverAge21Ack: true, ageVerified: true }), false);
+test("a server-side 21+ ack is required and a client age flag is not", async () => {
+  assert.equal(hausUpdateOptInAccepted({ optedIn: true, serverAge21Ack: true }), true);
+  assert.equal(hausUpdateOptInAccepted({ optedIn: true, serverAge21Ack: false }), false);
+  assert.equal(hausUpdateOptInAccepted({ optedIn: false, serverAge21Ack: true }), false);
 
   const blocked = new MemorySignupStore();
   const refused = await recordHausUpdateOptIn({
     ...door,
-    ageVerified: true,
     store: blocked,
     env: {},
   });
@@ -79,7 +87,6 @@ test("ageGate=1 without a server-side 21+ ack is rejected", async () => {
   const acceptedStore = withAck(new MemorySignupStore());
   const accepted = await recordHausUpdateOptIn({
     ...door,
-    ageVerified: false,
     store: acceptedStore,
     env: {},
   });
@@ -117,6 +124,7 @@ test("a suppressed email is rejected and a repeat opt-in stays one row", async (
 
   const hmac = hashLockoutValue(door.email);
   await store.unsubscribeHausUpdate(hmac);
+  assert.equal(store.hasHausUpdate(door.email), false);
   const again = await recordHausUpdateOptIn({ ...door, store, env: {} });
   assert.equal(again.ok, false);
   assert.equal(again.reason, "suppressed");
@@ -330,7 +338,7 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   );
   assert.match(
     privacy,
-    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email\. A confirmation id expires after 7 days\. An unsubscribe id does not expire\. Those ids are deleted with the record, when you unsubscribe, or when an unsubscribe id has no record and is older than 30 days\./,
+    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email\. A confirmation id expires after 7 days\. An unsubscribe id does not expire\. Those ids are deleted with the record or when you unsubscribe\. Unused confirmation and unsubscribe ids with no record are deleted after 30 days\./,
   );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);
@@ -338,7 +346,7 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   for (const sentence of [
     "If you opt in on the Haus door or on your Haus page, Bond keeps your email, the time you opted in, and the source, so Bond can send Bond Haus updates. That opt in is separate from a product request and it starts unticked. Bond accepts that opt in only when this server has your 21 or older attestation for that email.",
     "Bond Haus updates are opt in. You can unsubscribe from the link in any email. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again. Bond keeps that hash for as long as it needs to honor the unsubscribe.",
-    "If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email. A confirmation id expires after 7 days. An unsubscribe id does not expire. Those ids are deleted with the record, when you unsubscribe, or when an unsubscribe id has no record and is older than 30 days. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
+    "If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email. A confirmation id expires after 7 days. An unsubscribe id does not expire. Those ids are deleted with the record or when you unsubscribe. Unused confirmation and unsubscribe ids with no record are deleted after 30 days. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
   ]) {
     assert.equal(sentence.includes("!"), false);
     assert.equal(sentence.includes(String.fromCharCode(0x2013)), false);

@@ -163,6 +163,10 @@ export class MemorySignupStore {
     return this.haus.some((row) => row.email === mark && row.age21Ack === true);
   }
 
+  hasHausUpdate(email: string): boolean {
+    return this.updates.has(email.trim().toLowerCase());
+  }
+
   recordHausSignup(email: string, requestedDispensary = ""): HausSignupRecord {
     const mark = email.trim().toLowerCase();
     const dispensary = requestedDispensary.trim().replace(/\s+/g, " ");

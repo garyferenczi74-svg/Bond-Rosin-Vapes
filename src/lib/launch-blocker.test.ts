@@ -115,7 +115,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   );
   assert.match(
     privacy,
-    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email\. A confirmation id expires after 7 days\. An unsubscribe id does not expire\. Those ids are deleted with the record, when you unsubscribe, or when an unsubscribe id has no record and is older than 30 days\./,
+    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email\. A confirmation id expires after 7 days\. An unsubscribe id does not expire\. Those ids are deleted with the record or when you unsubscribe\. Unused confirmation and unsubscribe ids with no record are deleted after 30 days\./,
   );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);

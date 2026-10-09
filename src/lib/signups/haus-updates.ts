@@ -38,7 +38,6 @@ export function hausUpdatesDoubleOptInEnabled(env: NodeJS.ProcessEnv = process.e
 export function hausUpdateOptInAccepted(input: {
   optedIn: boolean;
   serverAge21Ack: boolean;
-  ageVerified?: boolean;
 }): boolean {
   return input.optedIn && input.serverAge21Ack;
 }
@@ -65,7 +64,6 @@ export async function recordHausUpdateOptIn(input: {
   email: string;
   source: string;
   optedIn: boolean;
-  ageVerified?: boolean;
   store: HausUpdateWrite;
   env?: NodeJS.ProcessEnv;
   deliver?: (delivery: HausUpdateDelivery) => Promise<{ attempted: false }>;
@@ -81,7 +79,6 @@ export async function recordHausUpdateOptIn(input: {
   if (!hausUpdateOptInAccepted({
     optedIn: input.optedIn,
     serverAge21Ack,
-    ageVerified: input.ageVerified,
   })) {
     return { ok: true, recorded: false, confirmationAttempted: false };
   }

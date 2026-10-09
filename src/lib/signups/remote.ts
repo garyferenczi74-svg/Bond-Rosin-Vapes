@@ -211,6 +211,16 @@ export class RemoteSignupStore {
     await client().from("haus_sessions").delete().eq("id", sessionId);
   }
 
+  async hasHausUpdate(email: string): Promise<boolean> {
+    const { data, error } = await client()
+      .from("haus_updates")
+      .select("email")
+      .eq("email", email.trim().toLowerCase())
+      .maybeSingle();
+    if (error || !data) return false;
+    return true;
+  }
+
   async hasHausAge21Ack(email: string): Promise<boolean> {
     const { data, error } = await client()
       .from("haus_requests")
