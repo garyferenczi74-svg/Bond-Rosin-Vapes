@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { enterHausAction } from "@/app/haus/actions";
 import { ComplianceBand } from "@/components/compliance-band";
+import { BOND_AGE_KEY } from "@/lib/haus/age-gate";
 import { tokens } from "@/lib/tokens";
 
 export function WelcomeClient({
@@ -18,6 +19,8 @@ export function WelcomeClient({
   function onEnter(formData: FormData) {
     start(async () => {
       setMessage("");
+      const ageOk = window.sessionStorage.getItem(BOND_AGE_KEY);
+      if (ageOk) formData.set("ageGate", "1");
       const result = await enterHausAction(formData);
       if (result && !result.ok) {
         setMessage(result.message);
@@ -109,6 +112,21 @@ export function WelcomeClient({
               />
             </>
           ) : null}
+          <label
+            style={{
+              display: "flex",
+              gap: 10,
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 13,
+              color: "#B0A99A",
+              cursor: "pointer",
+              marginTop: 16,
+            }}
+          >
+            <input type="checkbox" name="hausUpdates" value="1" />
+            <span>Send me Bond Haus updates by email. I can unsubscribe at any time.</span>
+          </label>
           <button
             className="btn"
             type="submit"

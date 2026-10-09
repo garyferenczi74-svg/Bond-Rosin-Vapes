@@ -33,6 +33,13 @@ export type OrderRequestRecord = {
   createdAt: string;
 };
 
+export type HausUpdateRecord = {
+  email: string;
+  consentAt: string;
+  source: string;
+  confirmedAt: string | null;
+};
+
 export type HausSignupRecord = {
   id: string;
   email: string;
@@ -65,8 +72,10 @@ export type SignupLedger = {
     age21AckAt: string;
     requestedDispensary: string;
   }>;
+  updates: HausUpdateRecord[];
   source: "memory" | "supabase";
   unavailable?: boolean;
+  updatesUnavailable?: boolean;
 };
 
 export type HausSessionView = {

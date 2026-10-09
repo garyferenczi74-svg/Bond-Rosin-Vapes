@@ -21,6 +21,8 @@ import {
   readMemberSession,
 } from "@/lib/member-session";
 import { readRequestMeta } from "@/lib/request-meta";
+import { getSignupStore } from "@/lib/signups";
+import { recordHausUpdateOptIn } from "@/lib/signups/haus-updates";
 
 function fail(message = GENERIC_DOOR) {
   return { ok: false as const, message, next: "credentials" as const };
@@ -250,6 +252,18 @@ export async function enterHausAction(formData: FormData) {
     },
     requestedDispensary,
   );
+  try {
+    await recordHausUpdateOptIn({
+      email: session.email,
+      source: "haus_door",
+      optedIn: String(formData.get("hausUpdates") ?? "") === "1",
+      attested21: true,
+      ageVerified: String(formData.get("ageGate") ?? "") === "1",
+      store: getSignupStore(),
+    });
+  } catch {
+    // The product request still stands if the update list cannot be written.
+  }
   redirect("/haus/salon");
 }
 
