@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createSupabaseServiceRole } from "@/lib/supabase/service";
+import { hashLockoutValue } from "../lockout.ts";
 import type {
   DispensaryRecord,
   HausSessionView,
@@ -212,13 +213,24 @@ export class RemoteSignupStore {
   }
 
   async hasHausUpdate(email: string): Promise<boolean> {
-    const { data, error } = await client()
-      .from("haus_updates")
-      .select("email")
-      .eq("email", email.trim().toLowerCase())
-      .maybeSingle();
-    if (error || !data) return false;
-    return true;
+    const emailHmac = hashLockoutValue(email);
+    if (!emailHmac) throw new Error("Haus update was not read.");
+    const { data, error } = await client().rpc("bond_has_haus_update", {
+      p_email_hmac: emailHmac,
+    });
+    if (error || typeof data !== "boolean") throw new Error("Haus update was not read.");
+    return data;
+  }
+
+  async reoptHausUpdate(email: string): Promise<boolean> {
+    const emailHmac = hashLockoutValue(email);
+    if (!emailHmac) throw new Error("Haus update was not stored.");
+    const { data, error } = await client().rpc("bond_reopt_haus_update", {
+      p_email: email,
+      p_email_hmac: emailHmac,
+    });
+    if (error || typeof data !== "boolean") throw new Error("Haus update was not stored.");
+    return data;
   }
 
   async hasHausAge21Ack(email: string): Promise<boolean> {

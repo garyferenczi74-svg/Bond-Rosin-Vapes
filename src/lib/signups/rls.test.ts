@@ -15,6 +15,8 @@ const hold = fileURLToPath(new URL("../../../supabase/migrations/20261009203000_
 const revokeInserts = fileURLToPath(new URL("../../../supabase/migrations/20261009210000_revoke_anon_signup_inserts.sql", import.meta.url));
 const tokenCleanup = fileURLToPath(new URL("../../../supabase/migrations/20261009220000_haus_update_token_cleanup.sql", import.meta.url));
 const tokenExpiry = fileURLToPath(new URL("../../../supabase/migrations/20261009230000_haus_confirm_token_expiry.sql", import.meta.url));
+const hasUpdate = fileURLToPath(new URL("../../../supabase/migrations/20261009233000_bond_has_haus_update.sql", import.meta.url));
+const reopt = fileURLToPath(new URL("../../../supabase/migrations/20261009234000_haus_update_reopt.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -85,7 +87,39 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.equal(/GRANT INSERT ON TABLE public\.haus_updates TO anon/.test(expirySql), false);
   assert.equal(/GRANT INSERT ON TABLE public\.haus_updates TO authenticated/.test(expirySql), false);
   assert.equal(expirySql.includes("is_admin()"), false);
+  const hasSql = readFileSync(hasUpdate, "utf8");
+  assert.match(hasSql, /CREATE OR REPLACE FUNCTION public\.bond_has_haus_update\(p_email_hmac text\)/);
+  assert.match(hasSql, /SECURITY DEFINER/);
+  assert.match(hasSql, /SET search_path TO public, pg_temp/);
+  assert.match(hasSql, /REVOKE ALL ON FUNCTION public\.bond_has_haus_update\(text\) FROM PUBLIC/);
+  assert.match(hasSql, /REVOKE ALL ON FUNCTION public\.bond_has_haus_update\(text\) FROM anon/);
+  assert.match(hasSql, /REVOKE ALL ON FUNCTION public\.bond_has_haus_update\(text\) FROM authenticated/);
+  assert.match(hasSql, /GRANT EXECUTE ON FUNCTION public\.bond_has_haus_update\(text\) TO service_role/);
+  assert.match(hasSql, /GRANT EXECUTE ON FUNCTION public\.bond_has_haus_update\(text\) TO postgres/);
+  assert.equal(/GRANT .* ON TABLE public\.haus_updates/.test(hasSql), false);
+  assert.equal(hasSql.includes("is_admin()"), false);
+  const reoptSql = readFileSync(reopt, "utf8");
+  assert.match(reoptSql, /CREATE OR REPLACE FUNCTION public\.bond_reopt_haus_update\(/);
+  assert.match(reoptSql, /SECURITY DEFINER/);
+  assert.match(reoptSql, /SET search_path TO public, pg_temp/);
+  assert.match(reoptSql, /DELETE FROM public\.haus_updates_suppression WHERE email_hmac = p_email_hmac/);
+  assert.match(reoptSql, /'salon'/);
+  assert.match(reoptSql, /INSERT INTO public\.audit_log \(action, target, before, after\)/);
+  assert.match(reoptSql, /REVOKE ALL ON FUNCTION public\.bond_reopt_haus_update\(text, text\) FROM anon/);
+  assert.match(reoptSql, /REVOKE ALL ON FUNCTION public\.bond_reopt_haus_update\(text, text\) FROM authenticated/);
+  assert.match(reoptSql, /GRANT EXECUTE ON FUNCTION public\.bond_reopt_haus_update\(text, text\) TO service_role/);
+  assert.match(reoptSql, /GRANT EXECUTE ON FUNCTION public\.bond_reopt_haus_update\(text, text\) TO postgres/);
+  assert.equal(/GRANT .* ON TABLE public\.haus_updates/.test(reoptSql), false);
+  assert.equal(reoptSql.includes("is_admin()"), false);
+  const auditLift = reoptSql.match(
+    /INSERT INTO public\.audit_log \(action, target, before, after\)[\s\S]*?\);/,
+  );
+  assert.ok(auditLift);
+  assert.equal(auditLift[0].replaceAll("p_email_hmac", "").includes("p_email"), false);
+  assert.match(auditLift[0], /p_email_hmac/);
 
+  const database = `bond_signup_rls_${process.pid}_${Date.now()}`;
+  try {
   const dir = mkdtempSync(join(tmpdir(), "bond-signup-rls-"));
   chmodSync(dir, 0o755);
   const setup = join(dir, "setup.sql");
@@ -93,8 +127,8 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   writeFileSync(
     setup,
     `
-DROP DATABASE IF EXISTS bond_signup_rls;
-CREATE DATABASE bond_signup_rls;
+DROP DATABASE IF EXISTS ${database};
+CREATE DATABASE ${database};
 `,
   );
   chmodSync(setup, 0o644);
@@ -203,6 +237,10 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 \\i ${tokenCleanup}
 
 \\i ${tokenExpiry}
+
+\\i ${hasUpdate}
+
+\\i ${reopt}
 
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
@@ -518,7 +556,7 @@ RESET ROLE;
   );
 
   chmodSync(probe, 0o644);
-  const probed = psqlFile("bond_signup_rls", probe);
+  const probed = psqlFile(database, probe);
   assert.equal(probed.status, 0, `${probed.stdout}\n${probed.stderr}`);
   const text = probed.stdout;
   const saw = (label: string, value: string) => {
@@ -616,7 +654,7 @@ RESET ROLE;
   console.log("FELIX_REPRO_FUNCTION_READD reader_readd f");
 
   const denied = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SET ROLE anon;
 INSERT INTO public.dispensary_accounts (
@@ -633,7 +671,7 @@ INSERT INTO public.dispensary_accounts (
   console.log("ANON_DISPENSARY_INSERT", denied.stderr.trim());
 
   const badHaus = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SET ROLE anon;
 INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
@@ -665,7 +703,7 @@ VALUES ('young@bond.test', false, now(), 'Harbor House');
     "SELECT public.bond_issue_haus_update_token(repeat('22', 32), 'unsub')",
     "SELECT public.bond_purge_haus_updates()",
   ]) {
-    const blocked = psqlSql("bond_signup_rls", `SET ROLE anon; ${sql};`);
+    const blocked = psqlSql(database, `SET ROLE anon; ${sql};`);
     assert.notEqual(blocked.status, 0, sql);
     assert.match(`${blocked.stderr}\n${blocked.stdout}`, /permission denied/i, sql);
   }
@@ -677,13 +715,13 @@ VALUES ('young@bond.test', false, now(), 'Harbor House');
     "DELETE FROM public.auth_attempts WHERE email_hash = 'plain-ip-row'",
     "DELETE FROM public.haus_updates WHERE email = 'stamp@bond.test'",
   ]) {
-    const blocked = psqlSql("bond_signup_rls", sql);
+    const blocked = psqlSql(database, sql);
     assert.notEqual(blocked.status, 0, sql);
     assert.match(`${blocked.stderr}\n${blocked.stdout}`, /append only|retention deletes are limited/i, sql);
   }
 
   const operatorUpdate = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
 SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
@@ -695,7 +733,7 @@ UPDATE public.haus_updates SET source = 'nope';
   assert.match(`${operatorUpdate.stderr}\n${operatorUpdate.stdout}`, /permission denied/i);
 
   const operatorDelete = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
 SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
@@ -707,7 +745,7 @@ DELETE FROM public.haus_updates;
   assert.match(`${operatorDelete.stderr}\n${operatorDelete.stdout}`, /permission denied/i);
 
   const felixAnonSuppressed = psqlSql(
-    "bond_signup_rls",
+    database,
     "SET ROLE anon; INSERT INTO public.haus_updates (email, source, email_hmac) VALUES ('reader@bond.test', 'haus_door', repeat('ef', 32));",
   );
   console.log("FELIX_REPRO_ANON_SUPPRESSED", felixAnonSuppressed.stderr.trim());
@@ -715,7 +753,7 @@ DELETE FROM public.haus_updates;
   assert.match(felixAnonSuppressed.stderr, /permission denied/i);
 
   const felixAnonThird = psqlSql(
-    "bond_signup_rls",
+    database,
     "SET ROLE anon; INSERT INTO public.haus_updates (email, source) VALUES ('third.party@example.test', 'haus_door');",
   );
   console.log("FELIX_REPRO_ANON_THIRD", felixAnonThird.stderr.trim());
@@ -723,7 +761,7 @@ DELETE FROM public.haus_updates;
   assert.match(felixAnonThird.stderr, /permission denied/i);
 
   const felixAnonSuppression = psqlSql(
-    "bond_signup_rls",
+    database,
     "SET ROLE anon; INSERT INTO public.haus_updates_suppression (email_hmac) VALUES (repeat('11', 32));",
   );
   console.log("FELIX_REPRO_ANON_SUPPRESSION", felixAnonSuppression.stderr.trim());
@@ -731,7 +769,7 @@ DELETE FROM public.haus_updates;
   assert.match(felixAnonSuppression.stderr, /permission denied/i);
 
   const felixService = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 BEGIN;
 GRANT INSERT ON TABLE public.haus_updates TO service_role;
@@ -746,7 +784,7 @@ COMMIT;
   assert.match(`${felixService.stderr}\n${felixService.stdout}`, /haus_updates writes go through bond_record_haus_update/);
 
   const felixServiceSuppressed = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 BEGIN;
 GRANT INSERT ON TABLE public.haus_updates TO service_role;
@@ -762,7 +800,7 @@ COMMIT;
   assert.match(`${felixServiceSuppressed.stderr}\n${felixServiceSuppressed.stdout}`, /haus_updates address is suppressed/);
 
   const anonOrder = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SET ROLE anon;
 INSERT INTO public.order_requests (dispensary_account_id, lines, promised_on, notes)
@@ -774,7 +812,7 @@ VALUES ('11111111-1111-1111-1111-111111111111', '[{"skuId":"no-1","format":"1g",
   assert.match(anonOrder.stderr, /permission denied/i);
 
   const authInserts = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
 SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
@@ -793,7 +831,7 @@ INSERT INTO public.dispensary_accounts (
   assert.match(authInserts.stderr, /permission denied/i);
 
   const authOrder = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
 SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
@@ -807,7 +845,7 @@ VALUES ('11111111-1111-1111-1111-111111111111', '[{"skuId":"no-1","format":"1g",
   assert.match(authOrder.stderr, /permission denied/i);
 
   const authHaus = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
 SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
@@ -821,7 +859,7 @@ VALUES ('ops@bond.test', true, now(), 'Harbor House');
   assert.match(authHaus.stderr, /permission denied/i);
 
   const serviceWrites = psqlSql(
-    "bond_signup_rls",
+    database,
     `
 SET ROLE service_role;
 INSERT INTO public.dispensary_accounts (
@@ -852,9 +890,229 @@ SELECT COUNT(*) AS service_haus FROM public.haus_requests WHERE email = 'service
   assert.match(serviceWrites.stdout, /service_haus[\s\S]{0,80}\n-+\n\s*1/);
 
   const after = psqlSql(
-    "bond_signup_rls",
+    database,
     "SELECT status FROM public.dispensary_accounts WHERE email = 'harbor.buyer@example.test'",
   );
   assert.equal(after.status, 0, after.stderr);
   assert.match(after.stdout, /pending/);
+
+  const prepared = psqlSql(
+    database,
+    `
+INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
+VALUES ('listed@bond.test', true, now(), 'Harbor House');
+INSERT INTO public.haus_sessions (email, expires_at)
+VALUES ('listed@bond.test', now() + interval '1 day');
+SELECT public.bond_record_haus_update('listed@bond.test', 'haus_page', repeat('d4', 32)) AS listed_recorded;
+UPDATE public.haus_updates SET consent_at = now() - interval '2 days' WHERE email = 'listed@bond.test';
+SELECT public.bond_issue_haus_update_token(repeat('d4', 32), 'unsub') AS unsub_token;
+SELECT public.bond_issue_haus_update_token(repeat('d4', 32), 'confirm') AS confirm_token;
+SELECT count(*) AS rows_before FROM public.haus_updates WHERE email_hmac = repeat('d4', 32);
+SELECT count(*) AS tokens_before FROM public.haus_update_tokens WHERE email_hmac = repeat('d4', 32);
+SELECT consent_at AS old_consent FROM public.haus_updates WHERE email = 'listed@bond.test';
+SELECT has_table_privilege('service_role', 'public.haus_updates', 'SELECT') AS service_table_select;
+SELECT prosecdef AS definer, proconfig::text AS config
+FROM pg_proc WHERE proname = 'bond_has_haus_update';
+SELECT proconfig::text AS reopt_config FROM pg_proc WHERE proname = 'bond_reopt_haus_update';
+`,
+  );
+  console.log("SALON_PREP", prepared.stdout.trim());
+  if (prepared.status !== 0) console.log("SALON_PREP_ERR", prepared.stderr.trim());
+  assert.equal(prepared.status, 0, `${prepared.stdout}\n${prepared.stderr}`);
+  assert.match(prepared.stdout, /rows_before[\s\S]{0,40}\n-+\n\s*1/);
+  assert.match(prepared.stdout, /tokens_before[\s\S]{0,40}\n-+\n\s*2/);
+  assert.match(prepared.stdout, /service_table_select[\s\S]{0,40}\n-+\n\s*f/);
+  assert.match(prepared.stdout, /search_path=public, pg_temp/);
+  assert.match(prepared.stdout, /reopt_config[\s\S]*search_path=public, pg_temp/);
+
+  const serviceUntick = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_has_haus_update(repeat('d4', 32)) AS box_on;
+SELECT public.bond_unsubscribe_haus_update(repeat('d4', 32)) AS untick;
+`,
+  );
+  console.log("SERVICE_UNTICK", serviceUntick.stdout.trim());
+  if (serviceUntick.status !== 0) console.log("SERVICE_UNTICK_ERR", serviceUntick.stderr.trim());
+  assert.equal(serviceUntick.status, 0, `${serviceUntick.stdout}\n${serviceUntick.stderr}`);
+  assert.match(serviceUntick.stdout, /box_on[\s\S]{0,40}\n-+\n\s*t/);
+  assert.match(serviceUntick.stdout, /untick[\s\S]{0,40}\n-+\n\s*t/);
+
+  const afterUntick = psqlSql(
+    database,
+    `
+SELECT count(*) AS rows_off FROM public.haus_updates WHERE email_hmac = repeat('d4', 32);
+SELECT count(*) AS tokens_off FROM public.haus_update_tokens WHERE email_hmac = repeat('d4', 32);
+SELECT count(*) AS suppressed_on FROM public.haus_updates_suppression WHERE email_hmac = repeat('d4', 32);
+`,
+  );
+  assert.equal(afterUntick.status, 0, `${afterUntick.stdout}\n${afterUntick.stderr}`);
+  assert.match(afterUntick.stdout, /rows_off[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(afterUntick.stdout, /tokens_off[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(afterUntick.stdout, /suppressed_on[\s\S]{0,40}\n-+\n\s*1/);
+
+  const serviceRetick = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_reopt_haus_update('listed@bond.test', repeat('d4', 32)) AS retick;
+`,
+  );
+  console.log("SERVICE_RETICK", serviceRetick.stdout.trim());
+  if (serviceRetick.status !== 0) console.log("SERVICE_RETICK_ERR", serviceRetick.stderr.trim());
+  assert.equal(serviceRetick.status, 0, `${serviceRetick.stdout}\n${serviceRetick.stderr}`);
+  assert.match(serviceRetick.stdout, /retick[\s\S]{0,40}\n-+\n\s*t/);
+
+  const afterRetick = psqlSql(
+    database,
+    `
+SELECT count(*) AS suppressed_off FROM public.haus_updates_suppression WHERE email_hmac = repeat('d4', 32);
+SELECT source AS retick_source FROM public.haus_updates WHERE email = 'listed@bond.test';
+SELECT (consent_at > now() - interval '1 day') AS new_consent FROM public.haus_updates WHERE email = 'listed@bond.test';
+SELECT (target = repeat('d4', 32)) AS audit_hmac FROM public.audit_log WHERE action = 'haus_updates.reopt';
+SELECT (position('listed@bond.test' in coalesce(action, '') || coalesce(target, '') || coalesce(before::text, '') || coalesce(after::text, '') || coalesce(ip, '') || coalesce(path, '') || coalesce(user_agent, '')) = 0) AS audit_no_email
+FROM public.audit_log WHERE action = 'haus_updates.reopt';
+`,
+  );
+  console.log("AFTER_RETICK", afterRetick.stdout.trim());
+  if (afterRetick.status !== 0) console.log("AFTER_RETICK_ERR", afterRetick.stderr.trim());
+  assert.equal(afterRetick.status, 0, `${afterRetick.stdout}\n${afterRetick.stderr}`);
+  assert.match(afterRetick.stdout, /suppressed_off[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(afterRetick.stdout, /salon/);
+  assert.match(afterRetick.stdout, /new_consent[\s\S]{0,40}\n-+\n\s*t/);
+  assert.match(afterRetick.stdout, /audit_hmac[\s\S]{0,80}\n-+\n\s*t/);
+  assert.match(afterRetick.stdout, /audit_no_email[\s\S]{0,40}\n-+\n\s*t/);
+
+  const linkOff = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_issue_haus_update_token(repeat('d4', 32), 'unsub') AS link_token;
+SELECT public.bond_unsubscribe_haus_update(repeat('d4', 32)) AS link_unsub;
+`,
+  );
+  console.log("LINK_UNSUB", linkOff.stdout.trim());
+  if (linkOff.status !== 0) console.log("LINK_UNSUB_ERR", linkOff.stderr.trim());
+  assert.equal(linkOff.status, 0, `${linkOff.stdout}\n${linkOff.stderr}`);
+  assert.match(linkOff.stdout, /link_unsub[\s\S]{0,40}\n-+\n\s*t/);
+
+  const afterLink = psqlSql(
+    database,
+    `
+SELECT count(*) AS rows_end FROM public.haus_updates WHERE email_hmac = repeat('d4', 32);
+SELECT count(*) AS tokens_end FROM public.haus_update_tokens WHERE email_hmac = repeat('d4', 32);
+SELECT count(*) AS suppressed_end FROM public.haus_updates_suppression WHERE email_hmac = repeat('d4', 32);
+`,
+  );
+  assert.equal(afterLink.status, 0, `${afterLink.stdout}\n${afterLink.stderr}`);
+  assert.match(afterLink.stdout, /rows_end[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(afterLink.stdout, /tokens_end[\s\S]{0,40}\n-+\n\s*0/);
+  assert.match(afterLink.stdout, /suppressed_end[\s\S]{0,40}\n-+\n\s*1/);
+
+  const doorBlocked = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_record_haus_update('listed@bond.test', 'haus_door', repeat('d4', 32)) AS door_blocked;
+`,
+  );
+  console.log("DOOR_BLOCKED", doorBlocked.stdout.trim());
+  if (doorBlocked.status !== 0) console.log("DOOR_BLOCKED_ERR", doorBlocked.stderr.trim());
+  assert.equal(doorBlocked.status, 0, `${doorBlocked.stdout}\n${doorBlocked.stderr}`);
+  assert.match(doorBlocked.stdout, /door_blocked[\s\S]{0,40}\n-+\n\s*f/);
+  const doorStill = psqlSql(
+    database,
+    "SELECT count(*) AS still_suppressed FROM public.haus_updates_suppression WHERE email_hmac = repeat('d4', 32);",
+  );
+  assert.equal(doorStill.status, 0, doorStill.stderr);
+  assert.match(doorStill.stdout, /still_suppressed[\s\S]{0,40}\n-+\n\s*1/);
+
+  const otherSession = psqlSql(
+    database,
+    `
+DELETE FROM public.haus_sessions WHERE lower(email) = 'listed@bond.test';
+INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
+VALUES ('other@bond.test', true, now(), 'Other House');
+INSERT INTO public.haus_sessions (email, expires_at)
+VALUES ('other@bond.test', now() + interval '1 day');
+`,
+  );
+  assert.equal(otherSession.status, 0, `${otherSession.stdout}\n${otherSession.stderr}`);
+  const otherCall = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_reopt_haus_update('listed@bond.test', repeat('d4', 32)) AS other_session;
+SELECT public.bond_reopt_haus_update('other@bond.test', repeat('d6', 32)) AS other_own;
+`,
+  );
+  console.log("OTHER_SESSION", otherCall.stdout.trim());
+  if (otherCall.status !== 0) console.log("OTHER_SESSION_ERR", otherCall.stderr.trim());
+  assert.equal(otherCall.status, 0, `${otherCall.stdout}\n${otherCall.stderr}`);
+  assert.match(otherCall.stdout, /other_session[\s\S]{0,40}\n-+\n\s*f/);
+  assert.match(otherCall.stdout, /other_own[\s\S]{0,40}\n-+\n\s*t/);
+  const listedStays = psqlSql(
+    database,
+    "SELECT count(*) AS listed_still FROM public.haus_updates_suppression WHERE email_hmac = repeat('d4', 32);",
+  );
+  assert.equal(listedStays.status, 0, listedStays.stderr);
+  assert.match(listedStays.stdout, /listed_still[\s\S]{0,40}\n-+\n\s*1/);
+
+  const noAck = psqlSql(
+    database,
+    `
+INSERT INTO public.haus_sessions (email, expires_at)
+VALUES ('bare@bond.test', now() + interval '1 day');
+SELECT public.bond_record_haus_update('bare@bond.test', 'haus_page', repeat('d7', 32)) AS bare_recorded;
+SELECT public.bond_unsubscribe_haus_update(repeat('d7', 32)) AS bare_unsub;
+`,
+  );
+  assert.equal(noAck.status, 0, `${noAck.stdout}\n${noAck.stderr}`);
+  const noAckCall = psqlSql(
+    database,
+    `
+SET ROLE service_role;
+SELECT public.bond_reopt_haus_update('bare@bond.test', repeat('d7', 32)) AS no_ack;
+`,
+  );
+  console.log("NO_ACK", noAckCall.stdout.trim());
+  if (noAckCall.status !== 0) console.log("NO_ACK_ERR", noAckCall.stderr.trim());
+  assert.equal(noAckCall.status, 0, `${noAckCall.stdout}\n${noAckCall.stderr}`);
+  assert.match(noAckCall.stdout, /no_ack[\s\S]{0,40}\n-+\n\s*f/);
+  const bareStays = psqlSql(
+    database,
+    "SELECT count(*) AS bare_still FROM public.haus_updates_suppression WHERE email_hmac = repeat('d7', 32);",
+  );
+  assert.equal(bareStays.status, 0, bareStays.stderr);
+  assert.match(bareStays.stdout, /bare_still[\s\S]{0,40}\n-+\n\s*1/);
+
+  const serviceTable = psqlSql(
+    database,
+    "SET ROLE service_role; SELECT email FROM public.haus_updates;",
+  );
+  console.log("SERVICE_TABLE_SELECT", serviceTable.stderr.trim());
+  assert.notEqual(serviceTable.status, 0);
+  assert.match(serviceTable.stderr, /permission denied for table haus_updates/i);
+
+  for (const role of ["anon", "authenticated"]) {
+    for (const sql of [
+      "SELECT public.bond_has_haus_update(repeat('d4', 32))",
+      "SELECT public.bond_unsubscribe_haus_update(repeat('d4', 32))",
+      "SELECT public.bond_reopt_haus_update('listed@bond.test', repeat('d4', 32))",
+      "SELECT public.bond_record_haus_update('listed@bond.test', 'haus_page', repeat('d4', 32))",
+    ]) {
+      const deniedFn = psqlSql(database, `SET ROLE ${role}; ${sql};`);
+      console.log(`DENIED_${role.toUpperCase()}`, sql, deniedFn.stderr.trim());
+      assert.notEqual(deniedFn.status, 0, `${role} ${sql}`);
+      assert.match(deniedFn.stderr, /permission denied/i, `${role} ${sql}`);
+    }
+  }
+  } finally {
+    spawnSync(
+      "sudo",
+      ["-n", "-u", "postgres", "psql", "-v", "ON_ERROR_STOP=1", "-c", `DROP DATABASE IF EXISTS ${database}`],
+      { encoding: "utf8" },
+    );
+  }
 });

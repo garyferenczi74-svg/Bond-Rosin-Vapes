@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { hashLockoutValue } from "../lockout.ts";
 import { HAUS_CONFIRM_TOKEN_MS } from "./haus-updates.ts";
 import { SEED_PARTNER_ACCOUNTS } from "../order/seed.ts";
 import type {
@@ -165,6 +166,25 @@ export class MemorySignupStore {
 
   hasHausUpdate(email: string): boolean {
     return this.updates.has(email.trim().toLowerCase());
+  }
+
+  reoptHausUpdate(email: string): boolean {
+    const mark = email.trim().toLowerCase();
+    const sessionOpen = [...this.hausSessions.values()].some(
+      (row) => row.email === mark && row.expiresAt > Date.now(),
+    );
+    if (!mark || !sessionOpen || !this.hasHausAge21Ack(mark)) return false;
+    const emailHmac = hashLockoutValue(mark);
+    if (!emailHmac) return false;
+    this.updateSuppression.delete(emailHmac);
+    this.updates.set(mark, {
+      email: mark,
+      consentAt: nowIso(),
+      source: "salon",
+      confirmedAt: null,
+    });
+    this.updateHmac.set(mark, emailHmac);
+    return true;
   }
 
   recordHausSignup(email: string, requestedDispensary = ""): HausSignupRecord {

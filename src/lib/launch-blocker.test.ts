@@ -107,7 +107,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   );
   assert.match(
     privacy,
-    /You can unsubscribe from the link in any email\. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again\. Bond keeps that hash for as long as it needs to honor the unsubscribe\./,
+    /You can unsubscribe from the email link or by unticking the box on your Haus page\. After you unsubscribe, Bond will not add that email again unless you opt back in yourself on your Haus page while signed in\./,
   );
   assert.match(
     privacy,

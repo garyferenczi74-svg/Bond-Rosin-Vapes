@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     return page("This unsubscribe link is not valid.", 400);
   }
   const response = page(
-    "You are unsubscribed from Bond Haus updates. The email is deleted. A keyed hash is kept so it is not added again.",
+    "You are unsubscribed from Bond Haus updates. The email is deleted. A keyed hash is kept. Bond will not add that email again unless you opt back in yourself on your Haus page while signed in.",
     200,
   );
   if (oneClick) response.headers.set("cache-control", "no-store");

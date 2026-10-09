@@ -31,6 +31,23 @@ export type HausUpdateWrite = {
   confirmHausUpdate(emailHmac: string): Promise<{ ok: boolean }> | { ok: boolean };
 };
 
+export type HausSalonStore = HausUpdateWrite & {
+  hasHausUpdate(email: string): Promise<boolean> | boolean;
+  reoptHausUpdate(email: string): Promise<boolean> | boolean;
+};
+
+const HAUS_COULD_NOT_SAVE = "Bond could not save that opt in.";
+const HAUS_UPDATES_OFF = "Bond Haus updates are off for this email.";
+const HAUS_UPDATES_ON = "Bond Haus updates are on for this email.";
+const HAUS_UPDATES_ATTEST = "Bond accepts Haus updates only with your 21 or older attestation.";
+
+export type HausSalonOptInResult = {
+  ok: boolean;
+  recorded: boolean;
+  subscribed: boolean;
+  message: string;
+};
+
 export function hausUpdatesDoubleOptInEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.BOND_HAUS_UPDATES_DOUBLE_OPT_IN === "on";
 }
@@ -127,6 +144,60 @@ export async function recordHausUpdateOptIn(input: {
     unsubscribeToken: unsub.id,
     confirmToken: confirm.id,
   };
+}
+
+export async function saveHausSalonOptIn(input: {
+  email: string;
+  optedIn: boolean;
+  store: HausSalonStore;
+  env?: NodeJS.ProcessEnv;
+}): Promise<HausSalonOptInResult> {
+  if (!input.optedIn) {
+    let current = false;
+    try {
+      current = await input.store.hasHausUpdate(input.email);
+    } catch {
+      return { ok: false, recorded: false, subscribed: true, message: HAUS_COULD_NOT_SAVE };
+    }
+    if (!current) {
+      return { ok: true, recorded: false, subscribed: false, message: "" };
+    }
+    try {
+      await input.store.unsubscribeHausUpdate(hashLockoutValue(input.email));
+      return { ok: true, recorded: false, subscribed: false, message: HAUS_UPDATES_OFF };
+    } catch {
+      return { ok: false, recorded: false, subscribed: true, message: HAUS_COULD_NOT_SAVE };
+    }
+  }
+
+  try {
+    const result = await recordHausUpdateOptIn({
+      email: input.email,
+      source: "haus_page",
+      optedIn: true,
+      store: input.store,
+      env: input.env,
+    });
+    if (result.reason === "suppressed") {
+      const lifted = await input.store.reoptHausUpdate(input.email);
+      if (!lifted) {
+        return { ok: false, recorded: false, subscribed: false, message: HAUS_COULD_NOT_SAVE };
+      }
+      await input.store.issueHausUpdateToken(hashLockoutValue(input.email), "unsub");
+      return { ok: true, recorded: true, subscribed: true, message: HAUS_UPDATES_ON };
+    }
+    if (!result.recorded) {
+      return {
+        ok: false,
+        recorded: false,
+        subscribed: false,
+        message: result.reason === "closed" ? HAUS_COULD_NOT_SAVE : HAUS_UPDATES_ATTEST,
+      };
+    }
+    return { ok: true, recorded: true, subscribed: true, message: HAUS_UPDATES_ON };
+  } catch {
+    return { ok: false, recorded: false, subscribed: false, message: HAUS_COULD_NOT_SAVE };
+  }
 }
 
 export async function applyUnsubscribe(

@@ -21,9 +21,8 @@ import {
   readMemberSession,
 } from "@/lib/member-session";
 import { readRequestMeta } from "@/lib/request-meta";
-import { hashLockoutValue } from "@/lib/lockout";
 import { getSignupStore } from "@/lib/signups";
-import { recordHausUpdateOptIn } from "@/lib/signups/haus-updates";
+import { recordHausUpdateOptIn, saveHausSalonOptIn } from "@/lib/signups/haus-updates";
 
 function fail(message = GENERIC_DOOR) {
   return { ok: false as const, message, next: "credentials" as const };
@@ -277,57 +276,11 @@ export async function optInHausUpdatesAction(formData: FormData) {
   }
   const store = getSignupStore();
   const optedIn = String(formData.get("hausUpdates") ?? "") === "1";
-  if (!optedIn) {
-    const current = await store.hasHausUpdate(session.email);
-    if (!current) {
-      return { ok: true as const, recorded: false, subscribed: false, message: "" };
-    }
-    try {
-      await store.unsubscribeHausUpdate(hashLockoutValue(session.email));
-      return {
-        ok: true as const,
-        recorded: false,
-        subscribed: false,
-        message: "Bond Haus updates are off for this email.",
-      };
-    } catch {
-      return {
-        ok: false as const,
-        recorded: false,
-        subscribed: true,
-        message: "Bond could not save that opt in.",
-      };
-    }
-  }
-  try {
-    const result = await recordHausUpdateOptIn({
-      email: session.email,
-      source: "haus_page",
-      optedIn: true,
-      store,
-    });
-    if (result.reason === "suppressed") {
-      return {
-        ok: false as const,
-        recorded: false,
-        subscribed: false,
-        message: "This email unsubscribed from Bond Haus updates, so Bond will not add it again.",
-      };
-    }
-    if (!result.recorded) {
-      return {
-        ok: false as const,
-        recorded: false,
-        subscribed: false,
-        message: result.reason === "closed"
-          ? "Bond could not save that opt in."
-          : "Bond accepts Haus updates only with your 21 or older attestation.",
-      };
-    }
-    return { ok: true as const, recorded: true, subscribed: true, message: "Bond Haus updates are on for this email." };
-  } catch {
-    return { ok: false as const, recorded: false, subscribed: false, message: "Bond could not save that opt in." };
-  }
+  return saveHausSalonOptIn({
+    email: session.email,
+    optedIn,
+    store,
+  });
 }
 
 export async function signOutAction() {
