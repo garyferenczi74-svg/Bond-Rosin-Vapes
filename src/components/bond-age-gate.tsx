@@ -129,10 +129,33 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
   useEffect(() => {
     if (!open || !pressedYes.current) return;
     pressedYes.current = false;
-    const target = document.querySelector("main") ?? document.querySelector("h1");
-    if (!(target instanceof HTMLElement)) return;
-    if (target.tabIndex < 0) target.setAttribute("tabindex", "-1");
-    target.focus({ preventScroll: true });
+    let tries = 0;
+    let id = 0;
+    const attempt = () => {
+      const gate = document.getElementById("bond-age-gate");
+      const outside = (el: Element | null): el is HTMLElement =>
+        el instanceof HTMLElement && !(gate && gate.contains(el));
+      const main = document.querySelector("main");
+      let target: HTMLElement | null = outside(main) ? main : null;
+      if (!target) {
+        for (const node of document.querySelectorAll("h1, h2")) {
+          if (outside(node)) {
+            target = node;
+            break;
+          }
+        }
+      }
+      if (target) {
+        if (target.tabIndex < 0) target.setAttribute("tabindex", "-1");
+        target.focus({ preventScroll: true });
+        if (document.activeElement === target) return;
+      }
+      tries += 1;
+      if (tries >= 40) return;
+      id = window.setTimeout(attempt, 50);
+    };
+    attempt();
+    return () => window.clearTimeout(id);
   }, [open]);
 
   function yes() {

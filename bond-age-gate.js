@@ -118,15 +118,42 @@
   }
   setTimeout(focusYes, 60);
 
-  function focusMain() {
+  function pageTarget() {
     var query = document.querySelector;
-    if (typeof query !== "function") return;
-    var target = document.querySelector("main") || document.querySelector("h1");
-    if (!target || typeof target.focus !== "function") return;
-    if (typeof target.tabIndex === "number" && target.tabIndex < 0 && typeof target.setAttribute === "function") {
-      target.setAttribute("tabindex", "-1");
+    if (typeof query !== "function") return null;
+    function outside(el) {
+      if (!el) return false;
+      var gate = document.querySelector(".bond-age-dc") || document.getElementById("bond-age-gate");
+      if (gate && gate.contains && gate.contains(el)) return false;
+      return true;
     }
-    try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
+    var main = document.querySelector("main");
+    if (outside(main)) return main;
+    if (typeof document.querySelectorAll !== "function") {
+      var only = document.querySelector("h1");
+      return outside(only) ? only : null;
+    }
+    var list = document.querySelectorAll("h1, h2");
+    for (var i = 0; i < list.length; i++) {
+      if (outside(list[i])) return list[i];
+    }
+    return null;
+  }
+
+  function focusMain() {
+    var tries = 0;
+    function attempt() {
+      var target = pageTarget();
+      if (!target || typeof target.focus !== "function") return;
+      if (typeof target.tabIndex === "number" && target.tabIndex < 0 && typeof target.setAttribute === "function") {
+        target.setAttribute("tabindex", "-1");
+      }
+      try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
+      if (document.activeElement === target || tries >= 40) return;
+      tries += 1;
+      setTimeout(attempt, 50);
+    }
+    attempt();
   }
 
   yesEl.addEventListener("click", function () {
