@@ -151,7 +151,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
         if (document.activeElement === target) return;
       }
       tries += 1;
-      if (tries >= 40) return;
+      if (tries >= 160) return;
       id = window.setTimeout(attempt, 50);
     };
     attempt();

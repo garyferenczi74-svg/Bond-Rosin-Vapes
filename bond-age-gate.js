@@ -149,7 +149,7 @@
         target.setAttribute("tabindex", "-1");
       }
       try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
-      if (document.activeElement === target || tries >= 40) return;
+      if (document.activeElement === target || tries >= 160) return;
       tries += 1;
       setTimeout(attempt, 50);
     }
