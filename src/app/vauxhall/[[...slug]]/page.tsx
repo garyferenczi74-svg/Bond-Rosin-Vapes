@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { CommandApp } from "@/components/vauxhall/command-app";
+import { SignupLedger } from "@/components/vauxhall/signup-ledger";
 import { writeAudit } from "@/lib/audit";
 import { requirePortalSession } from "@/lib/gate";
 import { readPartnerDraftPersist } from "@/lib/order/session";
 import { readRequestMeta } from "@/lib/request-meta";
+import { readOwnerSignupLedger } from "@/lib/signups/ledger";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { readMetrcAdapterMode } from "@/lib/vauxhall/metrc-flags";
 import { parseVauxhallRoute } from "@/lib/vauxhall/routes";
@@ -29,7 +31,10 @@ export default async function VauxhallPage({
   });
 
   const partnerRequests = await readPartnerDraftPersist();
+  const signups = await readOwnerSignupLedger(session.role);
   return (
+    <>
+    {signups ? <SignupLedger ledger={signups} /> : null}
     <CommandApp
       role={session.role}
       email={session.email}
@@ -37,5 +42,6 @@ export default async function VauxhallPage({
       partnerRequests={partnerRequests}
       metrcAdapterMode={readMetrcAdapterMode()}
     />
+    </>
   );
 }

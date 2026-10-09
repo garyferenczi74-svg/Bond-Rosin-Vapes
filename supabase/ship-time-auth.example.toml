@@ -1,0 +1,48 @@
+# Ship-time note for M. This file is not applied by the app and must not be
+# pushed at the live project ziruzhhkkndgmdouithb from this PR.
+#
+# Leaked-password protection is a Supabase Auth project setting, not SQL.
+# Dashboard → Authentication → Sign In / Providers → Email → Password security
+# (Dashboard → Auth → password security). Turn on leaked-password protection
+# when M ships. Do not toggle it before that gate.
+#
+# Config equivalent, if M applies a local config.toml at ship time:
+
+[auth.password]
+hibp_enabled = true
+
+# pg_cron is not created by the app. Enable the pg_cron extension on the
+# live project before applying 20261008201000_felix_request_retention.sql
+# and 20261008220000_keyed_hash_and_dispensary_retention.sql.
+# Those migrations schedule the retention jobs. If the extension is still
+# missing, each migration records a notice and skips the schedules. Enable
+# the extension, then run the schedule statements again. Do not enable it
+# from this PR.
+#
+# Ship condition for the Privacy page. Apply these migrations and verify the
+# pg_cron jobs on ziruzhhkkndgmdouithb before or with the deploy that ships
+# this Privacy page. Never after. Ship a production build only. Never ship a
+# preview. The preview vercel.live loader is a preview artifact.
+#
+# Server-only env, names only. Set on Production before that deploy. Never
+# NEXT_PUBLIC_. Never log the values. Do not set them from this PR.
+#
+#   BOND_SESSION_SECRET
+#   BOND_HASH_KEY
+#
+# BOND_HASH_KEY is the HMAC key for auth_attempts email and IP digests. It is
+# separate from BOND_SESSION_SECRET. Rotating BOND_HASH_KEY resets lockout
+# history. That is acceptable because auth_attempts are deleted after 90 days.
+# The keyed-hash migration deletes pre-existing auth_attempts rows. It does
+# not backfill them. SQL cannot compute the HMAC without this key.
+#
+# Bond Haus updates. Apply 20261009190000_haus_updates_optin.sql and then
+# 20261009203000_haus_updates_hold.sql in the same window, after the owner
+# read migration, and before or with the Privacy deploy. Never after. Do not
+# apply them from this PR. The hold migration drops the anon insert, stores
+# email_hmac, and schedules bond_purge_haus_updates at 45 4 * * *. That job
+# deletes haus_updates rows 24 months after consent_at, or after confirmed_at
+# when that is later. It does not delete haus_updates_suppression.
+# Leave BOND_HAUS_UPDATES_DOUBLE_OPT_IN unset. Confirmation mail stays off
+# until a provider is named on the Privacy page. BOND_HASH_KEY is also the
+# key for haus_updates_suppression. Do not send from a preview.

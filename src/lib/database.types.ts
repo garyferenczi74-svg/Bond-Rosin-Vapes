@@ -80,21 +80,21 @@ export type Database = {
           attempted_at: string;
           email_hash: string;
           id: number;
-          ip: string | null;
+          ip_hash: string | null;
           outcome: string;
         };
         Insert: {
           attempted_at?: string;
           email_hash: string;
           id?: never;
-          ip?: string | null;
+          ip_hash?: string | null;
           outcome: string;
         };
         Update: {
           attempted_at?: string;
           email_hash?: string;
           id?: never;
-          ip?: string | null;
+          ip_hash?: string | null;
           outcome?: string;
         };
         Relationships: [];

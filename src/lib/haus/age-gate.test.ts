@@ -194,7 +194,12 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
     assert.match(html, /html:not\(\[data-bond-age="ok"\]\) \.bond-floor \{ visibility: hidden; \}/, name);
     assert.equal(html.includes("haus-age-host"), false, name);
     assert.equal(html.includes("<iframe"), false, name);
-    assert.equal(html.includes("unpkg.com"), false, name);
+    if (name === "Privacy.dc.html") {
+      assert.equal(html.includes('src="https://unpkg.com'), false, name);
+      assert.match(html, /unpkg\.com/);
+    } else {
+      assert.equal(html.includes("unpkg.com"), false, name);
+    }
     assert.equal(html.includes("support.js"), false, name);
     assert.equal(html.includes('sessionStorage.setItem("bond_age_ok"'), false, name);
     assert.equal(html.includes("sessionStorage.setItem('bond_age_ok'"), false, name);

@@ -84,7 +84,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /Bond does not sell member data\./);
   assert.match(
     privacy,
-    /On the Next door the confirmation, with a note that you have seen the welcome, is kept in a cookie for one year\. Signing out does not clear that cookie\./,
+    /On the Next door the confirmation, with a note that you have seen the welcome, is stored by Bond in Supabase\. Signing out does not delete that row\./,
   );
   assert.match(privacy, /\[PRIVACY EMAIL\]/);
   assert.match(privacy, /optional notes on a batch you shelve/);
@@ -93,14 +93,41 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /which chapter of The Number Guide you last opened/);
   assert.equal(privacy.includes("Experience Guide"), false);
   assert.equal(privacy.includes("email delivery"), false);
-  assert.match(privacy, /\(hosting, analytics\)/);
+  assert.equal(privacy.includes("(hosting, analytics)"), false);
+  assert.equal(privacy.includes("Site analytics:"), false);
+  assert.match(privacy, /This site does not use analytics/);
   assert.equal(privacy.includes("Correspondence preference"), false);
-  assert.match(privacy, /Bond does not store a Haus correspondence preference/);
-  assert.match(privacy, /There is no Bond Haus email list/);
+  assert.equal(privacy.includes("Bond does not store a Haus correspondence preference"), false);
+  assert.equal(privacy.includes("unsubscribe page"), false);
+  assert.equal(privacy.includes("consented_at"), false);
+  assert.equal(privacy.includes("There is no Bond Haus email list"), false);
+  assert.match(
+    privacy,
+    /If you opt in on the Haus door or on your Haus page, Bond keeps your email, the time you opted in, and the source, so Bond can send Bond Haus updates\. That opt in is separate from a product request and it starts unticked\. Bond accepts that opt in only when this server has your 21 or older attestation for that email\./,
+  );
+  assert.match(
+    privacy,
+    /You can unsubscribe from the email link or by unticking the box on your Haus page\. After you unsubscribe, Bond will not add that email again unless you opt back in yourself on your Haus page while signed in\./,
+  );
+  assert.match(
+    privacy,
+    /The audit log also records a member opting back in, and that record keeps only a keyed hash of the email\./,
+  );
+  assert.match(
+    privacy,
+    /If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later\./,
+  );
+  assert.match(
+    privacy,
+    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email\. A confirmation id expires after 7 days\. An unsubscribe id does not expire\. Those ids are deleted with the record or when you unsubscribe\. Unused confirmation and unsubscribe ids with no record are deleted after 30 days\./,
+  );
+  assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
+  assert.match(privacy, /Any email service will be named on this page before the first send\./);
+  assert.equal(read("Terms.dc.html").includes("There is no Bond Haus email list"), false);
   assert.match(privacy, /Haus members are not asked for an authenticator code/);
   assert.match(
     privacy,
-    /Each staff sign-in, and each staff page a staff member opens, creates a record of the staff member's account id and role, the IP address, browser and page used, and the time\. Sign-in records also note that the code step was skipped\. These records are kept until Bond has a deletion process in place\./,
+    /Each staff sign-in, and each staff page a staff member opens, creates a record of the staff member's account id and role, a keyed hash of the IP address, the browser and page used, and the time\. Staff records made before this change keep the IP address until they are deleted at 24 months\. Sign-in records also note that the code step was skipped\. The staff audit log is deleted after 24 months\./,
   );
   assert.match(
     privacy,
@@ -117,6 +144,21 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.equal(privacy.includes("factor id"), false);
   assert.match(privacy, /Effective date: September 27, 2026\./);
   assert.match(read("Terms.dc.html"), /Effective date: September 27, 2026\./);
+  assert.match(privacy, /load React and ReactDOM from unpkg\.com/);
+  assert.equal(privacy.includes("Babel"), false);
+  assert.match(privacy, /An older bond_haus_ack cookie is cleared and is not read\./);
+  assert.match(privacy, /Bond clears the contact name, the phone, the address, and the password hash and salt, and replaces the email with a placeholder, 24 months after the account is closed/);
+  assert.match(privacy, /The dispensary name and the New York OCM license number stay as the business record/);
+  assert.equal(privacy.includes("not deleted on the 24 month schedule"), false);
+  const memberSession = read("src/lib/member-session.ts");
+  assert.match(memberSession, /MEMBER_ACK_COOKIE, "", \{[\s\S]*maxAge: 0/);
+  assert.equal(read("src/lib/member-session.ts").includes("jar.get(MEMBER_ACK_COOKIE)"), false);
+  for (const name of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html", "AgeGate.dc.html"]) {
+    const html = read(name);
+    assert.match(html, /unpkg\.com\/react@18\.3\.1\/umd\/react\.production\.min\.js/, name);
+    assert.match(html, /unpkg\.com\/react-dom@18\.3\.1\/umd\/react-dom\.production\.min\.js/, name);
+    assert.equal(/babel/i.test(html), false, name);
+  }
 });
 
 test("order portal says nothing is sent to the state tracking system", () => {
