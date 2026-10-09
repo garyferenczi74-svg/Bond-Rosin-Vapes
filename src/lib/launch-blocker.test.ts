@@ -98,7 +98,19 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   assert.match(privacy, /This site does not use analytics/);
   assert.equal(privacy.includes("Correspondence preference"), false);
   assert.match(privacy, /Bond does not store a Haus correspondence preference/);
-  assert.match(privacy, /There is no Bond Haus email list/);
+  assert.equal(privacy.includes("There is no Bond Haus email list"), false);
+  assert.match(
+    privacy,
+    /If you opt in on the Haus door, Bond keeps your email, the time you consented, and the source, so Bond can send Bond Haus updates\./,
+  );
+  assert.match(
+    privacy,
+    /You can unsubscribe from a link in every email, or from the unsubscribe page\. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again\./,
+  );
+  assert.match(privacy, /Bond keeps that email, the consent time, and the source until you unsubscribe\./);
+  assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
+  assert.match(privacy, /Any email service will be named on this page before the first send\./);
+  assert.equal(read("Terms.dc.html").includes("There is no Bond Haus email list"), false);
   assert.match(privacy, /Haus members are not asked for an authenticator code/);
   assert.match(
     privacy,

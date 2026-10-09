@@ -242,6 +242,38 @@ export class RemoteSignupStore {
     return mapHaus(data as HausRow);
   }
 
+  async recordHausUpdate(
+    email: string,
+    source: string,
+    emailHmac: string,
+  ): Promise<{ ok: boolean; reason?: string }> {
+    const { data, error } = await client().rpc("bond_record_haus_update", {
+      p_email: email,
+      p_source: source,
+      p_email_hmac: emailHmac,
+    });
+    if (error) throw new Error("Haus update was not stored.");
+    if (data !== true) return { ok: false, reason: "suppressed" };
+    return { ok: true };
+  }
+
+  async unsubscribeHausUpdate(email: string, emailHmac: string): Promise<{ ok: boolean }> {
+    const { data, error } = await client().rpc("bond_unsubscribe_haus_update", {
+      p_email: email,
+      p_email_hmac: emailHmac,
+    });
+    if (error || data !== true) throw new Error("Unsubscribe was not stored.");
+    return { ok: true };
+  }
+
+  async confirmHausUpdate(email: string): Promise<{ ok: boolean }> {
+    const { data, error } = await client().rpc("bond_confirm_haus_update", {
+      p_email: email,
+    });
+    if (error || data !== true) return { ok: false };
+    return { ok: true };
+  }
+
   private async touchDispensary(accountId: string): Promise<void> {
     const stamped = new Date().toISOString();
     const { error } = await client()
@@ -263,5 +295,5 @@ export class RemoteSignupStore {
 }
 
 export function emptyLedger(source: SignupLedger["source"]): SignupLedger {
-  return { source, dispensaries: [], orders: [], haus: [] };
+  return { source, dispensaries: [], orders: [], haus: [], updates: [] };
 }

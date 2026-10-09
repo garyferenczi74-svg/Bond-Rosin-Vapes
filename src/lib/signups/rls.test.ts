@@ -10,6 +10,7 @@ const migration = fileURLToPath(new URL("../../../supabase/migrations/2026100819
 const felix = fileURLToPath(new URL("../../../supabase/migrations/20261008201000_felix_request_retention.sql", import.meta.url));
 const ownerOnly = fileURLToPath(new URL("../../../supabase/migrations/20261008213000_owner_only_signup_reads.sql", import.meta.url));
 const keyed = fileURLToPath(new URL("../../../supabase/migrations/20261008220000_keyed_hash_and_dispensary_retention.sql", import.meta.url));
+const updates = fileURLToPath(new URL("../../../supabase/migrations/20261009190000_haus_updates_optin.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -156,6 +157,8 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 \\i ${ownerOnly}
 
 \\i ${keyed}
+
+\\i ${updates}
 
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
@@ -319,6 +322,76 @@ SELECT (
   AND address = '18 Harbor Street, Albany, NY 12207' AND password_hash = 'scrypt-hash'
 ) AS harbor_kept
 FROM public.dispensary_accounts WHERE ocm_license = 'OCM-HARBOR-19';
+
+SET ROLE anon;
+INSERT INTO public.haus_updates (email, source) VALUES ('Reader@bond.test', 'haus_door');
+INSERT INTO public.haus_updates (email, source) VALUES ('reader@bond.test', 'haus_door');
+INSERT INTO public.haus_updates (email, source, confirmed_at) VALUES ('stamp@bond.test', 'haus_door', now());
+RESET ROLE;
+SELECT COUNT(*) AS reader_once FROM public.haus_updates WHERE email = 'reader@bond.test';
+SELECT (confirmed_at IS NULL) AS stamp_open FROM public.haus_updates WHERE email = 'stamp@bond.test';
+
+SELECT public.bond_record_haus_update('fresh@bond.test', 'haus_door', repeat('cd', 32)) AS fresh_recorded;
+SELECT public.bond_record_haus_update('fresh@bond.test', 'haus_door', repeat('cd', 32)) AS fresh_again;
+SELECT COUNT(*) AS fresh_once FROM public.haus_updates WHERE email = 'fresh@bond.test';
+SELECT (confirmed_at IS NULL) AS fresh_unconfirmed FROM public.haus_updates WHERE email = 'fresh@bond.test';
+
+INSERT INTO public.haus_updates_suppression (email_hmac) VALUES (repeat('ab', 32));
+SELECT public.bond_record_haus_update('gone@bond.test', 'haus_door', repeat('ab', 32)) AS suppressed_rejected;
+SELECT COUNT(*) AS suppressed_absent FROM public.haus_updates WHERE email = 'gone@bond.test';
+
+SELECT public.bond_unsubscribe_haus_update('reader@bond.test', repeat('ef', 32)) AS reader_unsubscribed;
+SELECT COUNT(*) AS reader_left FROM public.haus_updates WHERE email = 'reader@bond.test';
+SELECT COUNT(*) AS reader_suppressed FROM public.haus_updates_suppression WHERE email_hmac = repeat('ef', 32);
+SELECT public.bond_record_haus_update('reader@bond.test', 'haus_door', repeat('ef', 32)) AS reader_readd;
+
+SELECT COUNT(*) AS updates_columns
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'haus_updates'
+  AND column_name IN ('email', 'consent_at', 'source', 'confirmed_at');
+SELECT COUNT(*) AS updates_extra
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'haus_updates'
+  AND column_name NOT IN ('email', 'consent_at', 'source', 'confirmed_at');
+SELECT COUNT(*) AS suppression_columns
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'haus_updates_suppression'
+  AND column_name IN ('email_hmac', 'created_at');
+SELECT COUNT(*) AS suppression_extra
+FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'haus_updates_suppression'
+  AND column_name NOT IN ('email_hmac', 'created_at');
+
+SELECT COUNT(*) AS updates_insert_policy
+FROM pg_policy p
+JOIN pg_class c ON c.oid = p.polrelid
+WHERE c.relname = 'haus_updates' AND p.polcmd = 'a';
+SELECT COUNT(*) AS updates_owner_policy
+FROM pg_policy p
+JOIN pg_class c ON c.oid = p.polrelid
+WHERE c.relname = 'haus_updates' AND p.polcmd = 'r'
+  AND position('is_owner' in pg_get_expr(p.polqual, p.polrelid)) > 0;
+SELECT COUNT(*) AS updates_mutate_policies
+FROM pg_policy p
+JOIN pg_class c ON c.oid = p.polrelid
+WHERE c.relname = 'haus_updates' AND p.polcmd IN ('w', 'd', '*');
+SELECT COUNT(*) AS updates_mutate_grants
+FROM information_schema.role_table_grants
+WHERE table_schema = 'public' AND table_name = 'haus_updates'
+  AND grantee IN ('anon', 'authenticated')
+  AND privilege_type IN ('UPDATE', 'DELETE', 'TRUNCATE');
+
+SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
+SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
+SET ROLE authenticated;
+SELECT COUNT(*) AS operator_updates FROM public.haus_updates;
+RESET ROLE;
+
+SELECT set_config('request.jwt.claim.sub', '11111111-1111-1111-1111-111111111111', false);
+SELECT set_config('request.jwt.claims', '{"sub":"11111111-1111-1111-1111-111111111111","email":"owner@bond.test"}', false);
+SET ROLE authenticated;
+SELECT COUNT(*) AS owner_updates FROM public.haus_updates;
+RESET ROLE;
 `,
   );
 
@@ -365,6 +438,28 @@ FROM public.dispensary_accounts WHERE ocm_license = 'OCM-HARBOR-19';
   saw("north_cleared", "t");
   saw("closed_cleared", "t");
   saw("harbor_kept", "t");
+  saw("reader_once", "1");
+  saw("stamp_open", "t");
+  saw("fresh_recorded", "t");
+  saw("fresh_again", "t");
+  saw("fresh_once", "1");
+  saw("fresh_unconfirmed", "t");
+  saw("suppressed_rejected", "f");
+  saw("suppressed_absent", "0");
+  saw("reader_unsubscribed", "t");
+  saw("reader_left", "0");
+  saw("reader_suppressed", "1");
+  saw("reader_readd", "f");
+  saw("updates_columns", "4");
+  saw("updates_extra", "0");
+  saw("suppression_columns", "2");
+  saw("suppression_extra", "0");
+  saw("updates_insert_policy", "1");
+  saw("updates_owner_policy", "1");
+  saw("updates_mutate_policies", "0");
+  saw("updates_mutate_grants", "0");
+  saw("operator_updates", "0");
+  saw("owner_updates", "2");
 
   const denied = psqlSql(
     "bond_signup_rls",
@@ -401,6 +496,13 @@ VALUES ('young@bond.test', false, now(), 'Harbor House');
     "UPDATE public.haus_requests SET email = 'nope@bond.test'",
     "DELETE FROM public.haus_requests",
     "SELECT COUNT(*) FROM public.order_requests",
+    "SELECT COUNT(*) FROM public.haus_updates",
+    "UPDATE public.haus_updates SET source = 'nope'",
+    "DELETE FROM public.haus_updates",
+    "SELECT COUNT(*) FROM public.haus_updates_suppression",
+    "INSERT INTO public.haus_updates_suppression (email_hmac) VALUES (repeat('11', 32))",
+    "SELECT public.bond_record_haus_update('blocked@bond.test', 'haus_door', repeat('22', 32))",
+    "SELECT public.bond_unsubscribe_haus_update('blocked@bond.test', repeat('22', 32))",
   ]) {
     const blocked = psqlSql("bond_signup_rls", `SET ROLE anon; ${sql};`);
     assert.notEqual(blocked.status, 0, sql);
@@ -417,6 +519,30 @@ VALUES ('young@bond.test', false, now(), 'Harbor House');
     assert.notEqual(blocked.status, 0, sql);
     assert.match(`${blocked.stderr}\n${blocked.stdout}`, /append only|retention deletes are limited/i, sql);
   }
+
+  const operatorUpdate = psqlSql(
+    "bond_signup_rls",
+    `
+SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
+SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
+SET ROLE authenticated;
+UPDATE public.haus_updates SET source = 'nope';
+`,
+  );
+  assert.notEqual(operatorUpdate.status, 0, operatorUpdate.stdout);
+  assert.match(`${operatorUpdate.stderr}\n${operatorUpdate.stdout}`, /permission denied/i);
+
+  const operatorDelete = psqlSql(
+    "bond_signup_rls",
+    `
+SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
+SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
+SET ROLE authenticated;
+DELETE FROM public.haus_updates;
+`,
+  );
+  assert.notEqual(operatorDelete.status, 0, operatorDelete.stdout);
+  assert.match(`${operatorDelete.stderr}\n${operatorDelete.stdout}`, /permission denied/i);
 
   const after = psqlSql(
     "bond_signup_rls",

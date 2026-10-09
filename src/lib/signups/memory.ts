@@ -5,6 +5,7 @@ import type {
   DispensaryStatus,
   HausSessionView,
   HausSignupRecord,
+  HausUpdateRecord,
   OrderLineRecord,
   OrderRequestRecord,
   SignupLedger,
@@ -47,6 +48,8 @@ export class MemorySignupStore {
   private orders: OrderRequestRecord[] = [];
   private haus: HausSignupRecord[] = [];
   private hausSessions = new Map<string, HausSessionRow>();
+  private updates = new Map<string, HausUpdateRecord>();
+  private updateSuppression = new Set<string>();
 
   constructor() {
     for (const row of seedRecords()) this.accounts.set(row.id, row);
@@ -173,6 +176,43 @@ export class MemorySignupStore {
     return { ...row };
   }
 
+  recordHausUpdate(
+    email: string,
+    source: string,
+    emailHmac: string,
+  ): { ok: boolean; reason?: string } {
+    const mark = email.trim().toLowerCase();
+    const origin = source.trim();
+    if (!mark || !origin || !emailHmac) return { ok: false, reason: "closed" };
+    if (this.updateSuppression.has(emailHmac)) return { ok: false, reason: "suppressed" };
+    if (!this.updates.has(mark)) {
+      this.updates.set(mark, {
+        email: mark,
+        consentAt: nowIso(),
+        source: origin,
+        confirmedAt: null,
+      });
+    }
+    return { ok: true };
+  }
+
+  unsubscribeHausUpdate(email: string, emailHmac: string): { ok: boolean } {
+    this.updates.delete(email.trim().toLowerCase());
+    if (emailHmac) this.updateSuppression.add(emailHmac);
+    return { ok: true };
+  }
+
+  confirmHausUpdate(email: string): { ok: boolean } {
+    const row = this.updates.get(email.trim().toLowerCase());
+    if (!row) return { ok: false };
+    if (!row.confirmedAt) row.confirmedAt = nowIso();
+    return { ok: true };
+  }
+
+  listHausUpdates(): HausUpdateRecord[] {
+    return [...this.updates.values()].map((row) => ({ ...row }));
+  }
+
   ledger(): SignupLedger {
     return {
       source: "memory",
@@ -198,6 +238,7 @@ export class MemorySignupStore {
         age21AckAt: row.age21AckAt,
         requestedDispensary: row.requestedDispensary,
       })),
+      updates: this.listHausUpdates(),
     };
   }
 }

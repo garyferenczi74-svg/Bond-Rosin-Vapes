@@ -30,5 +30,5 @@ export function resetSignupStoreForTests(): MemorySignupStore {
 export async function readSignupLedger(): Promise<SignupLedger> {
   const store = getSignupStore();
   if (store instanceof MemorySignupStore) return store.ledger();
-  return { source: "supabase", dispensaries: [], orders: [], haus: [] };
+  return { source: "supabase", dispensaries: [], orders: [], haus: [], updates: [] };
 }

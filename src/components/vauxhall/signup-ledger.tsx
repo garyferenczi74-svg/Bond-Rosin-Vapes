@@ -38,6 +38,21 @@ export function SignupLedger({ ledger }: { ledger: SignupLedger }) {
               </p>
             ))}
           </LedgerBlock>
+          <LedgerBlock title="Bond Haus updates">
+            {ledger.updatesUnavailable ? (
+              <p style={{ margin: 0, color: "#8E887C" }}>Update subscribers are not on this database yet.</p>
+            ) : (
+              <>
+                <p style={{ margin: "0 0 6px" }}>{ledger.updates.length} subscribed</p>
+                {ledger.updates.length === 0 ? <Empty /> : null}
+                {ledger.updates.map((row) => (
+                  <p key={row.email} style={{ margin: "0 0 6px" }}>
+                    {row.email} · {row.source} · {row.consentAt}
+                  </p>
+                ))}
+              </>
+            )}
+          </LedgerBlock>
         </div>
       )}
     </section>
