@@ -12,6 +12,7 @@ const ownerOnly = fileURLToPath(new URL("../../../supabase/migrations/2026100821
 const keyed = fileURLToPath(new URL("../../../supabase/migrations/20261008220000_keyed_hash_and_dispensary_retention.sql", import.meta.url));
 const updates = fileURLToPath(new URL("../../../supabase/migrations/20261009190000_haus_updates_optin.sql", import.meta.url));
 const hold = fileURLToPath(new URL("../../../supabase/migrations/20261009203000_haus_updates_hold.sql", import.meta.url));
+const revokeInserts = fileURLToPath(new URL("../../../supabase/migrations/20261009210000_revoke_anon_signup_inserts.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -56,6 +57,16 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.match(holdSql, /'45 4 \* \* \*'/);
   assert.match(holdSql, /RAISE NOTICE 'pg_cron schedule skipped \(%\)\. Enabling pg_cron is a ship-time step for M\.'/);
   assert.equal(holdSql.includes("is_admin()"), false);
+  const revokeSql = readFileSync(revokeInserts, "utf8");
+  assert.match(revokeSql, /REVOKE INSERT ON TABLE public\.dispensary_accounts FROM anon/);
+  assert.match(revokeSql, /REVOKE INSERT ON TABLE public\.order_requests FROM anon/);
+  assert.match(revokeSql, /REVOKE INSERT ON TABLE public\.haus_requests FROM anon/);
+  assert.match(revokeSql, /REVOKE INSERT ON TABLE public\.dispensary_accounts FROM authenticated/);
+  assert.match(revokeSql, /DROP POLICY IF EXISTS dispensary_accounts_anon_insert/);
+  assert.match(revokeSql, /DROP POLICY IF EXISTS order_requests_anon_insert/);
+  assert.match(revokeSql, /DROP POLICY IF EXISTS haus_requests_anon_insert/);
+  assert.match(revokeSql, /GRANT SELECT, INSERT, UPDATE ON TABLE public\.dispensary_accounts TO service_role/);
+  assert.equal(revokeSql.includes("is_admin()"), false);
 
   const dir = mkdtempSync(join(tmpdir(), "bond-signup-rls-"));
   chmodSync(dir, 0o755);
@@ -169,6 +180,8 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 
 \\i ${hold}
 
+\\i ${revokeInserts}
+
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
 
@@ -189,20 +202,26 @@ INSERT INTO public.dispensary_accounts (
   password_hash, password_salt, age21_ack_at, status, created_at, last_active_at
 ) VALUES (
   'North House', '1 North Street, Albany, NY 12207', 'North Buyer', '518-555-0101',
-  'OCM-NORTH-19', 'north.buyer@example.test', 'scrypt-hash', 'scrypt-salt', now(), 'approved',
+  'OCM-NORTH-19', 'north.buyer@example.test', 'scrypt-hash', 'scrypt-salt', now(), 'pending',
   now() - interval '30 months', now() - interval '30 months'
 );
+UPDATE public.dispensary_accounts
+SET status = 'approved'
+WHERE email = 'north.buyer@example.test';
 
 INSERT INTO public.dispensary_accounts (
   dispensary_name, address, contact_name, phone, ocm_license, email,
   password_hash, password_salt, age21_ack_at, status, created_at, last_active_at, closed_at
 ) VALUES (
   'Closed House', '2 Closed Street, Albany, NY 12207', 'Closed Buyer', '518-555-0102',
-  'OCM-CLOSED-19', 'closed.buyer@example.test', 'scrypt-hash', 'scrypt-salt', now(), 'rejected',
+  'OCM-CLOSED-19', 'closed.buyer@example.test', 'scrypt-hash', 'scrypt-salt', now(), 'pending',
   now() - interval '30 months', now() - interval '30 months', now() - interval '30 months'
 );
+UPDATE public.dispensary_accounts
+SET status = 'rejected'
+WHERE email = 'closed.buyer@example.test';
 
-SET ROLE anon;
+SET ROLE service_role;
 INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
 VALUES ('member@bond.test', true, now(), 'Harbor House');
 RESET ROLE;
@@ -549,7 +568,8 @@ INSERT INTO public.dispensary_accounts (
 `,
   );
   assert.notEqual(denied.status, 0, denied.stdout);
-  assert.match(`${denied.stderr}\n${denied.stdout}`, /row-level security|check constraint|new row violates/i);
+  assert.match(`${denied.stderr}\n${denied.stdout}`, /permission denied/i);
+  console.log("ANON_DISPENSARY_INSERT", denied.stderr.trim());
 
   const badHaus = psqlSql(
     "bond_signup_rls",
@@ -560,7 +580,8 @@ VALUES ('young@bond.test', false, now(), 'Harbor House');
 `,
   );
   assert.notEqual(badHaus.status, 0, badHaus.stdout);
-  assert.match(`${badHaus.stderr}\n${badHaus.stdout}`, /check constraint|row-level security|new row violates/i);
+  assert.match(`${badHaus.stderr}\n${badHaus.stdout}`, /permission denied/i);
+  console.log("ANON_HAUS_INSERT", badHaus.stderr.trim());
 
   for (const sql of [
     "SELECT COUNT(*) FROM public.dispensary_accounts",
@@ -678,6 +699,96 @@ COMMIT;
   console.log("FELIX_REPRO_SERVICE_ROLE_SUPPRESSED", felixServiceSuppressed.stderr.trim());
   assert.notEqual(felixServiceSuppressed.status, 0);
   assert.match(`${felixServiceSuppressed.stderr}\n${felixServiceSuppressed.stdout}`, /haus_updates address is suppressed/);
+
+  const anonOrder = psqlSql(
+    "bond_signup_rls",
+    `
+SET ROLE anon;
+INSERT INTO public.order_requests (dispensary_account_id, lines, promised_on, notes)
+VALUES ('11111111-1111-1111-1111-111111111111', '[{"skuId":"no-1","format":"1g","qty":1}]'::jsonb, '2026-12-20', 'Dock note');
+`,
+  );
+  console.log("ANON_ORDER_INSERT", anonOrder.stderr.trim());
+  assert.notEqual(anonOrder.status, 0);
+  assert.match(anonOrder.stderr, /permission denied/i);
+
+  const authInserts = psqlSql(
+    "bond_signup_rls",
+    `
+SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
+SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
+SET ROLE authenticated;
+INSERT INTO public.dispensary_accounts (
+  dispensary_name, address, contact_name, phone, ocm_license, email,
+  password_hash, password_salt, age21_ack_at, status
+) VALUES (
+  'Operator House', '18 Harbor Street, Albany, NY 12207', 'Ops Buyer', '518-555-0199',
+  'OCM-OPS-19', 'ops.buyer@example.test', 'scrypt-hash', 'scrypt-salt', now(), 'pending'
+);
+`,
+  );
+  console.log("AUTH_NON_OWNER_DISPENSARY_INSERT", authInserts.stderr.trim());
+  assert.notEqual(authInserts.status, 0);
+  assert.match(authInserts.stderr, /permission denied/i);
+
+  const authOrder = psqlSql(
+    "bond_signup_rls",
+    `
+SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
+SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
+SET ROLE authenticated;
+INSERT INTO public.order_requests (dispensary_account_id, lines, promised_on, notes)
+VALUES ('11111111-1111-1111-1111-111111111111', '[{"skuId":"no-1","format":"1g","qty":1}]'::jsonb, '2026-12-20', 'Dock note');
+`,
+  );
+  console.log("AUTH_NON_OWNER_ORDER_INSERT", authOrder.stderr.trim());
+  assert.notEqual(authOrder.status, 0);
+  assert.match(authOrder.stderr, /permission denied/i);
+
+  const authHaus = psqlSql(
+    "bond_signup_rls",
+    `
+SELECT set_config('request.jwt.claim.sub', '22222222-2222-2222-2222-222222222222', false);
+SELECT set_config('request.jwt.claims', '{"sub":"22222222-2222-2222-2222-222222222222","email":"ops@bond.test"}', false);
+SET ROLE authenticated;
+INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
+VALUES ('ops@bond.test', true, now(), 'Harbor House');
+`,
+  );
+  console.log("AUTH_NON_OWNER_HAUS_INSERT", authHaus.stderr.trim());
+  assert.notEqual(authHaus.status, 0);
+  assert.match(authHaus.stderr, /permission denied/i);
+
+  const serviceWrites = psqlSql(
+    "bond_signup_rls",
+    `
+SET ROLE service_role;
+INSERT INTO public.dispensary_accounts (
+  dispensary_name, address, contact_name, phone, ocm_license, email,
+  password_hash, password_salt, age21_ack_at, status
+) VALUES (
+  'Service House', '18 Harbor Street, Albany, NY 12207', 'Service Buyer', '518-555-0198',
+  'OCM-SERVICE-19', 'service.buyer@example.test', 'scrypt-hash', 'scrypt-salt', now(), 'pending'
+);
+INSERT INTO public.order_requests (dispensary_account_id, lines, promised_on, notes)
+SELECT id, '[{"skuId":"no-1","format":"1g","qty":1}]'::jsonb, '2026-12-20', 'Dock note'
+FROM public.dispensary_accounts WHERE ocm_license = 'OCM-SERVICE-19';
+INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
+VALUES ('service.member@bond.test', true, now(), 'Service House');
+RESET ROLE;
+SELECT status AS service_dispensary FROM public.dispensary_accounts WHERE email = 'service.buyer@example.test';
+SELECT COUNT(*) AS service_order FROM public.order_requests r
+JOIN public.dispensary_accounts a ON a.id = r.dispensary_account_id
+WHERE a.ocm_license = 'OCM-SERVICE-19';
+SELECT COUNT(*) AS service_haus FROM public.haus_requests WHERE email = 'service.member@bond.test';
+`,
+  );
+  console.log("SERVICE_ROLE_WRITES", serviceWrites.stdout.trim());
+  if (serviceWrites.status !== 0) console.log("SERVICE_ROLE_WRITES_ERR", serviceWrites.stderr.trim());
+  assert.equal(serviceWrites.status, 0, `${serviceWrites.stdout}\n${serviceWrites.stderr}`);
+  assert.match(serviceWrites.stdout, /service_dispensary[\s\S]{0,80}\n-+\n\s*pending/);
+  assert.match(serviceWrites.stdout, /service_order[\s\S]{0,80}\n-+\n\s*1/);
+  assert.match(serviceWrites.stdout, /service_haus[\s\S]{0,80}\n-+\n\s*1/);
 
   const after = psqlSql(
     "bond_signup_rls",
