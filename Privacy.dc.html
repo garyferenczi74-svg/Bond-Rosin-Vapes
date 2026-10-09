@@ -40,13 +40,13 @@
   @supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}
 </style>
 <script>
-(function(){var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}if(!ok){try{ok=fresh(sessionStorage.getItem("bond_age_ok"));}catch(e){}}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();
+(function(){var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();
 </script>
 </head>
 <body>
 <div id="bond-age-gate" class="bond-age-gate" data-declined="false" role="dialog" aria-modal="true" aria-labelledby="bond-gate-h">
   <div class="bond-age-box">
-    <img class="bond-age-logo" src="/media/gate/bond-logo-bone-600.png" alt="Bond" width="170" height="41">
+    <p class="bond-age-logo">BOND</p>
     <noscript>
       <style>#bond-age-gate .bond-age-ask,#bond-age-gate .bond-age-no{display:none !important}</style>
       <p class="bond-age-lead">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p>
@@ -62,7 +62,7 @@
     </div>
     <div class="bond-age-panel bond-age-no">
       <h2 id="bond-gate-denied-h" class="bond-age-title" tabindex="-1">Come back when you're 21.</h2>
-      <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
+      <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
     </div>
     <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>There may be health risks associated with consumption of this product.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
   </div>
@@ -83,7 +83,7 @@
     <p>This site is operated by Cedargrowth LLC, a New York State licensed cannabis business (OCM-PROC-25-000329), the company behind Bond ("Bond," "we," "us"). Contact: [PRIVACY EMAIL].</p>
 
     <h2>2. Age verification, first and always</h2>
-    <p>New York law requires this site to verify that every visitor is 21 or older before viewing. When you choose yes, a yes flag and its timestamp are kept in localStorage on this device for 30 days, under the name bond_age_ok. It isn't a cookie, nothing is sent, and a No stores nothing. We do not store your date of birth.</p>
+    <p>New York law requires this site to verify that every visitor is 21 or older before viewing. The 30-day flag is set only when you click Yes, and a yes flag and its timestamp are kept in localStorage on this device for 30 days, under the name bond_age_ok. It isn't a cookie, nothing is sent, and a No stores nothing. We do not store your date of birth.</p>
 
     <h2>3. What we collect</h2>
     <ul>
@@ -124,13 +124,13 @@
     <p>Only with service providers who help us run the site (hosting, analytics), each bound to our instructions; with the Office of Cannabis Management or other authorities where the law requires; and never sold, and never shared for cross-context behavioral advertising.</p>
 
     <h2>7. Cookies</h2>
-    <p>The age check is a yes flag and its timestamp, kept in localStorage on this device for 30 days, under the name bond_age_ok. It isn't a cookie, nothing is sent, and a No stores nothing. These other keys stay in the browser and are never sent: localStorage bondDispensaryDir and bondNyCities (Finder), and localStorage bondFindResult (Home quiz). The Haus door uses two cookies: bond_haus_ack, kept for one year, and bond_haus_member, kept for one day. Analytics cookies may also be present. Your browser controls let you clear site data.</p>
+    <p>The age check is a yes flag and its timestamp, kept in localStorage on this device for 30 days, under the name bond_age_ok. The 30-day flag is set only when you click Yes. It isn't a cookie, nothing is sent, and a No stores nothing. These other keys stay in the browser and are never sent: localStorage bondDispensaryDir and bondNyCities (Finder), and localStorage bondFindResult (Home quiz). The Haus door uses two cookies: bond_haus_ack, kept for one year, and bond_haus_member, kept for one day. Analytics cookies may also be present. Your browser controls let you clear site data.</p>
 
     <h2>8. Your choices and rights</h2>
     <p>There is no Bond Haus email list, so there is no unsubscribe link for one. Bond does not store a Haus correspondence preference. Depending on where you live, you may have rights to access, correct, or delete your personal information; send requests to [PRIVACY EMAIL] and we will verify and respond within the time your state's law requires, and we honor reasonable requests regardless of state.</p>
 
     <h2>9. Retention</h2>
-    <p>The Home Haus form stores nothing and sends nothing, so Bond keeps no Bond Haus subscription records from it. Dispensary Login records are kept while the partner account is active and as long as New York business and cannabis recordkeeping requires, then deleted or disabled when operations revokes the account. Analytics persist in aggregate. A yes flag and its timestamp stay in localStorage on this device for 30 days, under the name bond_age_ok. A No stores nothing.</p>
+    <p>The Home Haus form stores nothing and sends nothing, so Bond keeps no Bond Haus subscription records from it. Dispensary Login records are kept while the partner account is active and as long as New York business and cannabis recordkeeping requires, then deleted or disabled when operations revokes the account. Analytics persist in aggregate. A yes flag and its timestamp stay in localStorage on this device for 30 days, under the name bond_age_ok. The 30-day flag is set only when you click Yes. A No stores nothing.</p>
 
     <h2>10. Security</h2>
     <p>Access controls, encryption in transit, and a least-access, audited internal environment, consistent with the New York SHIELD Act's reasonable safeguards requirement. We design so a breach would find very little to take.</p>

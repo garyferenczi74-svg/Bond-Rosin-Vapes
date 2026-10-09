@@ -35,13 +35,13 @@
 <link rel="stylesheet" href="/bond-age-gate.css">
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 <script>
-(function(){var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}if(!ok){try{ok=fresh(sessionStorage.getItem("bond_age_ok"));}catch(e){}}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();
+(function(){var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();
 </script>
 </head>
 <body>
 <div id="bond-age-gate" class="bond-age-gate" data-declined="false" role="dialog" aria-modal="true" aria-labelledby="bond-gate-h">
   <div class="bond-age-box">
-    <img class="bond-age-logo" src="/media/gate/bond-logo-bone-600.png" alt="Bond" width="170" height="41">
+    <p class="bond-age-logo">BOND</p>
     <noscript>
       <style>#bond-age-gate .bond-age-ask,#bond-age-gate .bond-age-no{display:none !important}</style>
       <p class="bond-age-lead">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p>
@@ -57,7 +57,7 @@
     </div>
     <div class="bond-age-panel bond-age-no">
       <h2 id="bond-gate-denied-h" class="bond-age-title" tabindex="-1">Come back when you're 21.</h2>
-      <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
+      <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
     </div>
     <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
   </div>

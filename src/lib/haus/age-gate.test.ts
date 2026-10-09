@@ -24,8 +24,9 @@ function read(rel: string) {
   return readFileSync(join(root, rel), "utf8");
 }
 
-function bootMark(stored: string | null, blocked = false): string | null {
+function bootRun(local: string | null, session: string | null = null, blocked = false) {
   const attrs = new Map<string, string>();
+  let sessionLeft = session;
   const document = {
     documentElement: {
       setAttribute(name: string, value: string) {
@@ -40,12 +41,30 @@ function bootMark(stored: string | null, blocked = false): string | null {
     getItem(key: string) {
       if (blocked) throw new Error("blocked");
       assert.equal(key, BOND_AGE_KEY);
-      return stored;
+      return sessionLeft;
+    },
+    removeItem(key: string) {
+      if (blocked) throw new Error("blocked");
+      assert.equal(key, BOND_AGE_KEY);
+      sessionLeft = null;
     },
   };
-  const run = new Function("document", "sessionStorage", HAUS_AGE_BOOT);
-  run(document, sessionStorage);
-  return attrs.get("data-bond-age") ?? null;
+  const localStorage = {
+    getItem(key: string) {
+      assert.equal(key, BOND_AGE_KEY);
+      return local;
+    },
+    setItem() {
+      throw new Error("boot wrote localStorage");
+    },
+  };
+  const run = new Function("document", "sessionStorage", "localStorage", HAUS_AGE_BOOT);
+  run(document, sessionStorage, localStorage);
+  return { mark: attrs.get("data-bond-age") ?? null, session: sessionLeft };
+}
+
+function bootMark(local: string | null, session: string | null = null, blocked = false): string | null {
+  return bootRun(local, session, blocked).mark;
 }
 
 test("AgeGate shows on an unverified Haus door or floor and skips when the session is already verified", () => {
@@ -90,7 +109,10 @@ test("AgeGate shows on an unverified Haus door or floor and skips when the sessi
   assert.equal(bootMark("nope"), null);
   assert.equal(bootMark(fresh), "ok");
   assert.equal(bootMark(freshJson), "ok");
-  assert.equal(bootMark(null, true), null);
+  assert.equal(bootMark(null, null, true), null);
+  const legacyBoot = bootRun(null, fresh);
+  assert.equal(legacyBoot.mark, null);
+  assert.equal(legacyBoot.session, null);
   assert.equal(BOND_AGE_MS, 30 * 24 * 60 * 60 * 1000);
 });
 
@@ -172,7 +194,7 @@ test("Haus and order render the native gate and the old host stays unpublished",
   assert.match(blockedBlock, /haus-age-host\.dc\.html/);
   assert.match(gate, /sessionStorage\.getItem\('bond_age_ok'\)/);
   assert.match(gate, /localStorage\.setItem\('bond_age_ok'/);
-  assert.equal(gate.includes("sessionStorage.setItem('bond_age_ok'"), false);
+  assert.match(gate, /sessionStorage\.setItem\('bond_age_ok', String\(t\)\)/);
   assert.match(gate, /Yes, I am 21 or older/);
   assert.equal(gate.includes("Yes, enter"), false);
   assert.equal(gate.includes("Birth month"), false);
@@ -227,11 +249,11 @@ test("faq privacy terms and order use an in page gate with bond_age_ok", () => {
   }
 
   assert.match(gateJs, /localStorage\.setItem\(KEY, stamp\(t\)\)/);
-  assert.equal(gateJs.includes("sessionStorage.setItem"), false);
+  assert.match(gateJs, /sessionStorage\.setItem\(KEY, String\(t\)\)/);
   assert.match(gateJs, /removeItem\(KEY\)/);
   assert.match(gateJs, /data-declined", "true"/);
   assert.match(gateView, /localStorage\.setItem\(BOND_AGE_KEY, bondAgeStamp\(t\)\)/);
-  assert.equal(gateView.includes("sessionStorage.setItem"), false);
+  assert.match(gateView, /sessionStorage\.setItem\(BOND_AGE_KEY, String\(t\)\)/);
   assert.match(gateView, /Are you 21 or older\?/);
   assert.match(gateView, /Come back when you&apos;re 21\./);
   assert.equal(gateView.includes("Not yet"), false);
@@ -289,7 +311,7 @@ test("the shared bond_age_ok key clears the gate both ways and under 21 writes n
   const expired = "1710000000000";
 
   assert.match(marketing, /localStorage\.setItem\('bond_age_ok'/);
-  assert.equal(marketing.includes("sessionStorage.setItem('bond_age_ok'"), false);
+  assert.match(marketing, /sessionStorage\.setItem\('bond_age_ok', String\(t\)\)/);
   assert.match(marketing, /sessionStorage\.getItem\('bond_age_ok'\)/);
   assert.match(marketing, /if \(localRaw\)/);
   assert.equal(BOND_AGE_KEY, "bond_age_ok");
@@ -628,7 +650,7 @@ test("yes stores a flag and timestamp, no stores nothing, and a bad flag re-gate
   const saved = JSON.parse(yesGate.localMap.get("bond_age_ok") ?? "") as { ok: boolean; t: number };
   assert.equal(saved.ok, true);
   assert.equal(typeof saved.t, "number");
-  assert.equal(yesGate.sessionMap.size, 0);
+  assert.equal(yesGate.sessionMap.get("bond_age_ok"), String(saved.t));
   assert.equal(yesGate.dataset.bondAge, "ok");
 
   const expired = loadStaticGate(new Map([["bond_age_ok", "1710000000000"]]), new Map());
@@ -641,11 +663,58 @@ test("yes stores a flag and timestamp, no stores nothing, and a bad flag re-gate
   assert.equal(junk.sessionMap.has("bond_age_ok"), false);
   assert.equal(junk.dataset.bondAge, undefined);
 
-  const migrated = loadStaticGate(new Map(), new Map([["bond_age_ok", String(Date.now())]]));
-  assert.equal(migrated.sessionMap.size, 0);
-  assert.equal(JSON.parse(migrated.localMap.get("bond_age_ok") ?? "").ok, true);
-  assert.equal(migrated.dataset.bondAge, "ok");
-  assert.equal(migrated.clicks.size, 0);
+  const legacy = loadStaticGate(new Map(), new Map([["bond_age_ok", String(Date.now())]]));
+  assert.equal(legacy.sessionMap.has("bond_age_ok"), false);
+  assert.equal(legacy.localMap.size, 0);
+  assert.equal(legacy.dataset.bondAge, undefined);
+  assert.equal(legacy.active(), legacy.yes);
+  legacy.clicks.get("yes")?.();
+  const afterYes = JSON.parse(legacy.localMap.get("bond_age_ok") ?? "") as { ok: boolean; t: number };
+  assert.equal(afterYes.ok, true);
+  assert.equal(legacy.sessionMap.get("bond_age_ok"), String(afterYes.t));
+  assert.equal(legacy.dataset.bondAge, "ok");
+
+  const homeLocal = new Map<string, string>();
+  const homeSession = new Map<string, string>([["bond_age_ok", String(Date.now())]]);
+  let homeVerified = false;
+  const homeDoc = {
+    documentElement: { dataset: {} as { bondAge?: string }, getAttribute() { return null; } },
+    getElementById() { return null; },
+    querySelector() { return null; },
+    addEventListener() {},
+    activeElement: null,
+  };
+  const mount = new Function(
+    "document",
+    "localStorage",
+    "sessionStorage",
+    "window",
+    "setTimeout",
+    "getComputedStyle",
+    "CustomEvent",
+    methodSource("componentDidMount() {"),
+  );
+  mount.call(
+    { setState(next: { verified?: boolean }) { if (next.verified) homeVerified = true; } },
+    homeDoc,
+    {
+      getItem(key: string) { return homeLocal.get(key) ?? null; },
+      setItem() { throw new Error("localStorage written before Yes"); },
+      removeItem(key: string) { homeLocal.delete(key); },
+    },
+    {
+      getItem(key: string) { return homeSession.get(key) ?? null; },
+      setItem() { throw new Error("sessionStorage written before Yes"); },
+      removeItem(key: string) { homeSession.delete(key); },
+    },
+    { dispatchEvent() { return true; } },
+    () => 0,
+    () => ({ display: "block", visibility: "visible" }),
+    CustomEvent,
+  );
+  assert.equal(homeVerified, false);
+  assert.equal(homeSession.has("bond_age_ok"), false);
+  assert.equal(homeLocal.size, 0);
 });
 
 test("one click replaces the birth date form and keeps the warning box", () => {
@@ -654,7 +723,7 @@ test("one click replaces the birth date form and keeps the warning box", () => {
   const full =
     "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
   const denied =
-    "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
+    "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
   const noJs = "This site is intended for adults 21 and older. Please enable JavaScript to verify your age.";
 
   const gateJs = read("bond-age-gate.js");

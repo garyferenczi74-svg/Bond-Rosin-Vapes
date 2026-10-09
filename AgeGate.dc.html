@@ -29,7 +29,7 @@
 <style>x-dc{display:none}</style>
 <div class="bond-age-off">
   <div class="bond-age-box">
-    <img class="bond-age-logo" src="/media/gate/bond-logo-bone-600.png" alt="Bond" width="170" height="41">
+    <p class="bond-age-logo">BOND</p>
     <p class="bond-age-lead">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p>
     <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
   </div>
@@ -52,11 +52,11 @@ a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
 <sc-if value="{{ visible }}" hint-placeholder-val="{{ false }}">
 <div class="bond-age-dc" role="dialog" aria-modal="true" aria-labelledby="{{ headingId }}" data-declined="{{ declinedAttr }}">
   <div class="bond-age-box">
-    <img class="bond-age-logo" src="/media/gate/bond-logo-bone-600.png" alt="Bond" width="170" height="41">
+    <p class="bond-age-logo">BOND</p>
     <sc-if value="{{ declined }}" hint-placeholder-val="{{ false }}">
       <div class="bond-age-panel bond-age-no">
         <h2 id="bond-gate-denied-h" class="bond-age-title" tabindex="-1">Come back when you're 21.</h2>
-        <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
+        <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
       </div>
     </sc-if>
     <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
@@ -106,25 +106,21 @@ class Component extends DCLogic {
     try { sessionRaw = sessionStorage.getItem('bond_age_ok'); } catch (e) {}
     const now = Date.now();
     const localT = freshTime(localRaw, now);
-    const sessionT = freshTime(sessionRaw, now);
     const pass = () => {
       this.setState({ verified: true, checked: true });
-      try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
+      const fire = () => {
+        try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
+      };
+      try { setTimeout(fire, 0); } catch (e) { fire(); }
     };
+    try {
+      if (sessionRaw != null) sessionStorage.removeItem('bond_age_ok');
+    } catch (e) {}
     if (localT != null) {
-      if (localRaw !== stamp(localT)) { try { localStorage.setItem(KEY, stamp(localT)); } catch (e) {} }
-      if (sessionRaw != null) drop(sessionStorage);
-      pass();
-      return;
-    }
-    if (sessionT != null) {
-      try { localStorage.setItem(KEY, stamp(sessionT)); } catch (e) {}
-      drop(sessionStorage);
       pass();
       return;
     }
     if (localRaw) drop(localStorage);
-    if (sessionRaw) drop(sessionStorage);
     this.setState({ checked: true });
     const trap = (ev) => {
       if (document.getElementById('bond-gate-hold')) return;
@@ -182,9 +178,18 @@ class Component extends DCLogic {
       enter: () => {
         const t = Date.now();
         try { localStorage.setItem('bond_age_ok', JSON.stringify({ ok: true, t })); } catch (e) {}
+        try { sessionStorage.setItem('bond_age_ok', String(t)); } catch (e) {}
         try { document.documentElement.dataset.bondAge = 'ok'; } catch (e) {}
         this.setState({ verified: true });
         try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
+        const query = document.querySelector;
+        if (typeof query !== 'function') return;
+        const target = document.querySelector('main') || document.querySelector('h1');
+        if (!target || typeof target.focus !== 'function') return;
+        if (typeof target.tabIndex === 'number' && target.tabIndex < 0 && typeof target.setAttribute === 'function') {
+          target.setAttribute('tabindex', '-1');
+        }
+        try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
       },
       decline: () => {
         this.setState({ declined: true });

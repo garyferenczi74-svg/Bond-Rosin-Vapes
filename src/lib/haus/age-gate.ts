@@ -13,7 +13,7 @@ export function bondAgeStamp(t: number): string {
 }
 
 // Fresh yes timestamp, or null when the value is missing, expired, or malformed.
-// A plain digit string is the previous sessionStorage bond_age_ok timestamp.
+// A plain digit string is an older localStorage timestamp. It is not read from sessionStorage.
 export function bondAgeTimestamp(raw: string | null, now = Date.now()): number | null {
   if (raw == null || raw === "") return null;
   let t: number | null = null;
@@ -57,7 +57,7 @@ export function routeShowsAgeGate(pathname: string, stored: string | null): bool
   return hausShowsAgeGate(stored);
 }
 
-export const HAUS_AGE_BOOT = `(function(){var KEY=${JSON.stringify(BOND_AGE_KEY)},MAX=${BOND_AGE_MS};function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}if(!ok){try{ok=fresh(sessionStorage.getItem("bond_age_ok"));}catch(e){}}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();`;
+export const HAUS_AGE_BOOT = `(function(){var KEY=${JSON.stringify(BOND_AGE_KEY)},MAX=${BOND_AGE_MS};function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();`;
 
 const LATIN_RANGE =
   "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
@@ -85,7 +85,7 @@ export const HAUS_FONT_LATE_CSS = [
   webFace("Inter", "500", "/fonts/inter-latin.woff2"),
   webFace("GFS Didot", "400", "/fonts/gfs-didot-latin-400.woff2"),
   `html body .bond-age-gate .bond-age-ask .bond-age-body{font-family:Inter,"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif}`,
-  `html body .bond-age-gate .bond-age-panel .bond-age-mark,html body .bond-age-gate .bond-age-panel .bond-age-lead,html body .bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot",Didot,serif}`,
+  `html body .bond-age-gate .bond-age-panel .bond-age-mark,html body .bond-age-gate .bond-age-logo,html body .bond-age-gate .bond-age-panel .bond-age-lead,html body .bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot",Didot,serif}`,
 ].join("");
 
 export const HAUS_FONT_LATE = `(function(){function load(){if(document.getElementById("bond-gate-fonts"))return;var cover=document.getElementById("bond-gate-cover");var gate=document.querySelector(".bond-age-gate");if(cover==null&&gate==null)return;var node=document.createElement("style");node.id="bond-gate-fonts";node.textContent=${JSON.stringify(HAUS_FONT_LATE_CSS)};var parent=document.body;if(parent==null)parent=document.documentElement;parent.appendChild(node);}function arm(){requestAnimationFrame(function(){requestAnimationFrame(load);});}window.addEventListener("load",arm);})();`;

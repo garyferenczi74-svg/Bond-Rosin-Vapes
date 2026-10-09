@@ -9,6 +9,73 @@ import { setTimeout as delay } from "node:timers/promises";
 import { chromium, webkit } from "playwright";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+let nextChild = null;
+
+function killNextGroup(signal) {
+  const proc = nextChild;
+  if (!proc || !proc.pid) return;
+  try {
+    process.kill(-proc.pid, signal);
+  } catch {
+    try {
+      proc.kill(signal);
+    } catch {
+      /* already gone */
+    }
+  }
+}
+
+async function stopNext() {
+  const proc = nextChild;
+  if (!proc || !proc.pid) return;
+  const pid = proc.pid;
+  killNextGroup("SIGTERM");
+  const started = Date.now();
+  while (Date.now() - started < 4000) {
+    try {
+      process.kill(-pid, 0);
+    } catch {
+      nextChild = null;
+      return;
+    }
+    await delay(100);
+  }
+  killNextGroup("SIGKILL");
+  await delay(200);
+  nextChild = null;
+}
+
+function onStopSignal(code) {
+  const proc = nextChild;
+  if (proc && proc.pid) {
+    try {
+      process.kill(-proc.pid, "SIGKILL");
+    } catch {
+      try {
+        proc.kill("SIGKILL");
+      } catch {
+        /* already gone */
+      }
+    }
+  }
+  process.exit(code);
+}
+
+process.on("SIGINT", () => onStopSignal(130));
+process.on("SIGTERM", () => onStopSignal(143));
+process.on("exit", () => {
+  const proc = nextChild;
+  if (!proc || !proc.pid) return;
+  try {
+    process.kill(-proc.pid, "SIGKILL");
+  } catch {
+    try {
+      proc.kill("SIGKILL");
+    } catch {
+      /* already gone */
+    }
+  }
+});
 
 const ROUTES = [
   ["Home", "/"],
@@ -62,6 +129,7 @@ async function waitForServer(base, child) {
 function startNext(port) {
   const child = spawn("npx", ["next", "dev", "--port", String(port)], {
     cwd: root,
+    detached: true,
     stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env, BROWSER: "none" },
   });
@@ -172,17 +240,17 @@ async function main() {
   const syncCode = await new Promise((resolve) => sync.on("exit", resolve));
   if (syncCode !== 0) throw new Error("sync-public failed");
 
-  let child = null;
   let base = process.env.GATE_BASE || "";
   if (!base) {
     const port = await freePort();
     base = "http://127.0.0.1:" + port;
-    child = startNext(port);
+    nextChild = startNext(port);
+    const child = nextChild;
     try {
       await waitForServer(base, child);
     } catch (err) {
       console.error(child.logTail());
-      child.kill("SIGTERM");
+      killNextGroup("SIGTERM");
       throw err;
     }
   }
@@ -245,12 +313,7 @@ async function main() {
       }
     }
   } finally {
-    if (child) {
-      child.kill("SIGTERM");
-      child.stdout.destroy();
-      child.stderr.destroy();
-      child.unref();
-    }
+    await stopNext();
   }
 
   const byEngine = {};
@@ -288,7 +351,8 @@ async function main() {
   process.exit(wins === total ? 0 : 1);
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error(err);
+  await stopNext();
   process.exit(1);
 });

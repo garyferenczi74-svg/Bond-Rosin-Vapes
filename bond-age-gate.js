@@ -46,24 +46,13 @@
   var localRaw = readStore(localStorage);
   var sessionRaw = readStore(sessionStorage);
   var localT = freshTime(localRaw, now);
-  var sessionT = freshTime(sessionRaw, now);
+  if (sessionRaw != null) drop(sessionStorage);
 
   if (localT != null) {
-    if (localRaw !== stamp(localT)) {
-      try { localStorage.setItem(KEY, stamp(localT)); } catch (e) {}
-    }
-    if (sessionRaw != null) drop(sessionStorage);
-    openFloor();
-    return;
-  }
-  if (sessionT != null) {
-    try { localStorage.setItem(KEY, stamp(sessionT)); } catch (e) {}
-    drop(sessionStorage);
     openFloor();
     return;
   }
   if (localRaw) drop(localStorage);
-  if (sessionRaw) drop(sessionStorage);
 
   if (!root) return;
 
@@ -129,10 +118,23 @@
   }
   setTimeout(focusYes, 60);
 
+  function focusMain() {
+    var query = document.querySelector;
+    if (typeof query !== "function") return;
+    var target = document.querySelector("main") || document.querySelector("h1");
+    if (!target || typeof target.focus !== "function") return;
+    if (typeof target.tabIndex === "number" && target.tabIndex < 0 && typeof target.setAttribute === "function") {
+      target.setAttribute("tabindex", "-1");
+    }
+    try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
+  }
+
   yesEl.addEventListener("click", function () {
     var t = Date.now();
     try { localStorage.setItem(KEY, stamp(t)); } catch (e) {}
+    try { sessionStorage.setItem(KEY, String(t)); } catch (e) {}
     openFloor();
+    focusMain();
   });
 
   noEl.addEventListener("click", function () {

@@ -15,7 +15,7 @@ const REMEMBER = "We remember your answer on this device for 30 days.";
 const FULL_WARN =
   "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
 const DENIED =
-  "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
+  "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
 
 function readRaw(store: Storage): string | null {
   try {
@@ -50,38 +50,15 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
   const gateRef = useRef<HTMLDivElement>(null);
   const yesRef = useRef<HTMLButtonElement>(null);
   const deniedRef = useRef<HTMLHeadingElement>(null);
+  const pressedYes = useRef(false);
 
   useEffect(() => {
     const now = Date.now();
     const localRaw = readRaw(localStorage);
     const sessionRaw = readRaw(sessionStorage);
+    if (sessionRaw != null) drop(sessionStorage);
     const localHit = bondAgeTimestamp(localRaw, now);
-    const sessionHit = bondAgeTimestamp(sessionRaw, now);
     if (localHit != null) {
-      if (localRaw !== bondAgeStamp(localHit)) {
-        try {
-          localStorage.setItem(BOND_AGE_KEY, bondAgeStamp(localHit));
-        } catch {
-          /* private mode */
-        }
-      }
-      if (sessionRaw != null) drop(sessionStorage);
-      markBondAgePassed(document.documentElement);
-      setOpen(true);
-      try {
-        window.dispatchEvent(new CustomEvent("bond-entered"));
-      } catch {
-        /* ignore */
-      }
-      return;
-    }
-    if (sessionHit != null) {
-      try {
-        localStorage.setItem(BOND_AGE_KEY, bondAgeStamp(sessionHit));
-      } catch {
-        /* private mode */
-      }
-      drop(sessionStorage);
       markBondAgePassed(document.documentElement);
       setOpen(true);
       try {
@@ -92,7 +69,6 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
       return;
     }
     if (localRaw) drop(localStorage);
-    if (sessionRaw) drop(sessionStorage);
     let tries = 0;
     let id = 0;
     const focusYes = () => {
@@ -150,6 +126,15 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
     if (declined) deniedRef.current?.focus();
   }, [declined]);
 
+  useEffect(() => {
+    if (!open || !pressedYes.current) return;
+    pressedYes.current = false;
+    const target = document.querySelector("main") ?? document.querySelector("h1");
+    if (!(target instanceof HTMLElement)) return;
+    if (target.tabIndex < 0) target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
+  }, [open]);
+
   function yes() {
     const t = Date.now();
     try {
@@ -157,7 +142,13 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
     } catch {
       /* private mode */
     }
+    try {
+      sessionStorage.setItem(BOND_AGE_KEY, String(t));
+    } catch {
+      /* private mode */
+    }
     markBondAgePassed(document.documentElement);
+    pressedYes.current = true;
     setOpen(true);
     try {
       window.dispatchEvent(new CustomEvent("bond-entered"));
@@ -178,7 +169,7 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
         aria-labelledby={declined ? "bond-gate-denied-h" : "bond-gate-h"}
       >
         <div className="bond-age-box">
-          <img className="bond-age-logo" src="/media/gate/bond-logo-bone-600.png" alt="Bond" width={170} height={41} />
+          <p className="bond-age-logo">BOND</p>
           <div className="bond-age-panel bond-age-ask">
             <h2 id="bond-gate-h" className="bond-age-lead">
               Are you 21 or older?

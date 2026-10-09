@@ -127,7 +127,7 @@ test("finder uses the shared gate and writes the directory only after entry", ()
   assert.equal(rest.includes("localStorage.setItem"), false);
   assert.match(
     finder,
-    /You must be 21 or older to visit this site\. If you or someone you know needs support, the NYS HOPEline is free and confidential: call 1-877-8-HOPENY or text HOPENY \(467369\)\./,
+    /You must be 21 or older to visit this site\. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY \(467369\)\./,
   );
   assert.equal(
     finder.includes("Sold only at dispensaries licensed by New York State. This site does not sell cannabis."),

@@ -60,10 +60,15 @@ html[data-bond-age="ok"] .bond-age-dc {
 }
 
 .bond-age-logo {
-  width: 170px;
-  height: auto;
   margin: 0 auto 30px;
   display: block;
+  font-family: "GFS Didot", Didot, serif;
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: 0.35em;
+  padding-left: 0.35em;
+  line-height: 1.15;
+  color: #E8E1D5;
 }
 
 .bond-age-gate[data-declined="false"] .bond-age-no,

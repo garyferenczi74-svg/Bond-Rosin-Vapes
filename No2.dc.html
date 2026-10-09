@@ -28,7 +28,7 @@ html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 <noscript><style>body>*:not(#bond-gate-cover){display:none !important}#bond-gate-cover{display:flex !important;align-items:center;justify-content:center;overflow:auto}#bond-gate-cover .bond-js-off{visibility:visible !important}</style></noscript>
 <script id="bond-gate-boot">
 (function(){
-  var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}if(!ok){try{ok=fresh(sessionStorage.getItem("bond_age_ok"));}catch(e){}}if(ok)document.documentElement.setAttribute("data-bond-age","ok");
+  var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");
   document.addEventListener("focusin",function(ev){
     if(document.documentElement.getAttribute("data-bond-age")==="ok")return;
     var t=ev.target;
@@ -261,7 +261,8 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     var localRaw = null, sessionRaw = null;
     try { localRaw = localStorage.getItem(ageKey); } catch (err) {}
     try { sessionRaw = sessionStorage.getItem("bond_age_ok"); } catch (err) {}
-    passed = ageFresh(localRaw) || ageFresh(sessionRaw);
+    try { if (sessionRaw != null) sessionStorage.removeItem("bond_age_ok"); } catch (err) {}
+    passed = ageFresh(localRaw);
   } catch (e) {}
   function findGate() {
     return document.querySelector(".bond-age-dc") || document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
