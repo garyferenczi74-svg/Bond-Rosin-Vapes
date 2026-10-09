@@ -140,13 +140,25 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.equal(/GRANT .* ON TABLE public\.dispensary_sessions TO authenticated/.test(bindSql), false);
   const purgeSql = readFileSync(sessionPurge, "utf8");
   assert.match(purgeSql, /ALTER FUNCTION public\.bond_purge_expired_sessions\(\) OWNER TO bond_retention/);
-  assert.match(purgeSql, /GRANT DELETE ON TABLE public\.haus_sessions TO bond_retention/);
-  assert.match(purgeSql, /GRANT DELETE ON TABLE public\.dispensary_sessions TO bond_retention/);
+  assert.equal(purgeSql.split("SET search_path TO public, pg_temp").length - 1, 2);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_delete_expired_sessions\(\) FROM PUBLIC/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_delete_expired_sessions\(\) FROM anon/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_delete_expired_sessions\(\) FROM authenticated/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_delete_expired_sessions\(\) FROM service_role/);
+  assert.match(purgeSql, /GRANT EXECUTE ON FUNCTION public\.bond_delete_expired_sessions\(\) TO bond_retention/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_purge_expired_sessions\(\) FROM PUBLIC/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_purge_expired_sessions\(\) FROM anon/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_purge_expired_sessions\(\) FROM authenticated/);
+  assert.match(purgeSql, /REVOKE ALL ON FUNCTION public\.bond_purge_expired_sessions\(\) FROM service_role/);
+  assert.match(purgeSql, /GRANT EXECUTE ON FUNCTION public\.bond_purge_expired_sessions\(\) TO postgres/);
+  assert.match(purgeSql, /REVOKE ALL ON TABLE public\.haus_sessions FROM bond_retention/);
+  assert.match(purgeSql, /REVOKE ALL ON TABLE public\.dispensary_sessions FROM bond_retention/);
   assert.match(purgeSql, /'50 4 \* \* \*'/);
   assert.match(purgeSql, /expires_at <= now\(\)/);
   assert.equal(purgeSql.includes("GRANT SELECT"), false);
   assert.equal(purgeSql.includes("GRANT INSERT"), false);
   assert.equal(purgeSql.includes("GRANT UPDATE"), false);
+  assert.equal(purgeSql.includes("GRANT DELETE"), false);
 
   const database = `bond_signup_rls_${process.pid}_${Date.now()}`;
   try {
@@ -1324,22 +1336,44 @@ SELECT has_table_privilege('bond_retention', 'public.dispensary_sessions', 'DELE
     "ret_haus_select",
     "ret_haus_insert",
     "ret_haus_update",
+    "ret_haus_delete",
     "ret_disp_select",
     "ret_disp_insert",
     "ret_disp_update",
+    "ret_disp_delete",
   ]) {
     assert.match(retentionPrivs.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*f`), name);
   }
-  for (const name of ["ret_haus_delete", "ret_disp_delete"]) {
-    assert.match(retentionPrivs.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*t`), name);
+
+  const execPrivs = psqlSql(
+    database,
+    `
+SELECT has_function_privilege('bond_retention', 'public.bond_delete_expired_sessions()', 'EXECUTE') AS ret_exec_inner;
+SELECT has_function_privilege('postgres', 'public.bond_purge_expired_sessions()', 'EXECUTE') AS pg_exec_wrapper;
+SELECT has_function_privilege('service_role', 'public.bond_delete_expired_sessions()', 'EXECUTE') AS svc_exec_inner;
+SELECT has_function_privilege('service_role', 'public.bond_purge_expired_sessions()', 'EXECUTE') AS svc_exec_wrapper;
+SELECT has_function_privilege('anon', 'public.bond_purge_expired_sessions()', 'EXECUTE') AS anon_exec_wrapper;
+SELECT has_function_privilege('authenticated', 'public.bond_delete_expired_sessions()', 'EXECUTE') AS auth_exec_inner;
+`,
+  );
+  console.log("SESSION_EXEC", execPrivs.stdout.trim());
+  if (execPrivs.status !== 0) console.log("SESSION_EXEC_ERR", execPrivs.stderr.trim());
+  assert.equal(execPrivs.status, 0, `${execPrivs.stdout}\n${execPrivs.stderr}`);
+  for (const name of ["ret_exec_inner", "pg_exec_wrapper"]) {
+    assert.match(execPrivs.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*t`), name);
+  }
+  for (const name of ["svc_exec_inner", "svc_exec_wrapper", "anon_exec_wrapper", "auth_exec_inner"]) {
+    assert.match(execPrivs.stdout, new RegExp(`${name}[\\s\\S]{0,40}\\n-+\\n\\s*f`), name);
   }
 
   for (const sql of [
     "SELECT email FROM public.haus_sessions",
     "INSERT INTO public.haus_sessions (email, email_hmac, expires_at) VALUES ('nope@bond.test', repeat('e3', 32), now() + interval '1 day')",
     "UPDATE public.haus_sessions SET expires_at = now()",
+    "DELETE FROM public.haus_sessions",
     "SELECT id FROM public.dispensary_sessions",
     "UPDATE public.dispensary_sessions SET expires_at = now()",
+    "DELETE FROM public.dispensary_sessions",
   ]) {
     const deniedRetention = psqlSql(database, `SET ROLE bond_retention; ${sql};`);
     console.log("DENIED_RETENTION", sql, deniedRetention.stderr.trim());
