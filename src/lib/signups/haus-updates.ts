@@ -149,7 +149,7 @@ export async function confirmHausUpdate(
   token: string | null | undefined,
   store: HausUpdateWrite,
   env: NodeJS.ProcessEnv = process.env,
-): Promise<{ ok: true; sent: false } | { ok: false; reason: "off" | "token" | "missing"; sent: false }> {
+): Promise<{ ok: true; sent: false } | { ok: false; reason: "off" | "token" | "expired" | "missing"; sent: false }> {
   if (!hausUpdatesDoubleOptInEnabled(env)) {
     return { ok: false, reason: "off", sent: false };
   }
