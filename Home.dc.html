@@ -1733,8 +1733,9 @@ class Component extends DCLogic {
     var scale = cover;
     var gap = naturalGap;
     var pad = padB;
-    // lockGap keeps the desktop 1.6em rhythm. fitLandscape scales the stack
-    // instead of tightening the gaps. Phone landscape never sets lockGap.
+    // lockGap keeps the desktop 1.6em rhythm. fitLandscape scales the copy
+    // instead of tightening the gaps. The plate stays full-bleed.
+    // Phone landscape never sets lockGap.
     if (!lockGap && needAt(scale, gap, pad) > ch) {
       if (needAt(cover, floorGap, floorPad) <= ch) {
         var lo = floorGap;
@@ -1853,39 +1854,109 @@ class Component extends DCLogic {
     }
   }
 
-  // Scale the desktop composition around the nav line so the tagline, italic,
-  // paragraph, and both buttons stay inside the viewport. Writes nothing when
-  // the unscaled stack already fits, so 1200-wide desktops that fit are untouched.
-  function fitLandscape(t, s) {
+  // Keep the plate full-bleed, cropped like the desktop hero: smoke behind the
+  // nav, wordmark cap just under it, no stage showing at the edges. Zoom only
+  // as far as the B and D still sit 8px inside. Writes nothing when that crop
+  // is already in place, so a size that already fits is untouched.
+  function bleedPlate(t, s, v) {
+    var cw = t.clientWidth || window.innerWidth || 0;
+    var ch = t.clientHeight || window.innerHeight || 0;
+    if (!(cw > 2) || !(ch > 2) || !v) return;
+    var cs = window.getComputedStyle(t);
+    var left = parseFloat(cs.getPropertyValue('--hero-media-left'));
+    var top = parseFloat(cs.getPropertyValue('--hero-media-top'));
+    var vidW = parseFloat(cs.getPropertyValue('--hero-media-width'));
+    var vidH = parseFloat(cs.getPropertyValue('--hero-media-height'));
+    if (!(vidW > 2) || !(vidH > 2)) return;
+    if (!(left === left)) left = 0;
+    if (!(top === top)) top = 0;
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var cap = DESK_CAP * (srcH / 1080);
+    var feet = DESK_FEET * (srcH / 1080);
+    var nav = document.querySelector('nav');
+    var stageTop = t.getBoundingClientRect().top;
+    var navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom - stageTop) : 64;
+    var gapNav = 16;
+    var cover = Math.max(cw / srcW, ch / srcH);
+    var scalePin = (ch - navBottom - gapNav) / (srcH - cap);
+    if (!(scalePin > 0)) scalePin = cover;
+    var scale = cover;
+    if (scalePin > scale) scale = scalePin;
+    var wordL = 204 * (srcW / 1920);
+    var wordR = 1686 * (srcW / 1920);
+    var mid = srcW / 2;
+    var half = cw / 2;
+    var fitL = (half - 8) / (mid - wordL);
+    var fitR = (half - 8) / (wordR - mid);
+    var wordFit = Math.min(fitL, fitR);
+    if (wordFit > cover && scale > wordFit) scale = wordFit;
+    var nextW = srcW * scale;
+    var nextH = srcH * scale;
+    var nextLeft = (cw - nextW) / 2;
+    if (nextLeft > 0) nextLeft = 0;
+    var nextTop = (navBottom + gapNav) - (cap * scale);
+    var topLo = ch - nextH;
+    if (topLo > 0) topLo = 0;
+    if (nextTop < topLo) nextTop = topLo;
+    if (nextTop > 0) nextTop = 0;
+    var same = Math.abs(nextLeft - left) < 0.4 && Math.abs(nextTop - top) < 0.4 && Math.abs(nextW - vidW) < 0.4 && Math.abs(nextH - vidH) < 0.4;
+    if (same) return;
+    var oldScale = vidW / srcW;
+    var scs = window.getComputedStyle(s);
+    var copyTop = parseFloat(scs.getPropertyValue('--hero-copy-top'));
+    var gap = copyTop - (top + feet * oldScale);
+    if (!(gap > 0)) gap = 44.8;
+    t.style.setProperty('--hero-media-width', nextW.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-height', nextH.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-left', nextLeft.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-top', nextTop.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-max-width', 'none');
+    t.style.setProperty('--hero-media-min-height', '0px');
+    t.style.setProperty('--hero-media-object-fit', 'fill');
+    var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.backgroundSize = nextW.toFixed(2) + 'px ' + nextH.toFixed(2) + 'px';
+      media.style.backgroundPosition = nextLeft.toFixed(2) + 'px ' + nextTop.toFixed(2) + 'px';
+      media.style.backgroundRepeat = 'no-repeat';
+    }
+    var nextCopy = Math.ceil(nextTop + (feet * scale) + gap);
+    if (nextCopy > 0) s.style.setProperty('--hero-copy-top', nextCopy + 'px');
+  }
+
+  // Scale the copy so the tagline, italic, paragraph, and both buttons stay
+  // inside the viewport. The plate is not scaled: it keeps the full-bleed
+  // cover from layoutBand. Writes nothing when the unscaled stack already
+  // fits, so 1200-wide desktops that fit are untouched.
+  function fitLandscape(t, s, v) {
     if (!isDeskLandscape()) return;
     if (t.classList.contains('hero-copy-flow')) return;
     var btn = s.querySelector('.hero-buttons');
     var tag = s.querySelector('.hero-tagline');
-    var media = document.querySelector('.hero-media');
-    if (!btn || !media) return;
-    var nav = document.querySelector('nav');
-    var navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
-    var ctaBottom = layoutTop(btn) + btn.offsetHeight;
+    if (!btn) return;
     var ih = window.innerHeight || 0;
     var iw = t.clientWidth || window.innerWidth || 0;
     var pad = 28;
+    function measure() {
+      var stackTop = layoutTop(s);
+      var ctaBottom = layoutTop(btn) + btn.offsetHeight;
+      return { stackTop: stackTop, ctaBottom: ctaBottom, span: ctaBottom - stackTop };
+    }
+    var m = measure();
+    var tagW = tag ? tag.offsetWidth : 0;
+    if (!(m.ctaBottom > ih - pad) && !(tagW > iw - 16)) return;
+    if (v) bleedPlate(t, s, v);
+    m = measure();
+    tagW = tag ? tag.offsetWidth : 0;
+    var room = (ih - pad) - m.stackTop;
     var vScale = 1;
-    var span = ctaBottom - navBottom;
-    var room = (ih - pad) - navBottom;
-    if (ctaBottom > ih - pad && span > 1 && room > 40) vScale = room / span;
+    if (m.ctaBottom > ih - pad && m.span > 1 && room > 40) vScale = room / m.span;
     var hScale = 1;
-    if (tag && tag.offsetWidth > iw - 16) hScale = (iw - 16) / tag.offsetWidth;
+    if (tagW > iw - 16) hScale = (iw - 16) / tagW;
     var scale = vScale < hScale ? vScale : hScale;
     if (!(scale < 0.999)) return;
     if (!(scale > 0.4)) scale = 0.4;
-    var stageTop = t.getBoundingClientRect().top;
-    var anchor = navBottom - stageTop;
-    if (!(anchor >= 0)) anchor = 0;
-    var textTop = s.getBoundingClientRect().top;
-    var mediaTop = media.getBoundingClientRect().top;
-    media.style.transformOrigin = 'center ' + (anchor - (mediaTop - stageTop)).toFixed(2) + 'px';
-    media.style.transform = 'scale(' + scale.toFixed(4) + ')';
-    s.style.transformOrigin = 'center ' + (anchor - (textTop - stageTop)).toFixed(2) + 'px';
+    s.style.transformOrigin = 'center top';
     s.style.transform = 'translateX(-50%) scale(' + scale.toFixed(4) + ')';
   }
 
@@ -2198,15 +2269,16 @@ class Component extends DCLogic {
       if (isWideNow()) {
         layoutDesktop(t, s, v);
         relaxShort(t, s, v);
-        fitLandscape(t, s);
+        fitLandscape(t, s, v);
         return;
       }
       if (isLandscapeBand()) {
         // 853 and up, landscape, 450 tall and up: the desktop composition.
-        // Shorter windows scale to fit. Phone landscape stays on layoutBand.
+        // Shorter windows scale the copy. The plate stays full-bleed.
+        // Phone landscape stays on layoutBand.
         if (isDeskLandscape()) {
           layoutBand(t, s, v, true);
-          fitLandscape(t, s);
+          fitLandscape(t, s, v);
           return;
         }
         layoutBand(t, s, v);
