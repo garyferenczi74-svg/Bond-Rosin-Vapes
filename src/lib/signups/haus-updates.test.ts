@@ -132,6 +132,7 @@ test("unsubscribe deletes the row, adds suppression, and rejects an invalid toke
   const done = await applyUnsubscribe(token, store);
   assert.equal(done.ok, true);
   assert.equal(store.listHausUpdates().length, 0);
+  assert.equal(store.readHausUpdateToken(token), null);
   const ledger = store.ledger();
   assert.equal(ledger.updates.length, 0);
 
@@ -152,6 +153,11 @@ test("unsubscribe deletes the row, adds suppression, and rejects an invalid toke
   const wrong = await applyUnsubscribe(withConfirm.confirmToken, confirmOnly);
   assert.equal(wrong.ok, false);
   assert.equal(confirmOnly.listHausUpdates().length, 1);
+  assert.equal(confirmOnly.readHausUpdateToken(withConfirm.confirmToken ?? "")?.purpose, "confirm");
+  const cleared = await applyUnsubscribe(withConfirm.unsubscribeToken, confirmOnly);
+  assert.equal(cleared.ok, true);
+  assert.equal(confirmOnly.readHausUpdateToken(withConfirm.unsubscribeToken ?? ""), null);
+  assert.equal(confirmOnly.readHausUpdateToken(withConfirm.confirmToken ?? ""), null);
 });
 
 test("the double opt-in flag is off, so no send is attempted", async () => {
@@ -277,13 +283,17 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
     privacy,
     /If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later\. When you unsubscribe, Bond deletes the email sooner\. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe\./,
   );
+  assert.match(
+    privacy,
+    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email, and those ids are deleted with the record or when you unsubscribe\./,
+  );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);
   assert.match(privacy, /The Home Haus form stores nothing and sends nothing\. Nothing else\./);
   for (const sentence of [
     "If you opt in on the Haus door, Bond keeps your email, the consent time (consent_at), and the source, so Bond can send Bond Haus updates. That opt in is separate from a product request and it starts unticked. The Haus door form sends whether the age gate flag is present on this browser.",
     "Bond Haus updates are opt in. You can unsubscribe from the link in any email. When you unsubscribe, Bond deletes the email and keeps only a keyed hash so the address is not added again. Bond keeps that hash for as long as it needs to honor the unsubscribe.",
-    "If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
+    "If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address so it is not added again, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email, and those ids are deleted with the record or when you unsubscribe. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
   ]) {
     assert.equal(sentence.includes("!"), false);
     assert.equal(sentence.includes(String.fromCharCode(0x2013)), false);

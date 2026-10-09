@@ -113,6 +113,10 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
     privacy,
     /If you opt in on the Haus door, Bond keeps that email, the consent time, and the source for 24 months after consent_at, or for 24 months after a later confirmation, whichever is later\./,
   );
+  assert.match(
+    privacy,
+    /Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email, and those ids are deleted with the record or when you unsubscribe\./,
+  );
   assert.match(privacy, /Bond sends no Bond Haus update emails yet\./);
   assert.match(privacy, /Any email service will be named on this page before the first send\./);
   assert.equal(read("Terms.dc.html").includes("There is no Bond Haus email list"), false);

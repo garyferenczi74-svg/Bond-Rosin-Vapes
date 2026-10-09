@@ -13,6 +13,7 @@ const keyed = fileURLToPath(new URL("../../../supabase/migrations/20261008220000
 const updates = fileURLToPath(new URL("../../../supabase/migrations/20261009190000_haus_updates_optin.sql", import.meta.url));
 const hold = fileURLToPath(new URL("../../../supabase/migrations/20261009203000_haus_updates_hold.sql", import.meta.url));
 const revokeInserts = fileURLToPath(new URL("../../../supabase/migrations/20261009210000_revoke_anon_signup_inserts.sql", import.meta.url));
+const tokenCleanup = fileURLToPath(new URL("../../../supabase/migrations/20261009220000_haus_update_token_cleanup.sql", import.meta.url));
 const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psql.status === 0 && sudo.status === 0;
@@ -67,6 +68,13 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.match(revokeSql, /DROP POLICY IF EXISTS haus_requests_anon_insert/);
   assert.match(revokeSql, /GRANT SELECT, INSERT, UPDATE ON TABLE public\.dispensary_accounts TO service_role/);
   assert.equal(revokeSql.includes("is_admin()"), false);
+  const tokenSql = readFileSync(tokenCleanup, "utf8");
+  assert.match(tokenSql, /DELETE FROM public\.haus_update_tokens WHERE email_hmac = p_email_hmac/);
+  assert.match(tokenSql, /interval '30 days'/);
+  assert.match(tokenSql, /GRANT SELECT, DELETE ON TABLE public\.haus_update_tokens TO bond_retention/);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_update_tokens TO anon/.test(tokenSql), false);
+  assert.equal(/GRANT INSERT ON TABLE public\.haus_update_tokens TO authenticated/.test(tokenSql), false);
+  assert.equal(tokenSql.includes("is_admin()"), false);
 
   const dir = mkdtempSync(join(tmpdir(), "bond-signup-rls-"));
   chmodSync(dir, 0o755);
@@ -181,6 +189,8 @@ FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 \\i ${hold}
 
 \\i ${revokeInserts}
+
+\\i ${tokenCleanup}
 
 SELECT COUNT(*) AS legacy_attempts_left FROM public.auth_attempts WHERE email_hash = 'plain-ip-row';
 SELECT COUNT(*) AS legacy_raw_ip_left FROM public.auth_attempts WHERE ip_hash = '203.0.113.9';
@@ -366,8 +376,11 @@ SELECT COUNT(*) AS fresh_once FROM public.haus_updates WHERE email = 'fresh@bond
 SELECT (confirmed_at IS NULL) AS fresh_unconfirmed FROM public.haus_updates WHERE email = 'fresh@bond.test';
 
 SELECT public.bond_record_haus_update('gone@bond.test', 'haus_door', repeat('ab', 32)) AS gone_recorded;
+SELECT public.bond_issue_haus_update_token(repeat('ab', 32), 'unsub') IS NOT NULL AS gone_unsub_token;
+SELECT public.bond_issue_haus_update_token(repeat('ab', 32), 'confirm') IS NOT NULL AS gone_confirm_token;
 SELECT public.bond_unsubscribe_haus_update(repeat('ab', 32)) AS gone_unsubscribed;
 SELECT COUNT(*) AS gone_left FROM public.haus_updates WHERE email = 'gone@bond.test';
+SELECT COUNT(*) AS gone_tokens_left FROM public.haus_update_tokens WHERE email_hmac = repeat('ab', 32);
 SELECT public.bond_record_haus_update('gone@bond.test', 'haus_door', repeat('ab', 32)) AS suppressed_rejected;
 SELECT COUNT(*) AS suppressed_absent FROM public.haus_updates WHERE email = 'gone@bond.test';
 
@@ -380,12 +393,23 @@ SELECT public.bond_record_haus_update('aged@bond.test', 'haus_door', repeat('aa'
 UPDATE public.haus_updates
 SET consent_at = now() - interval '25 months'
 WHERE email = 'aged@bond.test';
+SELECT public.bond_issue_haus_update_token(repeat('aa', 32), 'unsub') IS NOT NULL AS aged_token_issued;
+SELECT public.bond_issue_haus_update_token(repeat('cd', 32), 'unsub') IS NOT NULL AS fresh_token_issued;
+SELECT public.bond_issue_haus_update_token(repeat('ee', 32), 'unsub') IS NOT NULL AS old_orphan_issued;
+UPDATE public.haus_update_tokens
+SET created_at = now() - interval '31 days'
+WHERE email_hmac = repeat('ee', 32);
+SELECT public.bond_issue_haus_update_token(repeat('ff', 32), 'confirm') IS NOT NULL AS young_orphan_issued;
 SELECT public.bond_record_haus_update('keptconfirm@bond.test', 'haus_door', repeat('bb', 32)) AS kept_recorded;
 UPDATE public.haus_updates
 SET consent_at = now() - interval '25 months', confirmed_at = now()
 WHERE email = 'keptconfirm@bond.test';
 SELECT public.bond_purge_haus_updates() AS updates_purged;
 SELECT COUNT(*) AS aged_left FROM public.haus_updates WHERE email = 'aged@bond.test';
+SELECT COUNT(*) AS aged_tokens_left FROM public.haus_update_tokens WHERE email_hmac = repeat('aa', 32);
+SELECT COUNT(*) AS fresh_tokens_left FROM public.haus_update_tokens WHERE email_hmac = repeat('cd', 32);
+SELECT COUNT(*) AS old_orphan_left FROM public.haus_update_tokens WHERE email_hmac = repeat('ee', 32);
+SELECT COUNT(*) AS young_orphan_left FROM public.haus_update_tokens WHERE email_hmac = repeat('ff', 32);
 SELECT COUNT(*) AS keptconfirm_left FROM public.haus_updates WHERE email = 'keptconfirm@bond.test';
 SELECT COUNT(*) AS fresh_after_purge FROM public.haus_updates WHERE email = 'fresh@bond.test';
 SELECT COUNT(*) AS suppression_after_purge
@@ -524,8 +548,11 @@ RESET ROLE;
   saw("fresh_once", "1");
   saw("fresh_unconfirmed", "t");
   saw("gone_recorded", "t");
+  saw("gone_unsub_token", "t");
+  saw("gone_confirm_token", "t");
   saw("gone_unsubscribed", "t");
   saw("gone_left", "0");
+  saw("gone_tokens_left", "0");
   saw("suppressed_rejected", "f");
   saw("suppressed_absent", "0");
   saw("reader_unsubscribed", "t");
@@ -534,6 +561,14 @@ RESET ROLE;
   saw("reader_readd", "f");
   saw("updates_purged", "1");
   saw("aged_left", "0");
+  saw("aged_token_issued", "t");
+  saw("fresh_token_issued", "t");
+  saw("old_orphan_issued", "t");
+  saw("young_orphan_issued", "t");
+  saw("aged_tokens_left", "0");
+  saw("fresh_tokens_left", "1");
+  saw("old_orphan_left", "0");
+  saw("young_orphan_left", "1");
   saw("keptconfirm_left", "1");
   saw("fresh_after_purge", "1");
   saw("suppression_after_purge", "2");

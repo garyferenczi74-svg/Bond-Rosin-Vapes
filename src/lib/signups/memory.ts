@@ -217,6 +217,9 @@ export class MemorySignupStore {
         this.updateHmac.delete(email);
       }
     }
+    for (const [id, token] of [...this.updateTokens]) {
+      if (token.emailHmac === emailHmac) this.updateTokens.delete(id);
+    }
     if (emailHmac) this.updateSuppression.add(emailHmac);
     return { ok: true };
   }
