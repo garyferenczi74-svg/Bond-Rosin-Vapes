@@ -115,7 +115,7 @@ test("privacy age flag matches sessionStorage and the Haus records section stays
   );
   assert.match(
     privacy,
-    /While you are signed in, your session keeps your email on the server until you sign out or the session expires, and then it is deleted\./,
+    /While you are signed in, your session keeps your email and a keyed hash of it on the server\. It is deleted when you sign out, or within a day after the session expires\./,
   );
   assert.match(
     privacy,

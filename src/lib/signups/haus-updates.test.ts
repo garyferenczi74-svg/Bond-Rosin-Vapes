@@ -350,7 +350,7 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   );
   assert.match(
     privacy,
-    /While you are signed in, your session keeps your email on the server until you sign out or the session expires, and then it is deleted\./,
+    /While you are signed in, your session keeps your email and a keyed hash of it on the server\. It is deleted when you sign out, or within a day after the session expires\./,
   );
   assert.match(
     privacy,
@@ -367,7 +367,7 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
     "If you opt in on the Haus door or on your Haus page, Bond keeps your email, the time you opted in, and the source, so Bond can send Bond Haus updates. That opt in is separate from a product request and it starts unticked. Bond accepts that opt in only when this server has your 21 or older attestation for that email.",
     "You can unsubscribe from the email link or by unticking the box on your Haus page. After you unsubscribe, Bond will not add that email again unless you opt back in yourself on your Haus page while signed in.",
     "The audit log also records a member opting back in, and that record keeps only a keyed hash of the email.",
-    "While you are signed in, your session keeps your email on the server until you sign out or the session expires, and then it is deleted.",
+    "While you are signed in, your session keeps your email and a keyed hash of it on the server. It is deleted when you sign out, or within a day after the session expires.",
     "If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later. When you unsubscribe, Bond deletes the email sooner. Bond then keeps only a keyed hash of the address, and Bond keeps that hash for as long as it needs to honor the unsubscribe. Unsubscribe and confirmation links use a random id tied only to a keyed hash of the email. A confirmation id expires after 7 days. An unsubscribe id does not expire. Those ids are deleted with the record or when you unsubscribe. Unused confirmation and unsubscribe ids with no record are deleted after 30 days. Bond sends no Bond Haus update emails yet. Any email service will be named on this page before the first send.",
   ]) {
     assert.equal(sentence.includes("!"), false);
