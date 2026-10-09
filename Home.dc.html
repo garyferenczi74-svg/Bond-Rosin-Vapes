@@ -166,6 +166,9 @@ nav { container-type: inline-size; container-name: bondnav; }
       flex: 0 0 auto;
       gap: clamp(10px, calc(10px + (100cqw - 849px) * 0.1206136), 38px);
       font-size: clamp(11.5px, calc(11.5px + (100cqw - 849px) * 0.00568182), 13px);
+      /* 0.13em keeps the BOND logo about 24px clear of No. 1 at 853 wide.
+         Right padding is unchanged, so the right inset stays put. */
+      letter-spacing: 0.13em;
     }
     .hero-nav-links a { white-space: nowrap; }
   }
@@ -192,6 +195,7 @@ nav { container-type: inline-size; container-name: bondnav; }
       flex: 0 0 auto;
       gap: clamp(10px, calc(10px + (100cqw - 849px) * 0.1206136), 38px);
       font-size: clamp(11.5px, calc(11.5px + (100cqw - 849px) * 0.00568182), 13px);
+      letter-spacing: 0.13em;
     }
     .hero-nav-links a { white-space: nowrap; }
   }
