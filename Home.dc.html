@@ -180,6 +180,33 @@ nav { container-type: inline-size; container-name: bondnav; }
     }
   }
 }
+/* Same link scale for a short laptop window. 1280 at 150% is 853 wide.
+   Phone landscape (844x390, 896x414, 932x430) is under 450 tall, so it misses this. */
+@media (min-width: 853px) and (max-width: 1023px) and (min-height: 450px) and (max-height: 499px) and (min-aspect-ratio: 1/1) {
+  @container bondnav (min-width: 849px) and (max-width: 936px) {
+    nav > div:nth-child(2) {
+      padding-left: clamp(20px, 4cqw, 56px) !important;
+      padding-right: clamp(20px, 4cqw, 56px) !important;
+    }
+    .hero-nav-links {
+      flex: 0 0 auto;
+      gap: clamp(10px, calc(10px + (100cqw - 849px) * 0.1206136), 38px);
+      font-size: clamp(11.5px, calc(11.5px + (100cqw - 849px) * 0.00568182), 13px);
+    }
+    .hero-nav-links a { white-space: nowrap; }
+  }
+  @container bondnav (min-width: 937px) and (max-width: 1023px) {
+    nav > div:nth-child(2) {
+      padding-left: clamp(20px, 4cqw, 56px) !important;
+      padding-right: clamp(20px, 4cqw, 56px) !important;
+    }
+    .hero-nav-links {
+      gap: clamp(12px, calc(100cqw * 0.022), 38px);
+      font-size: clamp(12px, calc(100cqw * 0.0105), 13px);
+    }
+    .hero-nav-links a { white-space: nowrap; }
+  }
+}
 input::placeholder { color: #B0A99A; }
 .hero-text {
   --hero-tagline-size: 28px;
@@ -278,10 +305,10 @@ input::placeholder { color: #B0A99A; }
 @media (min-width: 768px) and (min-height: 500px) and (max-height: 800px) and (min-aspect-ratio: 1/1) {
   #top { --hero-short-laptop: 1; }
 }
-/* Landscape from 1024 wide uses the desktop type, rules, and gaps. The 819 rule above
-   is the compact landscape scale. This puts the desktop scale back from 1024 to 1199.
+/* Landscape laptop and tablet from 853 wide and 450 tall. Desktop type, rules, and gaps.
+   The 819 rule above is the compact scale. Phone landscape is under 450 tall.
    Fit, when the stack would leave the viewport, is the hero-fit scale in the layout script. */
-@media (min-width: 1024px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) {
+@media (min-width: 853px) and (max-width: 1199px) and (min-height: 450px) and (min-aspect-ratio: 1/1) {
   .hero-text { --hero-tagline-size: 28px; --hero-tagline-gap: calc(1.6 * 28px); }
   .hero-tagline { gap: 22px; }
   .hero-tagline h1 { letter-spacing: 6px; padding-left: 6px; line-height: 1.1; }
@@ -1175,6 +1202,9 @@ class Component extends DCLogic {
     const navIsNarrow = () => {
       const w = navBox();
       const h = innerHeight || 0;
+      // Landscape laptop from 853 wide, including a short window under 500 tall.
+      // Phone landscape is under 450 tall, so 932x430 keeps the hamburger.
+      if (w >= 853 && h >= 450 && w >= h) return false;
       if (!(h > 0)) return w < 1024;
       // Under 500px tall is a phone, including landscape. Match live: hamburger below 1024.
       if (h < 500) return w < 1024;
@@ -1797,15 +1827,16 @@ class Component extends DCLogic {
     } catch (e) { return false; }
   }
 
-  // Landscape laptop or tablet. Phone landscape is under 1024 wide.
-  // Portrait never matches. 1200 and up is the same test and already uses layoutDesktop.
+  // Landscape laptop or tablet from 853 wide and 450 tall. Phone landscape is
+  // under 450 tall (844x390, 896x414, 932x430). Portrait never matches.
+  // 1200 and up is the same test and already uses layoutDesktop.
   function isDeskLandscape() {
     try {
-      return window.matchMedia('(min-width: 1024px) and (min-aspect-ratio: 1/1)').matches;
+      return window.matchMedia('(min-width: 853px) and (min-height: 450px) and (min-aspect-ratio: 1/1)').matches;
     } catch (e) {
       var w = window.innerWidth || 0;
       var h = window.innerHeight || 0;
-      return w >= 1024 && h > 0 && w >= h;
+      return w >= 853 && h >= 450 && w >= h;
     }
   }
 
@@ -2171,8 +2202,8 @@ class Component extends DCLogic {
         return;
       }
       if (isLandscapeBand()) {
-        // 1024 and up, landscape: the desktop composition. Shorter windows scale
-        // to fit. Under 1024 stays on layoutBand, including phone landscape.
+        // 853 and up, landscape, 450 tall and up: the desktop composition.
+        // Shorter windows scale to fit. Phone landscape stays on layoutBand.
         if (isDeskLandscape()) {
           layoutBand(t, s, v, true);
           fitLandscape(t, s);
