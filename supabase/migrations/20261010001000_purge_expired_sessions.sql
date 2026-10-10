@@ -61,16 +61,19 @@ GRANT EXECUTE ON FUNCTION public.bond_purge_expired_sessions() TO postgres;
 REVOKE ALL ON TABLE public.haus_sessions FROM bond_retention;
 REVOKE ALL ON TABLE public.dispensary_sessions FROM bond_retention;
 
+-- A missing pg_cron install is the only skip. cron.schedule errors fail this migration.
 DO $cron$
 BEGIN
-  CREATE EXTENSION IF NOT EXISTS pg_cron;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron')
+     OR NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.',
+      'pg_cron is not installed';
+    RETURN;
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_expired_sessions',
     '50 4 * * *',
     'SELECT public.bond_purge_expired_sessions()'
   );
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.', SQLERRM;
 END
 $cron$;

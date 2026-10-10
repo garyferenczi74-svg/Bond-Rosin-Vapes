@@ -16,9 +16,10 @@
 --   audit_log: append-only. A dedicated role bond_retention may delete rows
 --   older than 24 months. Every other role is blocked by trigger.
 --
--- pg_cron schedules are below. Enabling the pg_cron extension is a ship-time
--- step for M. If the extension is not loaded, the schedules are skipped and
--- the purge functions remain callable.
+-- pg_cron schedules are below. Enabling pg_cron is a ship-time step for M.
+-- If pg_cron is not installed, these schedules are not written. The guard
+-- migration after the session purge fails the apply until the seven jobs
+-- exist. An error from cron.schedule fails this migration.
 
 ALTER TABLE public.haus_signups RENAME TO haus_requests;
 
@@ -383,10 +384,15 @@ GRANT EXECUTE ON FUNCTION public.bond_purge_order_requests() TO postgres;
 GRANT EXECUTE ON FUNCTION public.bond_purge_auth_attempts() TO postgres;
 GRANT EXECUTE ON FUNCTION public.bond_purge_audit_log() TO postgres;
 
--- Enabling pg_cron is a ship-time step. The schedules are still written here.
+-- A missing pg_cron install is the only skip. cron.schedule errors fail this migration.
 DO $cron$
 BEGIN
-  CREATE EXTENSION IF NOT EXISTS pg_cron;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron')
+     OR NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.',
+      'pg_cron is not installed';
+    RETURN;
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_haus_requests',
     '20 4 * * *',
@@ -407,8 +413,5 @@ BEGIN
     '35 4 * * *',
     'SELECT public.bond_purge_audit_log()'
   );
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.', SQLERRM;
 END
 $cron$;
