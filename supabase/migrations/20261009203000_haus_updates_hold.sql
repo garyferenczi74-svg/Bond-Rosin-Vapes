@@ -332,18 +332,30 @@ GRANT EXECUTE ON FUNCTION public.bond_read_haus_update_token(uuid) TO service_ro
 GRANT EXECUTE ON FUNCTION public.bond_purge_haus_updates() TO postgres;
 GRANT EXECUTE ON FUNCTION public.bond_purge_haus_updates() TO service_role;
 
--- Enabling pg_cron is a ship-time step. The schedule is still written here.
+-- A missing pg_cron install is the only skip. cron.schedule errors fail this migration.
 DO $cron$
+DECLARE
+  spec record;
 BEGIN
-  CREATE EXTENSION IF NOT EXISTS pg_cron;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron')
+     OR NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.',
+      'pg_cron is not installed';
+    RETURN;
+  END IF;
+
+  SELECT specs.schedule, specs.command
+    INTO spec
+  FROM public.bond_retention_cron_specs() AS specs
+  WHERE specs.jobname = 'bond_purge_haus_updates';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'retention job bond_purge_haus_updates has no canonical definition';
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_haus_updates',
-    '45 4 * * *',
-    'SELECT public.bond_purge_haus_updates()'
+    spec.schedule,
+    spec.command
   );
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.', SQLERRM;
 END
 $cron$;
 

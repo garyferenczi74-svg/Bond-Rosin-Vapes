@@ -214,16 +214,29 @@ COMMENT ON TABLE public.order_requests IS
 COMMENT ON TABLE public.dispensary_accounts IS
   'Licensed dispensary sign-ups. Status is server-owned. Anon may insert only as pending. Owner read. Not sent to Metrc. Contact fields are cleared 24 months after the later of closed_at and last_active_at. The business name and license number stay.';
 
+-- A missing pg_cron install is the only skip. cron.schedule errors fail this migration.
 DO $cron$
+DECLARE
+  spec record;
 BEGIN
-  CREATE EXTENSION IF NOT EXISTS pg_cron;
+  IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron')
+     OR NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.',
+      'pg_cron is not installed';
+    RETURN;
+  END IF;
+
+  SELECT specs.schedule, specs.command
+    INTO spec
+  FROM public.bond_retention_cron_specs() AS specs
+  WHERE specs.jobname = 'bond_purge_dispensary_accounts';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'retention job bond_purge_dispensary_accounts has no canonical definition';
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_dispensary_accounts',
-    '40 4 * * *',
-    'SELECT public.bond_purge_dispensary_accounts()'
+    spec.schedule,
+    spec.command
   );
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE NOTICE 'pg_cron schedule skipped (%). Enabling pg_cron is a ship-time step for M.', SQLERRM;
 END
 $cron$;
