@@ -60,7 +60,7 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   const holdSql = readFileSync(hold, "utf8");
   assert.match(holdSql, /DROP POLICY IF EXISTS haus_updates_anon_insert/);
   assert.match(holdSql, /cron\.schedule\(\s*'bond_purge_haus_updates'/);
-  assert.match(holdSql, /'45 4 \* \* \*'/);
+  assert.match(felixSql, /'bond_purge_haus_updates', '45 4 \* \* \*'/);
   assert.match(holdSql, /RAISE NOTICE 'pg_cron schedule skipped \(%\)\. Enabling pg_cron is a ship-time step for M\.'/);
   assert.equal(holdSql.includes("is_admin()"), false);
   const revokeSql = readFileSync(revokeInserts, "utf8");
@@ -153,7 +153,8 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.match(purgeSql, /GRANT EXECUTE ON FUNCTION public\.bond_purge_expired_sessions\(\) TO postgres/);
   assert.match(purgeSql, /REVOKE ALL ON TABLE public\.haus_sessions FROM bond_retention/);
   assert.match(purgeSql, /REVOKE ALL ON TABLE public\.dispensary_sessions FROM bond_retention/);
-  assert.match(purgeSql, /'50 4 \* \* \*'/);
+  assert.match(purgeSql, /cron\.schedule\(\s*'bond_purge_expired_sessions'/);
+  assert.match(felixSql, /'bond_purge_expired_sessions', '50 4 \* \* \*'/);
   assert.match(purgeSql, /expires_at <= now\(\)/);
   assert.equal(purgeSql.includes("GRANT SELECT"), false);
   assert.equal(purgeSql.includes("GRANT INSERT"), false);
