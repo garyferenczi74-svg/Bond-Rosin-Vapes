@@ -100,7 +100,11 @@ BEGIN
 END;
 $function$;
 
+-- A non-superuser can only hand a function to a role that has CREATE on
+-- its schema. Grant it for the ownership change only, then take it back.
+GRANT CREATE ON SCHEMA public TO bond_retention;
 ALTER FUNCTION public.bond_drop_legacy_auth_attempts() OWNER TO bond_retention;
+REVOKE CREATE ON SCHEMA public FROM bond_retention;
 REVOKE ALL ON FUNCTION public.bond_drop_legacy_auth_attempts() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.bond_drop_legacy_auth_attempts() TO postgres;
 
@@ -200,7 +204,9 @@ BEGIN
 END;
 $function$;
 
+GRANT CREATE ON SCHEMA public TO bond_retention;
 ALTER FUNCTION public.bond_purge_dispensary_accounts() OWNER TO bond_retention;
+REVOKE CREATE ON SCHEMA public FROM bond_retention;
 REVOKE ALL ON FUNCTION public.bond_purge_dispensary_accounts() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.bond_purge_dispensary_accounts() FROM anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.bond_purge_dispensary_accounts() TO postgres;

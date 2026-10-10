@@ -177,6 +177,39 @@ BEGIN
 END
 $$;
 
+-- PG16+ (Supabase runs 17): a non-superuser that creates a role gets ADMIN on
+-- it but not SET or INHERIT, because createrole_self_grant is empty. The
+-- ALTER ... OWNER TO bond_retention statements need SET. The later CREATE OR
+-- REPLACE, COMMENT, GRANT, REVOKE and DROP on those functions need the
+-- owner's privileges, which need INHERIT. Without INHERIT, REVOKE ... FROM
+-- PUBLIC on them only warns and leaves EXECUTE open. Grant both to the
+-- applying role and to postgres, once. Superusers are skipped.
+DO $$
+DECLARE
+  v_role oid := (SELECT oid FROM pg_roles WHERE rolname = 'bond_retention');
+  v_member record;
+BEGIN
+  FOR v_member IN
+    SELECT r.oid, r.rolname
+    FROM pg_roles AS r
+    WHERE r.rolname IN (current_user, 'postgres')
+      AND NOT r.rolsuper
+  LOOP
+    IF current_setting('server_version_num')::int >= 160000 THEN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_auth_members AS m
+        WHERE m.roleid = v_role AND m.member = v_member.oid
+          AND m.set_option AND m.inherit_option
+      ) THEN
+        EXECUTE format('GRANT bond_retention TO %I WITH SET TRUE, INHERIT TRUE', v_member.rolname);
+      END IF;
+    ELSIF NOT pg_has_role(v_member.oid, v_role, 'MEMBER') THEN
+      EXECUTE format('GRANT bond_retention TO %I', v_member.rolname);
+    END IF;
+  END LOOP;
+END
+$$;
+
 GRANT USAGE ON SCHEMA public TO bond_retention;
 GRANT SELECT, DELETE ON TABLE public.haus_requests TO bond_retention;
 GRANT SELECT, DELETE ON TABLE public.order_requests TO bond_retention;
@@ -366,10 +399,14 @@ BEGIN
 END;
 $function$;
 
+-- A non-superuser can only hand a function to a role that has CREATE on
+-- its schema. Grant it for the ownership change only, then take it back.
+GRANT CREATE ON SCHEMA public TO bond_retention;
 ALTER FUNCTION public.bond_purge_haus_requests() OWNER TO bond_retention;
 ALTER FUNCTION public.bond_purge_order_requests() OWNER TO bond_retention;
 ALTER FUNCTION public.bond_purge_auth_attempts() OWNER TO bond_retention;
 ALTER FUNCTION public.bond_purge_audit_log() OWNER TO bond_retention;
+REVOKE CREATE ON SCHEMA public FROM bond_retention;
 
 REVOKE ALL ON FUNCTION public.bond_purge_haus_requests() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.bond_purge_order_requests() FROM PUBLIC;
