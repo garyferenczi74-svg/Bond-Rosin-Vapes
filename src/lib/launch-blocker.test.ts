@@ -117,6 +117,10 @@ test("privacy age flag matches localStorage and the Haus records section stays",
   );
   assert.match(
     privacy,
+    /While you are signed in to the Haus, your session keeps your email and a keyed hash of it on the server\. A partner session keeps your account id\. Either is deleted when you sign out, or within a day after the session expires\./,
+  );
+  assert.match(
+    privacy,
     /If you opt in on the Haus door or on your Haus page, Bond keeps that email, the time you opted in, and the source for 24 months after the time you opted in, or for 24 months after a later confirmation, whichever is later\./,
   );
   assert.match(

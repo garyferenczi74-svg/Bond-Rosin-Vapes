@@ -205,11 +205,7 @@ export async function saveHausSalonOptIn(input: {
       if (!lifted) {
         return { ok: false, recorded: false, subscribed: false, message: HAUS_COULD_NOT_SAVE };
       }
-      try {
-        await issuedHausToken(input.store, hashLockoutValue(input.email), "unsub");
-      } catch {
-        console.error("Haus update token was not issued.", "unsub");
-      }
+      await issuedHausToken(input.store, hashLockoutValue(input.email), "unsub");
       return { ok: true, recorded: true, subscribed: true, message: HAUS_UPDATES_ON };
     }
     if (!result.recorded) {
