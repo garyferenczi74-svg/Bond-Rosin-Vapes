@@ -72,15 +72,17 @@ test("launch blocker copy is replaced on Home No1 and No3", () => {
   assert.equal(no3.includes("Alpine"), false);
 });
 
-test("privacy age flag matches sessionStorage and the Haus records section stays", () => {
+test("privacy age flag matches localStorage and the Haus records section stays", () => {
   const privacy = read("Privacy.dc.html");
   assert.match(
     privacy,
-    /we store a flag in sessionStorage for this browser session, under the name bond_age_ok/,
+    /a yes flag and its timestamp are kept in localStorage on this device for 30 days, under the name bond_age_ok/,
   );
-  assert.match(privacy, /It is not a cookie and it is not kept for 30 days\./);
+  assert.match(privacy, /It isn't a cookie, nothing is sent, and a No stores nothing\./);
+  assert.equal(privacy.includes("we store a flag in sessionStorage for this browser session"), false);
   assert.equal(privacy.includes("if member accounts launch"), false);
   assert.equal(privacy.includes("a cookie on your device for 30 days"), false);
+  assert.equal(privacy.includes("age verification cookie"), false);
   assert.match(privacy, /Bond does not sell member data\./);
   assert.match(
     privacy,

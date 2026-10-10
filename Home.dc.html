@@ -17,7 +17,7 @@ html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 @supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}
 </style>
 <script id="bond-gate-boot">
-(function(){try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}})();
+(function(){var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");})();
 </script>
 <link rel="preconnect" href="https://unpkg.com" crossorigin>
 <link rel="preload" as="font" type="font/woff2" crossorigin fetchpriority="high" href="/fonts/gfs-didot-latin-400.woff2">
@@ -44,7 +44,7 @@ html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
-<div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">Bond requires JavaScript to confirm your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
+<div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
 <x-dc inert>
 <helmet>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#0D0F0E"></rect><text x="50" y="57" font-family="Didot,serif" font-size="16" letter-spacing="5" fill="#C29A45" text-anchor="middle">BOND</text></svg></template>
@@ -1046,9 +1046,31 @@ input::placeholder { color: #B0A99A; }
 (function () {
   var cover = document.getElementById("bond-gate-cover");
   var passed = false;
-  try { passed = Boolean(sessionStorage.getItem("bond_age_ok")); } catch (e) {}
+  try {
+    var ageKey = "bond_age_ok", ageMax = 2592000000;
+    function ageFresh(raw) {
+      if (raw == null || raw === "") return false;
+      try {
+        var obj = JSON.parse(raw);
+        if (obj && obj.ok === true && typeof obj.t === "number" && isFinite(obj.t)) {
+          var delta = Date.now() - obj.t;
+          return delta >= 0 && delta < ageMax;
+        }
+      } catch (err) {}
+      if (/^\d+$/.test(String(raw))) {
+        var stamp = Number(raw), delta2 = Date.now() - stamp;
+        return delta2 >= 0 && delta2 < ageMax;
+      }
+      return false;
+    }
+    var localRaw = null, sessionRaw = null;
+    try { localRaw = localStorage.getItem(ageKey); } catch (err) {}
+    try { sessionRaw = sessionStorage.getItem("bond_age_ok"); } catch (err) {}
+    try { if (sessionRaw != null) sessionStorage.removeItem("bond_age_ok"); } catch (err) {}
+    passed = ageFresh(localRaw);
+  } catch (e) {}
   function findGate() {
-    return document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
+    return document.querySelector(".bond-age-dc") || document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
   }
   function gateRoot() {
     var live = document.querySelector(".bond-age-dc");

@@ -35,37 +35,30 @@
 <link rel="stylesheet" href="/bond-age-gate.css">
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 <script>
-(function(){var stored=null;try{stored=sessionStorage.getItem("bond_age_ok");}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();
+(function(){var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();
 </script>
 </head>
 <body>
-<div id="bond-age-gate" class="bond-age-gate" data-declined="false">
-  <div class="bond-age-veil"></div>
-  <div class="bond-age-veil-soft"></div>
-  <div class="bond-age-panel bond-age-no">
-    <div class="bond-age-mark">BOND</div>
-    <p class="bond-age-title">Not yet</p>
-    <p class="bond-age-body">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
-    <div class="bond-age-rule"></div>
-  </div>
-  <div class="bond-age-panel bond-age-ask">
-    <div class="bond-age-mark">BOND</div>
-    <p class="bond-age-lead">Please confirm your age.</p>
-    <div class="bond-age-rule bond-age-rule-wide"></div>
-    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
-    <div class="bond-age-fields">
-      <select id="bond-age-month" class="bond-age-select bond-age-month" aria-label="Birth month">
-        <option value="">Birth month</option>
-      </select>
-      <select id="bond-age-year" class="bond-age-select bond-age-year" aria-label="Birth year">
-        <option value="">Birth year</option>
-      </select>
-      <div class="bond-age-affirm">
-        <input type="checkbox" id="bond-age-affirm" class="bond-age-affirm-input">
-        <label for="bond-age-affirm">I am 21 years of age or older</label>
+<div id="bond-age-gate" class="bond-age-gate" data-declined="false" role="dialog" aria-modal="true" aria-labelledby="bond-gate-h">
+  <div class="bond-age-box">
+    <p class="bond-age-logo">BOND</p>
+    <noscript>
+      <style>#bond-age-gate .bond-age-ask,#bond-age-gate .bond-age-no{display:none !important}</style>
+      <p class="bond-age-lead">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p>
+    </noscript>
+    <div class="bond-age-panel bond-age-ask">
+      <h2 id="bond-gate-h" class="bond-age-lead">Are you 21 or older?</h2>
+      <p class="bond-age-body">Bond is a cannabis product for adults 21 and older.</p>
+      <div class="bond-age-actions">
+        <button type="button" id="bond-age-yes" class="bond-age-yes">Yes, I am 21 or older</button>
+        <button type="button" id="bond-age-no" class="bond-age-no-btn">No</button>
       </div>
+      <p class="bond-age-legal">By entering you confirm you are 21 or older and consent to view cannabis-related material. We remember your answer on this device for 30 days. For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
     </div>
-    <button type="button" id="bond-age-enter" class="bond-age-enter" data-ready="false">Enter</button>
+    <div class="bond-age-panel bond-age-no">
+      <h2 id="bond-gate-denied-h" class="bond-age-title" tabindex="-1">Come back when you're 21.</h2>
+      <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
+    </div>
     <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
   </div>
 </div>

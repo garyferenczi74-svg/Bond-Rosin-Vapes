@@ -20,6 +20,7 @@
 </style>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
+<style id="bond-age-ink">.bond-age-dc,.bond-age-gate,.bond-age-off{background:#0E0F0F}</style>
 <style id="bond-age-ring">@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}</style>
 <script src="./support.js"></script>
 </head>
@@ -27,20 +28,9 @@
 <noscript>
 <style>x-dc{display:none}</style>
 <div class="bond-age-off">
-  <div class="bond-age-panel bond-age-ask">
-    <div class="bond-age-mark">BOND</div>
-    <p class="bond-age-lead">Please confirm your age.</p>
-    <div class="bond-age-rule bond-age-rule-wide"></div>
-    <p class="bond-age-body">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
-    <div class="bond-age-fields">
-      <select class="bond-age-select bond-age-month" aria-label="Birth month">
-        <option value="">Birth month</option>
-      </select>
-      <select class="bond-age-select bond-age-year" aria-label="Birth year">
-        <option value="">Birth year</option>
-      </select>
-    </div>
-    <button type="button" class="bond-age-enter" data-ready="false">Enter</button>
+  <div class="bond-age-box">
+    <p class="bond-age-logo">BOND</p>
+    <p class="bond-age-lead">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p>
     <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can be addictive.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
   </div>
 </div>
@@ -57,115 +47,194 @@
 @font-face{font-family:"Didot";font-style:normal;font-weight:500;src:local("Liberation Serif");size-adjust:112.50%;ascent-override:84.18%;descent-override:24.62%;line-gap-override:2.22%}
 body { margin: 0; background: #1B1D1C; }
 a { color: #E1DAD0; } a:hover { color: #EFEBE2; }
-@keyframes gateIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes gateRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes bondBreathe { 0% { color: rgba(232,225,213,1); } 50% { color: rgba(232,225,213,0); } 100% { color: rgba(232,225,213,1); } }
-@keyframes breatheScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.13); } }
-@media (max-height: 640px) {
-  .bond-age-dc {
-    max-height: 100dvh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    align-items: flex-start !important;
-    justify-content: center !important;
-  }
-}
 </style>
 </helmet>
 <sc-if value="{{ visible }}" hint-placeholder-val="{{ false }}">
-<div class="bond-age-dc" style="position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;align-items:center;justify-content:center;animation:gateIn .6s cubic-bezier(0.22,1,0.36,1) both">
-  <div style="position:absolute;inset:0;background:radial-gradient(900px 600px at 50% 38%, rgba(194,154,69,0.07), transparent 70%),radial-gradient(1200px 700px at 50% 100%, rgba(13,15,14,0.9), transparent 80%)"></div>
-  <div style="position:absolute;inset:0;opacity:0.45;mix-blend-mode:overlay"></div>
-  <sc-if value="{{ declined }}" hint-placeholder-val="{{ false }}">
-    <div style="position:relative;text-align:center;padding:32px;max-width:520px;width:100%;box-sizing:border-box;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
-      <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(44px,6vw,64px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;transform-origin:center;animation:bondBreathe 6.5s ease-in-out infinite,breatheScale 3.6s ease-in-out infinite">BOND</div>
-      <p style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(22px,3vw,30px);color:#E1DAD0;line-height:1.5;margin:48px 0 16px">Not yet</p>
-      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:16px;color:#B0A99A;line-height:1.7;margin:0 0 40px">Bond is for adults 21 and over. We look forward to meeting you when it is time.</p>
-      <div style="width:48px;height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:0 auto"></div>
-    </div>
-  </sc-if>
-  <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
-    <div style="position:relative;text-align:center;padding:32px;max-width:760px;width:100%;box-sizing:border-box;animation:gateRise .7s cubic-bezier(0.22,1,0.36,1) both">
-      <div style="font-family:'GFS Didot',Didot,serif;font-weight:400;font-size:clamp(52px,8vw,84px);letter-spacing:0.35em;padding-left:0.35em;color:#E8E1D5;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;transform-origin:center;animation:bondBreathe 6.5s ease-in-out infinite,breatheScale 3.6s ease-in-out infinite">BOND</div>
-      <p style="font-family:'GFS Didot',Didot,serif;font-size:clamp(18px,2.6vw,28px);letter-spacing:0.03em;color:#E1DAD0;margin:24px 0 0">Please confirm your age.</p>
-      <div style="width:min(420px,80%);height:1px;background:linear-gradient(90deg,transparent,#C29A45,transparent);margin:30px auto 0"></div>
-      <p style="font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:16px;line-height:1.7;color:#B0A99A;max-width:440px;margin:26px auto 26px">By entering, you verify that you are 21 years of age or older and consent to view cannabis-related material.</p>
-      <div class="bond-age-fields" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:32px;max-width:100%">
-        <select aria-label="Birth month" value="{{ month }}" onChange="{{ setMonth }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(160px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
-          <option value="" style="color:#1B1D1C">Birth month</option>
-          <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
-            <option value="{{ $index }}" style="color:#1B1D1C">{{ m }}</option>
-          </sc-for>
-        </select>
-        <select aria-label="Birth year" value="{{ year }}" onChange="{{ setYear }}" style="appearance:none;background:transparent;border:1px solid #3A3C3B;border-radius:2px;color:#E1DAD0;font-family:Aptos,'Segoe UI Variable','Segoe UI',Inter,sans-serif;font-size:15px;padding:14px 20px;min-width:0;width:min(140px,100%);max-width:100%;box-sizing:border-box;outline:none;cursor:pointer">
-          <option value="" style="color:#1B1D1C">Birth year</option>
-          <sc-for list="{{ years }}" as="y" hint-placeholder-count="0">
-            <option value="{{ y }}" style="color:#1B1D1C">{{ y }}</option>
-          </sc-for>
-        </select>
-        <div class="bond-age-affirm">
-          <input type="checkbox" id="bond-age-affirm" class="bond-age-affirm-input" checked="{{ ofAge }}" onChange="{{ setOfAge }}">
-          <label for="bond-age-affirm">I am 21 years of age or older</label>
-        </div>
+<div class="bond-age-dc" role="dialog" aria-modal="true" aria-labelledby="{{ headingId }}" data-declined="{{ declinedAttr }}">
+  <div class="bond-age-box">
+    <p class="bond-age-logo">BOND</p>
+    <sc-if value="{{ declined }}" hint-placeholder-val="{{ false }}">
+      <div class="bond-age-panel bond-age-no">
+        <h2 id="bond-gate-denied-h" class="bond-age-title" tabindex="-1">Come back when you're 21.</h2>
+        <p class="bond-age-body">You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).</p>
       </div>
-      <button onClick="{{ enter }}" style="background:{{ enterBg }};color:{{ enterColor }};border:1px solid {{ enterBorder }};border-radius:2px;font-family:'GFS Didot',Didot,serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;padding:18px 56px;cursor:pointer;transition:background .4s,color .4s,border-color .4s,box-shadow .4s;box-shadow:{{ enterShadow }}">Enter</button>
-      <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>{{ warn }}</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
-    </div>
-  </sc-if>
+    </sc-if>
+    <sc-if value="{{ asking }}" hint-placeholder-val="{{ true }}">
+      <div class="bond-age-panel bond-age-ask">
+        <h2 id="bond-gate-h" class="bond-age-lead">Are you 21 or older?</h2>
+        <p class="bond-age-body">Bond is a cannabis product for adults 21 and older.</p>
+        <div class="bond-age-actions">
+          <button type="button" id="bond-age-yes" class="bond-age-yes" onClick="{{ enter }}">Yes, I am 21 or older</button>
+          <button type="button" id="bond-age-no" class="bond-age-no-btn" onClick="{{ decline }}">No</button>
+        </div>
+        <p class="bond-age-legal">By entering you confirm you are 21 or older and consent to view cannabis-related material. We remember your answer on this device for 30 days. For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p>
+      </div>
+    </sc-if>
+    <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>{{ warn }}</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
+  </div>
 </div>
 </sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:600},&quot;bypass&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
-  state = { verified: false, declined: false, month: '', year: '', checked: false, ofAge: false };
+  state = { verified: false, declined: false, checked: false };
+
   componentDidMount() {
-    // One time cleanup of the pre session localStorage key so it does not linger.
-    try { localStorage.removeItem('bond_age_ok'); } catch (e) {}
-    // Remember the entry for the browser session. Once verified, the gate does
-    // not show again while navigating the site, and closing the site clears it
-    // so the gate returns on the next visit. It also releases the hero cascade
-    // so the Home page does not stall waiting for the gate.
-    try {
-      const raw = sessionStorage.getItem('bond_age_ok');
-      if (raw) {
-        this.setState({ verified: true, checked: true });
+    const KEY = 'bond_age_ok';
+    const MAX = 30 * 24 * 60 * 60 * 1000;
+    const freshTime = (raw, now) => {
+      if (raw == null || raw === '') return null;
+      let t = null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          if (parsed.ok === true && typeof parsed.t === 'number' && isFinite(parsed.t)) t = parsed.t;
+          else return null;
+        }
+      } catch (e) {}
+      if (t == null && /^\d+$/.test(String(raw))) t = Number(raw);
+      if (t == null || !isFinite(t)) return null;
+      const age = now - t;
+      if (age < 0 || age >= MAX) return null;
+      return t;
+    };
+    const stamp = (t) => JSON.stringify({ ok: true, t });
+    const drop = (store) => { try { store.removeItem(KEY); } catch (e) {} };
+    let localRaw = null;
+    let sessionRaw = null;
+    try { localRaw = localStorage.getItem(KEY); } catch (e) {}
+    try { sessionRaw = sessionStorage.getItem('bond_age_ok'); } catch (e) {}
+    const now = Date.now();
+    const localT = freshTime(localRaw, now);
+    const pass = () => {
+      this.setState({ verified: true, checked: true });
+      const fire = () => {
         try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
-        return;
-      }
+      };
+      try { setTimeout(fire, 0); } catch (e) { fire(); }
+    };
+    try {
+      if (sessionRaw != null) sessionStorage.removeItem('bond_age_ok');
     } catch (e) {}
+    if (localT != null) {
+      pass();
+      return;
+    }
+    if (localRaw) drop(localStorage);
     this.setState({ checked: true });
+    const trap = (ev) => {
+      if (document.getElementById('bond-gate-hold')) return;
+      if (ev.key !== 'Tab') return;
+      if (document.documentElement.getAttribute('data-bond-age') === 'ok') return;
+      const gate = document.querySelector('.bond-age-dc');
+      const list = gate ? gate.querySelectorAll('a[href], button, input, select, textarea') : [];
+      const controls = [];
+      for (let i = 0; i < list.length; i++) {
+        const el = list[i];
+        if (el.disabled || el.tabIndex < 0) continue;
+        const st = getComputedStyle(el);
+        if (st.display === 'none' || st.visibility === 'hidden') continue;
+        if (!el.getClientRects().length) continue;
+        controls.push(el);
+      }
+      if (!controls.length) { ev.preventDefault(); return; }
+      let idx = controls.indexOf(document.activeElement);
+      let next;
+      if (idx === -1) next = ev.shiftKey ? controls.length - 1 : 0;
+      else if (ev.shiftKey) next = idx === 0 ? controls.length - 1 : idx - 1;
+      else next = idx === controls.length - 1 ? 0 : idx + 1;
+      ev.preventDefault();
+      controls[next].focus();
+    };
+    this._trap = trap;
+    document.addEventListener('keydown', trap, true);
+    let tries = 0;
+    const focusYes = () => {
+      const btn = document.getElementById('bond-age-yes');
+      if (btn) btn.focus({ preventScroll: true });
+      tries += 1;
+      if (document.activeElement && document.activeElement.id === 'bond-age-yes') return;
+      if (tries < 20) setTimeout(focusYes, 60);
+    };
+    setTimeout(focusYes, 60);
   }
+
+  componentWillUnmount() {
+    if (this._trap) document.removeEventListener('keydown', this._trap, true);
+  }
+
   renderVals() {
     const bypass = this.props.bypass ?? false;
-    const { verified, declined, month, year, checked, ofAge } = this.state;
+    const { verified, declined, checked } = this.state;
     const standalone = /AgeGate\.dc\.html/i.test(location.pathname);
     const visible = standalone ? true : (checked && !verified && !bypass);
-    const ready = month !== '' && year !== '' && ofAge === true;
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const years = []; const now = new Date().getFullYear();
-    for (let y = now; y >= now - 100; y--) years.push(String(y));
     return {
-      visible, declined, asking: !declined, months, years, month, year, ofAge,
+      visible,
+      declined,
+      asking: !declined,
+      declinedAttr: declined ? 'true' : 'false',
+      headingId: declined ? 'bond-gate-denied-h' : 'bond-gate-h',
       warn: this.props.warn || "Cannabis can be addictive.",
-      enterBg: ready ? 'linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%)' : 'transparent',
-      enterColor: ready ? '#141109' : '#8E887C',
-      enterBorder: ready ? '#E3C270' : '#3A3C3B',
-      enterShadow: ready ? '0 8px 40px rgba(194,154,69,0.4)' : 'none',
-      setMonth: (e) => this.setState({ month: e.target.value }),
-      setYear: (e) => this.setState({ year: e.target.value }),
-      setOfAge: (e) => this.setState({ ofAge: e.target.checked === true }),
       enter: () => {
-        if (month === '' || year === '' || ofAge !== true) return;
-        const b = new Date(parseInt(year, 10), parseInt(month, 10), 1);
-        const nowD = new Date();
-        let age = nowD.getFullYear() - b.getFullYear();
-        if (nowD.getMonth() < b.getMonth()) age--;
-        if (age >= 21) {
-          try { sessionStorage.setItem('bond_age_ok', String(Date.now())); } catch (e) {}
-          try { document.documentElement.dataset.bondAge = "ok"; } catch (e) {}
-          this.setState({ verified: true });
-          try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
-        } else this.setState({ declined: true });
+        const t = Date.now();
+        try { localStorage.setItem('bond_age_ok', JSON.stringify({ ok: true, t })); } catch (e) {}
+        try { sessionStorage.setItem('bond_age_ok', String(t)); } catch (e) {}
+        try { document.documentElement.dataset.bondAge = 'ok'; } catch (e) {}
+        this.setState({ verified: true });
+        try { window.dispatchEvent(new CustomEvent('bond-entered')); } catch (e) {}
+        const pageTarget = () => {
+          const query = document.querySelector;
+          if (typeof query !== 'function') return null;
+          const outside = (el) => {
+            if (!el) return false;
+            const gate = document.querySelector('.bond-age-dc') || document.getElementById('bond-age-gate');
+            if (gate && gate.contains && gate.contains(el)) return false;
+            return true;
+          };
+          const main = document.querySelector('main');
+          if (outside(main)) return main;
+          if (typeof document.querySelectorAll !== 'function') {
+            const only = document.querySelector('h1');
+            return outside(only) ? only : null;
+          }
+          const list = document.querySelectorAll('h1, h2');
+          for (let i = 0; i < list.length; i++) {
+            if (outside(list[i])) return list[i];
+          }
+          return null;
+        };
+        const quiet = (target) => {
+          if (typeof target.setAttribute !== 'function') return;
+          if (typeof target.tabIndex === 'number' && target.tabIndex < 0) {
+            target.setAttribute('tabindex', '-1');
+          }
+          if (target.getAttribute('data-bond-age-target') == null) {
+            target.setAttribute('data-bond-age-target', '');
+            if (typeof target.addEventListener === 'function') {
+              target.addEventListener('blur', function () {
+                target.removeAttribute('data-bond-age-target');
+              }, { once: true });
+            }
+          }
+        };
+        let tries = 0;
+        const attempt = () => {
+          const target = pageTarget();
+          if (!target || typeof target.focus !== 'function') return;
+          quiet(target);
+          try { target.focus({ preventScroll: true }); } catch (e) { try { target.focus(); } catch (err) {} }
+          if (document.activeElement === target || tries >= 160) return;
+          tries += 1;
+          setTimeout(attempt, 50);
+        };
+        attempt();
+      },
+      decline: () => {
+        this.setState({ declined: true });
+        setTimeout(() => {
+          const heading = document.getElementById('bond-gate-denied-h');
+          if (heading) heading.focus();
+        }, 30);
       }
     };
   }
