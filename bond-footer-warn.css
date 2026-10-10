@@ -5,3 +5,7 @@ footer .bond-warn-hope a,
 footer .bond-warn-license {
   font-size: 12px;
 }
+
+footer .bond-warn-hope a[href^="tel:"] {
+  white-space: nowrap;
+}

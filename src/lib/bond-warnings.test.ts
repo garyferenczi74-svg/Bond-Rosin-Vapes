@@ -117,6 +117,7 @@ test("gate and footer share one warning block and one css rule", () => {
 test("footer warnings are 12px and Home keeps the shared 9px rule", () => {
   const css = read("bond-footer-warn.css");
   assert.match(css, /footer \.bond-warn-box p,\s*footer \.bond-warn-hope,\s*footer \.bond-warn-hope a,\s*footer \.bond-warn-license \{\s*font-size: 12px;\s*\}/);
+  assert.match(css, /footer \.bond-warn-hope a\[href\^="tel:"\] \{\s*white-space: nowrap;\s*\}/);
   assert.equal(css.includes("font-size: 9px"), false);
   assert.equal(read("Home.dc.html").includes("bond-footer-warn.css"), false);
   assert.equal(read("AgeGate.dc.html").includes("bond-footer-warn.css"), false);
