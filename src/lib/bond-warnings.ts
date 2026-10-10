@@ -20,8 +20,10 @@ export const HOPE_URL = "https://oasas.ny.gov/hopeline";
 export const HOPE_URL_LABEL = "oasas.ny.gov/hopeline";
 export const HOPE_TAIL = ".";
 
-export const LICENSE_LINE =
-  "Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329";
+export const LICENSE_LEAD =
+  "Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. ";
+export const LICENSE_NUMBER = "OCM-PROC-25-000329";
+export const LICENSE_LINE = LICENSE_LEAD + LICENSE_NUMBER;
 
 export const WARNING_ROUTES = [
   { route: "/", label: "/", file: "Home.dc.html", gate: "import", d: 1 },
@@ -78,6 +80,13 @@ export function warnBlockHtml(line: string): string {
     `<p class="bond-warn-hope">${HOPE_LEAD}<a href="${HOPE_PHONE_HREF}">${HOPE_PHONE_LABEL}</a>${HOPE_MID}<a href="${HOPE_URL}">${HOPE_URL_LABEL}</a>${HOPE_TAIL}</p>` +
     `<p class="bond-warn-license">${LICENSE_LINE}</p>` +
     "</div>"
+  );
+}
+
+export function footerWarnBlockHtml(line: string): string {
+  return warnBlockHtml(line).replace(
+    `<p class="bond-warn-license">${LICENSE_LINE}</p>`,
+    `<p class="bond-warn-license">${LICENSE_LEAD}<span class="bond-warn-lic-no">${LICENSE_NUMBER}</span></p>`,
   );
 }
 

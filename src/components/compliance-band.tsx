@@ -38,7 +38,7 @@ export function ComplianceBand() {
         >
           Health and Safety
         </div>
-        <BondWarn route={route} />
+        <BondWarn route={route} holdLicense />
         <p style={{ fontSize: 12, lineHeight: 1.7, color: tokens.muted, margin: "16px 0 0" }}>
           21+ Cannabis products. Keep out of reach of children.
         </p>

@@ -9,3 +9,7 @@ footer .bond-warn-license {
 footer .bond-warn-hope a[href^="tel:"] {
   white-space: nowrap;
 }
+
+footer .bond-warn-lic-no {
+  white-space: nowrap;
+}

@@ -9,6 +9,7 @@ import {
   WARNING_C1,
   WARNING_ROUTES,
   dLineForRoute,
+  footerWarnBlockHtml,
   warnBlockForRoute,
   warnBlockHtml,
   warningRouteForPath,
@@ -52,7 +53,7 @@ test("gate and footer share one warning block and one css rule", () => {
   const band = read("src/components/compliance-band.tsx");
   const warn = read("src/components/bond-warn.tsx");
   assert.match(gate, /<BondWarn route=\{route\} \/>/);
-  assert.match(band, /<BondWarn route=\{route\} \/>/);
+  assert.match(band, /<BondWarn route=\{route\} holdLicense \/>/);
   assert.match(band, /warningRouteForPath/);
   assert.match(warn, /WARNING_C1/);
   assert.match(warn, /dLineForRoute/);
@@ -76,7 +77,25 @@ test("gate and footer share one warning block and one css rule", () => {
     const block = warnBlockForRoute(row.route);
     const copies = html.split(block).length - 1;
     const expected = row.gate === "inline" || row.gate === "import" ? 2 : 1;
-    assert.equal(copies, expected, row.file);
+    const footerFiles = new Set([
+      "FAQ.dc.html",
+      "No1.dc.html",
+      "No2.dc.html",
+      "No3.dc.html",
+      "Finder.dc.html",
+      "Privacy.dc.html",
+      "Terms.dc.html",
+    ]);
+    if (footerFiles.has(row.file)) {
+      assert.equal(copies, 1, row.file);
+      const footerBlock = footerWarnBlockHtml(dLineForRoute(row.route));
+      assert.equal(html.split(footerBlock).length - 1, 1, row.file);
+      const license = footerBlock.match(/<p class="bond-warn-license">([\s\S]*?)<\/p>/);
+      assert.ok(license, row.file);
+      assert.equal(license[1].replace(/<[^>]+>/g, ""), LICENSE_LINE, row.file);
+    } else {
+      assert.equal(copies, expected, row.file);
+    }
     const assigned = dLineForRoute(row.route);
     for (const line of D_LINES) {
       if (line === assigned) continue;
@@ -118,6 +137,9 @@ test("footer warnings are 12px and Home keeps the shared 9px rule", () => {
   const css = read("bond-footer-warn.css");
   assert.match(css, /footer \.bond-warn-box p,\s*footer \.bond-warn-hope,\s*footer \.bond-warn-hope a,\s*footer \.bond-warn-license \{\s*font-size: 12px;\s*\}/);
   assert.match(css, /footer \.bond-warn-hope a\[href\^="tel:"\] \{\s*white-space: nowrap;\s*\}/);
+  assert.match(css, /footer \.bond-warn-lic-no \{\s*white-space: nowrap;\s*\}/);
+  assert.equal(read("Home.dc.html").includes("bond-warn-lic-no"), false);
+  assert.equal(read("AgeGate.dc.html").includes("bond-warn-lic-no"), false);
   assert.equal(css.includes("font-size: 9px"), false);
   assert.equal(read("Home.dc.html").includes("bond-footer-warn.css"), false);
   assert.equal(read("AgeGate.dc.html").includes("bond-footer-warn.css"), false);
