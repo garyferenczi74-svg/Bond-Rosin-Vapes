@@ -1,0 +1,7 @@
+/* Footer 129.2 warning, HOPEline, and licensee lines. The age gate keeps 9px in bond-age-gate.css. */
+footer .bond-warn-box p,
+footer .bond-warn-hope,
+footer .bond-warn-hope a,
+footer .bond-warn-license {
+  font-size: 12px;
+}

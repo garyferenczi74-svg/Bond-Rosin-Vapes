@@ -114,6 +114,29 @@ test("gate and footer share one warning block and one css rule", () => {
   }
 });
 
+test("footer warnings are 12px and Home keeps the shared 9px rule", () => {
+  const css = read("bond-footer-warn.css");
+  assert.match(css, /footer \.bond-warn-box p,\s*footer \.bond-warn-hope,\s*footer \.bond-warn-hope a,\s*footer \.bond-warn-license \{\s*font-size: 12px;\s*\}/);
+  assert.equal(css.includes("font-size: 9px"), false);
+  assert.equal(read("Home.dc.html").includes("bond-footer-warn.css"), false);
+  assert.equal(read("AgeGate.dc.html").includes("bond-footer-warn.css"), false);
+  assert.equal(read("bond-age-gate.css").includes("bond-footer-warn"), false);
+  for (const file of [
+    "FAQ.dc.html",
+    "No1.dc.html",
+    "No2.dc.html",
+    "No3.dc.html",
+    "Finder.dc.html",
+    "Privacy.dc.html",
+    "Terms.dc.html",
+    "Haus.dc.html",
+  ]) {
+    assert.equal(read(file).includes('href="/bond-footer-warn.css"'), true, file);
+  }
+  assert.match(read("src/app/globals.css"), /bond-footer-warn\.css/);
+  assert.match(read("scripts/sync-public.mjs"), /bond-footer-warn\.css/);
+});
+
 test("warning rotation keys are gone from source and from Privacy section 7", () => {
   const privacy = read("Privacy.dc.html");
   const cookies = privacy.slice(privacy.indexOf("<h2>7. Cookies</h2>"), privacy.indexOf("<h2>8."));

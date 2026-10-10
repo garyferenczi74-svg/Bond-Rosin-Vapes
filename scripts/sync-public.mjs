@@ -21,6 +21,7 @@ const files = [
   "image-slots.state.json",
   "bond-age-gate.js",
   "bond-age-gate.css",
+  "bond-footer-warn.css",
   "bond-tokens.css",
 ];
 
