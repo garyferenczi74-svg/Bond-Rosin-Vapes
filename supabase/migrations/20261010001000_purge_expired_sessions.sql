@@ -50,7 +50,11 @@ BEGIN
 END;
 $function$;
 
+-- A non-superuser can only hand a function to a role that has CREATE on
+-- its schema. Grant it for the ownership change only, then take it back.
+GRANT CREATE ON SCHEMA public TO bond_retention;
 ALTER FUNCTION public.bond_purge_expired_sessions() OWNER TO bond_retention;
+REVOKE CREATE ON SCHEMA public FROM bond_retention;
 
 REVOKE ALL ON FUNCTION public.bond_purge_expired_sessions() FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.bond_purge_expired_sessions() FROM anon;

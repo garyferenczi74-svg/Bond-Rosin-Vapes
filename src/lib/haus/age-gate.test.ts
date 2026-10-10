@@ -754,7 +754,8 @@ test("one click replaces the birth date form and keeps the warning box", () => {
   assert.ok(view.includes(consent));
   assert.ok(view.includes(remember));
   assert.ok(view.includes(full));
-  assert.ok(view.includes(denied));
+  assert.ok(view.includes("const DENIED =\n  \"" + denied + "\";"));
+  assert.match(view, /\{DENIED_LEAD\}\s*<span className="bond-age-tel">\{DENIED_PHONE\}<\/span>\s*\{DENIED_TAIL\}/);
 
   const gate = read("AgeGate.dc.html");
   const noscript = gate.slice(gate.indexOf("<noscript>"), gate.indexOf("</noscript>"));
@@ -789,7 +790,7 @@ test("one click replaces the birth date form and keeps the warning box", () => {
     assert.ok(html.includes(consent), name);
     assert.ok(html.includes(remember), name);
     assert.ok(html.includes(full), name);
-    assert.ok(html.includes(denied), name);
+    assert.ok(html.includes(denied.replace("1-877-8-HOPENY", '<span class="bond-age-tel">1-877-8-HOPENY</span>')), name);
     const gateBlock = html.slice(html.indexOf('id="bond-age-gate"'), html.indexOf('class="bond-floor"'));
     assert.equal(gateBlock.includes("Birth month"), false, name);
     assert.equal(gateBlock.includes("type=\"checkbox\""), false, name);

@@ -300,6 +300,19 @@ html[data-bond-age="ok"] .bond-age-dc {
   font-size: 12.5px;
 }
 
+/* Keep the HOPEline number and the licence number on one line in the gate. */
+.bond-age-gate .bond-warn-hope a[href^="tel:"],
+.bond-age-gate .bond-warn-lic-no,
+.bond-age-gate .bond-age-tel,
+.bond-age-dc .bond-warn-hope a[href^="tel:"],
+.bond-age-dc .bond-warn-lic-no,
+.bond-age-dc .bond-age-tel,
+.bond-age-off .bond-warn-hope a[href^="tel:"],
+.bond-age-off .bond-warn-lic-no,
+#bond-gate-cover .bond-warn-hope a[href^="tel:"] {
+  white-space: nowrap;
+}
+
 .bond-age-yes:focus-visible,
 .bond-age-no-btn:focus-visible,
 .bond-age-gate :focus-visible,

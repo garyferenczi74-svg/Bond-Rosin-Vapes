@@ -16,6 +16,8 @@ const FULL_WARN =
   "For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.";
 const DENIED =
   "You must be 21 or older to visit this site. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY (467369).";
+const DENIED_PHONE = "1-877-8-HOPENY";
+const [DENIED_LEAD, DENIED_TAIL] = DENIED.split(DENIED_PHONE);
 
 function readRaw(store: Storage): string | null {
   try {
@@ -224,9 +226,13 @@ export function BondAgeGate({ route, children }: { route: WarningRoute; children
             <h2 id="bond-gate-denied-h" ref={deniedRef} className="bond-age-title" tabIndex={-1}>
               Come back when you&apos;re 21.
             </h2>
-            <p className="bond-age-body">{DENIED}</p>
+            <p className="bond-age-body">
+              {DENIED_LEAD}
+              <span className="bond-age-tel">{DENIED_PHONE}</span>
+              {DENIED_TAIL}
+            </p>
           </div>
-          <BondWarn route={route} />
+          <BondWarn route={route} holdLicense />
         </div>
       </div>
       <div className="bond-floor" inert={open ? undefined : true}>
