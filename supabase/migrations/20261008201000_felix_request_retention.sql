@@ -17,9 +17,10 @@
 --   older than 24 months. Every other role is blocked by trigger.
 --
 -- pg_cron schedules are below. Enabling pg_cron is a ship-time step for M.
+-- Job name, schedule, and command live only in bond_retention_cron_specs.
 -- If pg_cron is not installed, these schedules are not written. The guard
--- migration after the session purge fails the apply until the seven jobs
--- exist. An error from cron.schedule fails this migration.
+-- migration then schedules any missing job and fails unless all seven match.
+-- An error from cron.schedule fails this migration.
 
 ALTER TABLE public.haus_signups RENAME TO haus_requests;
 
@@ -384,8 +385,35 @@ GRANT EXECUTE ON FUNCTION public.bond_purge_order_requests() TO postgres;
 GRANT EXECUTE ON FUNCTION public.bond_purge_auth_attempts() TO postgres;
 GRANT EXECUTE ON FUNCTION public.bond_purge_audit_log() TO postgres;
 
+-- Canonical retention jobs. The schedule migrations and the guard read this list.
+CREATE OR REPLACE FUNCTION public.bond_retention_cron_specs()
+RETURNS TABLE (jobname text, schedule text, command text)
+LANGUAGE sql
+IMMUTABLE
+SET search_path TO public, pg_temp
+AS $function$
+  SELECT *
+  FROM (VALUES
+    ('bond_purge_haus_requests', '20 4 * * *', 'SELECT public.bond_purge_haus_requests()'),
+    ('bond_purge_order_requests', '25 4 * * *', 'SELECT public.bond_purge_order_requests()'),
+    ('bond_purge_auth_attempts', '30 4 * * *', 'SELECT public.bond_purge_auth_attempts()'),
+    ('bond_purge_audit_log', '35 4 * * *', 'SELECT public.bond_purge_audit_log()'),
+    ('bond_purge_dispensary_accounts', '40 4 * * *', 'SELECT public.bond_purge_dispensary_accounts()'),
+    ('bond_purge_haus_updates', '45 4 * * *', 'SELECT public.bond_purge_haus_updates()'),
+    ('bond_purge_expired_sessions', '50 4 * * *', 'SELECT public.bond_purge_expired_sessions()')
+  ) AS spec(jobname, schedule, command);
+$function$;
+
+REVOKE ALL ON FUNCTION public.bond_retention_cron_specs() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.bond_retention_cron_specs() FROM anon;
+REVOKE ALL ON FUNCTION public.bond_retention_cron_specs() FROM authenticated;
+REVOKE ALL ON FUNCTION public.bond_retention_cron_specs() FROM service_role;
+GRANT EXECUTE ON FUNCTION public.bond_retention_cron_specs() TO postgres;
+
 -- A missing pg_cron install is the only skip. cron.schedule errors fail this migration.
 DO $cron$
+DECLARE
+  spec record;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron')
      OR NOT EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
@@ -393,25 +421,57 @@ BEGIN
       'pg_cron is not installed';
     RETURN;
   END IF;
+
+  SELECT specs.schedule, specs.command
+    INTO spec
+  FROM public.bond_retention_cron_specs() AS specs
+  WHERE specs.jobname = 'bond_purge_haus_requests';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'retention job bond_purge_haus_requests has no canonical definition';
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_haus_requests',
-    '20 4 * * *',
-    'SELECT public.bond_purge_haus_requests()'
+    spec.schedule,
+    spec.command
   );
+
+  SELECT specs.schedule, specs.command
+    INTO spec
+  FROM public.bond_retention_cron_specs() AS specs
+  WHERE specs.jobname = 'bond_purge_order_requests';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'retention job bond_purge_order_requests has no canonical definition';
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_order_requests',
-    '25 4 * * *',
-    'SELECT public.bond_purge_order_requests()'
+    spec.schedule,
+    spec.command
   );
+
+  SELECT specs.schedule, specs.command
+    INTO spec
+  FROM public.bond_retention_cron_specs() AS specs
+  WHERE specs.jobname = 'bond_purge_auth_attempts';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'retention job bond_purge_auth_attempts has no canonical definition';
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_auth_attempts',
-    '30 4 * * *',
-    'SELECT public.bond_purge_auth_attempts()'
+    spec.schedule,
+    spec.command
   );
+
+  SELECT specs.schedule, specs.command
+    INTO spec
+  FROM public.bond_retention_cron_specs() AS specs
+  WHERE specs.jobname = 'bond_purge_audit_log';
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'retention job bond_purge_audit_log has no canonical definition';
+  END IF;
   PERFORM cron.schedule(
     'bond_purge_audit_log',
-    '35 4 * * *',
-    'SELECT public.bond_purge_audit_log()'
+    spec.schedule,
+    spec.command
   );
 END
 $cron$;

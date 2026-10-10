@@ -396,7 +396,12 @@ test("owner reads update subscribers and Privacy matches the update list", () =>
   assert.match(hold, /bond\.haus_update_via_function/);
   assert.match(hold, /bond_purge_haus_updates/);
   assert.match(hold, /GREATEST\(consent_at, COALESCE\(confirmed_at, consent_at\)\)/);
-  assert.match(hold, /'45 4 \* \* \*'/);
+  assert.match(hold, /cron\.schedule\(\s*'bond_purge_haus_updates'/);
+  assert.match(hold, /bond_retention_cron_specs\(\)/);
+  assert.match(
+    read("supabase/migrations/20261008201000_felix_request_retention.sql"),
+    /'bond_purge_haus_updates', '45 4 \* \* \*'/
+  );
   assert.match(hold, /CREATE TABLE public\.haus_update_tokens/);
   assert.match(hold, /email_hmac text NOT NULL/);
   assert.equal(/GRANT INSERT ON TABLE public\.haus_updates TO anon/.test(hold), false);

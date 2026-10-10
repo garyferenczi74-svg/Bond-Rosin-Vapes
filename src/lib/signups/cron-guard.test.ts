@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { chmodSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -30,22 +31,38 @@ const applyFiles = [
   "20261010001000_purge_expired_sessions.sql",
 ];
 const guardFile = "20261010002000_require_retention_cron_jobs.sql";
-const jobs = [
-  "bond_purge_haus_requests",
-  "bond_purge_order_requests",
-  "bond_purge_auth_attempts",
-  "bond_purge_audit_log",
-  "bond_purge_dispensary_accounts",
-  "bond_purge_haus_updates",
-  "bond_purge_expired_sessions",
+const specsFile = "20261008201000_felix_request_retention.sql";
+const expectedJobs = [
+  ["bond_purge_haus_requests", "20 4 * * *", "SELECT public.bond_purge_haus_requests()"],
+  ["bond_purge_order_requests", "25 4 * * *", "SELECT public.bond_purge_order_requests()"],
+  ["bond_purge_auth_attempts", "30 4 * * *", "SELECT public.bond_purge_auth_attempts()"],
+  ["bond_purge_audit_log", "35 4 * * *", "SELECT public.bond_purge_audit_log()"],
+  ["bond_purge_dispensary_accounts", "40 4 * * *", "SELECT public.bond_purge_dispensary_accounts()"],
+  ["bond_purge_haus_updates", "45 4 * * *", "SELECT public.bond_purge_haus_updates()"],
+  ["bond_purge_expired_sessions", "50 4 * * *", "SELECT public.bond_purge_expired_sessions()"],
+] as const;
+const systemPaths = [
+  "/usr/share/postgresql",
+  "/usr/share/postgresql/16",
+  "/usr/share/postgresql/16/extension",
+  "/usr/lib/postgresql",
+  "/usr/lib/postgresql/16",
 ];
-const extensionDir = "/usr/share/postgresql/16/extension";
 const psqlReady = spawnSync("psql", ["--version"], { encoding: "utf8" });
 const sudoReady = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
 const ready = psqlReady.status === 0 && sudoReady.status === 0;
 
 function readMigration(name: string) {
   return readFileSync(join(migrationDir, name), "utf8");
+}
+
+function snapshotSystem() {
+  return systemPaths.map((path) => {
+    if (!existsSync(path)) return `${path} absent`;
+    const stat = statSync(path);
+    const names = stat.isDirectory() ? readdirSync(path).sort().join(",") : "";
+    return `${path} mtimeNs=${stat.mtimeNs} size=${stat.size} entries=${names}`;
+  }).join("\n");
 }
 
 function psql(args: string[]) {
@@ -58,10 +75,8 @@ function psqlSql(database: string, sql: string) {
   return psql(["-d", database, "-c", sql]);
 }
 
-function psqlFiles(database: string, names: string[]) {
-  const dir = mkdtempSync(join(tmpdir(), "bond-cron-"));
-  chmodSync(dir, 0o755);
-  const file = join(dir, "apply.sql");
+function psqlFiles(database: string, names: string[], dir: string) {
+  const file = join(dir, `apply-${randomBytes(4).toString("hex")}.sql`);
   writeFileSync(file, names.map((name) => `\\i ${join(migrationDir, name)}`).join("\n") + "\n");
   chmodSync(file, 0o644);
   return psql(["-d", database, "-f", file]);
@@ -143,120 +158,185 @@ CREATE TABLE public.audit_log (
 ALTER TABLE public.audit_log ENABLE ROW LEVEL SECURITY;
 `;
 
-function createDatabase(name: string) {
-  const created = psql(["-c", `DROP DATABASE IF EXISTS ${name}`, "-c", `CREATE DATABASE ${name}`]);
-  assert.equal(created.status, 0, created.stderr);
-  const stub = psqlSql(name, prelude);
-  assert.equal(stub.status, 0, stub.stderr);
-}
-
-function installCronStub() {
-  const dir = mkdtempSync(join(tmpdir(), "bond-pg-cron-"));
-  const control = join(dir, "pg_cron.control");
-  const sql = join(dir, "pg_cron--1.0.sql");
-  writeFileSync(
-    control,
-    [
-      "comment = 'Bond local stub for retention job tests. Not the pg_cron worker.'",
-      "default_version = '1.0'",
-      "relocatable = false",
-      "schema = cron",
-      "",
-    ].join("\n"),
-  );
-  writeFileSync(
-    sql,
-    `
-CREATE TABLE job (
+const cronStub = `
+CREATE SCHEMA IF NOT EXISTS cron;
+CREATE TABLE IF NOT EXISTS cron.job (
   jobid bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   schedule text NOT NULL,
   command text NOT NULL,
-  jobname text
+  jobname text UNIQUE,
+  active boolean NOT NULL DEFAULT true
 );
-
-CREATE FUNCTION schedule(job_name text, schedule text, command text)
+CREATE OR REPLACE FUNCTION cron.schedule(job_name text, schedule text, command text)
 RETURNS bigint
 LANGUAGE plpgsql
-SET search_path TO cron
+SET search_path TO cron, pg_temp
 AS $fn$
 DECLARE
   new_id bigint;
 BEGIN
-  INSERT INTO job (schedule, command, jobname)
+  INSERT INTO cron.job (schedule, command, jobname)
   VALUES (schedule, command, job_name)
   RETURNING jobid INTO new_id;
   RETURN new_id;
 END;
 $fn$;
-`,
-  );
-  const copied = spawnSync("sudo", ["-n", "cp", control, sql, extensionDir], { encoding: "utf8" });
-  assert.equal(copied.status, 0, copied.stderr);
+INSERT INTO pg_extension (oid, extname, extowner, extnamespace, extrelocatable, extversion)
+SELECT
+  ((SELECT max(oid) FROM pg_extension)::bigint + 1)::oid,
+  'pg_cron',
+  (SELECT oid FROM pg_roles WHERE rolname = current_user),
+  (SELECT oid FROM pg_namespace WHERE nspname = 'cron'),
+  false,
+  '1.0'
+WHERE NOT EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_cron');
+`;
+
+function createDatabase(name: string, created: string[]) {
+  if (!/^bond_cf_[a-z0-9_]+$/.test(name)) {
+    throw new Error(`refusing to create unexpected database name ${name}`);
+  }
+  const createdResult = psql(["-c", `CREATE DATABASE ${name}`]);
+  assert.equal(createdResult.status, 0, createdResult.stderr);
+  created.push(name);
+  const stub = psqlSql(name, prelude);
+  assert.equal(stub.status, 0, stub.stderr);
 }
 
-function removeCronStub() {
-  spawnSync("sudo", ["-n", "rm", "-f", join(extensionDir, "pg_cron.control"), join(extensionDir, "pg_cron--1.0.sql")], {
-    encoding: "utf8",
-  });
+function installCronStub(database: string) {
+  const installed = psqlSql(database, cronStub);
+  assert.equal(installed.status, 0, installed.stderr);
+}
+
+function assertJobs(database: string, label: string) {
+  const listed = psql([
+    "-d", database,
+    "-At",
+    "-c",
+    "SELECT jobname || '|' || schedule || '|' || command || '|' || active::text FROM cron.job ORDER BY jobname;",
+  ]);
+  console.log(label, listed.stdout.trim());
+  assert.equal(listed.status, 0, listed.stderr);
+  const rows = listed.stdout.trim().split("\n").filter((line) => line.length > 0);
+  const want = expectedJobs
+    .map(([jobname, schedule, command]) => `${jobname}|${schedule}|${command}|true`)
+    .sort();
+  assert.deepEqual(rows, want);
 }
 
 test("cron migrations tolerate only a missing pg_cron install", () => {
+  const specs = readMigration(specsFile);
+  for (const [jobname, schedule, command] of expectedJobs) {
+    assert.match(specs, new RegExp(`'${jobname}', '${schedule.replace(/\*/g, "\\*")}', '${command.replace(/[()]/g, "\\$&")}'`));
+  }
   for (const name of scheduleFiles) {
     const sql = readMigration(name);
     assert.equal(sql.includes("WHEN OTHERS"), false, name);
     assert.equal(sql.includes("CREATE EXTENSION"), false, name);
     assert.match(sql, /pg_extension WHERE extname = 'pg_cron'/);
     assert.match(sql, /pg_namespace WHERE nspname = 'cron'/);
+    assert.match(sql, /bond_retention_cron_specs\(\)/);
     assert.match(sql, /RAISE NOTICE 'pg_cron schedule skipped \(%\)\. Enabling pg_cron is a ship-time step for M\.'/);
+    if (name !== specsFile) {
+      for (const [, schedule] of expectedJobs) {
+        assert.equal(sql.includes(`'${schedule}'`), false, `${name} repeats ${schedule}`);
+      }
+    }
   }
   const guard = readMigration(guardFile);
+  assert.equal(guard.includes("WHEN OTHERS"), false);
   assert.match(guard, /Enable pg_cron on this database before applying migrations/);
-  for (const job of jobs) assert.match(guard, new RegExp(job));
-  assert.match(guard, /missing from cron\.job/);
+  assert.match(guard, /bond_retention_cron_specs\(\)/);
+  assert.match(guard, /PERFORM cron\.schedule\(spec\.jobname, spec\.schedule, spec\.command\)/);
+  assert.match(guard, /failed check: active/);
+  assert.match(guard, /failed check: schedule/);
+  assert.match(guard, /failed check: command/);
+  assert.match(guard, /failed check: missing/);
+  assert.match(guard, /SELECT public\.bond_require_retention_cron_jobs\(\)/);
+  for (const [, schedule] of expectedJobs) {
+    assert.equal(guard.includes(`'${schedule}'`), false);
+  }
 });
 
 test("retention cron guard fails closed and passes when all 7 jobs exist", { skip: ready ? false : "local Postgres is not available" }, () => {
-  const stamp = `${process.pid}_${Date.now()}`;
-  const bare = `bond_cron_bare_${stamp}`;
-  const full = `bond_cron_full_${stamp}`;
-  const broken = `bond_cron_break_${stamp}`;
-  const databases = [bare, full, broken];
-  installCronStub();
+  const suffix = `${process.pid}_${Date.now().toString(36)}_${randomBytes(4).toString("hex")}`;
+  const bare = `bond_cf_${suffix}_bare`;
+  const full = `bond_cf_${suffix}_full`;
+  const broken = `bond_cf_${suffix}_break`;
+  const created: string[] = [];
+  const beforeSystem = snapshotSystem();
+  const dir = mkdtempSync(join(tmpdir(), "bond-cron-"));
+  chmodSync(dir, 0o755);
+  console.log("CRON_SCRATCH_DBS", bare, full, broken);
+  console.log("CRON_SCRATCH_DIR", dir);
   try {
-    createDatabase(bare);
-    const bareApply = psqlFiles(bare, applyFiles);
+    createDatabase(bare, created);
+    const bareApply = psqlFiles(bare, applyFiles, dir);
     console.log("CRON_BARE_APPLY", bareApply.status);
     if (bareApply.status !== 0) console.log("CRON_BARE_APPLY_ERR", bareApply.stderr.trim());
     assert.equal(bareApply.status, 0, bareApply.stderr);
-    const bareGuard = psqlFiles(bare, [guardFile]);
+    const bareGuard = psqlFiles(bare, [guardFile], dir);
     console.log("CRON_BARE_GUARD", bareGuard.status, bareGuard.stderr.trim());
     assert.notEqual(bareGuard.status, 0);
     assert.match(bareGuard.stderr, /pg_cron is not installed\. Enable pg_cron on this database before applying migrations\. Privacy retention depends on the daily purge jobs\./);
 
-    createDatabase(full);
-    const extended = psqlSql(full, "CREATE EXTENSION pg_cron;");
-    assert.equal(extended.status, 0, extended.stderr);
-    const fullApply = psqlFiles(full, [...applyFiles, guardFile]);
+    installCronStub(bare);
+    const healed = psqlFiles(bare, [guardFile], dir);
+    console.log("CRON_HEAL_MISSING", healed.status);
+    if (healed.status !== 0) console.log("CRON_HEAL_MISSING_ERR", healed.stderr.trim());
+    assert.equal(healed.status, 0, `${healed.stdout}\n${healed.stderr}`);
+    assertJobs(bare, "CRON_HEALED_JOBS");
+
+    createDatabase(full, created);
+    installCronStub(full);
+    const fullApply = psqlFiles(full, [...applyFiles, guardFile], dir);
     console.log("CRON_FULL_APPLY", fullApply.status);
     if (fullApply.status !== 0) console.log("CRON_FULL_APPLY_ERR", fullApply.stderr.trim());
     assert.equal(fullApply.status, 0, `${fullApply.stdout}\n${fullApply.stderr}`);
-    const listed = psqlSql(full, "SELECT jobname FROM cron.job ORDER BY jobname;");
-    console.log("CRON_JOBS", listed.stdout.trim());
-    assert.equal(listed.status, 0, listed.stderr);
-    for (const job of jobs) assert.match(listed.stdout, new RegExp(`^\\s*${job}\\s*$`, "m"), job);
+    assertJobs(full, "CRON_JOBS");
 
-    const removed = psqlSql(full, "DELETE FROM cron.job WHERE jobname = 'bond_purge_audit_log';");
+    const disabled = psqlSql(full, "UPDATE cron.job SET active = false WHERE jobname = 'bond_purge_haus_updates';");
+    assert.equal(disabled.status, 0, disabled.stderr);
+    const disabledGuard = psqlFiles(full, [guardFile], dir);
+    console.log("CRON_DISABLED_JOB", disabledGuard.status, disabledGuard.stderr.trim());
+    assert.notEqual(disabledGuard.status, 0);
+    assert.match(disabledGuard.stderr, /retention job bond_purge_haus_updates failed check: active/);
+    const reenabled = psqlSql(full, "UPDATE cron.job SET active = true WHERE jobname = 'bond_purge_haus_updates';");
+    assert.equal(reenabled.status, 0, reenabled.stderr);
+
+    const wrongSchedule = psqlSql(full, "UPDATE cron.job SET schedule = '0 0 * * *' WHERE jobname = 'bond_purge_order_requests';");
+    assert.equal(wrongSchedule.status, 0, wrongSchedule.stderr);
+    const wrongScheduleGuard = psqlFiles(full, [guardFile], dir);
+    console.log("CRON_WRONG_SCHEDULE", wrongScheduleGuard.status, wrongScheduleGuard.stderr.trim());
+    assert.notEqual(wrongScheduleGuard.status, 0);
+    assert.match(wrongScheduleGuard.stderr, /retention job bond_purge_order_requests failed check: schedule/);
+    const restoredSchedule = psqlSql(full, "UPDATE cron.job SET schedule = '25 4 * * *' WHERE jobname = 'bond_purge_order_requests';");
+    assert.equal(restoredSchedule.status, 0, restoredSchedule.stderr);
+
+    const wrongCommand = psqlSql(full, "UPDATE cron.job SET command = 'SELECT 1' WHERE jobname = 'bond_purge_audit_log';");
+    assert.equal(wrongCommand.status, 0, wrongCommand.stderr);
+    const wrongCommandGuard = psqlFiles(full, [guardFile], dir);
+    console.log("CRON_WRONG_COMMAND", wrongCommandGuard.status, wrongCommandGuard.stderr.trim());
+    assert.notEqual(wrongCommandGuard.status, 0);
+    assert.match(wrongCommandGuard.stderr, /retention job bond_purge_audit_log failed check: command/);
+    const restoredCommand = psqlSql(
+      full,
+      "UPDATE cron.job SET command = 'SELECT public.bond_purge_audit_log()' WHERE jobname = 'bond_purge_audit_log';",
+    );
+    assert.equal(restoredCommand.status, 0, restoredCommand.stderr);
+
+    const removed = psqlSql(full, "DELETE FROM cron.job WHERE jobname = 'bond_purge_expired_sessions';");
     assert.equal(removed.status, 0, removed.stderr);
-    const missingGuard = psqlFiles(full, [guardFile]);
-    console.log("CRON_MISSING_JOB", missingGuard.status, missingGuard.stderr.trim());
-    assert.notEqual(missingGuard.status, 0);
-    assert.match(missingGuard.stderr, /these retention jobs are missing from cron\.job: bond_purge_audit_log/);
+    const rescheduled = psqlFiles(full, [guardFile], dir);
+    console.log("CRON_RESCHEDULE_MISSING", rescheduled.status);
+    if (rescheduled.status !== 0) console.log("CRON_RESCHEDULE_MISSING_ERR", rescheduled.stderr.trim());
+    assert.equal(rescheduled.status, 0, `${rescheduled.stdout}\n${rescheduled.stderr}`);
+    assertJobs(full, "CRON_RESCHEDULED_JOBS");
 
-    createDatabase(broken);
-    const brokenExt = psqlSql(broken, "CREATE EXTENSION pg_cron;");
-    assert.equal(brokenExt.status, 0, brokenExt.stderr);
+    const removedAgain = psqlSql(full, "DELETE FROM cron.job WHERE jobname = 'bond_purge_haus_requests';");
+    assert.equal(removedAgain.status, 0, removedAgain.stderr);
     const failSchedule = psqlSql(
-      broken,
+      full,
       `
 CREATE OR REPLACE FUNCTION cron.schedule(job_name text, schedule text, command text)
 RETURNS bigint
@@ -269,18 +349,54 @@ $fn$;
 `,
     );
     assert.equal(failSchedule.status, 0, failSchedule.stderr);
-    const beforeSchedule = psqlFiles(broken, [applyFiles[0]]);
+    const deletedGuard = psqlFiles(full, [guardFile], dir);
+    console.log("CRON_DELETED_JOB", deletedGuard.status, deletedGuard.stderr.trim());
+    assert.notEqual(deletedGuard.status, 0);
+    assert.match(deletedGuard.stderr, /simulated cron\.schedule failure/);
+    assert.equal(deletedGuard.stderr.includes("pg_cron schedule skipped"), false);
+
+    createDatabase(broken, created);
+    installCronStub(broken);
+    const brokenSchedule = psqlSql(
+      broken,
+      `
+CREATE OR REPLACE FUNCTION cron.schedule(job_name text, schedule text, command text)
+RETURNS bigint
+LANGUAGE plpgsql
+AS $fn$
+BEGIN
+  RAISE EXCEPTION 'simulated cron.schedule failure';
+END;
+$fn$;
+`,
+    );
+    assert.equal(brokenSchedule.status, 0, brokenSchedule.stderr);
+    const beforeSchedule = psqlFiles(broken, [applyFiles[0]], dir);
     assert.equal(beforeSchedule.status, 0, beforeSchedule.stderr);
-    const scheduleFail = psqlFiles(broken, [scheduleFiles[0]]);
+    const scheduleFail = psqlFiles(broken, [scheduleFiles[0]], dir);
     console.log("CRON_SCHEDULE_FAIL", scheduleFail.status, scheduleFail.stderr.trim());
     assert.notEqual(scheduleFail.status, 0);
     assert.match(scheduleFail.stderr, /simulated cron\.schedule failure/);
     assert.equal(scheduleFail.stderr.includes("pg_cron schedule skipped"), false);
+
+    assert.equal(snapshotSystem(), beforeSystem);
   } finally {
-    for (const name of databases) {
-      psql(["-c", `DROP DATABASE IF EXISTS ${name} WITH (FORCE)`]);
+    for (const name of created) {
+      if (!name.startsWith(`bond_cf_${suffix}_`)) continue;
+      const dropped = psql(["-c", `DROP DATABASE IF EXISTS ${name} WITH (FORCE)`]);
+      console.log("CRON_DROPPED", name, dropped.status);
     }
-    psql(["-c", "DROP DATABASE IF EXISTS bond_cron_stub WITH (FORCE)"]);
-    removeCronStub();
+    rmSync(dir, { recursive: true, force: true });
+    const afterSystem = snapshotSystem();
+    const leftover = psql(["-At", "-c", `SELECT datname FROM pg_database WHERE datname LIKE 'bond_cf_${suffix}%' ORDER BY 1;`]);
+    console.log("CRON_SYSTEM_PATHS", beforeSystem === afterSystem ? "untouched" : "CHANGED");
+    console.log("CRON_SCRATCH_LEFT", leftover.stdout.trim() || "(none)");
+    if (beforeSystem !== afterSystem) {
+      console.log("CRON_SYSTEM_BEFORE", beforeSystem);
+      console.log("CRON_SYSTEM_AFTER", afterSystem);
+    }
+    assert.equal(beforeSystem, afterSystem);
+    assert.equal(leftover.status, 0, leftover.stderr);
+    assert.equal(leftover.stdout.trim(), "");
   }
 });
