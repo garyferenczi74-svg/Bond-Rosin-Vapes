@@ -111,7 +111,7 @@ test("HOPEline and licensee contrast stays at or above 4.5:1 on every route gate
   assert.match(read("src/components/bond-warn.tsx"), /className="bond-warn-hope"/);
   assert.match(read("src/components/bond-warn.tsx"), /className="bond-warn-license"/);
   assert.match(read("src/components/bond-age-gate.tsx"), /<BondWarn route=\{route\} \/>/);
-  assert.match(read("src/components/compliance-band.tsx"), /<BondWarn route=\{route\} \/>/);
+  assert.match(read("src/components/compliance-band.tsx"), /<BondWarn route=\{route\} holdLicense \/>/);
   console.log(rows.join("\n"));
 });
 

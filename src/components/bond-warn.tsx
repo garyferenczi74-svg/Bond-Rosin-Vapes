@@ -6,13 +6,15 @@ import {
   HOPE_TAIL,
   HOPE_URL,
   HOPE_URL_LABEL,
+  LICENSE_LEAD,
   LICENSE_LINE,
+  LICENSE_NUMBER,
   WARNING_C1,
   dLineForRoute,
   type WarningRoute,
 } from "@/lib/bond-warnings";
 
-export function BondWarn({ route }: { route: WarningRoute }) {
+export function BondWarn({ route, holdLicense = false }: { route: WarningRoute; holdLicense?: boolean }) {
   return (
     <div className="bond-warn">
       <div className="bond-warn-box">
@@ -26,7 +28,7 @@ export function BondWarn({ route }: { route: WarningRoute }) {
         <a href={HOPE_URL}>{HOPE_URL_LABEL}</a>
         {HOPE_TAIL}
       </p>
-      <p className="bond-warn-license">{LICENSE_LINE}</p>
+      <p className="bond-warn-license">{holdLicense ? <>{LICENSE_LEAD}<span className="bond-warn-lic-no">{LICENSE_NUMBER}</span></> : LICENSE_LINE}</p>
     </div>
   );
 }
