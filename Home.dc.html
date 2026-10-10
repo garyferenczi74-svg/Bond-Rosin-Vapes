@@ -313,19 +313,37 @@ input::placeholder { color: #B0A99A; }
 @media (min-width: 768px) and (min-height: 500px) and (max-height: 800px) and (min-aspect-ratio: 1/1) {
   #top { --hero-short-laptop: 1; }
 }
-/* Landscape laptop and tablet from 853 wide and 450 tall. Desktop type, rules, and gaps.
-   The 819 rule above is the compact scale. Touch landscape stays under 450 tall.
-   A fine pointer (mouse laptop) uses the same type below that floor.
-   Fit, when the stack would leave the viewport, is the hero-fit scale in the layout script. */
+/* Laptop, and a short window 1200 wide or more. Sizes are the 1692x825 desktop
+   measured against that viewport: tagline 3.394vh, italic 2.909vh, subtext 2.061vh,
+   button type 1.939vh, button box 6.061vh, gap 5.430vh. --hero-s (set by the
+   layout script) fits that stack under the nav. 1200x720 and up does not match.
+   Touch landscape is under 450 tall and coarse, so it misses these queries. */
 @media (min-width: 853px) and (max-width: 1199px) and (min-height: 450px) and (min-aspect-ratio: 1/1),
-       (min-width: 853px) and (max-width: 1199px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1) {
-  .hero-text { --hero-tagline-size: 28px; --hero-tagline-gap: calc(1.6 * 28px); }
-  .hero-tagline { gap: 22px; }
-  .hero-tagline h1 { letter-spacing: 6px; padding-left: 6px; line-height: 1.1; }
-  .hero-rule { width: 150px; }
-  .hero-line2 { font-size: 24px; line-height: 1.25; }
-  .hero-subtext { font-size: 17px; line-height: 1.45; }
-  .hero-btn { font-size: 16px; letter-spacing: 3px; }
+       (min-width: 853px) and (max-width: 1199px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1),
+       (min-width: 1200px) and (max-height: 719px) and (min-aspect-ratio: 1/1) {
+  #top { --hero-s: 1; }
+  .hero-text {
+    --hero-tagline-size: clamp(12px, calc(3.394vh * var(--hero-s)), 28px);
+    --hero-tagline-gap: clamp(12px, calc(5.430vh * var(--hero-s)), 44.8px);
+    --hero-gap-line2: var(--hero-tagline-gap);
+    --hero-gap-body: var(--hero-tagline-gap);
+    --hero-gap-cta: var(--hero-tagline-gap);
+  }
+  .hero-tagline { gap: clamp(10px, calc(2.667vh * var(--hero-s)), 22px); }
+  .hero-tagline h1 { letter-spacing: 0.214em; padding-left: 0.214em; line-height: 1.1; }
+  .hero-rule { width: clamp(64px, calc(18.182vh * var(--hero-s)), 150px); }
+  .hero-line2 { font-size: clamp(10px, calc(2.909vh * var(--hero-s)), 24px); line-height: 1.25; }
+  .hero-subtext { font-size: clamp(9px, calc(2.061vh * var(--hero-s)), 17px); line-height: 1.45; max-width: 39em; }
+  .hero-btn {
+    font-size: clamp(9px, calc(1.939vh * var(--hero-s)), 16px);
+    letter-spacing: 0.1875em;
+    min-height: clamp(22px, calc(6.061vh * var(--hero-s)), 50px);
+    white-space: nowrap;
+  }
+  .hero-btn-primary, .hero-btn-secondary {
+    padding: clamp(6px, calc(1.939vh * var(--hero-s)), 16px) clamp(12px, calc(3.879vh * var(--hero-s)), 32px);
+  }
+  .hero-buttons { gap: clamp(6px, calc(1.939vh * var(--hero-s)), 16px); }
 }
 /* Below 819. Phone landscape keeps the 16:9 plate, and the type meets the 819 rule at 818px so the step is zero. 2.078vw of 818 is 17px. */
 @media (max-width: 818px) and (min-aspect-ratio: 1/1) {
@@ -2611,6 +2629,88 @@ class Component extends DCLogic {
     if (changed) t.style.setProperty('--hero-relax', '1');
   }
 
+  // Laptop, and a wide window under 720 tall. Scale of the measured 1692x825
+  // desktop: the stack under the nav is 758px there, the wordmark is 77% of
+  // the width when the scale is the width ratio. One scale keeps the gaps even.
+  // 1200x720 and up returns immediately. Phones never call this.
+  function layoutLaptopScale(t, s, v) {
+    var ih = window.innerHeight || 0;
+    if (!t || !isDeskLandscape() || !v || (isWideNow() && ih >= 720)) {
+      if (t) t.style.removeProperty('--hero-s');
+      return;
+    }
+    var nav = document.querySelector('nav');
+    var stageTop = t.getBoundingClientRect().top;
+    var navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom - stageTop) : 67;
+    var free = ih - navBottom;
+    if (!(free > 80)) return;
+    var cw = t.clientWidth || window.innerWidth || 0;
+    if (!(cw > 2)) return;
+    clearCopyScale(s);
+    s.style.removeProperty('--hero-gap-line2');
+    s.style.removeProperty('--hero-gap-body');
+    s.style.removeProperty('--hero-gap-cta');
+    s.style.removeProperty('padding-bottom');
+    t.style.removeProperty('height');
+    t.style.removeProperty('min-height');
+    var REF_W = 1692;
+    var REF_FREE = 758;
+    var S = free / REF_FREE;
+    if (S > cw / REF_W) S = cw / REF_W;
+    if (S > 1) S = 1;
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var pass;
+    for (pass = 0; pass < 6; pass++) {
+      var heroS = (S * 825) / ih;
+      t.style.setProperty('--hero-s', heroS.toFixed(4));
+      var vidW = REF_W * S * (srcW / 1920);
+      var vidH = vidW * (srcH / srcW);
+      var scale = vidW / srcW;
+      var left = (cw - vidW) / 2;
+      var cap = 308 * (srcH / 1080) * scale;
+      var wordH = 335 * (srcH / 1080) * scale;
+      var clear = 33.1 * S;
+      var top = (navBottom + clear) - cap;
+      t.style.setProperty('--hero-media-width', vidW.toFixed(2) + 'px');
+      t.style.setProperty('--hero-media-height', vidH.toFixed(2) + 'px');
+      t.style.setProperty('--hero-media-left', left.toFixed(2) + 'px');
+      t.style.setProperty('--hero-media-top', top.toFixed(2) + 'px');
+      t.style.setProperty('--hero-media-max-width', 'none');
+      t.style.setProperty('--hero-media-min-height', '0px');
+      t.style.setProperty('--hero-media-object-fit', 'fill');
+      var media = document.querySelector('.hero-media');
+      if (media) {
+        media.style.backgroundSize = vidW.toFixed(2) + 'px ' + vidH.toFixed(2) + 'px';
+        media.style.backgroundPosition = left.toFixed(2) + 'px ' + top.toFixed(2) + 'px';
+        media.style.backgroundRepeat = 'no-repeat';
+        var inset = (cw - vidW) / 2;
+        if (inset > 2) {
+          var feather = 64;
+          var letterFromEdge = vidW * (204 / srcW);
+          if (feather > letterFromEdge - 16) feather = Math.max(24, Math.round(letterFromEdge - 16));
+          var edge = Math.round(inset);
+          var solid = Math.round(inset + feather);
+          var mask = 'linear-gradient(to right, transparent 0px, transparent ' + edge + 'px, #000 ' + solid + 'px, #000 calc(100% - ' + solid + 'px), transparent calc(100% - ' + edge + 'px), transparent 100%)';
+          media.style.webkitMaskImage = mask;
+          media.style.maskImage = mask;
+        } else {
+          media.style.removeProperty('mask-image');
+          media.style.removeProperty('-webkit-mask-image');
+        }
+      }
+      var line2 = s.querySelector('.hero-line2');
+      var gap = line2 ? parseFloat(window.getComputedStyle(line2).marginTop) : (44.8 * S);
+      if (!(gap > 0)) gap = 44.8 * S;
+      var copyTop = (navBottom + clear) + wordH + gap;
+      s.style.setProperty('--hero-copy-top', Math.ceil(copyTop) + 'px');
+      var btn = s.querySelector('.hero-buttons');
+      var btnBottom = btn ? (layoutTop(btn) + btn.offsetHeight) : 0;
+      if (btnBottom <= ih - 32 + 0.5) break;
+      S = S * 0.96;
+    }
+  }
+
   function layoutCopy() {
     try {
       var t = document.getElementById(STAGE);
@@ -2630,6 +2730,8 @@ class Component extends DCLogic {
         layoutDesktop(t, s, v);
         relaxShort(t, s, v);
         fitLandscape(t, s, v);
+        if ((window.innerHeight || 0) < 720) layoutLaptopScale(t, s, v);
+        else t.style.removeProperty('--hero-s');
         return;
       }
       if (isLandscapeBand()) {
@@ -2639,6 +2741,7 @@ class Component extends DCLogic {
         if (isDeskLandscape()) {
           layoutBand(t, s, v, true);
           fitLandscape(t, s, v);
+          layoutLaptopScale(t, s, v);
           return;
         }
         layoutBand(t, s, v);
