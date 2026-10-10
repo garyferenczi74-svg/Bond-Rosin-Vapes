@@ -111,7 +111,7 @@ test("HOPEline and licensee contrast stays at or above 4.5:1 on every route gate
   assert.match(read("src/components/bond-warn.tsx"), /className="bond-warn-hope"/);
   assert.match(read("src/components/bond-warn.tsx"), /className="bond-warn-license"/);
   assert.match(read("src/components/bond-age-gate.tsx"), /<BondWarn route=\{route\} \/>/);
-  assert.match(read("src/components/compliance-band.tsx"), /<BondWarn route=\{route\} \/>/);
+  assert.match(read("src/components/compliance-band.tsx"), /<BondWarn route=\{route\} holdLicense \/>/);
   console.log(rows.join("\n"));
 });
 
@@ -125,7 +125,10 @@ test("finder uses the shared gate and writes the directory only after entry", ()
   assert.match(body, /localStorage\.setItem\('bondNyCities'/);
   const rest = finder.slice(0, start) + finder.slice(end);
   assert.equal(rest.includes("localStorage.setItem"), false);
-  assert.match(finder, /Bond is for adults 21 and over\. We look forward to meeting you when it is time\./);
+  assert.match(
+    finder,
+    /You must be 21 or older to visit this site\. If you or someone you know needs support, the NYS HOPEline is confidential: call 1-877-8-HOPENY or text HOPENY \(467369\)\./,
+  );
   assert.equal(
     finder.includes("Sold only at dispensaries licensed by New York State. This site does not sell cannabis."),
     true,

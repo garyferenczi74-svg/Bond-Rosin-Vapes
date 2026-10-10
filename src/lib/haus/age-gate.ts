@@ -1,59 +1,45 @@
-// Same session key as AgeGate.dc.html. A stored value means the visitor already entered.
+// Yes flag plus a timestamp in localStorage. A fresh value means the visitor already entered.
 
 export const BOND_AGE_KEY = "bond_age_ok";
+export const BOND_AGE_DAYS = 30;
+export const BOND_AGE_MS = BOND_AGE_DAYS * 24 * 60 * 60 * 1000;
 
 export function markBondAgePassed(documentElement: { dataset: { [key: string]: string | undefined } }): void {
   documentElement.dataset.bondAge = "ok";
 }
 
+export function bondAgeStamp(t: number): string {
+  return JSON.stringify({ ok: true, t });
+}
+
+// Fresh yes timestamp, or null when the value is missing, expired, or malformed.
+// A plain digit string is an older localStorage timestamp. It is not read from sessionStorage.
+export function bondAgeTimestamp(raw: string | null, now = Date.now()): number | null {
+  if (raw == null || raw === "") return null;
+  let t: number | null = null;
+  try {
+    const parsed = JSON.parse(raw) as { ok?: unknown; t?: unknown };
+    if (parsed && typeof parsed === "object") {
+      if (parsed.ok === true && typeof parsed.t === "number" && Number.isFinite(parsed.t)) t = parsed.t;
+      else return null;
+    }
+  } catch {
+    t = null;
+  }
+  if (t == null && /^\d+$/.test(raw)) {
+    const n = Number(raw);
+    if (Number.isFinite(n)) t = n;
+  }
+  if (t == null) return null;
+  const age = now - t;
+  if (age < 0 || age >= BOND_AGE_MS) return null;
+  return t;
+}
+
 export const HAUS_DOOR_PATH = "/haus";
 
-export function hausShowsAgeGate(stored: string | null): boolean {
-  return stored == null || stored === "";
-}
-
-export const BOND_AGE_MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-] as const;
-
-export function bondBirthYears(now: Date): string[] {
-  const end = now.getFullYear();
-  const years: string[] = [];
-  for (let y = end; y >= end - 100; y--) years.push(String(y));
-  return years;
-}
-
-// Same month index and birth-on-the-first rule as AgeGate.dc.html.
-export function bondAgeDecision(month: string, year: string, now: Date): "wait" | "enter" | "decline" {
-  if (month === "" || year === "") return "wait";
-  const born = new Date(parseInt(year, 10), parseInt(month, 10), 1);
-  let age = now.getFullYear() - born.getFullYear();
-  if (now.getMonth() < born.getMonth()) age = age - 1;
-  if (age >= 21) return "enter";
-  return "decline";
-}
-
-// Month, year, and the unchecked-by-default affirmation are all required.
-// A date under 21 still declines when the box is checked.
-export function bondAgeEntry(
-  month: string,
-  year: string,
-  affirmed: boolean,
-  now: Date,
-): "wait" | "enter" | "decline" {
-  if (affirmed !== true) return "wait";
-  return bondAgeDecision(month, year, now);
+export function hausShowsAgeGate(stored: string | null, now = Date.now()): boolean {
+  return bondAgeTimestamp(stored, now) == null;
 }
 
 export function hausRouteShowsAgeGate(pathname: string, stored: string | null): boolean {
@@ -71,7 +57,7 @@ export function routeShowsAgeGate(pathname: string, stored: string | null): bool
   return hausShowsAgeGate(stored);
 }
 
-export const HAUS_AGE_BOOT = `(function(){var stored=null;try{stored=sessionStorage.getItem(${JSON.stringify(BOND_AGE_KEY)});}catch(e){}if(stored==null||stored===""){document.documentElement.removeAttribute("data-bond-age");}else{document.documentElement.setAttribute("data-bond-age","ok");}})();`;
+export const HAUS_AGE_BOOT = `(function(){var KEY=${JSON.stringify(BOND_AGE_KEY)},MAX=${BOND_AGE_MS};function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");else document.documentElement.removeAttribute("data-bond-age");})();`;
 
 const LATIN_RANGE =
   "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
@@ -79,15 +65,16 @@ const LATIN_RANGE =
 export const AGE_GATE_CRITICAL = `/* Cover paints before tokens arrive */
 html,body,#bond-gate-cover{background:#1B1D1C}
 #bond-gate-cover{position:fixed;inset:0;z-index:8000;pointer-events:auto}
-html,body{margin:0;color:var(--bone)}
+html,body{margin:0}
 :root{--font-didot:"GFS Didot"}
 html[data-bond-age="ok"] #bond-gate-cover{display:none}
 html:not([data-bond-age="ok"]) .bond-floor { visibility: hidden; }
 html[data-bond-age="ok"] .bond-age-gate { display: none; }
-.bond-age-gate{position:fixed;inset:0;z-index:9999;background:#0D0F0E;display:flex;flex-direction:column;align-items:center}
-.bond-age-gate .bond-age-ask .bond-age-body{font-family:Arial,"Segoe UI",sans-serif;font-size:16px;line-height:1.7;font-weight:400;color:#B0A99A;max-width:440px;margin:26px auto}
-.bond-age-gate .bond-age-panel .bond-age-mark,.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:Georgia,"Times New Roman",serif;font-weight:400}
-.bond-age-dc{max-height:100vh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain}html:not([data-bond-age="ok"]):has(.bond-age-dc),html:not([data-bond-age="ok"]):has(#bond-age-gate),html:not([data-bond-age="ok"]):has(.bond-age-dc) body,html:not([data-bond-age="ok"]):has(#bond-age-gate) body{overflow:hidden}@media (max-height:640px){.bond-age-gate{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;justify-content:flex-start}.bond-age-gate .bond-age-panel{margin-top:0;margin-bottom:0;flex-shrink:0}.bond-age-dc{max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;align-items:flex-start !important;justify-content:center !important}}@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}`;
+.bond-age-gate,.bond-age-dc{position:fixed;inset:0;z-index:9999;background:#0E0F0F;display:flex;align-items:center;justify-content:center;overflow:auto}
+.bond-age-box{width:min(560px,100%);background:#1B1D1C;border:1px solid #3A3C3B;box-sizing:border-box;text-align:center}
+.bond-age-gate .bond-age-ask .bond-age-body{font-family:Arial,"Segoe UI",sans-serif;font-size:13px;line-height:1.6;font-weight:400;color:#CFC8BE;margin:0}
+.bond-age-gate .bond-age-panel .bond-age-lead,.bond-age-gate .bond-age-panel .bond-age-title{font-family:Georgia,"Times New Roman",serif;font-weight:400}
+html:not([data-bond-age="ok"]):has(.bond-age-dc),html:not([data-bond-age="ok"]):has(#bond-age-gate),html:not([data-bond-age="ok"]):has(.bond-age-dc) body,html:not([data-bond-age="ok"]):has(#bond-age-gate) body{overflow:hidden}@media (max-height:640px){.bond-age-gate,.bond-age-dc{align-items:flex-start}}@supports ((-webkit-clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px)) or (clip-path: polygon(evenodd, 0 0, 1px 0, 0 1px))){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px);clip-path:polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,3px 3px,3px calc(100% - 3px),calc(100% - 3px) calc(100% - 3px),calc(100% - 3px) 3px,3px 3px)}}@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)){.bond-age-gate .bond-warn-box::before,.bond-age-dc .bond-warn-box::before,.bond-age-off .bond-warn-box::before,#bond-gate-cover .bond-warn-box::before{content:"";position:absolute;inset:-4px;box-sizing:border-box;padding:3px;background:var(--bond-plant-gold);pointer-events:none;-webkit-clip-path:none;clip-path:none;-webkit-mask:linear-gradient(black, black) content-box,linear-gradient(black, black);-webkit-mask-composite:xor;mask:linear-gradient(black, black) content-box,linear-gradient(black, black);mask-composite:exclude}}`;
 
 function webFace(family: string, weight: string, file: string): string {
   return `@font-face{font-family:"${family}";font-style:normal;font-weight:${weight};font-display:swap;src:url("${file}") format("woff2");unicode-range:${LATIN_RANGE}}`;
@@ -98,7 +85,7 @@ export const HAUS_FONT_LATE_CSS = [
   webFace("Inter", "500", "/fonts/inter-latin.woff2"),
   webFace("GFS Didot", "400", "/fonts/gfs-didot-latin-400.woff2"),
   `html body .bond-age-gate .bond-age-ask .bond-age-body{font-family:Inter,"Inter Fallback",Aptos,"Segoe UI Variable","Segoe UI",sans-serif}`,
-  `html body .bond-age-gate .bond-age-panel .bond-age-mark,html body .bond-age-gate .bond-age-panel .bond-age-lead,html body .bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot",Didot,serif}`,
+  `html body .bond-age-gate .bond-age-panel .bond-age-mark,html body .bond-age-gate .bond-age-logo,html body .bond-age-gate .bond-age-panel .bond-age-lead,html body .bond-age-gate .bond-age-panel .bond-age-title{font-family:"GFS Didot",Didot,serif}`,
 ].join("");
 
 export const HAUS_FONT_LATE = `(function(){function load(){if(document.getElementById("bond-gate-fonts"))return;var cover=document.getElementById("bond-gate-cover");var gate=document.querySelector(".bond-age-gate");if(cover==null&&gate==null)return;var node=document.createElement("style");node.id="bond-gate-fonts";node.textContent=${JSON.stringify(HAUS_FONT_LATE_CSS)};var parent=document.body;if(parent==null)parent=document.documentElement;parent.appendChild(node);}function arm(){requestAnimationFrame(function(){requestAnimationFrame(load);});}window.addEventListener("load",arm);})();`;

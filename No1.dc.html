@@ -16,6 +16,8 @@ html:not([data-bond-age="ok"]) #bond-gate-cover .bond-js-off{visibility:hidden}
 html:not([data-bond-age="ok"]) body>*:not(#bond-gate-cover){visibility:hidden}
 html:not([data-bond-age="ok"]) dc-import[name="AgeGate"],
 html:not([data-bond-age="ok"]) dc-import[name="AgeGate"] *,
+html:not([data-bond-age="ok"]) .bond-age-dc,
+html:not([data-bond-age="ok"]) .bond-age-dc *,
 html:not([data-bond-age="ok"]) [style*="z-index:9999"],
 html:not([data-bond-age="ok"]) [style*="z-index:9999"] *,
 html:not([data-bond-age="ok"]) [style*="z-index: 9999"],
@@ -26,12 +28,12 @@ html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 <noscript><style>body>*:not(#bond-gate-cover){display:none !important}#bond-gate-cover{display:flex !important;align-items:center;justify-content:center;overflow:auto}#bond-gate-cover .bond-js-off{visibility:visible !important}</style></noscript>
 <script id="bond-gate-boot">
 (function(){
-  try{if(sessionStorage.getItem("bond_age_ok"))document.documentElement.setAttribute("data-bond-age","ok")}catch(e){}
+  var KEY="bond_age_ok",MAX=2592000000;function fresh(raw){if(raw==null||raw==="")return false;try{var o=JSON.parse(raw);if(o&&o.ok===true&&typeof o.t==="number"&&isFinite(o.t)){var d=Date.now()-o.t;return d>=0&&d<MAX;}}catch(e){}if(/^\d+$/.test(String(raw))){var t=Number(raw),d2=Date.now()-t;return d2>=0&&d2<MAX;}return false;}var ok=false;try{ok=fresh(localStorage.getItem(KEY));}catch(e){}try{if(sessionStorage.getItem("bond_age_ok")!=null)sessionStorage.removeItem("bond_age_ok");}catch(e){}if(ok)document.documentElement.setAttribute("data-bond-age","ok");
   document.addEventListener("focusin",function(ev){
     if(document.documentElement.getAttribute("data-bond-age")==="ok")return;
     var t=ev.target;
     if(!t||t===document.body||t===document.documentElement)return;
-    if(t.closest&&t.closest('dc-import[name="AgeGate"],.bond-age-gate,[style*="z-index:9999"],[style*="z-index: 9999"]'))return;
+    if(t.closest&&t.closest('dc-import[name="AgeGate"],.bond-age-dc,.bond-age-gate,[style*="z-index:9999"],[style*="z-index: 9999"]'))return;
     if(t.blur)t.blur();
   },true);
 })();
@@ -48,10 +50,11 @@ html:not([data-bond-age="ok"]) [style*="z-index: 9999"] *{visibility:visible}
 <script src="./video-policy.js"></script>
 <link rel="stylesheet" href="/bond-tokens.css">
 <link rel="stylesheet" href="/bond-age-gate.css">
+<link rel="stylesheet" href="/bond-footer-warn.css">
 <style id="bond-warn-tokens">:root{--bond-warning-yellow:#FFFF00;--bond-warning-ink:var(--matte-black)}</style>
 </head>
 <body>
-<div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">Bond requires JavaScript to confirm your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
+<div id="bond-gate-cover"><div class="bond-js-off"><p class="bond-js-note">This site is intended for adults 21 and older. Please enable JavaScript to verify your age.</p><div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div></div></div>
 <x-dc inert>
 <helmet>
 <link rel="stylesheet" href="/fonts/fonts.css">
@@ -212,7 +215,7 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
     <div style="max-width:1180px;margin:0 auto">
       <div style="max-width:720px;margin:0 auto 28px">
       <div style="font-size:12px;letter-spacing:0.32em;text-transform:uppercase;background:linear-gradient(160deg,#8F6B25 0%,#C29A45 38%,#E3C270 50%,#C29A45 62%,#8F6B25 100%);-webkit-background-clip:text;background-clip:text;color:#E3C270;display:inline-block;margin:0 0 14px">Health and Safety</div>
-      <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. OCM-PROC-25-000329</p></div>
+      <div class="bond-warn"><div class="bond-warn-box"><p>For use only by persons 21 years of age and older. Keep out of reach of children and pets. If someone accidentally consumes cannabis, contact the Poison Center. Consume responsibly.</p><p>Cannabis can impair concentration and coordination. Do not operate a vehicle or machinery under the influence of cannabis.</p></div><p class="bond-warn-hope">Concerned about your cannabis use? Contact the New York State HOPEline by texting HOPENY (467369), calling <a href="tel:18778467369">1-877-8-HOPENY</a>, or visiting <a href="https://oasas.ny.gov/hopeline">oasas.ny.gov/hopeline</a>.</p><p class="bond-warn-license">Cedargrowth LLC. Licensed by the New York State Office of Cannabis Management. <span class="bond-warn-lic-no">OCM-PROC-25-000329</span></p></div>
       </div>
       <div style="font-family:'GFS Didot',Didot,serif;font-size:20px;letter-spacing:0.4em;padding-left:0.4em;color:#E1DAD0;margin:0 0 22px">BOND</div>
       <div style="font-family:'GFS Didot',Didot,serif;display:flex;gap:26px 34px;flex-wrap:wrap;justify-content:center;font-size:12px;letter-spacing:0.16em;text-transform:uppercase">
@@ -241,9 +244,49 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
 (function () {
   var cover = document.getElementById("bond-gate-cover");
   var passed = false;
-  try { passed = Boolean(sessionStorage.getItem("bond_age_ok")); } catch (e) {}
+  try {
+    var ageKey = "bond_age_ok", ageMax = 2592000000;
+    function ageFresh(raw) {
+      if (raw == null || raw === "") return false;
+      try {
+        var obj = JSON.parse(raw);
+        if (obj && obj.ok === true && typeof obj.t === "number" && isFinite(obj.t)) {
+          var delta = Date.now() - obj.t;
+          return delta >= 0 && delta < ageMax;
+        }
+      } catch (err) {}
+      if (/^\d+$/.test(String(raw))) {
+        var stamp = Number(raw), delta2 = Date.now() - stamp;
+        return delta2 >= 0 && delta2 < ageMax;
+      }
+      return false;
+    }
+    var localRaw = null, sessionRaw = null;
+    try { localRaw = localStorage.getItem(ageKey); } catch (err) {}
+    try { sessionRaw = sessionStorage.getItem("bond_age_ok"); } catch (err) {}
+    try { if (sessionRaw != null) sessionStorage.removeItem("bond_age_ok"); } catch (err) {}
+    passed = ageFresh(localRaw);
+  } catch (e) {}
   function findGate() {
-    return document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
+    return document.querySelector(".bond-age-dc") || document.querySelector('dc-import[name="AgeGate"]') || document.querySelector('[style*="z-index:9999"], [style*="z-index: 9999"]');
+  }
+  function gateRoot() {
+    var live = document.querySelector(".bond-age-dc");
+    if (live) return live;
+    return findGate();
+  }
+  var attrSeen = typeof WeakSet === "function" ? new WeakSet() : null;
+  function armAttrs(root) {
+    if (!watch || !root) return;
+    var kids = root.children;
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      if (attrSeen) {
+        if (attrSeen.has(el)) continue;
+        attrSeen.add(el);
+      }
+      watch.observe(el, { attributes: true, attributeFilter: ["inert", "aria-hidden"] });
+    }
   }
   function hold() {
     var gate = findGate();
@@ -255,11 +298,11 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
       var el = kids[i];
       var keep = gate && el.contains(gate);
       if (keep) {
-        el.inert = false;
-        el.removeAttribute("data-bond-hold");
-      } else {
-        el.inert = true;
-        el.setAttribute("data-bond-hold", "");
+        if (el.inert) el.inert = false;
+        if (el.hasAttribute("data-bond-hold")) el.removeAttribute("data-bond-hold");
+      } else if (!el.inert || !el.hasAttribute("data-bond-hold")) {
+        if (!el.inert) el.inert = true;
+        if (!el.hasAttribute("data-bond-hold")) el.setAttribute("data-bond-hold", "");
       }
     }
     var node = gate;
@@ -268,11 +311,55 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
       if (node.inert) node.inert = false;
       node = node.parentElement;
     }
+    armAttrs(root);
+  }
+  function controlsIn(root) {
+    var out = [];
+    if (!root || !root.querySelectorAll) return out;
+    var list = root.querySelectorAll("a[href], button, input, select, textarea");
+    for (var i = 0; i < list.length; i++) {
+      var el = list[i];
+      if (el.disabled) continue;
+      if (el.tabIndex < 0) continue;
+      var st = window.getComputedStyle(el);
+      if (st.display === "none" || st.visibility === "hidden") continue;
+      if (!el.getClientRects || el.getClientRects().length === 0) continue;
+      out.push(el);
+    }
+    return out;
+  }
+  function onTab(ev) {
+    if (ev.key !== "Tab") return;
+    var controls = controlsIn(gateRoot());
+    if (!controls.length) {
+      ev.preventDefault();
+      return;
+    }
+    var idx = -1;
+    for (var i = 0; i < controls.length; i++) {
+      if (controls[i] === document.activeElement) { idx = i; break; }
+    }
+    var next;
+    if (idx === -1) next = ev.shiftKey ? controls.length - 1 : 0;
+    else if (ev.shiftKey) next = idx === 0 ? controls.length - 1 : idx - 1;
+    else next = idx === controls.length - 1 ? 0 : idx + 1;
+    ev.preventDefault();
+    controls[next].focus();
+  }
+  function onFocusIn(ev) {
+    var root = gateRoot();
+    var t = ev.target;
+    if (!t || t === document.body || t === document.documentElement) return;
+    if (root && (t === root || (root.contains && root.contains(t)))) return;
+    var controls = controlsIn(root);
+    if (controls.length && document.activeElement !== controls[0]) controls[0].focus();
   }
   var watch = null;
   function release() {
     if (watch) watch.disconnect();
     watch = null;
+    document.removeEventListener("keydown", onTab, true);
+    document.removeEventListener("focusin", onFocusIn, true);
     var held = document.querySelectorAll("[data-bond-hold]");
     for (var i = 0; i < held.length; i++) {
       held[i].inert = false;
@@ -305,6 +392,10 @@ a { color: #E1DAD0; text-decoration: none; } a:hover { color: #EFEBE2; }
   hold();
   watch = new MutationObserver(function () { hold(); });
   watch.observe(document.documentElement, { childList: true, subtree: true });
+  var navNow = document.querySelector("nav");
+  armAttrs(navNow ? navNow.parentElement : document.querySelector("x-dc > div"));
+  document.addEventListener("keydown", onTab, true);
+  document.addEventListener("focusin", onFocusIn, true);
   window.addEventListener("bond-entered", release);
 })();
 </script>

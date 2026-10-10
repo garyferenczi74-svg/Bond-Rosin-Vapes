@@ -1,5 +1,6 @@
 @import "../../bond-tokens.css";
 @import "../../bond-age-gate.css";
+@import "../../bond-footer-warn.css";
 
 :root {
   --deep-charcoal: #2A2A2A;

@@ -33,7 +33,7 @@ test("DESIGN PREVIEW seeds live KPIs and Phase A attention", () => {
   const board = dash.board.find((row) => row.id === "writes");
   assert.ok(board);
   assert.equal(board.live, true);
-  assert.equal(board.lintBlocked > 0, true);
+  assert.equal(board.lintBlocked, 0);
 });
 
 test("lint blocks long dash and hard-blocks claims", () => {
