@@ -52,7 +52,7 @@ test("gate and footer share one warning block and one css rule", () => {
   const gate = read("src/components/bond-age-gate.tsx");
   const band = read("src/components/compliance-band.tsx");
   const warn = read("src/components/bond-warn.tsx");
-  assert.match(gate, /<BondWarn route=\{route\} \/>/);
+  assert.match(gate, /<BondWarn route=\{route\} holdLicense \/>/);
   assert.match(band, /<BondWarn route=\{route\} holdLicense \/>/);
   assert.match(band, /warningRouteForPath/);
   assert.match(warn, /WARNING_C1/);
@@ -67,7 +67,7 @@ test("gate and footer share one warning block and one css rule", () => {
   }
 
   const ageGate = read("AgeGate.dc.html");
-  assert.equal(ageGate.includes(warnBlockHtml("{{ warn }}")), true);
+  assert.equal(ageGate.includes(footerWarnBlockHtml("{{ warn }}")), true);
   assert.equal(ageGate.includes('this.props.warn || "Cannabis can be addictive."'), true);
   assert.equal(ageGate.includes("bond-age-health"), false);
 
@@ -87,9 +87,11 @@ test("gate and footer share one warning block and one css rule", () => {
       "Terms.dc.html",
     ]);
     if (footerFiles.has(row.file)) {
-      assert.equal(copies, 1, row.file);
+      // Inline gates keep the licence number on one line like the footer.
+      const inlineGate = row.gate === "inline";
+      assert.equal(copies, inlineGate ? 0 : 1, row.file);
       const footerBlock = footerWarnBlockHtml(dLineForRoute(row.route));
-      assert.equal(html.split(footerBlock).length - 1, 1, row.file);
+      assert.equal(html.split(footerBlock).length - 1, inlineGate ? 2 : 1, row.file);
       const license = footerBlock.match(/<p class="bond-warn-license">([\s\S]*?)<\/p>/);
       assert.ok(license, row.file);
       assert.equal(license[1].replace(/<[^>]+>/g, ""), LICENSE_LINE, row.file);
@@ -115,7 +117,7 @@ test("gate and footer share one warning block and one css rule", () => {
     if (row.gate === "import") {
       assert.match(html, new RegExp(`warn="${assigned.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
     }
-    assert.equal(html.includes(LICENSE_LINE), true, row.file);
+    assert.equal(html.replace(/<span class="bond-warn-lic-no">([^<]*)<\/span>/g, "$1").includes(LICENSE_LINE), true, row.file);
   }
 
   const faq = read("FAQ.dc.html");
@@ -139,7 +141,11 @@ test("footer warnings are 12px and Home keeps the shared 9px rule", () => {
   assert.match(css, /footer \.bond-warn-hope a\[href\^="tel:"\] \{\s*white-space: nowrap;\s*\}/);
   assert.match(css, /footer \.bond-warn-lic-no \{\s*white-space: nowrap;\s*\}/);
   assert.equal(read("Home.dc.html").includes("bond-warn-lic-no"), false);
-  assert.equal(read("AgeGate.dc.html").includes("bond-warn-lic-no"), false);
+  assert.equal(read("AgeGate.dc.html").includes("bond-warn-lic-no"), true);
+  const gateCss = read("bond-age-gate.css");
+  assert.match(gateCss, /\.bond-age-dc \.bond-warn-lic-no,[^{]*\{\s*white-space: nowrap;\s*\}/);
+  assert.match(gateCss, /\.bond-age-gate \.bond-age-tel,[^{]*\{\s*white-space: nowrap;\s*\}/);
+  assert.match(gateCss, /\.bond-age-dc \.bond-warn-hope a\[href\^="tel:"\],[^{]*\{\s*white-space: nowrap;\s*\}/);
   assert.equal(css.includes("font-size: 9px"), false);
   assert.equal(read("Home.dc.html").includes("bond-footer-warn.css"), false);
   assert.equal(read("AgeGate.dc.html").includes("bond-footer-warn.css"), false);
