@@ -1911,14 +1911,15 @@ class Component extends DCLogic {
     var cw = t.clientWidth || window.innerWidth || 0;
     var ch = t.clientHeight || window.innerHeight || 0;
     if (!(cw > 2) || !(ch > 2) || !v) return;
-    var cs = window.getComputedStyle(t);
-    var left = parseFloat(cs.getPropertyValue('--hero-media-left'));
-    var top = parseFloat(cs.getPropertyValue('--hero-media-top'));
-    var vidW = parseFloat(cs.getPropertyValue('--hero-media-width'));
-    var vidH = parseFloat(cs.getPropertyValue('--hero-media-height'));
+    // Read the painted video box. The defaults are 100% and 115%, and
+    // parseFloat('100%') is 100, which is a 100px plate and a huge copy gap.
+    var vR = v.getBoundingClientRect();
+    var tR = t.getBoundingClientRect();
+    var left = vR.left - tR.left;
+    var top = vR.top - tR.top;
+    var vidW = vR.width;
+    var vidH = vR.height;
     if (!(vidW > 2) || !(vidH > 2)) return;
-    if (!(left === left)) left = 0;
-    if (!(top === top)) top = 0;
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
     var cap = DESK_CAP * (srcH / 1080);
