@@ -180,6 +180,7 @@ nav { container-type: inline-size; container-name: bondnav; }
     .hero-nav-links {
       gap: clamp(12px, calc(100cqw * 0.022), 38px);
       font-size: clamp(12px, calc(100cqw * 0.0105), 13px);
+      letter-spacing: 0.13em;
     }
   }
 }
@@ -207,6 +208,7 @@ nav { container-type: inline-size; container-name: bondnav; }
     .hero-nav-links {
       gap: clamp(12px, calc(100cqw * 0.022), 38px);
       font-size: clamp(12px, calc(100cqw * 0.0105), 13px);
+      letter-spacing: 0.13em;
     }
     .hero-nav-links a { white-space: nowrap; }
   }
@@ -1939,10 +1941,81 @@ class Component extends DCLogic {
     if (nextCopy > 0) s.style.setProperty('--hero-copy-top', nextCopy + 'px');
   }
 
+  // Side inset of the gold wordmark on the 1366x768 plate, as a fraction of
+  // the viewport. The band uses this scale so B and D are not pinned at 8px.
+  var DESK_WORD_LEFT = 66 / 1366;
+
+  // Cover crop whose wordmark side margins match 1366x768. Under 1200 only.
+  // 1200 and up keeps layoutDesktop. Writes the plate even when the copy fits.
+  function frameDesktopMargins(t, s, v) {
+    if (isWideNow() || !v) return;
+    var cw = t.clientWidth || window.innerWidth || 0;
+    var ch = t.clientHeight || window.innerHeight || 0;
+    if (!(cw > 2) || !(ch > 2)) return;
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var cap = DESK_CAP * (srcH / 1080);
+    var feet = DESK_FEET * (srcH / 1080);
+    var wordMid = (srcW / 2) - (204 * (srcW / 1920));
+    if (!(wordMid > 1)) return;
+    var scale = ((0.5 - DESK_WORD_LEFT) * cw) / wordMid;
+    var cover = Math.max(cw / srcW, ch / srcH);
+    if (!(scale > 0)) scale = cover;
+    if (scale < cover) scale = cover;
+    var nextW = srcW * scale;
+    var nextH = srcH * scale;
+    var nextLeft = (cw - nextW) / 2;
+    var nav = document.querySelector('nav');
+    var stageTop = t.getBoundingClientRect().top;
+    var navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom - stageTop) : 64;
+    var nextTop = (navBottom + 8) - (cap * scale);
+    var topLo = ch - nextH;
+    if (topLo > 0) topLo = 0;
+    if (nextTop < topLo) nextTop = topLo;
+    if (nextTop > 0) nextTop = 0;
+    t.style.setProperty('--hero-media-width', nextW.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-height', nextH.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-left', nextLeft.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-top', nextTop.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-max-width', 'none');
+    t.style.setProperty('--hero-media-min-height', '0px');
+    t.style.setProperty('--hero-media-object-fit', 'fill');
+    var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.backgroundSize = nextW.toFixed(2) + 'px ' + nextH.toFixed(2) + 'px';
+      media.style.backgroundPosition = nextLeft.toFixed(2) + 'px ' + nextTop.toFixed(2) + 'px';
+      media.style.backgroundRepeat = 'no-repeat';
+    }
+    var copyTop = Math.ceil(nextTop + (feet * scale) + 44.8);
+    if (copyTop > 0) s.style.setProperty('--hero-copy-top', copyTop + 'px');
+  }
+
+  // Move the copy up toward the wordmark, down to a 12px gap, so the buttons
+  // can reach the fold pad without shrinking the type.
+  function pullCopy(t, s, v, need) {
+    if (!(need > 0.5) || !v) return 0;
+    var cs = window.getComputedStyle(t);
+    var top = parseFloat(cs.getPropertyValue('--hero-media-top'));
+    var vidW = parseFloat(cs.getPropertyValue('--hero-media-width'));
+    if (!(vidW > 2) || !(top === top)) return 0;
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var feet = DESK_FEET * (srcH / 1080);
+    var feetY = top + feet * (vidW / srcW);
+    var scs = window.getComputedStyle(s);
+    var copyTop = parseFloat(scs.getPropertyValue('--hero-copy-top'));
+    if (!(copyTop === copyTop)) return 0;
+    var minTop = Math.ceil(feetY + 12);
+    var next = copyTop - need;
+    if (next < minTop) next = minTop;
+    if (!(next < copyTop - 0.4)) return 0;
+    s.style.setProperty('--hero-copy-top', next + 'px');
+    return copyTop - next;
+  }
+
   // The plate stays full-bleed. When the desktop stack would leave the fold,
-  // hold the type at the 12px / 14px floor and spend the spare on the gaps.
-  // A uniform scale crushed the paragraph to about 8px. Writes nothing when
-  // the desktop stack already fits, so 1200-wide desktops stay untouched.
+  // hold the type at the 12px / 14px floor and spend the spare on the gaps
+  // under the wordmark. Writes nothing on a 1200-wide desktop that already fits.
   function fitLandscape(t, s, v) {
     if (!isDeskLandscape()) return;
     if (t.classList.contains('hero-copy-flow')) return;
@@ -1963,9 +2036,36 @@ class Component extends DCLogic {
     function ctaBottom() { return layoutTop(btn) + btn.offsetHeight; }
     function tagWidth() { return tag ? tag.offsetWidth : 0; }
     function overflows() { return ctaBottom() > ih - pad + 0.5 || tagWidth() > iw - 16; }
+    var band = !isWideNow();
+    if (band && v) frameDesktopMargins(t, s, v);
     if (!overflows()) return;
-    if (v) bleedPlate(t, s, v);
+    if (!band && v) bleedPlate(t, s, v);
     if (!overflows()) return;
+    function wordFeet() {
+      if (!v) return 0;
+      var cs = window.getComputedStyle(t);
+      var top = parseFloat(cs.getPropertyValue('--hero-media-top'));
+      var vidW = parseFloat(cs.getPropertyValue('--hero-media-width'));
+      if (!(vidW > 2) || !(top === top)) return 0;
+      var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+      var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+      return top + (DESK_FEET * (srcH / 1080)) * (vidW / srcW);
+    }
+    // Spare under the buttons goes back into the wordmark gap, up to the
+    // desktop 44.8px, and the buttons stay about 28px above the fold.
+    function restoreWordGap() {
+      if (!band || !v) return;
+      var room = (ih - pad) - ctaBottom();
+      if (!(room > 1)) return;
+      var feetY = wordFeet();
+      var scs = window.getComputedStyle(s);
+      var copyTop = parseFloat(scs.getPropertyValue('--hero-copy-top'));
+      if (!(copyTop === copyTop)) return;
+      var maxTop = Math.floor(feetY + GAP_DESK);
+      var next = Math.floor(copyTop + room);
+      if (next > maxTop) next = maxTop;
+      if (next > copyTop + 0.4) s.style.setProperty('--hero-copy-top', next + 'px');
+    }
     function applyType(fs) {
       h1.style.fontSize = (28 * fs).toFixed(2) + 'px';
       h1.style.letterSpacing = (6 * fs).toFixed(2) + 'px';
@@ -1991,16 +2091,19 @@ class Component extends DCLogic {
       s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
     }
     // Largest type from the floor up to desktop, then the largest gap that
-    // still leaves the buttons 28px above the fold.
+    // still leaves the buttons 28px above the fold. The wordmark gap spends
+    // first, so the type does not drop to buy that pad.
     var fsLo = FLOOR;
     var fsHi = 1;
     var fs = FLOOR;
     var step;
+    if (band && v && overflows()) pullCopy(t, s, v, 10000);
     applyType(1);
     applyGap(GAP_DESK);
     if (!overflows()) {
       clearCopyScale(s);
       s.style.removeProperty('--hero-gap-line2');
+      restoreWordGap();
       return;
     }
     for (step = 0; step < 12; step++) {
@@ -2022,13 +2125,28 @@ class Component extends DCLogic {
     }
     applyType(fs);
     applyGap(gap);
+    if (overflows() && band) {
+      var tightLo = 2;
+      var tightHi = gap;
+      var tight = 2;
+      for (step = 0; step < 10; step++) {
+        var tg = (tightLo + tightHi) / 2;
+        applyGap(tg);
+        if (overflows()) tightHi = tg;
+        else { tight = tg; tightLo = tg; }
+      }
+      applyGap(tight);
+      if (overflows()) applyGap(2);
+    }
     // Floor type still leaves the fold. Raise the wordmark crop so the copy
     // keeps the floor and the plate stays full-bleed.
     if (overflows() && v) {
       shrinkWordmark(t, s, v, ctaBottom() - (ih - pad));
       applyType(fs);
       applyGap(gap);
+      if (band) pullCopy(t, s, v, ctaBottom() - (ih - pad));
     }
+    if (!overflows()) restoreWordGap();
   }
 
   // Pull the wordmark up by lowering the plate scale, never under a cover
