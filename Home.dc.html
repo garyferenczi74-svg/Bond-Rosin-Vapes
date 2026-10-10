@@ -1858,9 +1858,19 @@ class Component extends DCLogic {
     }
   }
 
+  function clearPlateMask() {
+    var nodes = document.querySelectorAll('.hero-media, .hero-video, .hero-endplate');
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      nodes[i].style.removeProperty('mask-image');
+      nodes[i].style.removeProperty('-webkit-mask-image');
+    }
+  }
+
   function clearFitScale() {
     var media = document.querySelector('.hero-media');
     var stack = document.getElementById(STACK);
+    clearPlateMask();
     if (media && media.style.transform) {
       media.style.removeProperty('transform');
       media.style.removeProperty('transform-origin');
@@ -1941,13 +1951,11 @@ class Component extends DCLogic {
     if (nextCopy > 0) s.style.setProperty('--hero-copy-top', nextCopy + 'px');
   }
 
-  // Side inset of the gold wordmark on the 1366x768 plate, as a fraction of
-  // the viewport. The band uses this scale so B and D are not pinned at 8px.
-  var DESK_WORD_LEFT = 66 / 1366;
-
-  // Cover crop whose wordmark side margins match 1366x768. Under 1200 only.
-  // 1200 and up keeps layoutDesktop. Writes the plate even when the copy fits.
-  function frameDesktopMargins(t, s, v) {
+  // Short landscape only. The gold letters are 31% of the 1080 frame, so a
+  // height cover keeps the cap near 31% of the viewport and centred. Wider
+  // than 16:9 that scale no longer fills the width; the side edges fade out
+  // so the stage does not show a hard plate line. 1200 and up never calls this.
+  function frameShortPlate(t, s, v) {
     if (isWideNow() || !v) return;
     var cw = t.clientWidth || window.innerWidth || 0;
     var ch = t.clientHeight || window.innerHeight || 0;
@@ -1955,24 +1963,32 @@ class Component extends DCLogic {
     var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
     var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
     var cap = DESK_CAP * (srcH / 1080);
-    var feet = DESK_FEET * (srcH / 1080);
-    var wordMid = (srcW / 2) - (204 * (srcW / 1920));
-    if (!(wordMid > 1)) return;
-    var scale = ((0.5 - DESK_WORD_LEFT) * cw) / wordMid;
-    var cover = Math.max(cw / srcW, ch / srcH);
-    if (!(scale > 0)) scale = cover;
-    if (scale < cover) scale = cover;
+    var coverW = cw / srcW;
+    var coverH = ch / srcH;
+    var scale = coverH;
+    if (!(scale > 0)) scale = coverW;
+    // Taller than 16:9: width cover is the smaller scale, so the letters stay
+    // inside the viewport instead of being cropped. Cap stays at or under 31%.
+    if (scale > coverW) scale = coverW;
+    if (coverW > scale && (coverW - scale) < 0.012) scale = coverW;
+    var wordW = (1686 - 204) * (srcW / 1920);
+    var scaleFit = (cw - 32) / wordW;
+    if (scaleFit > 0 && scale > scaleFit) scale = scaleFit;
     var nextW = srcW * scale;
     var nextH = srcH * scale;
     var nextLeft = (cw - nextW) / 2;
     var nav = document.querySelector('nav');
     var stageTop = t.getBoundingClientRect().top;
     var navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom - stageTop) : 64;
-    var nextTop = (navBottom + 8) - (cap * scale);
-    var topLo = ch - nextH;
-    if (topLo > 0) topLo = 0;
-    if (nextTop < topLo) nextTop = topLo;
+    var nextTop = (navBottom + 12) - (cap * scale);
     if (nextTop > 0) nextTop = 0;
+    // The bottom fade already blacks out the lower 42%. Keep the plate edge
+    // inside that fade when lifting the letters. Otherwise cover the bottom.
+    var bottomEdge = nextTop + nextH;
+    var fadeStart = ch * 0.62;
+    if (bottomEdge < ch - 1 && bottomEdge < fadeStart) {
+      nextTop = Math.min(0, fadeStart - nextH);
+    }
     t.style.setProperty('--hero-media-width', nextW.toFixed(2) + 'px');
     t.style.setProperty('--hero-media-height', nextH.toFixed(2) + 'px');
     t.style.setProperty('--hero-media-left', nextLeft.toFixed(2) + 'px');
@@ -1986,8 +2002,19 @@ class Component extends DCLogic {
       media.style.backgroundPosition = nextLeft.toFixed(2) + 'px ' + nextTop.toFixed(2) + 'px';
       media.style.backgroundRepeat = 'no-repeat';
     }
-    var copyTop = Math.ceil(nextTop + (feet * scale) + 44.8);
-    if (copyTop > 0) s.style.setProperty('--hero-copy-top', copyTop + 'px');
+    var inset = (cw - nextW) / 2;
+    if (inset > 2 && media) {
+      // The plate is narrower than the stage. Hold the mask clear through the
+      // empty sides and fade the plate's own edge in, stopping before the letters.
+      var feather = 64;
+      var letterFromEdge = nextW * (204 / srcW);
+      if (feather > letterFromEdge - 16) feather = Math.max(24, Math.round(letterFromEdge - 16));
+      var edge = Math.round(inset);
+      var solid = Math.round(inset + feather);
+      var mask = 'linear-gradient(to right, transparent 0px, transparent ' + edge + 'px, #000 ' + solid + 'px, #000 calc(100% - ' + solid + 'px), transparent calc(100% - ' + edge + 'px), transparent 100%)';
+      media.style.webkitMaskImage = mask;
+      media.style.maskImage = mask;
+    }
   }
 
   // Move the copy up toward the wordmark, down to a 12px gap, so the buttons
@@ -2013,9 +2040,27 @@ class Component extends DCLogic {
     return copyTop - next;
   }
 
-  // The plate stays full-bleed. When the desktop stack would leave the fold,
-  // hold the type at the 12px / 14px floor and spend the spare on the gaps
-  // under the wordmark. Writes nothing on a 1200-wide desktop that already fits.
+  // Line gaps and the wordmark gap. At 450-480 the floors are 14 and 18.
+  // They open toward the desktop 44.8 as the viewport gets taller.
+  function bandLineGap(h) {
+    if (h <= 480) return 14;
+    if (h >= 700) return 44.8;
+    return 14 + (44.8 - 14) * ((h - 480) / (700 - 480));
+  }
+  function bandWordGap(h) {
+    if (h <= 480) return 18;
+    if (h >= 700) return 44.8;
+    return 18 + (44.8 - 18) * ((h - 480) / (700 - 480));
+  }
+  function bandType(h) {
+    if (h <= 480) return 0.8;
+    if (h >= 700) return 1;
+    return 0.8 + 0.2 * ((h - 480) / (700 - 480));
+  }
+
+  // The plate stays full-bleed. On a short landscape window the wordmark is
+  // capped by the viewport height, and leftover room goes to the line gaps.
+  // Writes nothing on a 1200-wide desktop that already fits.
   function fitLandscape(t, s, v) {
     if (!isDeskLandscape()) return;
     if (t.classList.contains('hero-copy-flow')) return;
@@ -2037,10 +2082,6 @@ class Component extends DCLogic {
     function tagWidth() { return tag ? tag.offsetWidth : 0; }
     function overflows() { return ctaBottom() > ih - pad + 0.5 || tagWidth() > iw - 16; }
     var band = !isWideNow();
-    if (band && v) frameDesktopMargins(t, s, v);
-    if (!overflows()) return;
-    if (!band && v) bleedPlate(t, s, v);
-    if (!overflows()) return;
     function wordFeet() {
       if (!v) return 0;
       var cs = window.getComputedStyle(t);
@@ -2051,20 +2092,10 @@ class Component extends DCLogic {
       var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
       return top + (DESK_FEET * (srcH / 1080)) * (vidW / srcW);
     }
-    // Spare under the buttons goes back into the wordmark gap, up to the
-    // desktop 44.8px, and the buttons stay about 28px above the fold.
-    function restoreWordGap() {
-      if (!band || !v) return;
-      var room = (ih - pad) - ctaBottom();
-      if (!(room > 1)) return;
+    function applyWordGap(gap) {
       var feetY = wordFeet();
-      var scs = window.getComputedStyle(s);
-      var copyTop = parseFloat(scs.getPropertyValue('--hero-copy-top'));
-      if (!(copyTop === copyTop)) return;
-      var maxTop = Math.floor(feetY + GAP_DESK);
-      var next = Math.floor(copyTop + room);
-      if (next > maxTop) next = maxTop;
-      if (next > copyTop + 0.4) s.style.setProperty('--hero-copy-top', next + 'px');
+      if (!(feetY > 0)) return;
+      s.style.setProperty('--hero-copy-top', Math.ceil(feetY + gap) + 'px');
     }
     function applyType(fs) {
       h1.style.fontSize = (28 * fs).toFixed(2) + 'px';
@@ -2090,63 +2121,94 @@ class Component extends DCLogic {
     function applyGap(gap) {
       s.style.setProperty('--hero-gap-line2', gap.toFixed(2) + 'px');
     }
-    // Largest type from the floor up to desktop, then the largest gap that
-    // still leaves the buttons 28px above the fold. The wordmark gap spends
-    // first, so the type does not drop to buy that pad.
+    // 1200 and up: leave a stack that already fits alone. A short landscape
+    // window frames a smaller wordmark, then spends spare room on the gaps.
+    if (!band) {
+      if (!overflows()) return;
+      if (v) bleedPlate(t, s, v);
+      if (!overflows()) return;
+    } else if (v) {
+      frameShortPlate(t, s, v);
+    }
     var fsLo = FLOOR;
     var fsHi = 1;
     var fs = FLOOR;
     var step;
-    if (band && v && overflows()) pullCopy(t, s, v, 10000);
-    applyType(1);
-    applyGap(GAP_DESK);
-    if (!overflows()) {
+    var lineMin = band ? bandLineGap(ih) : GAP_FLOOR;
+    var wordMin = band ? bandWordGap(ih) : GAP_DESK;
+    var fsTarget = band ? bandType(ih) : 1;
+    if (band) applyWordGap(wordMin);
+    applyType(fsTarget);
+    applyGap(band ? lineMin : GAP_DESK);
+    if (!band && !overflows()) {
       clearCopyScale(s);
       s.style.removeProperty('--hero-gap-line2');
-      restoreWordGap();
       return;
     }
-    for (step = 0; step < 12; step++) {
-      var mid = (fsLo + fsHi) / 2;
-      applyType(mid);
-      applyGap(GAP_FLOOR);
-      if (overflows()) fsHi = mid;
-      else { fs = mid; fsLo = mid; }
-    }
-    applyType(fs);
-    var gapLo = GAP_FLOOR;
-    var gapHi = GAP_DESK;
-    var gap = GAP_FLOOR;
-    for (step = 0; step < 12; step++) {
-      var g = (gapLo + gapHi) / 2;
-      applyGap(g);
-      if (overflows()) gapHi = g;
-      else { gap = g; gapLo = g; }
-    }
-    applyType(fs);
-    applyGap(gap);
-    if (overflows() && band) {
-      var tightLo = 2;
-      var tightHi = gap;
-      var tight = 2;
-      for (step = 0; step < 10; step++) {
-        var tg = (tightLo + tightHi) / 2;
-        applyGap(tg);
-        if (overflows()) tightHi = tg;
-        else { tight = tg; tightLo = tg; }
+    if (overflows()) {
+      fsHi = fsTarget;
+      for (step = 0; step < 12; step++) {
+        var mid = (fsLo + fsHi) / 2;
+        applyType(mid);
+        applyGap(lineMin);
+        if (band) applyWordGap(wordMin);
+        if (overflows()) fsHi = mid;
+        else { fs = mid; fsLo = mid; }
       }
-      applyGap(tight);
-      if (overflows()) applyGap(2);
+      applyType(fs);
+      applyGap(lineMin);
+      if (band) applyWordGap(wordMin);
+    } else {
+      fs = fsTarget;
     }
-    // Floor type still leaves the fold. Raise the wordmark crop so the copy
-    // keeps the floor and the plate stays full-bleed.
-    if (overflows() && v) {
-      shrinkWordmark(t, s, v, ctaBottom() - (ih - pad));
+    // Open the gaps toward the desktop rhythm before growing the type.
+    if (band && !overflows()) {
+      var tLo = 0;
+      var tHi = 1;
+      var tBest = 0;
+      for (step = 0; step < 12; step++) {
+        var tm = (tLo + tHi) / 2;
+        applyGap(lineMin + (GAP_DESK - lineMin) * tm);
+        applyWordGap(wordMin + (GAP_DESK - wordMin) * tm);
+        if (overflows()) tHi = tm;
+        else { tBest = tm; tLo = tm; }
+      }
+      applyGap(lineMin + (GAP_DESK - lineMin) * tBest);
+      applyWordGap(wordMin + (GAP_DESK - wordMin) * tBest);
+      if (tBest > 0.98 && fs < 1 - 0.01) {
+        var upLo = fs;
+        var upHi = 1;
+        var up = fs;
+        for (step = 0; step < 10; step++) {
+          var um = (upLo + upHi) / 2;
+          applyType(um);
+          applyGap(GAP_DESK);
+          applyWordGap(GAP_DESK);
+          if (overflows()) upHi = um;
+          else { up = um; upLo = um; }
+        }
+        applyType(up);
+        applyGap(GAP_DESK);
+        applyWordGap(GAP_DESK);
+      }
+    } else if (!band) {
+      var gapLo = lineMin;
+      var gapHi = GAP_DESK;
+      var gap = lineMin;
+      for (step = 0; step < 12; step++) {
+        var g = (gapLo + gapHi) / 2;
+        applyGap(g);
+        if (overflows()) gapHi = g;
+        else { gap = g; gapLo = g; }
+      }
       applyType(fs);
       applyGap(gap);
-      if (band) pullCopy(t, s, v, ctaBottom() - (ih - pad));
+      if (overflows() && v) {
+        shrinkWordmark(t, s, v, ctaBottom() - (ih - pad));
+        applyType(fs);
+        applyGap(gap);
+      }
     }
-    if (!overflows()) restoreWordGap();
   }
 
   // Pull the wordmark up by lowering the plate scale, never under a cover
