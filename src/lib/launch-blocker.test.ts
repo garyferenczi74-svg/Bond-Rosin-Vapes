@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -88,7 +88,8 @@ test("privacy age flag matches localStorage and the Haus records section stays",
     privacy,
     /On the Next door the confirmation, with a note that you have seen the welcome, is stored by Bond in Supabase\. Signing out does not delete that row\./,
   );
-  assert.match(privacy, /\[PRIVACY EMAIL\]/);
+  assert.equal(privacy.includes("[PRIVACY EMAIL]"), false);
+  assert.equal(privacy.includes("[HELD:"), false);
   assert.match(privacy, /optional notes on a batch you shelve/);
   assert.equal(privacy.includes("optional tasting notes"), false);
   assert.equal(privacy.includes("erase tasting notes"), false);
@@ -266,3 +267,103 @@ test("process label, HOPEline short code, and license case stay on the served pa
   assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span>"), true);
   assert.equal(read("No3.dc.html").includes(">SOLVENTLESS LIVE ROSIN</span><br>"), false);
 });
+
+const servedPages = [
+  "Home.dc.html",
+  "No1.dc.html",
+  "No2.dc.html",
+  "No3.dc.html",
+  "AgeGate.dc.html",
+  "FAQ.dc.html",
+  "Terms.dc.html",
+  "Privacy.dc.html",
+  "Finder.dc.html",
+  "404.html",
+];
+
+const bracketPlaceholder =
+  /\[[^\]\n]*\b(?:EMAIL|ADDRESS|PHONE|CONTACT)\b[^\]\n]*\]|\[HELD\b[^\]\n]*\]/;
+
+function textFilesUnder(rel: string) {
+  const out: string[] = [];
+  for (const entry of readdirSync(join(root, rel), { recursive: true })) {
+    const name = String(entry);
+    if (!/\.(tsx|ts|jsx|js)$/.test(name)) continue;
+    out.push(join(rel, name));
+  }
+  return out;
+}
+
+function between(html: string, start: string, end: string) {
+  const at = html.indexOf(start);
+  assert.notEqual(at, -1, start);
+  const from = at + start.length;
+  const until = html.indexOf(end, from);
+  assert.notEqual(until, -1, end);
+  return html.slice(from, until);
+}
+
+function hasRealContactEmail(text: string) {
+  const match = text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+  if (!match) return false;
+  const domain = match[0].split("@")[1].toLowerCase();
+  if (
+    domain === "example.com" ||
+    domain === "example.org" ||
+    domain === "example.net" ||
+    domain === "localhost" ||
+    domain.endsWith(".example") ||
+    domain.endsWith(".test") ||
+    domain.endsWith(".invalid")
+  ) {
+    return false;
+  }
+  return true;
+}
+
+test("served pages have no bracketed contact placeholders", () => {
+  const pages = [...servedPages, ...textFilesUnder("src/app"), ...textFilesUnder("src/components")];
+  for (const name of pages) {
+    assert.equal(bracketPlaceholder.test(read(name)), false, name);
+  }
+  const privacy = read("Privacy.dc.html");
+  const terms = read("Terms.dc.html");
+  const faq = read("FAQ.dc.html");
+  assert.equal(privacy.includes("Contact:"), false);
+  assert.equal(privacy.includes("[HELD:"), false);
+  assert.match(
+    privacy,
+    /A contact for these requests will be posted on this page before launch\. Until then, a signed in member can erase notes, reflections, or the whole account from Account on the Haus floor, and anyone can stop Haus updates with the unsubscribe link in any update or by unticking the box\./,
+  );
+  assert.match(terms, /We may update these terms; continued use is acceptance\.<\/p>/);
+  assert.equal(terms.includes("[LEGAL EMAIL]"), false);
+  assert.equal(terms.includes("[MAILING ADDRESS]"), false);
+  assert.match(faq, /<h2>Press and partnerships\?<\/h2>\s*<p>We read everything and reply to the right things\.<\/p>/);
+  for (const name of ["Privacy.dc.html", "Terms.dc.html", "FAQ.dc.html"]) {
+    assert.equal(read(name).includes("ask in the Bond Haus or through your dispensary"), false, name);
+  }
+});
+
+// Ordinary npm test skips this. Before bondvapes.com launch, run:
+// BOND_LAUNCH_CHECK=1 npm test
+// Privacy section 8 and Terms section 14 must each contain a real email address.
+test(
+  "bondvapes.com launch requires a real contact in Privacy section 8 and Terms",
+  {
+    skip:
+      process.env.BOND_LAUNCH_CHECK === "1"
+        ? false
+        : "off unless BOND_LAUNCH_CHECK=1; run that before the bondvapes.com launch",
+  },
+  () => {
+    const rights = between(read("Privacy.dc.html"), "<h2>8. Your choices and rights</h2>", "<h2>9. Retention</h2>");
+    const changes = between(read("Terms.dc.html"), "<h2>14. Changes and contact</h2>", "</main>");
+    assert.equal(bracketPlaceholder.test(rights), false, "Privacy section 8 still has a bracketed placeholder");
+    assert.equal(bracketPlaceholder.test(changes), false, "Terms still has a bracketed placeholder");
+    const missing = [
+      hasRealContactEmail(rights) ? "" : "Privacy section 8",
+      hasRealContactEmail(changes) ? "" : "Terms section 14",
+    ].filter(Boolean);
+    assert.equal(missing.length, 0, "real contact email still missing: " + missing.join(", "));
+  },
+);
