@@ -1896,6 +1896,12 @@ class Component extends DCLogic {
     for (i = 0; i < nodes.length; i++) {
       nodes[i].style.removeProperty('mask-image');
       nodes[i].style.removeProperty('-webkit-mask-image');
+      nodes[i].style.removeProperty('mask-composite');
+      nodes[i].style.removeProperty('-webkit-mask-composite');
+      nodes[i].style.removeProperty('mask-repeat');
+      nodes[i].style.removeProperty('-webkit-mask-repeat');
+      nodes[i].style.removeProperty('mask-size');
+      nodes[i].style.removeProperty('-webkit-mask-size');
     }
   }
 
@@ -2266,17 +2272,44 @@ class Component extends DCLogic {
       media.style.backgroundSize = nextW.toFixed(2) + 'px ' + nextH.toFixed(2) + 'px';
       media.style.backgroundPosition = nextLeft.toFixed(2) + 'px ' + nextTop.toFixed(2) + 'px';
       media.style.backgroundRepeat = 'no-repeat';
-      var inset = (vw - nextW) / 2;
-      if (inset > 2) {
-        var feather = 64;
-        var letterFromEdge = nextW * (204 / srcW);
-        if (feather > letterFromEdge - 16) feather = Math.max(24, Math.round(letterFromEdge - 16));
-        var edge = Math.round(inset);
-        var solid = Math.round(inset + feather);
-        var mask = 'linear-gradient(to right, transparent 0px, transparent ' + edge + 'px, #000 ' + solid + 'px, #000 calc(100% - ' + solid + 'px), transparent calc(100% - ' + edge + 'px), transparent 100%)';
-        media.style.webkitMaskImage = mask;
-        media.style.maskImage = mask;
-      }
+      // Fade the plate's own left, right, and bottom. The gold stays solid:
+      // the side fade stops just before the letters (about 11 to 12% of the
+      // plate). Eighteen percent would cross the B and the D. The dark
+      // spotlight under the plate carries the falloff out to the viewport,
+      // so the stone edge does not meet black.
+      var fadeL = Math.max(32, nextW * (204 / srcW) - 8);
+      var fadeR = Math.max(32, nextW * ((1920 - 1686) / srcW) - 8);
+      var fadeB = nextH * 0.20;
+      var belowFeet = nextH * ((1080 - 643) / 1080) - 12;
+      if (fadeB > belowFeet) fadeB = belowFeet;
+      if (fadeB < 28) fadeB = 28;
+      var l0 = Math.round(nextLeft);
+      var l1 = Math.round(nextLeft + fadeL);
+      var r0 = Math.round(nextLeft + nextW);
+      var r1 = Math.round(nextLeft + nextW - fadeR);
+      var b0 = Math.round(nextTop + nextH);
+      var b1 = Math.round(nextTop + nextH - fadeB);
+      var maskX = 'linear-gradient(to right, transparent ' + l0 + 'px, #000 ' + l1 + 'px, #000 ' + r1 + 'px, transparent ' + r0 + 'px)';
+      var maskY = 'linear-gradient(to bottom, #000 0px, #000 ' + b1 + 'px, transparent ' + b0 + 'px)';
+      media.style.webkitMaskImage = maskX + ', ' + maskY;
+      media.style.maskImage = maskX + ', ' + maskY;
+      media.style.webkitMaskComposite = 'source-in';
+      media.style.maskComposite = 'intersect';
+      media.style.webkitMaskRepeat = 'no-repeat';
+      media.style.maskRepeat = 'no-repeat';
+      media.style.webkitMaskSize = '100% 100%';
+      media.style.maskSize = '100% 100%';
+      var focusY = ((navBottom + 8) + chosen.feetY) / 2;
+      var focusPct = Math.round(focusY / vh * 100);
+      if (focusPct < 16) focusPct = 16;
+      if (focusPct > 48) focusPct = 48;
+      var edgeDist = Math.max(Math.abs(nextLeft - (vw / 2)), Math.abs((nextLeft + nextW) - (vw / 2)));
+      var edgePct = Math.round(edgeDist / (vw / 2) * 100);
+      if (edgePct < 36) edgePct = 36;
+      if (edgePct > 78) edgePct = 78;
+      var hold = edgePct - 8;
+      if (hold < 24) hold = 24;
+      t.style.backgroundImage = 'radial-gradient(ellipse 50% 55% at 50% ' + focusPct + '%, rgb(34,32,30) 0%, rgb(34,32,30) ' + hold + '%, #000000 100%)';
     }
     if (chosen.copyTop > 0) s.style.setProperty('--hero-copy-top', Math.round(chosen.copyTop) + 'px');
   }
@@ -2810,6 +2843,7 @@ class Component extends DCLogic {
       // Drop a flag left by a previous size. A resize from a short window
       // onto one that already fits must not keep the old marker.
       t.style.removeProperty('--hero-relax');
+      t.style.removeProperty('background-image');
       clearFitScale();
       var hidden = !v || v.style.display === 'none' || reduced === true;
       if (hidden) { flowFallback(); return; }
