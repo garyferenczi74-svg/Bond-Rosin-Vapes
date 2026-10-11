@@ -338,7 +338,8 @@ test("served pages have no bracketed contact placeholders", () => {
   assert.match(terms, /We may update these terms; continued use is acceptance\.<\/p>/);
   assert.equal(terms.includes("[LEGAL EMAIL]"), false);
   assert.equal(terms.includes("[MAILING ADDRESS]"), false);
-  assert.match(faq, /<h2>Press and partnerships\?<\/h2>\s*<p>We read everything and reply to the right things\.<\/p>/);
+  assert.equal(faq.includes("Press and partnerships"), false);
+  assert.equal(faq.includes("We read everything and reply to the right things."), false);
   for (const name of ["Privacy.dc.html", "Terms.dc.html", "FAQ.dc.html"]) {
     assert.equal(read(name).includes("ask in the Bond Haus or through your dispensary"), false, name);
   }
