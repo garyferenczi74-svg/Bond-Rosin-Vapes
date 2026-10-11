@@ -90,7 +90,15 @@ test("privacy age flag matches localStorage and the Haus records section stays",
   );
   assert.equal(privacy.includes("[PRIVACY EMAIL]"), false);
   assert.equal(privacy.includes("[HELD:"), false);
-  assert.match(privacy, /optional notes on a batch you shelve/);
+  assert.equal(privacy.includes("optional notes on a batch you shelve"), false);
+  assert.equal(privacy.includes("Ritual reflections"), false);
+  assert.equal(privacy.includes("From Account on the Haus floor you can download"), false);
+  assert.equal(privacy.includes("erase the whole account"), false);
+  assert.equal(privacy.includes("erase notes"), false);
+  assert.match(privacy, /Erasing the account does not remove your password from the account service or the records of door attempts\./);
+  assert.match(privacy, /Signing out clears the one day session cookie\./);
+  assert.match(privacy, /Signing out does not delete the Haus request row\./);
+  assert.match(privacy, /To remove the browser request copy, clear site data for this site\./);
   assert.equal(privacy.includes("optional tasting notes"), false);
   assert.equal(privacy.includes("erase tasting notes"), false);
   assert.match(privacy, /which chapter of The Number Guide you last opened/);
@@ -333,7 +341,7 @@ test("served pages have no bracketed contact placeholders", () => {
   assert.equal(privacy.includes("[HELD:"), false);
   assert.match(
     privacy,
-    /A contact for these requests will be posted on this page before launch\. Until then, a signed in member can erase notes, reflections, or the whole account from Account on the Haus floor, and anyone can stop Haus updates with the unsubscribe link in any update or by unticking the box\./,
+    /A contact for these requests will be posted on this page before launch\. Until then, anyone who opts in to Haus updates can stop them with the unsubscribe link in any update, and a signed in member can untick the updates box in the Salon\./,
   );
   assert.match(terms, /We may update these terms; continued use is acceptance\.<\/p>/);
   assert.equal(terms.includes("[LEGAL EMAIL]"), false);
