@@ -1589,9 +1589,11 @@ class Component extends DCLogic {
       nodes[i].style.removeProperty('font-size');
       nodes[i].style.removeProperty('letter-spacing');
       nodes[i].style.removeProperty('padding-left');
+      nodes[i].style.removeProperty('padding-right');
       nodes[i].style.removeProperty('padding-top');
       nodes[i].style.removeProperty('padding-bottom');
       nodes[i].style.removeProperty('min-height');
+      nodes[i].style.removeProperty('line-height');
     }
     var rules = s.querySelectorAll('.hero-rule');
     for (i = 0; i < rules.length; i++) rules[i].style.removeProperty('width');
@@ -2095,12 +2097,200 @@ class Component extends DCLogic {
     return 0.8 + 0.2 * ((h - 480) / (700 - 480));
   }
 
+  // Laptop band only. Fine pointer, 853 wide, 450 tall, landscape, and either
+  // under 720 tall or under 1200 wide. Touch and the tall desktop stay out.
+  function isLaptopRhythm() {
+    var w = window.innerWidth || 0;
+    var h = window.innerHeight || 0;
+    var fine = false;
+    try { fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) { fine = false; }
+    if (!fine) return false;
+    if (!(w >= 853 && h >= 450 && w >= h)) return false;
+    return h < 720 || w < 1200;
+  }
+
+  // Scale the desktop stack by vh/825. The gold foot (source y 643, glow included)
+  // sits 1.5x G above the tagline, and never closer than 28px. The other three
+  // gaps stay at G. G is at least 22px. When the column is short, keep those
+  // gaps, then shrink the copy down to the hard floors, then let the wordmark
+  // cap fall from 26% of vh to 24%. The button foot stays near 88% of vh.
+  function fitLaptopStack(t, s, v) {
+    var vh = window.innerHeight || 0;
+    var vw = t.clientWidth || window.innerWidth || 0;
+    if (!(vh >= 450) || !(vw > 2) || !v) return;
+    var h1 = s.querySelector('.hero-tagline h1');
+    var tag = s.querySelector('.hero-tagline');
+    var line2 = s.querySelector('.hero-line2');
+    var sub = s.querySelector('.hero-subtext');
+    var buttons = s.querySelector('.hero-buttons');
+    var btns = s.querySelectorAll('.hero-btn');
+    var rules = s.querySelectorAll('.hero-rule');
+    if (!h1 || !tag || !line2 || !sub || !buttons) return;
+    var sc = vh / 825;
+    var G = Math.min(48, Math.max(22, vh * 0.057));
+    var wordGap = Math.max(28, G * 1.5);
+    var pref = {
+      tag: Math.max(15, 28 * sc),
+      italic: Math.max(14, 24 * sc),
+      sub: Math.max(12, 17 * sc),
+      btn: Math.max(11, 16 * sc),
+      btnH: Math.max(34, 46 * sc)
+    };
+    var hard = { tag: 14, italic: 13, sub: 11.5, btn: 10.5, btnH: 32 };
+    function mix(u) {
+      return {
+        tag: pref.tag + (hard.tag - pref.tag) * u,
+        italic: pref.italic + (hard.italic - pref.italic) * u,
+        sub: pref.sub + (hard.sub - pref.sub) * u,
+        btn: pref.btn + (hard.btn - pref.btn) * u,
+        btnH: pref.btnH + (hard.btnH - pref.btnH) * u
+      };
+    }
+    function applyType(sz) {
+      var tagS = sz.tag / 28;
+      var btnS = sz.btn / 16;
+      h1.style.fontSize = sz.tag.toFixed(2) + 'px';
+      h1.style.letterSpacing = (6 * tagS).toFixed(2) + 'px';
+      h1.style.paddingLeft = (6 * tagS).toFixed(2) + 'px';
+      h1.style.lineHeight = '1.1';
+      line2.style.fontSize = sz.italic.toFixed(2) + 'px';
+      line2.style.lineHeight = '1.25';
+      sub.style.fontSize = sz.sub.toFixed(2) + 'px';
+      sub.style.lineHeight = '1.55';
+      var i;
+      for (i = 0; i < rules.length; i++) rules[i].style.width = Math.max(28, 150 * tagS).toFixed(2) + 'px';
+      tag.style.gap = Math.max(8, 22 * tagS).toFixed(2) + 'px';
+      var padX = Math.max(12, 32 * btnS);
+      var padY = (sz.btnH - sz.btn - 2) / 2;
+      if (padY < 0) padY = 0;
+      for (i = 0; i < btns.length; i++) {
+        btns[i].style.fontSize = sz.btn.toFixed(2) + 'px';
+        btns[i].style.letterSpacing = (3 * btnS).toFixed(2) + 'px';
+        btns[i].style.lineHeight = '1';
+        btns[i].style.minHeight = sz.btnH.toFixed(2) + 'px';
+        btns[i].style.paddingLeft = padX.toFixed(2) + 'px';
+        btns[i].style.paddingRight = padX.toFixed(2) + 'px';
+        btns[i].style.paddingTop = padY.toFixed(2) + 'px';
+        btns[i].style.paddingBottom = padY.toFixed(2) + 'px';
+      }
+      s.style.setProperty('--hero-gap-line2', G.toFixed(2) + 'px');
+      var guard = 0;
+      while (tag.scrollWidth > vw - 8 && guard < 6) {
+        var shrunk = false;
+        for (i = 0; i < rules.length; i++) {
+          var rw = parseFloat(rules[i].style.width) || 0;
+          if (rw > 28) {
+            rules[i].style.width = Math.max(28, rw * 0.82).toFixed(2) + 'px';
+            shrunk = true;
+          }
+        }
+        if (!shrunk) break;
+        guard += 1;
+      }
+    }
+    function stackSpan() {
+      return (layoutTop(buttons) + buttons.offsetHeight) - layoutTop(tag);
+    }
+    var nav = document.querySelector('nav');
+    var stageTop = t.getBoundingClientRect().top;
+    var navBottom = nav ? Math.max(0, nav.getBoundingClientRect().bottom - stageTop) : 64;
+    var navClear = 8;
+    function metricsAt(u, anchorFrac) {
+      applyType(mix(u));
+      var span = stackSpan();
+      var anchorY = anchorFrac * vh;
+      var copyTop = anchorY - span;
+      var feetY = copyTop - wordGap;
+      var room = feetY - (navBottom + navClear);
+      return { u: u, anchorFrac: anchorFrac, span: span, copyTop: copyTop, feetY: feetY, room: room };
+    }
+    var chosen = metricsAt(0, 0.88);
+    var step;
+    if (chosen.room < vh * 0.26) {
+      var lo = 0;
+      var hi = 1;
+      var found = false;
+      for (step = 0; step < 14; step++) {
+        var mid = (lo + hi) / 2;
+        var trial = metricsAt(mid, 0.88);
+        if (trial.room >= vh * 0.26) {
+          found = true;
+          chosen = trial;
+          hi = mid;
+        } else lo = mid;
+      }
+      if (!found) chosen = metricsAt(1, 0.88);
+    }
+    var capPx = chosen.room;
+    if (capPx < vh * 0.24) {
+      var aLo = 0.88;
+      var aHi = 0.90;
+      var aFound = false;
+      for (step = 0; step < 10; step++) {
+        var am = (aLo + aHi) / 2;
+        var trialA = metricsAt(1, am);
+        if (trialA.room >= vh * 0.24) {
+          aFound = true;
+          chosen = trialA;
+          aHi = am;
+        } else aLo = am;
+      }
+      if (!aFound) chosen = metricsAt(1, 0.90);
+      capPx = chosen.room;
+    }
+    if (capPx > chosen.room) capPx = chosen.room;
+    if (!(capPx > 8)) capPx = Math.max(8, chosen.room);
+    var srcW = (v.videoWidth > 1) ? v.videoWidth : 1920;
+    var srcH = (v.videoHeight > 1) ? v.videoHeight : 1080;
+    var footSrc = 643 * (srcH / 1080);
+    var capSrc = 294 * (srcH / 1080);
+    var letterSrc = footSrc - capSrc;
+    if (!(letterSrc > 1)) return;
+    var scale = capPx / letterSrc;
+    var wordSrc = (1686 - 204) * (srcW / 1920);
+    var scaleFit = (vw - 16) / wordSrc;
+    if (scaleFit > 0 && scale > scaleFit) scale = scaleFit;
+    var nextW = srcW * scale;
+    var nextH = srcH * scale;
+    var nextLeft = (vw - nextW) / 2;
+    var nextTop = chosen.feetY - (footSrc * scale);
+    t.style.setProperty('--hero-media-width', nextW.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-height', nextH.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-left', nextLeft.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-top', nextTop.toFixed(2) + 'px');
+    t.style.setProperty('--hero-media-max-width', 'none');
+    t.style.setProperty('--hero-media-min-height', '0px');
+    t.style.setProperty('--hero-media-object-fit', 'fill');
+    var media = document.querySelector('.hero-media');
+    if (media) {
+      media.style.backgroundSize = nextW.toFixed(2) + 'px ' + nextH.toFixed(2) + 'px';
+      media.style.backgroundPosition = nextLeft.toFixed(2) + 'px ' + nextTop.toFixed(2) + 'px';
+      media.style.backgroundRepeat = 'no-repeat';
+      var inset = (vw - nextW) / 2;
+      if (inset > 2) {
+        var feather = 64;
+        var letterFromEdge = nextW * (204 / srcW);
+        if (feather > letterFromEdge - 16) feather = Math.max(24, Math.round(letterFromEdge - 16));
+        var edge = Math.round(inset);
+        var solid = Math.round(inset + feather);
+        var mask = 'linear-gradient(to right, transparent 0px, transparent ' + edge + 'px, #000 ' + solid + 'px, #000 calc(100% - ' + solid + 'px), transparent calc(100% - ' + edge + 'px), transparent 100%)';
+        media.style.webkitMaskImage = mask;
+        media.style.maskImage = mask;
+      }
+    }
+    if (chosen.copyTop > 0) s.style.setProperty('--hero-copy-top', Math.round(chosen.copyTop) + 'px');
+  }
+
   // The plate stays full-bleed. On a short landscape window the wordmark is
   // capped by the viewport height, and leftover room goes to the line gaps.
   // Writes nothing on a 1200-wide desktop that already fits.
   function fitLandscape(t, s, v) {
     if (!isDeskLandscape()) return;
     if (t.classList.contains('hero-copy-flow')) return;
+    if (isLaptopRhythm()) {
+      fitLaptopStack(t, s, v);
+      return;
+    }
     var btn = s.querySelector('.hero-buttons');
     var tag = s.querySelector('.hero-tagline');
     var h1 = s.querySelector('.hero-tagline h1');
