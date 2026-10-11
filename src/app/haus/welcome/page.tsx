@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { WelcomeClient } from "@/app/haus/welcome-client";
 import { requireMemberSession } from "@/lib/haus-gate";
+import { acceptWelcomeText } from "@/lib/haus/persist";
 import { readHausLedger } from "@/lib/haus-ledger";
 import { memberNeedsWelcome } from "@/lib/member";
 
@@ -19,5 +20,5 @@ export default async function HausWelcomePage() {
 
   const needsAge = !(ack?.email === member.email && ack.age21);
   const ledger = await readHausLedger();
-  return <WelcomeClient needsAge={needsAge} welcomeText={ledger.settings.welcomeText} />;
+  return <WelcomeClient needsAge={needsAge} welcomeText={acceptWelcomeText(ledger.settings.welcomeText)} />;
 }

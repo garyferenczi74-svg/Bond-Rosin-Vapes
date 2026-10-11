@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { admitAtDoor, canAdmitAtDoor } from "./door.ts";
 import { LONG_EM, lintCopy, lintFields, lintHasHardBlock } from "./lint.ts";
 import { parseHausPersist } from "./persist.ts";
-import { seedHausPersist } from "./seed.ts";
+import { DEFAULT_WELCOME, seedHausPersist } from "./seed.ts";
 import { HausStore } from "./store.ts";
 import { PRIVACY_WALL } from "./types.ts";
 
@@ -105,6 +105,22 @@ test("privacy wall is structural and note methods stay absent", () => {
   assert.equal(source.includes("getNote"), false);
   assert.equal(source.includes("listReflections"), false);
   assert.equal(source.includes("sessionContent"), false);
+});
+
+test("a stored welcome line that is the old default or names retired rooms falls back", () => {
+  const base = seedHausPersist(new Date("2026-09-16T12:00:00Z"));
+  function cookie(welcomeText: string) {
+    return JSON.stringify({
+      ...base,
+      settings: { ...base.settings, welcomeText },
+    });
+  }
+  const old = "This floor is yours. Your shelf, your guide, your rituals, kept quietly.";
+  assert.equal(parseHausPersist(cookie(old)).settings.welcomeText, DEFAULT_WELCOME);
+  assert.equal(parseHausPersist(cookie("Kept Quietly for now.")).settings.welcomeText, DEFAULT_WELCOME);
+  assert.equal(parseHausPersist(cookie("This page is yours to erase later.")).settings.welcomeText, DEFAULT_WELCOME);
+  const custom = "The evening light stays.";
+  assert.equal(parseHausPersist(cookie(custom)).settings.welcomeText, custom);
 });
 
 test("settings welcome text is lint gated and privacy wall cannot change", () => {

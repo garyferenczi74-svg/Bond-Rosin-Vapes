@@ -1,5 +1,18 @@
-import { seedHausPersist } from "./seed.ts";
+import { DEFAULT_WELCOME, RETIRED_WELCOME, seedHausPersist } from "./seed.ts";
 import { PRIVACY_WALL, type HausPersist } from "./types.ts";
+
+export function acceptWelcomeText(text: string): string {
+  const folded = text.toLowerCase();
+  if (
+    text === RETIRED_WELCOME ||
+    folded === RETIRED_WELCOME.toLowerCase() ||
+    folded.includes("kept quietly") ||
+    folded.includes("yours to erase")
+  ) {
+    return DEFAULT_WELCOME;
+  }
+  return text;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -60,7 +73,7 @@ export function parseHausPersist(raw: string | null | undefined): HausPersist {
       settings: {
         invitationWindow: asBool(settings.invitationWindow, true),
         registrationPause: asBool(settings.registrationPause, false),
-        welcomeText: asString(settings.welcomeText, fallback.settings.welcomeText),
+        welcomeText: acceptWelcomeText(asString(settings.welcomeText, fallback.settings.welcomeText)),
         privacyWall: PRIVACY_WALL,
       },
       audit: audit.filter(isRecord).map((row) => ({

@@ -60,6 +60,18 @@ curl -sI http://127.0.0.1:3000/bond-brain | head
 
 `/` and `/Home.dc.html` must be 200. `/haus` must be 200. `/vauxhall`, `/Admin.dc.html`, `/Haus.dc.html`, and `/bond-brain` must be 404.
 
+## Launch contact check
+
+Ordinary `npm test` fails if a served page still shows a bracketed contact placeholder (`[...EMAIL]`, `[...ADDRESS]`, `[...PHONE]`, `[...CONTACT]`, or `[HELD`).
+
+A real contact email is not required in that run. Before the bondvapes.com launch, turn the extra check on:
+
+```
+BOND_LAUNCH_CHECK=1 npm test
+```
+
+That run must find a real email address in Privacy section 8 (Your choices and rights) and in Terms section 14 (Changes and contact). It stays skipped during ordinary `npm test`. An `example.com` address does not count.
+
 ## Env vars
 
 | Name | Where | Notes |

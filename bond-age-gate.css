@@ -376,6 +376,12 @@ html[data-bond-age="ok"] .bond-age-dc {
   .bond-age-box .bond-warn {
     margin-top: 12px;
   }
+
+  /* The denied screen is one line taller than the question screen. */
+  .bond-age-gate[data-declined="true"] .bond-age-box .bond-warn,
+  .bond-age-dc[data-declined="true"] .bond-age-box .bond-warn {
+    margin-top: 11px;
+  }
 }
 
 @media (max-height: 640px) {

@@ -8,6 +8,9 @@ import type {
 } from "./types.ts";
 
 export const DEFAULT_WELCOME =
+  "This floor is yours.";
+
+export const RETIRED_WELCOME =
   "This floor is yours. Your shelf, your guide, your rituals, kept quietly.";
 
 export const SEED_BATCHES: HausBatchPreview[] = [
