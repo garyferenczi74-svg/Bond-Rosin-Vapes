@@ -8,7 +8,7 @@ import type {
 } from "./types.ts";
 
 export const DEFAULT_WELCOME =
-  "This floor is yours. Your shelf, your guide, your rituals, kept quietly.";
+  "This floor is yours.";
 
 export const SEED_BATCHES: HausBatchPreview[] = [
   {

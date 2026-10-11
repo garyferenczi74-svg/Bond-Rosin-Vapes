@@ -60,7 +60,7 @@ export function WelcomeClient({
             margin: "22px 0 0",
           }}
         >
-          {welcomeText ?? "This floor is yours. Your shelf, your guide, your rituals, kept quietly."}
+          {welcomeText ?? "This floor is yours."}
         </p>
         <p
           style={{
@@ -70,7 +70,7 @@ export function WelcomeClient({
             margin: "8px 0 0",
           }}
         >
-          Everything here is private, optional, and yours to erase.
+          Everything here is private and optional.
         </p>
         <div
           style={{

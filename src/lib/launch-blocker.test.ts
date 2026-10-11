@@ -95,7 +95,7 @@ test("privacy age flag matches localStorage and the Haus records section stays",
   assert.equal(privacy.includes("From Account on the Haus floor you can download"), false);
   assert.equal(privacy.includes("erase the whole account"), false);
   assert.equal(privacy.includes("erase notes"), false);
-  assert.match(privacy, /Erasing the account does not remove your password from the account service or the records of door attempts\./);
+  assert.match(privacy, /Signing out or unsubscribing does not remove your password from the account service or the records of door attempts\./);
   assert.match(privacy, /Signing out clears the one day session cookie\./);
   assert.match(privacy, /Signing out does not delete the Haus request row\./);
   assert.match(privacy, /To remove the browser request copy, clear site data for this site\./);
