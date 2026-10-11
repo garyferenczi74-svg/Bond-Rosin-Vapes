@@ -2258,7 +2258,9 @@ class Component extends DCLogic {
     if (scaleFit > 0 && scale > scaleFit) scale = scaleFit;
     var nextW = srcW * scale;
     var nextH = srcH * scale;
-    var nextLeft = (vw - nextW) / 2;
+    // 945 is the glow midpoint on the 1920 endplate (x 204 and x 1686).
+    // The frame centre is 960, which puts the B past the left edge.
+    var nextLeft = vw / 2 - 945 * (srcW / 1920) * scale;
     var nextTop = chosen.feetY - (footSrc * scale);
     t.style.setProperty('--hero-media-width', nextW.toFixed(2) + 'px');
     t.style.setProperty('--hero-media-height', nextH.toFixed(2) + 'px');
