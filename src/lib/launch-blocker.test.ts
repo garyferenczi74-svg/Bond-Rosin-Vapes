@@ -101,7 +101,15 @@ test("privacy age flag matches localStorage and the Haus records section stays",
   assert.match(privacy, /To remove the browser request copy, clear site data for this site\./);
   assert.equal(privacy.includes("optional tasting notes"), false);
   assert.equal(privacy.includes("erase tasting notes"), false);
-  assert.match(privacy, /which chapter of The Number Guide you last opened/);
+  assert.equal(privacy.includes("which chapter of The Number Guide you last opened"), false);
+  assert.equal(privacy.includes("Erasing the account does not clear the browser copy."), false);
+  assert.equal(privacy.includes("First name. Purpose:"), false);
+  assert.equal(privacy.includes("City. Purpose:"), false);
+  assert.equal(privacy.includes("Request draft."), false);
+  assert.equal(privacy.includes("Shelf. Purpose:"), false);
+  assert.equal(privacy.includes("Run numbers on your record."), false);
+  assert.equal(privacy.includes("Evenings. Purpose:"), false);
+  assert.equal(privacy.includes("Guide place."), false);
   assert.equal(privacy.includes("Experience Guide"), false);
   assert.equal(privacy.includes("email delivery"), false);
   assert.equal(privacy.includes("(hosting, analytics)"), false);
@@ -289,8 +297,15 @@ const servedPages = [
   "404.html",
 ];
 
-const bracketPlaceholder =
-  /\[[^\]\n]*\b(?:EMAIL|ADDRESS|PHONE|CONTACT)\b[^\]\n]*\]|\[HELD\b[^\]\n]*\]/;
+function hasBracketPlaceholder(text: string) {
+  const pattern =
+    /\[[^\]\n]*\b(?:email|address|phone|contact)\b[^\]\n]*\]|\[held\b[^\]\n]*\]/gi;
+  for (const match of text.matchAll(pattern)) {
+    if (/^\[[A-Za-z_$][\w$]*\s*,/.test(match[0])) continue;
+    return true;
+  }
+  return false;
+}
 
 function textFilesUnder(rel: string) {
   const out: string[] = [];
@@ -330,9 +345,13 @@ function hasRealContactEmail(text: string) {
 }
 
 test("served pages have no bracketed contact placeholders", () => {
+  assert.equal(hasBracketPlaceholder("[Email]"), true);
+  assert.equal(hasBracketPlaceholder("[PRIVACY EMAIL]"), true);
+  assert.equal(hasBracketPlaceholder("[Held: deletion contact]"), true);
+  assert.equal(hasBracketPlaceholder("const [email, setEmail] = useState(\"\")"), false);
   const pages = [...servedPages, ...textFilesUnder("src/app"), ...textFilesUnder("src/components")];
   for (const name of pages) {
-    assert.equal(bracketPlaceholder.test(read(name)), false, name);
+    assert.equal(hasBracketPlaceholder(read(name)), false, name);
   }
   const privacy = read("Privacy.dc.html");
   const terms = read("Terms.dc.html");
@@ -366,9 +385,9 @@ test(
   },
   () => {
     const rights = between(read("Privacy.dc.html"), "<h2>8. Your choices and rights</h2>", "<h2>9. Retention</h2>");
-    const changes = between(read("Terms.dc.html"), "<h2>14. Changes and contact</h2>", "</main>");
-    assert.equal(bracketPlaceholder.test(rights), false, "Privacy section 8 still has a bracketed placeholder");
-    assert.equal(bracketPlaceholder.test(changes), false, "Terms still has a bracketed placeholder");
+    const changes = between(read("Terms.dc.html"), "<h2>14. Changes</h2>", "</main>");
+    assert.equal(hasBracketPlaceholder(rights), false, "Privacy section 8 still has a bracketed placeholder");
+    assert.equal(hasBracketPlaceholder(changes), false, "Terms still has a bracketed placeholder");
     const missing = [
       hasRealContactEmail(rights) ? "" : "Privacy section 8",
       hasRealContactEmail(changes) ? "" : "Terms section 14",
