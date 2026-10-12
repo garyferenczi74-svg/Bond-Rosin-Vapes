@@ -737,10 +737,15 @@ input::placeholder { color: #B0A99A; }
 /* Pill digits are 19 viewBox units. Below about 1056 wide that paints under 12px.
    Hold them at 12px on the hero laptop band only. 1200 and up keeps 19 units.
    The 12px floor makes a two-line callout taller than its share of a short frame,
-   so the core would meet the headline. Tighten that leading on this band only. */
+   so the core would meet the headline. Tighten that leading on this band only.
+   The same floor plus the wide tracking runs the core and heat words past their
+   leader tails (the line width goes to 0). Cap that tracking by the container
+   so each of those leaders stays at least 12px. 1200 and up is unchanged. */
 @media (min-width: 853px) and (max-width: 1199px) and (min-height: 450px) and (min-aspect-ratio: 1/1),
        (min-width: 853px) and (max-width: 1199px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1) {
   .bond-hw-calls li { line-height: 1.1; }
+  .bond-hw-calls .bond-hw-core { letter-spacing: min(0.67em, 0.16cqw); }
+  .bond-hw-calls .bond-hw-heat { letter-spacing: min(0.625em, 0.36cqw); }
 }
 @media (min-width: 853px) and (max-width: 1055px) and (min-height: 450px) and (min-aspect-ratio: 1/1),
        (min-width: 853px) and (max-width: 1055px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1) {
