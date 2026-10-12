@@ -258,6 +258,23 @@ test("cron migrations tolerate only a missing pg_cron install", () => {
   }
 });
 
+test("enable_pg_cron mirrors live history after the retention guard", () => {
+  const names = readdirSync(migrationDir).filter((name) => name.endsWith(".sql")).sort();
+  const enable = "20261011054912_enable_pg_cron.sql";
+  const guardAt = names.indexOf(guardFile);
+  const enableAt = names.indexOf(enable);
+  assert.ok(guardAt >= 0);
+  assert.ok(enableAt > guardAt);
+  for (const name of scheduleFiles) {
+    assert.ok(names.indexOf(name) < guardAt, name);
+  }
+  const sql = readMigration(enable);
+  assert.match(sql, /create extension if not exists pg_cron/);
+  assert.equal(/with schema/i.test(sql), false);
+  assert.match(sql, /pg_catalog/);
+  assert.match(sql, /20261010002000_require_retention_cron_jobs/);
+});
+
 test("retention cron guard fails closed and passes when all 7 jobs exist", { skip: ready ? false : "local Postgres is not available" }, () => {
   const suffix = `${process.pid}_${Date.now().toString(36)}_${randomBytes(4).toString("hex")}`;
   const bare = `bond_cf_${suffix}_bare`;
