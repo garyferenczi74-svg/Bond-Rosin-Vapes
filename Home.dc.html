@@ -555,8 +555,12 @@ input::placeholder { color: #B0A99A; }
   color: var(--bond-hw-ink);
 }
 /* Leaders start 8px outside the callout and run to the fixed tail beside the device.
-   Length is the callout's own width, so the gap holds when the 12px floor widens the words. */
-@media (min-width: 1200px) {
+   Length is the callout's own width, so the gap holds when the 12px floor widens the words.
+   The two queries after 1200 are the hero laptop band, copied from the hero block:
+   landscape, at least 853 wide, and either 450 tall or a fine pointer with hover. */
+@media (min-width: 1200px),
+       (min-width: 853px) and (max-width: 1199px) and (min-height: 450px) and (min-aspect-ratio: 1/1),
+       (min-width: 853px) and (max-width: 1199px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1) {
   .bond-hw-core::after,
   .bond-hw-heat::after {
     content: "";
@@ -580,7 +584,14 @@ input::placeholder { color: #B0A99A; }
 @media (prefers-reduced-motion: reduce) {
   .bond-hw.bond-hw-armed .bond-hw-rv { transform: none; transition: opacity .2s linear; }
 }
-@media (max-width: 1199px) {
+/* Stacked phone layout. Landscape laptops and tablets from 853 use the slide
+   above, on the same band as the hero. Touch landscape under 450 tall stays
+   here. A fine pointer still gets the slide below that floor. */
+@media (max-width: 852px),
+       (max-width: 1199px) and (max-aspect-ratio: 999/1000),
+       (min-width: 853px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (max-height: 449px) and (hover: none),
+       (min-width: 853px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (max-height: 449px) and (pointer: coarse),
+       (min-width: 853px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (max-height: 449px) and (pointer: none) {
   .bond-hw-frame {
     aspect-ratio: auto;
     display: flex;
@@ -714,10 +725,31 @@ input::placeholder { color: #B0A99A; }
   .bond-hw-step-v { font-size: 15px; }
   .bond-hw-step-n { font-size: 12px; }
 }
-@media (min-width: 768px) and (max-width: 1199px) {
+@media (min-width: 768px) and (max-width: 852px),
+       (min-width: 768px) and (max-width: 1199px) and (max-aspect-ratio: 999/1000),
+       (min-width: 853px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (max-height: 449px) and (hover: none),
+       (min-width: 853px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (max-height: 449px) and (pointer: coarse),
+       (min-width: 853px) and (max-width: 1199px) and (min-aspect-ratio: 1/1) and (max-height: 449px) and (pointer: none) {
   .bond-hw-steps {
     width: min(540px, calc(100% - 64px));
   }
+}
+/* Pill digits are 19 viewBox units. Below about 1056 wide that paints under 12px.
+   Hold them at 12px on the hero laptop band only. 1200 and up keeps 19 units.
+   The 12px floor makes a two-line callout taller than its share of a short frame,
+   so the core would meet the headline. Tighten that leading on this band only.
+   The same floor plus the wide tracking runs the core and heat words past their
+   leader tails (the line width goes to 0). Cap that tracking by the container
+   so each of those leaders stays at least 12px. 1200 and up is unchanged. */
+@media (min-width: 853px) and (max-width: 1199px) and (min-height: 450px) and (min-aspect-ratio: 1/1),
+       (min-width: 853px) and (max-width: 1199px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1) {
+  .bond-hw-calls li { line-height: 1.1; }
+  .bond-hw-calls .bond-hw-core { letter-spacing: min(0.67em, 0.16cqw); }
+  .bond-hw-calls .bond-hw-heat { letter-spacing: min(0.625em, 0.36cqw); }
+}
+@media (min-width: 853px) and (max-width: 1055px) and (min-height: 450px) and (min-aspect-ratio: 1/1),
+       (min-width: 853px) and (max-width: 1055px) and (hover:hover) and (pointer:fine) and (min-aspect-ratio: 1/1) {
+  .bond-hw-pill-num { font-size: 12px; }
 }
 </style>
 </helmet>
