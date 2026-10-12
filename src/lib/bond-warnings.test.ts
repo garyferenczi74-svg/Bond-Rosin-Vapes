@@ -87,14 +87,18 @@ test("gate and footer share one warning block and one css rule", () => {
       "Terms.dc.html",
     ]);
     if (footerFiles.has(row.file)) {
-      // Inline gates keep the licence number on one line like the footer.
-      const inlineGate = row.gate === "inline";
-      assert.equal(copies, inlineGate ? 0 : 1, row.file);
+      // Inline gates, and the static No.1 to No.3 covers, keep the licence number on one line like the footer.
+      const coverWrapped = row.file === "No1.dc.html" || row.file === "No2.dc.html" || row.file === "No3.dc.html";
+      const bothWrapped = row.gate === "inline" || coverWrapped;
+      assert.equal(copies, bothWrapped ? 0 : 1, row.file);
       const footerBlock = footerWarnBlockHtml(dLineForRoute(row.route));
-      assert.equal(html.split(footerBlock).length - 1, inlineGate ? 2 : 1, row.file);
+      assert.equal(html.split(footerBlock).length - 1, bothWrapped ? 2 : 1, row.file);
       const license = footerBlock.match(/<p class="bond-warn-license">([\s\S]*?)<\/p>/);
       assert.ok(license, row.file);
       assert.equal(license[1].replace(/<[^>]+>/g, ""), LICENSE_LINE, row.file);
+    } else if (row.file === "Home.dc.html") {
+      assert.equal(copies, 1, row.file);
+      assert.equal(html.split(footerWarnBlockHtml(dLineForRoute(row.route))).length - 1, 1, row.file);
     } else {
       assert.equal(copies, expected, row.file);
     }
