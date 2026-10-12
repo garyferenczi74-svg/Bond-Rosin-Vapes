@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const migrationDir = join(root, "supabase/migrations");
 const revokeFile = "20261012190000_revoke_trigger_definer_execute.sql";
+const searchPathFile = "20261012190100_pin_function_search_path.sql";
 const chain = [
   "20261008193000_server_side_signups.sql",
   "20261008201000_felix_request_retention.sql",
@@ -24,6 +25,7 @@ const chain = [
   "20261009235000_session_grants_and_reopt_bind.sql",
   "20261010001000_purge_expired_sessions.sql",
   revokeFile,
+  searchPathFile,
 ];
 
 const flaggedTriggers = [
@@ -70,6 +72,22 @@ test("trigger definer revoke names the two flagged functions", () => {
   assert.equal(sql.includes("bond_retention_delete_only"), true);
   assert.equal(/REVOKE EXECUTE ON FUNCTION public\.bond_retention_delete_only/.test(sql), false);
   assert.equal(/REVOKE EXECUTE ON FUNCTION public\.is_admin/.test(sql), false);
+});
+
+test("search_path pin names the five advisor functions", () => {
+  const sql = readFileSync(join(migrationDir, searchPathFile), "utf8");
+  for (const name of [
+    "audit_log_deny_mutation",
+    "bond_retention_delete_only",
+    "dispensary_accounts_mark_closed",
+    "haus_updates_before_delete",
+    "nearest_bond_dispensaries",
+  ]) {
+    assert.match(sql, new RegExp(name));
+  }
+  assert.match(sql, /SET search_path = public, pg_temp/);
+  assert.match(sql, /GRANT %I TO %I WITH SET TRUE, INHERIT TRUE/);
+  assert.match(sql, /input_city text/);
 });
 
 test("revoked security definer triggers still fire", { skip: ready ? false : "local Postgres is not available" }, () => {
@@ -297,6 +315,75 @@ SELECT count(*) FROM public.haus_updates_suppression WHERE email_hmac = repeat('
     ]);
     assert.equal(suppressed.status, 0, `${suppressed.stdout}\n${suppressed.stderr}`);
     assert.match(suppressed.stdout, /^1$/m);
+
+    const scrambled = runPsql([
+      "-d",
+      database,
+      "-c",
+      `
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'path_owner') THEN
+    CREATE ROLE path_owner NOLOGIN;
+  END IF;
+END
+$$;
+GRANT path_owner TO CURRENT_USER WITH SET TRUE, INHERIT TRUE;
+GRANT CREATE ON SCHEMA public TO path_owner;
+SET ROLE path_owner;
+CREATE FUNCTION public.nearest_bond_dispensaries(input_city text)
+RETURNS text
+LANGUAGE sql
+AS $fn$ SELECT input_city $fn$;
+RESET ROLE;
+REVOKE CREATE ON SCHEMA public FROM path_owner;
+GRANT CREATE ON SCHEMA public TO bond_retention;
+ALTER FUNCTION public.haus_updates_before_delete() OWNER TO bond_retention;
+REVOKE CREATE ON SCHEMA public FROM bond_retention;
+SET ROLE bond_retention;
+ALTER FUNCTION public.haus_updates_before_delete() RESET search_path;
+RESET ROLE;
+`,
+    ]);
+    assert.equal(scrambled.status, 0, `${scrambled.stdout}\n${scrambled.stderr}`);
+
+    const repaired = runPsql(["-d", database, "-f", join(migrationDir, searchPathFile)]);
+    assert.equal(repaired.status, 0, `${repaired.stdout}\n${repaired.stderr}`);
+    const repairedAgain = runPsql(["-d", database, "-f", join(migrationDir, searchPathFile)]);
+    assert.equal(repairedAgain.status, 0, repairedAgain.stderr);
+
+    const pinned = runPsql([
+      "-d",
+      database,
+      "-tAc",
+      `
+SELECT current_user = session_user;
+SELECT string_agg(p.proname || ':' || coalesce(array_to_string(p.proconfig, ','), ''), ',' ORDER BY p.proname)
+FROM pg_proc AS p
+JOIN pg_namespace AS n ON n.oid = p.pronamespace
+WHERE n.nspname = 'public'
+  AND p.proname IN (
+    'audit_log_deny_mutation',
+    'bond_retention_delete_only',
+    'dispensary_accounts_mark_closed',
+    'haus_updates_before_delete',
+    'nearest_bond_dispensaries'
+  );
+`,
+    ]);
+    assert.equal(pinned.status, 0, `${pinned.stdout}\n${pinned.stderr}`);
+    const pinnedLines = pinned.stdout.trim().split("\n").filter((line) => line.length > 0);
+    assert.equal(pinnedLines[0], "t");
+    assert.equal(
+      pinnedLines[1],
+      [
+        "audit_log_deny_mutation:search_path=public, pg_temp",
+        "bond_retention_delete_only:search_path=public, pg_temp",
+        "dispensary_accounts_mark_closed:search_path=public, pg_temp",
+        "haus_updates_before_delete:search_path=public, pg_temp",
+        "nearest_bond_dispensaries:search_path=public, pg_temp",
+      ].join(","),
+    );
   } finally {
     runPsql(["-c", `DROP DATABASE IF EXISTS ${database} WITH (FORCE)`]);
     rmSync(dir, { recursive: true, force: true });
