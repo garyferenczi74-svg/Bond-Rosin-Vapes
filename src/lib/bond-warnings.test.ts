@@ -140,10 +140,19 @@ test("footer warnings are 12px and Home keeps the shared 9px rule", () => {
   assert.match(css, /footer \.bond-warn-box p,\s*footer \.bond-warn-hope,\s*footer \.bond-warn-hope a,\s*footer \.bond-warn-license \{\s*font-size: 12px;\s*\}/);
   assert.match(css, /footer \.bond-warn-hope a\[href\^="tel:"\] \{\s*white-space: nowrap;\s*\}/);
   assert.match(css, /footer \.bond-warn-lic-no \{\s*white-space: nowrap;\s*\}/);
-  assert.equal(read("Home.dc.html").includes("bond-warn-lic-no"), false);
   assert.equal(read("AgeGate.dc.html").includes("bond-warn-lic-no"), true);
+  for (const file of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
+    const html = read(file);
+    const coverStart = html.indexOf('<div id="bond-gate-cover">');
+    const cover = html.slice(coverStart, html.indexOf("</div></div></div>", coverStart));
+    assert.match(cover, /<span class="bond-warn-lic-no">OCM-PROC-25-000329<\/span>/, file);
+    if (file === "Home.dc.html") {
+      assert.equal(html.replace(cover, "").includes("bond-warn-lic-no"), false);
+    }
+  }
   const gateCss = read("bond-age-gate.css");
   assert.match(gateCss, /\.bond-age-dc \.bond-warn-lic-no,[^{]*\{\s*white-space: nowrap;\s*\}/);
+  assert.match(gateCss, /#bond-gate-cover \.bond-warn-lic-no,/);
   assert.match(gateCss, /\.bond-age-gate \.bond-age-tel,[^{]*\{\s*white-space: nowrap;\s*\}/);
   assert.match(gateCss, /\.bond-age-dc \.bond-warn-hope a\[href\^="tel:"\],[^{]*\{\s*white-space: nowrap;\s*\}/);
   assert.equal(css.includes("font-size: 9px"), false);
