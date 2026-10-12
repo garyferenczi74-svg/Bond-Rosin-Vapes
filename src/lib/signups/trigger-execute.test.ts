@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { acquirePgLock, postgresTestReady, runPsql } from "./pg-harness.ts";
 
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const migrationDir = join(root, "supabase/migrations");
@@ -33,34 +33,7 @@ const flaggedTriggers = [
   "public.haus_updates_suppression_before_insert()",
 ];
 
-function psqlCommand(): string[] {
-  const raw = process.env.BOND_TEST_PSQL?.trim();
-  if (raw) return raw.split(/\s+/).filter((part) => part.length > 0);
-  return ["sudo", "-n", "-u", "postgres", "psql"];
-}
-
-function connectionPrefix(args: string[]): string[] {
-  const url = process.env.BOND_TEST_PGURL?.trim();
-  if (!url) return args;
-  const dbFlag = args.indexOf("-d");
-  if (dbFlag >= 0 && args[dbFlag + 1] && !args[dbFlag + 1].startsWith("-")) {
-    const rewritten = new URL(url);
-    rewritten.pathname = `/${args[dbFlag + 1]}`;
-    const rest = args.slice(0, dbFlag).concat(args.slice(dbFlag + 2));
-    return [rewritten.toString(), ...rest];
-  }
-  return [url, ...args];
-}
-
-function runPsql(args: string[]) {
-  const parts = psqlCommand();
-  return spawnSync(parts[0], [...parts.slice(1), "-v", "ON_ERROR_STOP=1", ...connectionPrefix(args)], {
-    encoding: "utf8",
-  });
-}
-
-const readyProbe = runPsql(["-tAc", "SELECT 1"]);
-const ready = readyProbe.status === 0 && readyProbe.stdout.trim() === "1";
+const ready = postgresTestReady();
 
 test("trigger definer revoke names the two flagged functions", () => {
   const sql = readFileSync(join(migrationDir, revokeFile), "utf8");
@@ -92,6 +65,7 @@ test("search_path pin names the five advisor functions", () => {
 
 test("revoked security definer triggers still fire", { skip: ready ? false : "local Postgres is not available" }, () => {
   const database = `bond_trig_${process.pid}_${Date.now()}`;
+  const release = acquirePgLock();
   const dir = mkdtempSync(join(tmpdir(), "bond-trig-"));
   chmodSync(dir, 0o755);
   const applyPath = join(dir, "apply.sql");
@@ -385,7 +359,11 @@ WHERE n.nspname = 'public'
       ].join(","),
     );
   } finally {
-    runPsql(["-c", `DROP DATABASE IF EXISTS ${database} WITH (FORCE)`]);
-    rmSync(dir, { recursive: true, force: true });
+    try {
+      runPsql(["-c", `DROP DATABASE IF EXISTS ${database} WITH (FORCE)`]);
+      rmSync(dir, { recursive: true, force: true });
+    } finally {
+      release();
+    }
   }
 });
