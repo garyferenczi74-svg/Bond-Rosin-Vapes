@@ -10,6 +10,7 @@ const root = fileURLToPath(new URL("../../..", import.meta.url));
 const migrationDir = join(root, "supabase/migrations");
 const revokeFile = "20261012190000_revoke_trigger_definer_execute.sql";
 const searchPathFile = "20261012190100_pin_function_search_path.sql";
+const triggerOnlyFile = "20261012190200_revoke_trigger_only_execute.sql";
 const chain = [
   "20261008193000_server_side_signups.sql",
   "20261008201000_felix_request_retention.sql",
@@ -26,6 +27,7 @@ const chain = [
   "20261010001000_purge_expired_sessions.sql",
   revokeFile,
   searchPathFile,
+  triggerOnlyFile,
 ];
 
 const flaggedTriggers = [
@@ -45,6 +47,21 @@ test("trigger definer revoke names the two flagged functions", () => {
   assert.equal(sql.includes("bond_retention_delete_only"), true);
   assert.equal(/REVOKE EXECUTE ON FUNCTION public\.bond_retention_delete_only/.test(sql), false);
   assert.equal(/REVOKE EXECUTE ON FUNCTION public\.is_admin/.test(sql), false);
+});
+
+test("trigger-only revoke names the three non-definer triggers", () => {
+  const sql = readFileSync(join(migrationDir, triggerOnlyFile), "utf8");
+  for (const fn of [
+    "public.bond_retention_delete_only()",
+    "public.haus_updates_before_delete()",
+    "public.dispensary_accounts_mark_closed()",
+  ]) {
+    assert.match(sql, new RegExp(`REVOKE EXECUTE ON FUNCTION ${fn.replace(/[().]/g, "\\$&")} FROM PUBLIC`));
+    assert.match(sql, new RegExp(`REVOKE EXECUTE ON FUNCTION ${fn.replace(/[().]/g, "\\$&")} FROM anon`));
+    assert.match(sql, new RegExp(`REVOKE EXECUTE ON FUNCTION ${fn.replace(/[().]/g, "\\$&")} FROM authenticated`));
+  }
+  assert.equal(/REVOKE EXECUTE ON FUNCTION public\.nearest_bond_dispensaries/.test(sql), false);
+  assert.match(sql, /nearest_bond_dispensaries/);
 });
 
 test("search_path pin names the five advisor functions", () => {
@@ -358,12 +375,203 @@ WHERE n.nspname = 'public'
         "nearest_bond_dispensaries:search_path=public, pg_temp",
       ].join(","),
     );
+
+    const againOnly = runPsql(["-d", database, "-f", join(migrationDir, triggerOnlyFile)]);
+    assert.equal(againOnly.status, 0, againOnly.stderr);
+
+    const triggerPrivs = runPsql([
+      "-d",
+      database,
+      "-tAc",
+      `
+SELECT has_function_privilege('public', 'public.bond_retention_delete_only()', 'EXECUTE')
+    OR has_function_privilege('anon', 'public.bond_retention_delete_only()', 'EXECUTE')
+    OR has_function_privilege('authenticated', 'public.bond_retention_delete_only()', 'EXECUTE')
+    OR has_function_privilege('public', 'public.haus_updates_before_delete()', 'EXECUTE')
+    OR has_function_privilege('anon', 'public.haus_updates_before_delete()', 'EXECUTE')
+    OR has_function_privilege('authenticated', 'public.haus_updates_before_delete()', 'EXECUTE')
+    OR has_function_privilege('public', 'public.dispensary_accounts_mark_closed()', 'EXECUTE')
+    OR has_function_privilege('anon', 'public.dispensary_accounts_mark_closed()', 'EXECUTE')
+    OR has_function_privilege('authenticated', 'public.dispensary_accounts_mark_closed()', 'EXECUTE');
+SELECT has_function_privilege('anon', 'public.nearest_bond_dispensaries(text)', 'EXECUTE');
+SELECT count(*) FROM pg_proc AS p
+  JOIN pg_namespace AS n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public'
+    AND p.proname IN ('bond_retention_delete_only', 'haus_updates_before_delete', 'dispensary_accounts_mark_closed')
+    AND pg_get_function_result(p.oid) = 'trigger';
+SELECT count(*) FROM pg_depend AS d
+  JOIN pg_proc AS p ON p.oid = d.refobjid
+  JOIN pg_namespace AS n ON n.oid = p.pronamespace
+  WHERE n.nspname = 'public'
+    AND p.proname IN ('bond_retention_delete_only', 'haus_updates_before_delete', 'dispensary_accounts_mark_closed')
+    AND d.objid <> p.oid
+    AND d.classid <> 'pg_trigger'::regclass;
+`,
+    ]);
+    assert.equal(triggerPrivs.status, 0, triggerPrivs.stderr);
+    const triggerPrivLines = triggerPrivs.stdout.trim().split("\n").filter((line) => line.length > 0);
+    assert.deepEqual(triggerPrivLines, ["f", "t", "3", "0"]);
+
+    for (const fn of [
+      "public.bond_retention_delete_only()",
+      "public.haus_updates_before_delete()",
+      "public.dispensary_accounts_mark_closed()",
+    ]) {
+      const denied = runPsql(["-d", database, "-c", `SET ROLE anon; SELECT ${fn};`]);
+      assert.notEqual(denied.status, 0, fn);
+      assert.match(denied.stderr, /permission denied/i, fn);
+    }
+
+    const retentionSeed = runPsql([
+      "-d",
+      database,
+      "-c",
+      `
+INSERT INTO public.haus_requests (email, age21_ack, age21_ack_at, requested_dispensary)
+VALUES ('retain@bond.test', true, now(), 'Harbor');
+`,
+    ]);
+    assert.equal(retentionSeed.status, 0, retentionSeed.stderr);
+
+    const retentionBlocked = runPsql([
+      "-d",
+      database,
+      "-c",
+      "DELETE FROM public.haus_requests WHERE email = 'retain@bond.test';",
+    ]);
+    assert.notEqual(retentionBlocked.status, 0);
+    assert.match(retentionBlocked.stderr, /retention deletes are limited to the retention job/);
+
+    const retentionAllowed = runPsql([
+      "-d",
+      database,
+      "-tAc",
+      `
+SET ROLE bond_retention;
+DELETE FROM public.haus_requests WHERE email = 'retain@bond.test';
+RESET ROLE;
+SELECT count(*) FROM public.haus_requests WHERE email = 'retain@bond.test';
+`,
+    ]);
+    assert.equal(retentionAllowed.status, 0, `${retentionAllowed.stdout}\n${retentionAllowed.stderr}`);
+    assert.match(retentionAllowed.stdout, /^0$/m);
+
+    const hausDeleteBlocked = runPsql([
+      "-d",
+      database,
+      "-c",
+      `
+SELECT set_config('bond.haus_update_via_function', '', true);
+DELETE FROM public.haus_updates WHERE email_hmac = repeat('ab', 32);
+`,
+    ]);
+    assert.notEqual(hausDeleteBlocked.status, 0);
+    assert.match(hausDeleteBlocked.stderr, /retention deletes are limited to the retention job/);
+
+    const hausDeleteViaFunction = runPsql([
+      "-d",
+      database,
+      "-tAc",
+      `
+SELECT set_config('bond.haus_update_via_function', '1', true);
+DELETE FROM public.haus_updates WHERE email_hmac = repeat('ab', 32);
+SELECT count(*) FROM public.haus_updates WHERE email_hmac = repeat('ab', 32);
+`,
+    ]);
+    assert.equal(hausDeleteViaFunction.status, 0, `${hausDeleteViaFunction.stdout}\n${hausDeleteViaFunction.stderr}`);
+    assert.match(hausDeleteViaFunction.stdout, /^0$/m);
+
+    const hausDeleteRetention = runPsql([
+      "-d",
+      database,
+      "-tAc",
+      `
+SELECT set_config('bond.haus_update_via_function', '1', true);
+INSERT INTO public.haus_updates (email, source, email_hmac)
+VALUES ('second@example.com', 'salon', repeat('ef', 32));
+RESET ROLE;
+SET ROLE bond_retention;
+DELETE FROM public.haus_updates WHERE email_hmac = repeat('ef', 32);
+RESET ROLE;
+SELECT count(*) FROM public.haus_updates WHERE email_hmac = repeat('ef', 32);
+`,
+    ]);
+    assert.equal(hausDeleteRetention.status, 0, `${hausDeleteRetention.stdout}\n${hausDeleteRetention.stderr}`);
+    assert.match(hausDeleteRetention.stdout, /^0$/m);
+
+    const markedClosed = runPsql([
+      "-d",
+      database,
+      "-q",
+      "-tAc",
+      `
+INSERT INTO public.dispensary_accounts (
+  dispensary_name, address, contact_name, phone, ocm_license, email,
+  password_hash, password_salt, age21_ack_at, status
+) VALUES (
+  'Mark House', '1 Mark Street, Albany, NY 12207', 'Mark Buyer', '518-555-0191',
+  'OCM-MARK-19', 'mark.buyer@bond.test', 'scrypt-hash', 'scrypt-salt', now(), 'pending'
+);
+SELECT (closed_at IS NULL)::text FROM public.dispensary_accounts WHERE email = 'mark.buyer@bond.test';
+UPDATE public.dispensary_accounts SET status = 'rejected' WHERE email = 'mark.buyer@bond.test';
+SELECT (closed_at IS NOT NULL)::text FROM public.dispensary_accounts WHERE email = 'mark.buyer@bond.test';
+`,
+    ]);
+    assert.equal(markedClosed.status, 0, `${markedClosed.stdout}\n${markedClosed.stderr}`);
+    const markedLines = markedClosed.stdout.trim().split("\n").filter((line) => line.length > 0);
+    assert.deepEqual(markedLines, ["true", "true"]);
   } finally {
+    let teardownError = "";
     try {
+      runPsql([
+        "-d",
+        database,
+        "-c",
+        `
+DO $$
+DECLARE
+  r text;
+BEGIN
+  FOREACH r IN ARRAY ARRAY['gate_writer', 'path_owner']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
+      BEGIN
+        EXECUTE format('REASSIGN OWNED BY %I TO %I', r, current_user);
+        EXECUTE format('DROP OWNED BY %I', r);
+      EXCEPTION WHEN OTHERS THEN
+        NULL;
+      END;
+    END IF;
+  END LOOP;
+END $$;
+`,
+      ]);
       runPsql(["-c", `DROP DATABASE IF EXISTS ${database} WITH (FORCE)`]);
+      const droppedRoles = runPsql([
+        "-c",
+        `
+DO $$
+DECLARE
+  r text;
+BEGIN
+  FOREACH r IN ARRAY ARRAY['gate_writer', 'path_owner']
+  LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
+      EXECUTE format('DROP ROLE %I', r);
+    END IF;
+  END LOOP;
+END $$;
+`,
+      ]);
+      if (droppedRoles.status !== 0) {
+        teardownError = droppedRoles.stderr;
+      }
       rmSync(dir, { recursive: true, force: true });
     } finally {
       release();
+    }
+    if (teardownError) {
+      throw new Error(teardownError);
     }
   }
 });
