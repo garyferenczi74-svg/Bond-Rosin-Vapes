@@ -98,7 +98,7 @@ test("privacy age flag matches localStorage and the Haus records section stays",
   assert.match(privacy, /Signing out or unsubscribing does not remove your password from the account service or the records of door attempts\./);
   assert.match(privacy, /Signing out clears the one day session cookie\./);
   assert.match(privacy, /Signing out does not delete the Haus request row\./);
-  assert.match(privacy, /To remove the browser request copy, clear site data for this site\./);
+  assert.equal(privacy.includes("To remove the browser request copy, clear site data for this site."), false);
   assert.equal(privacy.includes("optional tasting notes"), false);
   assert.equal(privacy.includes("erase tasting notes"), false);
   assert.equal(privacy.includes("which chapter of The Number Guide you last opened"), false);

@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { chmodSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { acquirePgLock, postgresTestReady, runPsql } from "./pg-harness.ts";
 
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const migrationDir = join(root, "supabase/migrations");
@@ -48,9 +48,7 @@ const systemPaths = [
   "/usr/lib/postgresql",
   "/usr/lib/postgresql/16",
 ];
-const psqlReady = spawnSync("psql", ["--version"], { encoding: "utf8" });
-const sudoReady = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
-const ready = psqlReady.status === 0 && sudoReady.status === 0;
+const ready = postgresTestReady();
 
 function readMigration(name: string) {
   return readFileSync(join(migrationDir, name), "utf8");
@@ -66,9 +64,7 @@ function snapshotSystem() {
 }
 
 function psql(args: string[]) {
-  return spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-v", "ON_ERROR_STOP=1", ...args], {
-    encoding: "utf8",
-  });
+  return runPsql(args);
 }
 
 function psqlSql(database: string, sql: string) {
@@ -101,7 +97,11 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon NOLOGIN; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role NOLOGIN BYPASSRLS; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role NOLOGIN BYPASSRLS;
+  ELSIF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role' AND rolbypassrls) THEN
+    ALTER ROLE service_role BYPASSRLS;
+  END IF;
 END
 $$;
 GRANT anon TO postgres;
@@ -258,6 +258,23 @@ test("cron migrations tolerate only a missing pg_cron install", () => {
   }
 });
 
+test("enable_pg_cron mirrors live history after the retention guard", () => {
+  const names = readdirSync(migrationDir).filter((name) => name.endsWith(".sql")).sort();
+  const enable = "20261011054912_enable_pg_cron.sql";
+  const guardAt = names.indexOf(guardFile);
+  const enableAt = names.indexOf(enable);
+  assert.ok(guardAt >= 0);
+  assert.ok(enableAt > guardAt);
+  for (const name of scheduleFiles) {
+    assert.ok(names.indexOf(name) < guardAt, name);
+  }
+  const sql = readMigration(enable);
+  assert.match(sql, /create extension if not exists pg_cron/);
+  assert.equal(/with schema/i.test(sql), false);
+  assert.match(sql, /pg_catalog/);
+  assert.match(sql, /20261010002000_require_retention_cron_jobs/);
+});
+
 test("retention cron guard fails closed and passes when all 7 jobs exist", { skip: ready ? false : "local Postgres is not available" }, () => {
   const suffix = `${process.pid}_${Date.now().toString(36)}_${randomBytes(4).toString("hex")}`;
   const bare = `bond_cf_${suffix}_bare`;
@@ -269,6 +286,7 @@ test("retention cron guard fails closed and passes when all 7 jobs exist", { ski
   chmodSync(dir, 0o755);
   console.log("CRON_SCRATCH_DBS", bare, full, broken);
   console.log("CRON_SCRATCH_DIR", dir);
+  const release = acquirePgLock();
   try {
     createDatabase(bare, created);
     const bareApply = psqlFiles(bare, applyFiles, dir);
@@ -381,6 +399,7 @@ $fn$;
 
     assert.equal(snapshotSystem(), beforeSystem);
   } finally {
+    try {
     for (const name of created) {
       if (!name.startsWith(`bond_cf_${suffix}_`)) continue;
       const dropped = psql(["-c", `DROP DATABASE IF EXISTS ${name} WITH (FORCE)`]);
@@ -398,5 +417,8 @@ $fn$;
     assert.equal(beforeSystem, afterSystem);
     assert.equal(leftover.status, 0, leftover.stderr);
     assert.equal(leftover.stdout.trim(), "");
+    } finally {
+      release();
+    }
   }
 });

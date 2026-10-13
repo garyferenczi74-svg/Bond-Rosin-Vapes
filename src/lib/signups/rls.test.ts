@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
 import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { acquirePgLock, postgresTestReady, runPsql } from "./pg-harness.ts";
 
 const migration = fileURLToPath(new URL("../../../supabase/migrations/20261008193000_server_side_signups.sql", import.meta.url));
 const felix = fileURLToPath(new URL("../../../supabase/migrations/20261008201000_felix_request_retention.sql", import.meta.url));
@@ -19,24 +19,14 @@ const hasUpdate = fileURLToPath(new URL("../../../supabase/migrations/2026100923
 const reopt = fileURLToPath(new URL("../../../supabase/migrations/20261009234000_haus_update_reopt.sql", import.meta.url));
 const sessionBind = fileURLToPath(new URL("../../../supabase/migrations/20261009235000_session_grants_and_reopt_bind.sql", import.meta.url));
 const sessionPurge = fileURLToPath(new URL("../../../supabase/migrations/20261010001000_purge_expired_sessions.sql", import.meta.url));
-const psql = spawnSync("psql", ["--version"], { encoding: "utf8" });
-const sudo = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-c", "SELECT 1"], { encoding: "utf8" });
-const ready = psql.status === 0 && sudo.status === 0;
+const ready = postgresTestReady();
 
 function psqlFile(database: string, file: string) {
-  return spawnSync(
-    "sudo",
-    ["-n", "-u", "postgres", "psql", "-v", "ON_ERROR_STOP=1", "-d", database, "-f", file],
-    { encoding: "utf8" },
-  );
+  return runPsql(["-d", database, "-f", file]);
 }
 
 function psqlSql(database: string, sql: string) {
-  return spawnSync(
-    "sudo",
-    ["-n", "-u", "postgres", "psql", "-d", database, "-v", "ON_ERROR_STOP=1", "-c", sql],
-    { encoding: "utf8" },
-  );
+  return runPsql(["-d", database, "-c", sql]);
 }
 
 test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? false : "local Postgres is not available" }, () => {
@@ -162,7 +152,9 @@ test("signup migrations apply and RLS holds on local Postgres", { skip: ready ? 
   assert.equal(purgeSql.includes("GRANT DELETE"), false);
 
   const database = `bond_signup_rls_${process.pid}_${Date.now()}`;
+  let release = () => {};
   try {
+  release = acquirePgLock();
   const dir = mkdtempSync(join(tmpdir(), "bond-signup-rls-"));
   chmodSync(dir, 0o755);
   const setup = join(dir, "setup.sql");
@@ -175,9 +167,7 @@ CREATE DATABASE ${database};
 `,
   );
   chmodSync(setup, 0o644);
-  const created = spawnSync("sudo", ["-n", "-u", "postgres", "psql", "-v", "ON_ERROR_STOP=1", "-f", setup], {
-    encoding: "utf8",
-  });
+  const created = runPsql(["-f", setup]);
   assert.equal(created.status, 0, created.stderr);
 
   writeFileSync(
@@ -201,7 +191,11 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon NOLOGIN; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated NOLOGIN; END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role NOLOGIN BYPASSRLS; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role NOLOGIN BYPASSRLS;
+  ELSIF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role' AND rolbypassrls) THEN
+    ALTER ROLE service_role BYPASSRLS;
+  END IF;
 END
 $$;
 GRANT anon TO postgres;
@@ -1382,10 +1376,10 @@ SELECT has_function_privilege('authenticated', 'public.bond_delete_expired_sessi
     assert.match(deniedRetention.stderr, /permission denied/i, sql);
   }
   } finally {
-    spawnSync(
-      "sudo",
-      ["-n", "-u", "postgres", "psql", "-v", "ON_ERROR_STOP=1", "-c", `DROP DATABASE IF EXISTS ${database}`],
-      { encoding: "utf8" },
-    );
+    try {
+      runPsql(["-c", `DROP DATABASE IF EXISTS ${database} WITH (FORCE)`]);
+    } finally {
+      release();
+    }
   }
 });

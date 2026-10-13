@@ -87,14 +87,18 @@ test("gate and footer share one warning block and one css rule", () => {
       "Terms.dc.html",
     ]);
     if (footerFiles.has(row.file)) {
-      // Inline gates keep the licence number on one line like the footer.
-      const inlineGate = row.gate === "inline";
-      assert.equal(copies, inlineGate ? 0 : 1, row.file);
+      // Inline gates, and the static No.1 to No.3 covers, keep the licence number on one line like the footer.
+      const coverWrapped = row.file === "No1.dc.html" || row.file === "No2.dc.html" || row.file === "No3.dc.html";
+      const bothWrapped = row.gate === "inline" || coverWrapped;
+      assert.equal(copies, bothWrapped ? 0 : 1, row.file);
       const footerBlock = footerWarnBlockHtml(dLineForRoute(row.route));
-      assert.equal(html.split(footerBlock).length - 1, inlineGate ? 2 : 1, row.file);
+      assert.equal(html.split(footerBlock).length - 1, bothWrapped ? 2 : 1, row.file);
       const license = footerBlock.match(/<p class="bond-warn-license">([\s\S]*?)<\/p>/);
       assert.ok(license, row.file);
       assert.equal(license[1].replace(/<[^>]+>/g, ""), LICENSE_LINE, row.file);
+    } else if (row.file === "Home.dc.html") {
+      assert.equal(copies, 1, row.file);
+      assert.equal(html.split(footerWarnBlockHtml(dLineForRoute(row.route))).length - 1, 1, row.file);
     } else {
       assert.equal(copies, expected, row.file);
     }
@@ -140,10 +144,19 @@ test("footer warnings are 12px and Home keeps the shared 9px rule", () => {
   assert.match(css, /footer \.bond-warn-box p,\s*footer \.bond-warn-hope,\s*footer \.bond-warn-hope a,\s*footer \.bond-warn-license \{\s*font-size: 12px;\s*\}/);
   assert.match(css, /footer \.bond-warn-hope a\[href\^="tel:"\] \{\s*white-space: nowrap;\s*\}/);
   assert.match(css, /footer \.bond-warn-lic-no \{\s*white-space: nowrap;\s*\}/);
-  assert.equal(read("Home.dc.html").includes("bond-warn-lic-no"), false);
   assert.equal(read("AgeGate.dc.html").includes("bond-warn-lic-no"), true);
+  for (const file of ["Home.dc.html", "No1.dc.html", "No2.dc.html", "No3.dc.html"]) {
+    const html = read(file);
+    const coverStart = html.indexOf('<div id="bond-gate-cover">');
+    const cover = html.slice(coverStart, html.indexOf("</div></div></div>", coverStart));
+    assert.match(cover, /<span class="bond-warn-lic-no">OCM-PROC-25-000329<\/span>/, file);
+    if (file === "Home.dc.html") {
+      assert.equal(html.replace(cover, "").includes("bond-warn-lic-no"), false);
+    }
+  }
   const gateCss = read("bond-age-gate.css");
   assert.match(gateCss, /\.bond-age-dc \.bond-warn-lic-no,[^{]*\{\s*white-space: nowrap;\s*\}/);
+  assert.match(gateCss, /#bond-gate-cover \.bond-warn-lic-no,/);
   assert.match(gateCss, /\.bond-age-gate \.bond-age-tel,[^{]*\{\s*white-space: nowrap;\s*\}/);
   assert.match(gateCss, /\.bond-age-dc \.bond-warn-hope a\[href\^="tel:"\],[^{]*\{\s*white-space: nowrap;\s*\}/);
   assert.equal(css.includes("font-size: 9px"), false);

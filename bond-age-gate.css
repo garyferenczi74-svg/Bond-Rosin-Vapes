@@ -309,6 +309,7 @@ html[data-bond-age="ok"] .bond-age-dc {
 .bond-age-dc .bond-age-tel,
 .bond-age-off .bond-warn-hope a[href^="tel:"],
 .bond-age-off .bond-warn-lic-no,
+#bond-gate-cover .bond-warn-lic-no,
 #bond-gate-cover .bond-warn-hope a[href^="tel:"] {
   white-space: nowrap;
 }
